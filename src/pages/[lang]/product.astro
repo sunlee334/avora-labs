@@ -1,0 +1,198 @@
+---
+/**
+ * 제품 상세 — Daily Sunscreen
+ *
+ * 선크림은 "믿을 수 있는가"가 구매 장벽이라, 스펙 표와 FAQ 가 이 페이지의 핵심입니다.
+ * 확정되지 않은 스펙은 숨기지 않고 "확정 예정"으로 노출합니다 — 빈칸을 감추는 것보다
+ * 정직하고, 나중에 값만 채우면 됩니다.
+ */
+import { Picture } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import productImage from '../../assets/images/product-daily-sunscreen.jpg';
+import waterImage from '../../assets/images/water-droplets.jpg';
+import { LOCALES, type Locale } from '../../config/site';
+import { dict, localePath } from '../../i18n';
+import { breadcrumb, productSchema, faqPage } from '../../lib/jsonld';
+import productData from '../../data/product.json';
+import paymentConfig from '../../config/payment-config.json';
+
+export function getStaticPaths() {
+  return LOCALES.map((lang) => ({ params: { lang } }));
+}
+
+const locale = Astro.params.lang as Locale;
+const t = dict(locale);
+const p = t.product;
+
+/**
+ * 1차 오픈에서는 자사 결제를 열지 않습니다(Round 15).
+ * 이 판단은 payment-config.json 이 내리며, 여기서는 그 결과만 읽습니다.
+ * 결제를 켤 때는 이 파일이 아니라 설정 파일을 고칩니다.
+ */
+const country = paymentConfig.countries[paymentConfig.defaultCountry as 'KR'];
+const sellsDirectly = country.sellable && country.checkout === 'internal';
+const externalUrl = country.externalStoreUrl || null;
+
+const priceLabel =
+  typeof productData.price === 'number'
+    ? new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: productData.currency,
+        maximumFractionDigits: 0,
+      }).format(productData.price)
+    : null;
+
+const specRows = [
+  { key: p.spec.labels.protection, value: productData.spec.protection },
+  { key: p.spec.labels.texture, value: productData.spec.texture },
+  { key: p.spec.labels.waterResistant, value: productData.spec.waterResistant },
+  { key: p.spec.labels.volume, value: productData.spec.volume },
+  { key: p.spec.labels.category, value: p.spec.values.category },
+];
+---
+
+<Base
+  locale={locale}
+  path="product"
+  title={p.meta.title}
+  description={p.meta.description}
+  ogImage="/og/product.jpg"
+  ogImageAlt={p.meta.ogAlt}
+  jsonLd={[
+    productSchema(locale, productData.name, p.meta.description),
+    faqPage(p.faq.items),
+    breadcrumb([
+      { name: 'AVORA', path: localePath(locale) },
+      { name: productData.name, path: localePath(locale, 'product') },
+    ]),
+  ]}
+>
+  {/* 제품 히어로 */}
+  <section class="section wrap">
+    <div class="product-hero">
+      <div class="product-hero__media rise">
+        <Picture
+          src={productImage}
+          alt={p.hero.imageAlt}
+          formats={['avif', 'webp']}
+          widths={[390, 780, 1200]}
+          sizes="(min-width: 900px) 50vw, 100vw"
+          quality={72}
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+        />
+      </div>
+
+      <div class="rise">
+        <p class="kicker">{productData.spf}</p>
+        <h1 class="display display--tight">{productData.name}</h1>
+        <p class="body" style="margin-top: 18px">{p.hero.headline}</p>
+
+        <p class="product-hero__price">
+          {priceLabel ?? <small>{p.hero.priceUnknown}</small>}
+        </p>
+
+        {
+          sellsDirectly ? (
+            <button class="cta" type="button">
+              {p.hero.ctaCart}
+            </button>
+          ) : externalUrl ? (
+            <a class="cta" href={externalUrl} rel="noopener">
+              {p.hero.ctaExternal}
+            </a>
+          ) : (
+            <span class="cta cta--ghost" aria-disabled="true">
+              {p.hero.priceUnknown}
+            </span>
+          )
+        }
+      </div>
+    </div>
+  </section>
+
+  {/* Stay · Breathe · Pure */}
+  <section class="rise">
+    <div class="principles">
+      {
+        p.principles.items.map((item) => (
+          <div>
+            <p class="principles__term">{item.term}</p>
+            <p class="principles__label">{item.label}</p>
+            <p>{item.body}</p>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  {/* 스펙 */}
+  <section class="section wrap rise">
+    <p class="kicker">{p.spec.kicker}</p>
+    <div class="spec">
+      {
+        specRows.map((row) => (
+          <div class="spec__row">
+            <p class="spec__key">{row.key}</p>
+            <p class={`spec__value${row.value ? '' : ' spec__value--pending'}`}>
+              {row.value ?? p.spec.values.pending}
+            </p>
+          </div>
+        ))
+      }
+    </div>
+    <p class="spec__note">{p.spec.note}</p>
+  </section>
+
+  {/* 사용법 */}
+  <section class="section section--alt wrap rise">
+    <p class="kicker">{p.howto.kicker}</p>
+    <ol class="steps">
+      {
+        p.howto.steps.map((step) => (
+          <li>
+            <strong>{step.title}</strong>
+            <p>{step.body}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  {/* 물방울 이미지 */}
+  <figure class="figure rise">
+    <Picture
+      src={waterImage}
+      alt="WATER"
+      formats={['avif', 'webp']}
+      widths={[390, 780]}
+      sizes="100vw"
+      quality={52}
+      loading="lazy"
+      decoding="async"
+    />
+  </figure>
+
+  {/*
+    FAQ — GEO 의 핵심입니다.
+    답변엔진이 인용할 수 있도록 사실 기반 문장으로 쓰고, details 로 접지 않습니다.
+  */}
+  <section class="section wrap rise">
+    <p class="kicker">{p.faq.kicker}</p>
+    <div class="faq">
+      {
+        p.faq.items.map((item) => (
+          <div>
+            <h2>{item.q}</h2>
+            <p>{item.a}</p>
+          </div>
+        ))
+      }
+    </div>
+
+    <p style="margin-top: 36px">
+      <a class="cta cta--ghost" href={localePath(locale)}>{p.backToStory}</a>
+    </p>
+  </section>
+</Base>

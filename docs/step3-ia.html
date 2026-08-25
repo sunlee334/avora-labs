@@ -1,0 +1,508 @@
+<title>AVORA 정보 구조</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=Noto+Serif+KR:wght@300;500;600&display=swap">
+
+<style>
+/* 확정된 팔레트 A를 그대로 씁니다 — 이 문서 자체가 토큰 구조의 첫 사용처입니다 */
+:root{
+  --ground:#F5F3EC;        /* Soft Paper */
+  --panel:#FFFFFF;
+  --panel-2:#E9E4D6;       /* Warm Cream */
+  --ink:#23291F;           /* Deep Forest */
+  --ink-2:#3E4638;
+  --muted:#6F6D61;         /* Stone Accent */
+  --line:#D9D5C6;
+  --line-2:#E6E2D5;
+  --pill:#23291F;
+  --pill-ink:#E9E4D6;
+  --shadow:0 1px 2px rgba(35,41,31,.05),0 14px 34px -14px rgba(35,41,31,.18);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#1A1F17;
+    --panel:#23291F;
+    --panel-2:#2C3327;
+    --ink:#E9E4D6;
+    --ink-2:#CFC9B6;
+    --muted:#A6A38F;       /* 다크 면 위 접근성 토큰 */
+    --line:#38402F;
+    --line-2:#2E3527;
+    --pill:#E9E4D6;
+    --pill-ink:#23291F;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 14px 34px -14px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#1A1F17; --panel:#23291F; --panel-2:#2C3327;
+  --ink:#E9E4D6; --ink-2:#CFC9B6; --muted:#A6A38F;
+  --line:#38402F; --line-2:#2E3527;
+  --pill:#E9E4D6; --pill-ink:#23291F;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 14px 34px -14px rgba(0,0,0,.6);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--ground);color:var(--ink);
+  font-family:"IBM Plex Sans KR",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+  font-weight:400;line-height:1.7;-webkit-font-smoothing:antialiased;
+}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.wrap{max-width:920px;margin:0 auto;padding:0 22px}
+
+header.top{padding:72px 0 40px;border-bottom:1px solid var(--line)}
+.wm{font-family:"Bodoni Moda",Didot,serif;letter-spacing:.28em;text-transform:uppercase;
+  font-size:14px;color:var(--muted);margin:0 0 22px}
+h1{font-family:"Noto Serif KR",serif;font-weight:300;font-size:clamp(30px,5vw,46px);
+  line-height:1.2;margin:0 0 16px;letter-spacing:-.02em;text-wrap:balance}
+h1 b{font-weight:600}
+.lede{margin:0;max-width:60ch;color:var(--ink-2);font-size:16px}
+.meta{margin:26px 0 0;display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.09em;
+  padding:5px 10px;border:1px solid var(--line);border-radius:3px;color:var(--muted)}
+.chip.on{background:var(--pill);color:var(--pill-ink);border-color:var(--pill)}
+
+section{padding:56px 0;border-bottom:1px solid var(--line-2)}
+section:last-of-type{border-bottom:0}
+h2{font-family:"Noto Serif KR",serif;font-weight:500;font-size:26px;margin:0 0 8px;
+  letter-spacing:-.015em;line-height:1.3}
+.sub{margin:0 0 30px;color:var(--muted);font-size:14px;max-width:62ch}
+h3{font-size:15px;font-weight:600;margin:34px 0 12px;letter-spacing:-.005em}
+p{margin:0 0 14px}
+p:last-child{margin-bottom:0}
+code,.mono{font-family:"IBM Plex Mono",monospace;font-size:.92em}
+code{background:var(--panel-2);padding:1px 5px;border-radius:3px}
+
+/* ── 사이트맵 트리 ── */
+.tree{font-family:"IBM Plex Mono",monospace;font-size:13px;line-height:2.05;
+  background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:22px 20px;overflow-x:auto;box-shadow:var(--shadow)}
+.tree .t{white-space:pre;display:block}
+.tree .dim{color:var(--muted)}
+.tree .n{color:var(--muted);font-size:11.5px}
+.tree .p2{color:var(--muted)}
+.tree .p2::after{content:" 2차";font-size:10px;letter-spacing:.08em;
+  border:1px solid var(--line);border-radius:3px;padding:1px 5px;margin-left:8px}
+
+/* ── figure ── */
+figure{margin:0}
+figure svg{width:100%;height:auto;display:block;color:var(--ink)}
+figcaption{margin-top:14px;color:var(--muted);font-size:13px;line-height:1.75;max-width:66ch}
+.figbox{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:26px 20px;box-shadow:var(--shadow);overflow-x:auto}
+
+/* ── ordered section lists ── */
+.flow{list-style:none;counter-reset:f;margin:0;padding:0;
+  border-top:1px solid var(--line-2)}
+.flow li{counter-increment:f;display:grid;grid-template-columns:38px 1fr;gap:16px;
+  padding:14px 0;border-bottom:1px solid var(--line-2);align-items:baseline}
+.flow li::before{content:counter(f,decimal-leading-zero);
+  font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);letter-spacing:.06em}
+.flow b{display:block;font-weight:600;font-size:14.5px;margin-bottom:2px}
+.flow span{color:var(--muted);font-size:13.5px;line-height:1.7}
+
+/* ── tables ── */
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;
+  background:var(--panel);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;min-width:660px;font-size:13px}
+th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line-2);vertical-align:top}
+th{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);font-weight:500;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.mono{font-family:"IBM Plex Mono",monospace;font-size:12px;white-space:nowrap}
+.yes{font-family:"IBM Plex Mono",monospace;font-size:11px}
+.no{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted)}
+
+/* ── callouts ── */
+.note{border-left:2px solid var(--ink);padding:2px 0 2px 18px;margin:26px 0;
+  color:var(--ink-2);font-size:14.5px}
+.note b{font-weight:600;color:var(--ink)}
+.ask{border-left:2px solid var(--muted);padding:2px 0 2px 18px;margin:26px 0;
+  color:var(--ink-2);font-size:14.5px}
+
+.two{display:grid;gap:14px}
+@media (min-width:720px){.two{grid-template-columns:1fr 1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:20px;box-shadow:var(--shadow)}
+.card h4{margin:0 0 8px;font-size:14px;font-weight:600}
+.card p{font-size:13.5px;color:var(--ink-2);margin-bottom:8px}
+footer{padding:48px 0 88px;color:var(--muted);font-size:13px}
+</style>
+
+<header class="top wrap">
+  <p class="wm">Avora</p>
+  <h1>Step 3 — <b>정보 구조와 페이지 구성</b></h1>
+  <p class="lede">
+    시안 01(Minimal Editorial) + 팔레트 A 확정에 따른 사이트맵, 페이지별 구성,
+    메타데이터 매트릭스, 그리고 “어디를 고치면 무엇이 바뀌는가” 지도입니다.
+  </p>
+  <div class="meta">
+    <span class="chip on">시안 01 확정</span>
+    <span class="chip on">팔레트 A 확정</span>
+    <span class="chip">Astro + Cloudflare Workers</span>
+    <span class="chip">5개 언어</span>
+    <span class="chip">2026.08.25</span>
+  </div>
+</header>
+
+<main class="wrap">
+
+<!-- ═══ 사이트맵 ═══ -->
+<section>
+  <h2>사이트맵</h2>
+  <p class="sub">
+    언어 접두어는 5개 전부 대칭입니다. 아래 트리는 <code>{lang}</code> 하나만 보여주며,
+    실제로는 <code>ko · en · zh · th · vi</code> 다섯 벌이 빌드 타임에 생성됩니다.
+  </p>
+
+  <div class="tree">
+<span class="t">/                                <span class="n">→ Worker가 Accept-Language 읽고 302</span></span>
+<span class="t"><span class="dim">└─</span> /{lang}/                      <span class="n">홈 · 원페이지 스토리 스크롤</span></span>
+<span class="t">   <span class="dim">├─</span> product                   <span class="n">제품 상세 · Daily Sunscreen</span></span>
+<span class="t">   <span class="dim">├─</span> <span class="p2">cart</span></span>
+<span class="t">   <span class="dim">├─</span> <span class="p2">checkout</span></span>
+<span class="t">   <span class="dim">├─</span> <span class="p2">order/complete</span></span>
+<span class="t">   <span class="dim">├─</span> legal/</span>
+<span class="t">   <span class="dim">│</span>  <span class="dim">├─</span> privacy                <span class="n">개인정보처리방침</span></span>
+<span class="t">   <span class="dim">│</span>  <span class="dim">├─</span> <span class="p2">terms</span></span>
+<span class="t">   <span class="dim">│</span>  <span class="dim">└─</span> <span class="p2">shipping-returns</span></span>
+<span class="t">   <span class="dim">└─</span> 404</span>
+<span class="t"></span>
+<span class="t">/sitemap.xml                     <span class="n">5개 언어 × 인덱싱 페이지 전량</span></span>
+<span class="t">/robots.txt</span>
+<span class="t">/llms.txt                        <span class="n">Step 1 결정에 따라 포함</span></span>
+<span class="t">/api/payments/confirm            <span class="n">Worker · 2차</span></span>
+  </div>
+
+  <div class="note">
+    <b>제품 목록 페이지는 만들지 않습니다.</b> 선크림 1종이므로 홈의 “First Product” 섹션이
+    곧 진입점이고, <code>/product</code>가 상세를 맡습니다. SKU가 늘면 그때
+    <code>/{lang}/products</code>를 추가하는 것이 자연스럽습니다 — 지금 만들면 빈 껍데기가 됩니다.
+  </div>
+</section>
+
+<!-- ═══ 요청 경로 ═══ -->
+<section>
+  <h2>요청이 Worker를 태우는가</h2>
+  <p class="sub">
+    Round 5에서 Cloudflare Workers 단독으로 정한 구조의 핵심입니다.
+    같은 도메인 안에서도 요청 종류에 따라 과금 여부가 갈립니다.
+  </p>
+
+  <div class="figbox">
+    <figure>
+      <svg viewBox="0 0 980 420" role="img"
+           aria-label="브라우저에서 나가는 세 종류의 요청 경로. 페이지 조회는 Worker를 거치지 않고 정적 에셋에 바로 닿아 과금되지 않으며, 루트 접속의 언어 리다이렉트와 결제 승인 요청만 Worker를 호출해 하루 10만 요청 한도에 계상된다.">
+        <defs>
+          <marker id="ah" viewBox="0 0 10 8" refX="9" refY="4"
+                  markerWidth="9" markerHeight="7" orient="auto">
+            <polygon points="0,0 10,4 0,8" fill="currentColor"/>
+          </marker>
+        </defs>
+
+        <!-- 과금 구간 밴드 -->
+        <rect x="372" y="128" width="266" height="268" rx="10"
+              fill="currentColor" fill-opacity="0.045"
+              stroke="currentColor" stroke-opacity="0.45"
+              stroke-width="1" stroke-dasharray="5 4"/>
+        <text x="505" y="118" text-anchor="middle" font-size="11"
+              font-family="IBM Plex Mono, monospace" fill="currentColor" fill-opacity="0.72"
+              letter-spacing="0.06em">WORKERS FREE — 10만 요청 / 일</text>
+
+        <!-- 브라우저 -->
+        <rect x="30" y="40" width="140" height="356" rx="8"
+              fill="none" stroke="currentColor" stroke-width="1.4"/>
+        <text x="100" y="212" text-anchor="middle" font-size="13" fill="currentColor">브라우저</text>
+        <text x="100" y="232" text-anchor="middle" font-size="10.5"
+              font-family="IBM Plex Mono, monospace" fill="currentColor" fill-opacity="0.6">visitor</text>
+
+        <!-- Worker -->
+        <rect x="392" y="150" width="226" height="226" rx="8"
+              fill="none" stroke="currentColor" stroke-width="2"/>
+        <text x="505" y="245" text-anchor="middle" font-size="13" fill="currentColor">Cloudflare Worker</text>
+        <text x="505" y="266" text-anchor="middle" font-size="10.5"
+              font-family="IBM Plex Mono, monospace" fill="currentColor" fill-opacity="0.6">run_worker_first</text>
+
+        <!-- 정적 에셋 -->
+        <rect x="762" y="46" width="188" height="70" rx="8"
+              fill="none" stroke="currentColor" stroke-width="1.4"/>
+        <text x="856" y="76" text-anchor="middle" font-size="12.5" fill="currentColor">정적 에셋</text>
+        <text x="856" y="95" text-anchor="middle" font-size="10.5"
+              font-family="IBM Plex Mono, monospace" fill="currentColor" fill-opacity="0.6">prerendered HTML</text>
+        <text x="856" y="136" text-anchor="middle" font-size="10.5" fill="currentColor" fill-opacity="0.72">과금 대상 아님 · 무제한</text>
+
+        <!-- PG -->
+        <rect x="762" y="316" width="188" height="70" rx="8"
+              fill="none" stroke="currentColor" stroke-width="1.4"/>
+        <text x="856" y="346" text-anchor="middle" font-size="12.5" fill="currentColor">PG 승인 API</text>
+        <text x="856" y="365" text-anchor="middle" font-size="10.5"
+              font-family="IBM Plex Mono, monospace" fill="currentColor" fill-opacity="0.6">10분 내 승인</text>
+
+        <!-- ① 정적 조회 : Worker 우회 -->
+        <line x1="170" y1="81" x2="756" y2="81" stroke="currentColor" stroke-width="1.4"
+              marker-end="url(#ah)"/>
+        <text x="463" y="70" text-anchor="middle" font-size="11.5"
+              font-family="IBM Plex Mono, monospace" fill="currentColor">GET /ko/  ·  /ko/product</text>
+
+        <!-- ② 루트 진입 -->
+        <line x1="170" y1="196" x2="386" y2="196" stroke="currentColor" stroke-width="2"
+              stroke-dasharray="6 4" marker-end="url(#ah)"/>
+        <text x="278" y="186" text-anchor="middle" font-size="11.5"
+              font-family="IBM Plex Mono, monospace" fill="currentColor">GET /</text>
+
+        <line x1="392" y1="256" x2="176" y2="256" stroke="currentColor" stroke-width="2"
+              stroke-dasharray="6 4" marker-end="url(#ah)"/>
+        <text x="284" y="246" text-anchor="middle" font-size="11" fill="currentColor">302 → /ko/</text>
+        <text x="284" y="276" text-anchor="middle" font-size="10"
+              font-family="IBM Plex Mono, monospace" fill="currentColor" fill-opacity="0.62">Accept-Language</text>
+
+        <!-- ③ 결제 승인 -->
+        <line x1="170" y1="351" x2="386" y2="351" stroke="currentColor" stroke-width="2"
+              stroke-dasharray="6 4" marker-end="url(#ah)"/>
+        <text x="278" y="341" text-anchor="middle" font-size="10.5"
+              font-family="IBM Plex Mono, monospace" fill="currentColor">POST /api/payments/confirm</text>
+
+        <line x1="618" y1="351" x2="756" y2="351" stroke="currentColor" stroke-width="2"
+              stroke-dasharray="6 4" marker-end="url(#ah)"/>
+        <text x="687" y="341" text-anchor="middle" font-size="10.5" fill="currentColor">승인 REST</text>
+        <text x="687" y="369" text-anchor="middle" font-size="10"
+              font-family="IBM Plex Mono, monospace" fill="currentColor" fill-opacity="0.62">Basic auth</text>
+
+        <!-- 범례 -->
+        <line x1="30" y1="412" x2="60" y2="412" stroke="currentColor" stroke-width="1.4"/>
+        <text x="68" y="416" font-size="10.5" fill="currentColor" fill-opacity="0.75">Worker 미호출</text>
+        <line x1="180" y1="412" x2="210" y2="412" stroke="currentColor" stroke-width="2" stroke-dasharray="6 4"/>
+        <text x="218" y="416" font-size="10.5" fill="currentColor" fill-opacity="0.75">Worker 호출 — 한도에 계상</text>
+      </svg>
+      <figcaption>
+        방문자가 사이트를 읽는 동안에는 Worker가 한 번도 돌지 않습니다.
+        하루 10만 요청 한도에 계상되는 건 <b>루트 진입 시 언어 리다이렉트 1회</b>와
+        <b>주문 1건당 결제 승인 2~3회</b>뿐이라, 실사용량이 한도에 닿기는 사실상 어렵습니다.
+      </figcaption>
+    </figure>
+  </div>
+
+  <div class="note">
+    <b>이 구조가 CORS 문제를 없앱니다.</b> 정적 파일과 <code>/api/*</code>가 같은 오리진이라
+    프리플라이트도, 허용 도메인 관리도 필요 없습니다. GitHub Pages를 남겼다면
+    결제 흐름 한복판에 오리진 경계가 생겼을 자리입니다.
+  </div>
+</section>
+
+<!-- ═══ 홈 구성 ═══ -->
+<section>
+  <h2>홈 — 원페이지 스토리 스크롤</h2>
+  <p class="sub">
+    시안 01의 확정 구조입니다. 순서가 곧 서사이므로 번호는 실제 정보입니다 —
+    스크롤은 “왜 이 브랜드인가”에서 “그래서 이 제품”으로 한 방향으로만 흐릅니다.
+  </p>
+  <ol class="flow">
+    <li><b>Hero</b><span>풀블리드 이미지 · <span class="mono">For every movement.</span> (얇게) / <span class="mono">MOVE. SWEAT. REAPPLY.</span> (굵게)</span></li>
+    <li><b>Origin</b><span>브랜드 한 줄 정의. 강조어에 밑줄이 좌→우로 그어지는 것이 이 안의 유일한 액센트 사용처</span></li>
+    <li><b>The Question</b><span>탄생 서사 — “왜 피부가 느끼는 스킨케어는 늘 평범해야 할까?” + 네이밍 유래(Active + Vitality &amp; Aura)</span></li>
+    <li><b>The Journey</b><span>sun → sweat → water → movement → reapply. 모바일 수직 목록, 데스크톱 5열</span></li>
+    <li><b>Visual break</b><span>SKIN 이미지 1장. 텍스트 없음 — 호흡 지점</span></li>
+    <li><b>Brand Promise</b><span>LIGHT / COMFORT / PROTECTION / RESET 2×2 (데스크톱 4열)</span></li>
+    <li><b>Philosophy</b><span>역상 블록(Deep Forest 배경 + Warm Cream 잉크). “움직임은 삶의 가장 순수하고 강력한 표현입니다”</span></li>
+    <li><b>First Product</b><span>Daily Sunscreen · SPF50+ / PA++++ · CTA → <code>/product</code></span></li>
+    <li><b>Footer</b><span>대형 워드마크 · 언어 선택 · 사업자 정보 · 법적 링크</span></li>
+  </ol>
+
+  <div class="note">
+    <b>7번이 “에너지 버튼”을 대신합니다.</b> 팔레트 A에는 캠페인 컬러가 없으므로,
+    ver3 문서가 라임에 맡기려던 역할을 <b>역상 블록 하나</b>가 맡습니다.
+    스크롤 내내 밝은 지반이 이어지다 한 섹션만 어두워지는 대비가 그 자리를 채웁니다.
+  </div>
+</section>
+
+<!-- ═══ 제품 상세 ═══ -->
+<section>
+  <h2>제품 상세 — <span class="mono" style="font-size:20px">/product</span></h2>
+  <p class="sub">
+    Ultra Violette에서 확인한 “시험 기준을 직접 설명해 신뢰를 얻는” 패턴을 스펙 표와 FAQ로 옮겼습니다.
+    선크림은 “믿을 수 있는가”가 구매 장벽이고, 이 페이지가 그걸 담당합니다.
+  </p>
+  <ol class="flow">
+    <li><b>제품 히어로</b><span>제품 컷 · 이름 · SPF50+ / PA++++ · 가격 · CTA(1차는 스마트스토어, 2차는 장바구니)</span></li>
+    <li><b>Stay · Breathe · Pure</b><span>디자인가이드의 세 원칙을 제품 언어로. 3열</span></li>
+    <li><b>Specification</b><span>차단지수 · 제형 · 내수성 · 용량 · 분류(기능성화장품). 미확정 항목은 빈칸으로 노출하고 확정 시 채웁니다</span></li>
+    <li><b>How to use</b><span>3스텝 — 스킨케어 마지막 / 활동 15~20분 전 / 2시간마다 재도포</span></li>
+    <li><b>성분 · 주의사항</b><span>전성분, 기능성화장품 표시사항, 사용상 주의사항. <b>OEM 처방 확정 후 채움</b></span></li>
+    <li><b>FAQ</b><span>GEO 핵심 — 사실 기반 문장으로 작성. AI 검색이 인용할 수 있는 형태</span></li>
+    <li><b>Back to story</b><span>홈의 해당 섹션으로 되돌리는 링크</span></li>
+  </ol>
+
+  <div class="ask">
+    FAQ 문항은 제가 초안을 잡겠습니다. 다만 <b>효능 표현은 기능성화장품 심사 범위를 넘지 않도록 보수적으로</b>
+    쓰겠습니다 — 디자인가이드 05장의 “지양 어휘” 기준을 그대로 적용합니다.
+  </div>
+</section>
+
+<!-- ═══ 메타데이터 ═══ -->
+<section>
+  <h2>메타데이터 매트릭스</h2>
+  <p class="sub">
+    페이지별 <code>title</code> · <code>description</code> · 구조화 데이터 · 인덱싱 정책입니다.
+    인덱싱 대상 페이지는 전부 5개 언어 <code>hreflang</code> alternate와 <code>x-default=/en/</code>를 갖습니다.
+  </p>
+  <div class="tbl">
+    <table>
+      <thead>
+        <tr><th>페이지</th><th>URL</th><th>title 패턴</th><th>JSON-LD</th><th>인덱싱</th><th>1차</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>홈</td><td class="mono">/{lang}/</td>
+          <td>AVORA — For every movement.</td>
+          <td>Organization · WebSite · BreadcrumbList</td>
+          <td>O</td><td class="yes">O</td>
+        </tr>
+        <tr>
+          <td>제품 상세</td><td class="mono">/{lang}/product</td>
+          <td>Daily Sunscreen SPF50+ — AVORA</td>
+          <td>Product(offers) · BreadcrumbList · FAQPage</td>
+          <td>O</td><td class="yes">O</td>
+        </tr>
+        <tr>
+          <td>개인정보처리방침</td><td class="mono">/{lang}/legal/privacy</td>
+          <td>개인정보처리방침 — AVORA</td>
+          <td>WebPage</td><td>O</td><td class="yes">O</td>
+        </tr>
+        <tr>
+          <td>404</td><td class="mono">/{lang}/404</td>
+          <td>페이지를 찾을 수 없습니다 — AVORA</td>
+          <td>—</td><td class="no">noindex</td><td class="yes">O</td>
+        </tr>
+        <tr>
+          <td>장바구니</td><td class="mono">/{lang}/cart</td>
+          <td>장바구니 — AVORA</td>
+          <td>—</td><td class="no">noindex</td><td class="no">2차</td>
+        </tr>
+        <tr>
+          <td>체크아웃</td><td class="mono">/{lang}/checkout</td>
+          <td>주문 · 결제 — AVORA</td>
+          <td>—</td><td class="no">noindex</td><td class="no">2차</td>
+        </tr>
+        <tr>
+          <td>주문 완료</td><td class="mono">/{lang}/order/complete</td>
+          <td>주문이 완료되었습니다 — AVORA</td>
+          <td>—</td><td class="no">noindex</td><td class="no">2차</td>
+        </tr>
+        <tr>
+          <td>이용약관</td><td class="mono">/{lang}/legal/terms</td>
+          <td>이용약관 — AVORA</td>
+          <td>WebPage</td><td>O</td><td class="no">2차</td>
+        </tr>
+        <tr>
+          <td>배송 · 교환/반품</td><td class="mono">/{lang}/legal/shipping-returns</td>
+          <td>배송 및 교환·반품 안내 — AVORA</td>
+          <td>WebPage</td><td>O</td><td class="no">2차</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>언어별로 달라지는 것</h3>
+  <p>
+    <code>title</code> · <code>description</code> · <code>og:image</code> · 이미지 <code>alt</code> —
+    네 가지 모두 언어별로 분리합니다. 특히 <code>alt</code>는 요구사항 9번이 명시적으로 요구한 항목이라
+    번역 파일에 이미지 키별 엔트리를 둡니다.
+  </p>
+
+  <h3>번역하지 않고 원문 유지</h3>
+  <p class="mono" style="color:var(--muted);font-size:13px">
+    AVORA · For every movement. · MOVE. SWEAT. REAPPLY. · Stay · Breathe · Pure · ACTIVE LIFESTYLE BEAUTY · SPF50+ / PA++++
+  </p>
+  <p style="font-size:14px;color:var(--ink-2)">
+    기준은 하나입니다 — <b>브랜드 자산이거나 국제 규격 표기면 원문</b>, 설명하는 문장이면 번역.
+    슬로건은 번역하는 순간 브랜드 식별자가 5개로 쪼개집니다.
+  </p>
+
+  <div class="ask">
+    <b>확인이 필요합니다.</b> 중국어권에서 <code>AVORA</code>의 음역 브랜드명(예: 阿芙拉 류)을 별도로 쓰실 계획이 있는지요.
+    있다면 <code>zh</code> 번역 파일의 브랜드명 키만 예외 처리하면 되고, 없다면 로마자 그대로 갑니다.
+    지금 정하지 않아도 진행에는 지장이 없어 <b>Step 4 중에 답해주셔도 됩니다.</b>
+  </div>
+</section>
+
+<!-- ═══ 파일 구조 ═══ -->
+<section>
+  <h2>어디를 고치면 무엇이 바뀌는가</h2>
+  <p class="sub">
+    요구사항 2-1이 요청한 유지보수 가이드의 뼈대입니다. 개발 지식 없이도
+    “이 파일의 이 값만 바꾸면 된다”가 성립하도록 값의 정의처를 한 곳씩만 둡니다.
+  </p>
+
+  <div class="tbl" style="margin-bottom:26px">
+    <table>
+      <thead><tr><th>바꾸고 싶은 것</th><th>고칠 파일</th><th>따라 바뀌는 것</th></tr></thead>
+      <tbody>
+        <tr><td>브랜드 컬러</td><td class="mono">src/styles/tokens.css</td><td>사이트 전체 색</td></tr>
+        <tr><td>제품 가격</td><td class="mono">src/data/product.json</td><td>제품 상세 · JSON-LD · 장바구니 · 체크아웃</td></tr>
+        <tr><td>문구 (언어별)</td><td class="mono">src/i18n/{lang}.json</td><td>해당 언어 전체 · alt 텍스트 포함</td></tr>
+        <tr><td>판매 국가 · 결제수단</td><td class="mono">src/config/payment-config.json</td><td>결제수단 노출 · 구매 버튼 동작</td></tr>
+        <tr><td>도메인</td><td class="mono">src/config/site.ts</td><td>canonical · hreflang · OG · sitemap 전량</td></tr>
+        <tr><td>이미지</td><td class="mono">public/images/</td><td>해당 이미지 (파일명 유지 시 코드 무수정)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tree">
+<span class="t">avora-homepage/</span>
+<span class="t"><span class="dim">├─</span> src/</span>
+<span class="t"><span class="dim">│</span>  <span class="dim">├─</span> config/</span>
+<span class="t"><span class="dim">│</span>  <span class="dim">│</span>  <span class="dim">├─</span> site.ts                <span class="n">도메인·URL 상수 — 한 곳</span></span>
+<span class="t"><span class="dim">│</span>  <span class="dim">│</span>  <span class="dim">└─</span> payment-config.json    <span class="n">국가코드 → 결제수단</span></span>
+<span class="t"><span class="dim">│</span>  <span class="dim">├─</span> styles/tokens.css         <span class="n">★ 컬러의 유일한 정의처</span></span>
+<span class="t"><span class="dim">│</span>  <span class="dim">├─</span> i18n/                     <span class="n">ko en zh th vi</span></span>
+<span class="t"><span class="dim">│</span>  <span class="dim">├─</span> data/product.json         <span class="n">제품 정보·가격</span></span>
+<span class="t"><span class="dim">│</span>  <span class="dim">├─</span> components/  layouts/</span>
+<span class="t"><span class="dim">│</span>  <span class="dim">└─</span> pages/[lang]/             <span class="n">언어별 정적 생성</span></span>
+<span class="t"><span class="dim">├─</span> public/                      <span class="n">images · robots.txt · llms.txt</span></span>
+<span class="t"><span class="dim">├─</span> tokens/design-tokens.json    <span class="n">프레임워크 중립 — 앱 재사용 대비</span></span>
+<span class="t"><span class="dim">├─</span> worker/index.ts              <span class="n">루트 302 + 결제 승인</span></span>
+<span class="t"><span class="dim">├─</span> tests/e2e/                   <span class="n">Playwright</span></span>
+<span class="t"><span class="dim">├─</span> wrangler.jsonc</span>
+<span class="t"><span class="dim">└─</span> astro.config.mjs</span>
+  </div>
+
+  <div class="note">
+    <b><code>tokens/design-tokens.json</code>이 CSS 토큰의 원본입니다.</b>
+    빌드 시 여기서 <code>tokens.css</code>를 생성하면, 나중에 React Native로 앱을 만들 때
+    같은 JSON을 그대로 읽을 수 있습니다. Round 0에서 “앱 대비로 웹을 무겁게 하지 않는다”고
+    정했으므로 이 한 파일 이상은 하지 않습니다.
+  </div>
+</section>
+
+<!-- ═══ 1차/2차 ═══ -->
+<section>
+  <h2>1차와 2차의 경계</h2>
+  <p class="sub">Round 15에서 정한 분리를 페이지 단위로 옮긴 것입니다.</p>
+  <div class="two">
+    <div class="card">
+      <h4>1차 — 2026.10 브랜드사이트 오픈</h4>
+      <p>홈 · 제품 상세 · 개인정보처리방침 · 404, 5개 언어 전량.
+        SEO/GEO 요소 전부(메타 · OG · sitemap · robots · llms.txt · JSON-LD · hreflang).</p>
+      <p>구매 버튼은 <b>스마트스토어로 이동</b>. 장바구니·체크아웃 화면은 만들되 라우트를 노출하지 않습니다.</p>
+    </div>
+    <div class="card">
+      <h4>2차 — 자사 결제 개시</h4>
+      <p>장바구니 · 체크아웃 · 주문 완료 라우트 공개, Worker 결제 승인 엔드포인트 활성.
+        이용약관 · 배송/교환반품 페이지 추가.</p>
+      <p><b>선행 조건 3가지</b> — 도메인 확정, PG 가맹 심사 완료, 통신판매업 신고.
+        셋 중 하나라도 미완이면 스위치를 켤 수 없습니다.</p>
+    </div>
+  </div>
+
+  <div class="ask">
+    법적 고지 페이지의 <b>문안 자체는 제가 초안을 쓰지 않겠습니다.</b>
+    개인정보처리방침·이용약관·청약철회 안내는 실제 수집 항목과 사업자 정보에 따라 달라지고
+    법적 효력이 있는 문서라, 페이지 구조와 배치만 잡아두고 문안은 확인 후 채우는 편이 안전합니다.
+  </div>
+</section>
+
+<footer class="wrap">
+  <p>Step 3 · 정보 구조 — 승인 후 Step 4(개발)로 넘어갑니다.<br>
+  이전 산출물: Step 1 레퍼런스 리서치 · Step 2 시안 3안 · Deep Interview 스펙(모호도 10.0%)</p>
+</footer>
+</main>

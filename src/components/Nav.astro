@@ -1,0 +1,28 @@
+---
+import LanguageSwitcher from './LanguageSwitcher.astro';
+import { dict, localePath } from '../i18n';
+import type { Locale } from '../config/site';
+
+interface Props {
+  locale: Locale;
+  path?: string;
+}
+const { locale, path = '' } = Astro.props;
+const t = dict(locale);
+---
+
+<nav class="nav" aria-label={t.nav.menu}>
+  <a class="nav__wordmark" href={localePath(locale)} aria-label="AVORA">
+    {/* 팔레트 A 확정에 따라 보유 자산을 그대로 씁니다 — 리컬러 불필요 */}
+    <img src="/brand/avora-wordmark-forest.svg" alt="AVORA" width="120" height="21" />
+  </a>
+
+  <div class="nav__links">
+    <a href={`${localePath(locale)}#story`}>{t.nav.story}</a>
+    <a href={localePath(locale, 'product')}>{t.nav.product}</a>
+  </div>
+
+  <div class="nav__right">
+    <LanguageSwitcher locale={locale} path={path} />
+  </div>
+</nav>

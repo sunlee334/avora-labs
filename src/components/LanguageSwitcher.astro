@@ -1,0 +1,91 @@
+---
+/**
+ * 언어 전환. 모바일에서는 바텀시트, 데스크톱에서는 우측 상단 패널로 열립니다.
+ * 요구사항 7번의 "드롭다운 대신 바텀시트" 지침을 따릅니다.
+ *
+ * <dialog> 를 쓰는 이유:
+ *   이 스위처는 .nav 안에 있는데, .nav 에는 backdrop-filter 가 걸려 있습니다.
+ *   backdrop-filter 는 position: fixed 자손의 컨테이닝 블록을 만들기 때문에,
+ *   일반 div 로 만들면 시트가 뷰포트가 아니라 nav 기준으로 배치돼 화면 위쪽에 튀어나옵니다.
+ *   <dialog showModal()> 은 top layer 에 렌더되어 이 문제를 겪지 않고,
+ *   백드롭·ESC 닫기·포커스 가둠을 브라우저가 대신 해 줍니다.
+ *
+ * JS 가 없으면 이 시트는 열리지 않습니다. 그 경우를 위해 푸터에 5개 언어 링크를
+ * 항상 평문으로 두었습니다 — 언어 전환 자체는 JS 없이도 가능합니다.
+ */
+import { LOCALES, LOCALE_LABELS, LOCALE_TAGS, type Locale } from '../config/site';
+import { dict, localePath } from '../i18n';
+
+interface Props {
+  locale: Locale;
+  path?: string;
+}
+const { locale, path = '' } = Astro.props;
+const t = dict(locale);
+---
+
+<div class="lang">
+  <button
+    class="lang__toggle"
+    type="button"
+    aria-haspopup="dialog"
+    aria-label={t.a11y.selectLanguage}
+    data-lang-open
+  >
+    <span aria-hidden="true">{locale.toUpperCase()}</span>
+  </button>
+
+  <dialog class="lang__sheet" aria-label={t.nav.language} data-lang-sheet>
+    <div class="lang__head">
+      <p class="lang__title">{t.nav.language}</p>
+      <button class="lang__close" type="button" aria-label={t.nav.close} data-lang-close>
+        <span aria-hidden="true">✕</span>
+      </button>
+    </div>
+    <ul class="lang__list">
+      {
+        LOCALES.map((l) => (
+          <li>
+            <a
+              class="lang__item"
+              href={localePath(l, path)}
+              hreflang={LOCALE_TAGS[l]}
+              lang={LOCALE_TAGS[l]}
+              aria-current={l === locale ? 'true' : undefined}
+            >
+              {LOCALE_LABELS[l]}
+              <span aria-hidden="true">{l.toUpperCase()}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </dialog>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.lang').forEach((root) => {
+    const open = root.querySelector<HTMLButtonElement>('[data-lang-open]');
+    const close = root.querySelector<HTMLButtonElement>('[data-lang-close]');
+    const sheet = root.querySelector<HTMLDialogElement>('[data-lang-sheet]');
+    if (!open || !sheet || typeof sheet.showModal !== 'function') return;
+
+    open.addEventListener('click', () => sheet.showModal());
+    close?.addEventListener('click', () => sheet.close());
+
+    // 백드롭(시트 바깥)을 누르면 닫습니다. dialog 자체가 백드롭 클릭도 받으므로
+    // 클릭 지점이 시트 영역 밖인지 좌표로 판별합니다.
+    sheet.addEventListener('click', (event) => {
+      const box = sheet.getBoundingClientRect();
+      const outside =
+        event.clientX < box.left ||
+        event.clientX > box.right ||
+        event.clientY < box.top ||
+        event.clientY > box.bottom;
+      if (outside) sheet.close();
+    });
+
+    // 닫힌 뒤 포커스를 열었던 버튼으로 돌려줍니다.
+    sheet.addEventListener('close', () => open.focus());
+  });
+</script>

@@ -1,0 +1,26 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+.astro/
+.wrangler/
+
+# env & secrets
+.env
+.env.*
+!.env.example
+.dev.vars
+
+# test artifacts
+test-results/
+playwright-report/
+blob-report/
+.playwright-mcp/
+
+# OMC 운영 아티팩트 (문서는 docs/ 로 승격해 커밋)
+.omc/
+
+# os
+.DS_Store
+.fontsrc/

@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+Disallow: /*/cart
+Disallow: /*/checkout
+Disallow: /*/order/
+
+Sitemap: https://avora-homepage.workers.dev/sitemap-index.xml

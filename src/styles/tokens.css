@@ -1,0 +1,36 @@
+/* ─────────────────────────────────────────────────────────────
+ * 이 파일은 자동 생성됩니다. 직접 수정하지 마세요.
+ * 값을 바꾸려면 tokens/design-tokens.json 을 고치고 npm run tokens 실행.
+ *
+ * 팔레트: A — Deep Forest / Warm Cream (AVORA_디자인_가이드.pdf 기준)
+ * ───────────────────────────────────────────────────────────── */
+:root {
+  --brand-primary: #23291F; /* Deep Forest — 로고·핵심 브랜드 요소·역상 블록 배경 */
+  --brand-surface: #F5F3EC; /* Soft Paper — 기본 배경 */
+  --brand-surface-alt: #E9E4D6; /* Warm Cream — 교차 배경 · 역상 잉크 */
+  --brand-muted: #6F6D61; /* Stone Accent — 보조 텍스트 · 구분선 */
+  --brand-muted-on-dark: #A6A38F; /* Stone Light — 어두운 면 위 보조 텍스트 — Stone은 Deep Forest 위에서 2.87:1로 기준 미달 */
+  --brand-accent-campaign: #E9E4D6; /* Warm Cream (대체) — 캠페인 포인트. 팔레트 A에는 전용 캠페인 컬러가 없어 역상 대비로 대체. 나중에 캠페인 컬러를 도입하면 이 값만 교체 */
+
+  --color-ink: #23291F;
+  --color-ink-inverse: #E9E4D6;
+  --color-line: rgba(35, 41, 31, 0.14);
+  --color-line-inverse: rgba(233, 228, 214, 0.20);
+
+  --font-display: 'AVORA Display', 'Noto Serif KR', 'Apple SD Gothic Neo', serif;
+  --font-body: 'AVORA Body', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+
+  --size-tap-min: 44px;
+  --size-measure: 65ch;
+  --size-page-max: 1280px;
+
+  --space-section-mobile: 56px;
+  --space-section-desktop: 104px;
+  --space-gutter-mobile: 20px;
+  --space-gutter-desktop: 48px;
+
+  --motion-rise-duration: 700ms;
+  --motion-rise-easing: cubic-bezier(0.2, 0.7, 0.3, 1);
+  --motion-rule-duration: 800ms;
+}

@@ -1,0 +1,26 @@
+---
+import Base from '../../layouts/Base.astro';
+import { LOCALES, type Locale } from '../../config/site';
+import { dict, localePath } from '../../i18n';
+
+export function getStaticPaths() {
+  return LOCALES.map((lang) => ({ params: { lang } }));
+}
+
+const locale = Astro.params.lang as Locale;
+const t = dict(locale);
+---
+
+<Base
+  locale={locale}
+  path="404"
+  title={t.notFound.meta.title}
+  description={t.notFound.meta.description}
+  noindex
+>
+  <section class="section wrap notfound">
+    <h1 class="display display--tight">{t.notFound.heading}</h1>
+    <p class="body">{t.notFound.body}</p>
+    <p><a class="cta" href={localePath(locale)}>{t.notFound.cta}</a></p>
+  </section>
+</Base>

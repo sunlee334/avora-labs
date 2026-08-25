@@ -1,0 +1,184 @@
+{
+  "$meta": {
+    "locale": "zh",
+    "reviewed": false,
+    "note": "以韩语原文为基准的翻译初稿，尚未经母语审校。"
+  },
+  "nav": {
+    "story": "品牌故事",
+    "product": "产品",
+    "cart": "购物车",
+    "language": "选择语言",
+    "menu": "菜单",
+    "close": "关闭"
+  },
+  "home": {
+    "meta": {
+      "title": "AVORA — For every movement.",
+      "description": "AVORA 是一个将运动活力与温和护理结合的活跃生活方式护肤品牌。首款产品 Daily Sunscreen SPF50+ / PA++++。",
+      "ogAlt": "低角度阳光下奔跑者的剪影"
+    },
+    "hero": {
+      "imageAlt": "低角度阳光下在岩石小径上奔跑的人的剪影",
+      "scrollHint": "向下滚动"
+    },
+    "origin": {
+      "kicker": "Origin",
+      "statementBefore": "将运动活力与",
+      "statementEmphasis": "温和护理",
+      "statementAfter": "结合的护肤。"
+    },
+    "question": {
+      "kicker": "The Question",
+      "quote": "当身体最富生机的时刻，为什么肌肤所感受到的护理却总是平淡而千篇一律？",
+      "body": "以往的美妆市场停留在两个极端。追求华丽的普通化妆品在日常活动中显得厚重闷塞，而只强调功能的运动化妆品则粗糙生硬，忽略了肌肤应有的舒适与质感。",
+      "naming": "AVORA 由代表运动主体的 Athlete·Active 的 A，与象征肌肤本真活力与格调的 Vitality & Aura 结合而成。"
+    },
+    "journey": {
+      "kicker": "The Journey",
+      "lead": "产品所处的场景",
+      "steps": [
+        { "word": "Sun", "body": "晨光下的第一次涂抹" },
+        { "word": "Sweat", "body": "在汗水与高温中依然稳固" },
+        { "word": "Water", "body": "接触水后仍能坚持" },
+        { "word": "Movement", "body": "不妨碍动作的轻盈质感" },
+        { "word": "Reapply", "body": "让补涂不再麻烦" }
+      ]
+    },
+    "break": {
+      "imageAlt": "活动后肌肤上凝结的汗珠特写"
+    },
+    "promise": {
+      "kicker": "Brand Promise",
+      "lead": "使用后应有的感受",
+      "items": [
+        { "code": "LIGHT", "body": "毫不厚重的肤感" },
+        { "code": "COMFORT", "body": "活动时肌肤依然舒适" },
+        { "code": "PROTECTION", "body": "抵御阳光与日常侵扰" },
+        { "code": "RESET", "body": "活动后重新整顿肌肤的感觉" }
+      ]
+    },
+    "philosophy": {
+      "kicker": "Philosophy",
+      "quote": "运动是生命最纯粹、最有力的表达。从清晨的漫步，到全神贯注掌控生活的时刻，AVORA 不打扰这份流动，只是让肌肤回到它本来的样子。",
+      "body": "在尽情活动之后，AVORA 触及肌肤的瞬间所带来的细腻柔滑 —— 这份反差正是 AVORA 的独特之处。"
+    },
+    "product": {
+      "kicker": "First Product",
+      "name": "Daily Sunscreen",
+      "spec": "SPF50+ / PA++++ · 水感凝胶 · 抗水配方",
+      "cta": "查看产品"
+    }
+  },
+  "product": {
+    "meta": {
+      "title": "Daily Sunscreen SPF50+ / PA++++ — AVORA",
+      "description": "AVORA 首款产品 Daily Sunscreen。SPF50+ / PA++++ 防晒功能性化妆品，无泛白的水感凝胶质地，跑步、普拉提、攀岩等户外活动中依然轻盈舒适。",
+      "ogAlt": "置于明亮台面上的 AVORA Daily Sunscreen"
+    },
+    "hero": {
+      "imageAlt": "置于明亮台面上的 AVORA Daily Sunscreen 瓶身",
+      "headline": "在每一次移动中，肌肤依然自在呼吸。",
+      "priceUnknown": "价格待定",
+      "ctaExternal": "前往 Smart Store 购买",
+      "ctaCart": "加入购物车"
+    },
+    "principles": {
+      "kicker": "Product Principles",
+      "items": [
+        { "term": "Stay", "label": "不易脱妆的持久", "body": "针对汗水与高温设计，力求持久稳固。" },
+        { "term": "Breathe", "label": "轻盈不厚重", "body": "无泛白的水感凝胶，轻盈渗透，不压迫毛孔。" },
+        { "term": "Pure", "label": "减法的纯粹", "body": "最大限度减少人工香料与色素，趋向无香设计。" }
+      ]
+    },
+    "spec": {
+      "kicker": "Specification",
+      "labels": {
+        "protection": "防晒指数",
+        "texture": "质地",
+        "waterResistant": "抗水性",
+        "volume": "容量",
+        "category": "分类"
+      },
+      "values": {
+        "category": "功能性化妆品（防晒）",
+        "pending": "待确定"
+      },
+      "note": "质地、容量与全成分将在配方确定后更新。"
+    },
+    "howto": {
+      "kicker": "How to use",
+      "steps": [
+        { "title": "护肤的最后一步", "body": "面部取约一枚硬币大小的用量涂抹均匀。" },
+        { "title": "活动前 15~20 分钟", "body": "涂抹后留出充分吸收的时间。" },
+        { "title": "每两小时补涂", "body": "若大量出汗，请提前补涂。" }
+      ]
+    },
+    "faq": {
+      "kicker": "常见问题",
+      "items": [
+        {
+          "q": "AVORA 是怎样的品牌？",
+          "a": "AVORA 是面向 20~30 岁活跃人群的活跃生活方式护肤品牌。品牌名由 Athlete·Active 的 A 与 Vitality & Aura 组合而成。它并非运动专用品牌，而是为所有会活动的人而做。"
+        },
+        {
+          "q": "Daily Sunscreen 的防晒指数是多少？",
+          "a": "SPF50+ / PA++++，为韩国标准下的最高等级，针对长时间户外活动的场景设计。"
+        },
+        {
+          "q": "运动时可以使用吗？",
+          "a": "可以。产品以抗汗抗水的配方为目标设计，质地轻盈不妨碍动作。若大量出汗，建议不必等满两小时即可补涂。"
+        },
+        {
+          "q": "会泛白吗？",
+          "a": "将泛白降到最低是本产品的核心设计目标之一。目标质地为无泛白的水感凝胶，最终配方经由感官评估确定。"
+        },
+        {
+          "q": "有香味吗？",
+          "a": "最大限度减少人工香料与色素，趋向无香设计，不区分性别，适合所有人使用。"
+        }
+      ]
+    },
+    "backToStory": "返回品牌故事"
+  },
+  "footer": {
+    "tagline": "For every movement.",
+    "language": "语言",
+    "legal": {
+      "privacy": "隐私政策",
+      "terms": "服务条款",
+      "shipping": "配送与退换货说明"
+    },
+    "business": {
+      "registrationNumber": "营业执照号",
+      "mailOrderNumber": "通信销售申报号",
+      "email": "电子邮箱"
+    },
+    "copyright": "© 2026 AVORA. All rights reserved."
+  },
+  "legal": {
+    "privacy": {
+      "meta": {
+        "title": "隐私政策 — AVORA",
+        "description": "AVORA 网站的隐私政策。"
+      },
+      "heading": "隐私政策",
+      "placeholder": "本文件正在准备中，待实际收集项目与企业信息确定后发布。"
+    }
+  },
+  "notFound": {
+    "meta": {
+      "title": "未找到页面 — AVORA",
+      "description": "未能找到您请求的页面。"
+    },
+    "heading": "这条路径尚不存在。",
+    "body": "地址可能已更改，或该页面已被删除。",
+    "cta": "返回首页"
+  },
+  "a11y": {
+    "skipToContent": "跳到正文",
+    "openMenu": "打开菜单",
+    "closeMenu": "关闭菜单",
+    "selectLanguage": "选择语言"
+  }
+}

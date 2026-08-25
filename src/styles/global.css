@@ -1,0 +1,848 @@
+/* ─────────────────────────────────────────────────────────────
+ * AVORA — 전역 스타일
+ *
+ * 컬러·타이포·간격 값은 여기서 정의하지 않습니다.
+ * 전부 tokens.css 의 CSS 변수를 참조하며, 그 원본은 tokens/design-tokens.json 입니다.
+ *
+ * 모바일 우선: 기본 규칙이 모바일이고, 미디어 쿼리는 넓힐 때만 씁니다.
+ * ───────────────────────────────────────────────────────────── */
+
+@import './tokens.css';
+/* @font-face 는 언어별이라 Base.astro 가 /fonts/{locale}/fonts.css 를 링크합니다 */
+
+/* ── reset ────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--brand-surface);
+  color: var(--brand-ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+
+  /*
+   * 한국어·중국어는 기본값(break-all 유사 동작)으로 두면 단어 한가운데서 줄이 끊깁니다.
+   * "부드러운 케어" 가 "부드러운 / 케어" 가 아니라 "부드러 / 운 케어" 로 잘리는 식입니다.
+   * keep-all 로 어절 단위 줄바꿈을 강제하고, 긴 URL 등 예외는 overflow-wrap 이 받습니다.
+   */
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+img,
+picture,
+video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+h1, h2, h3, h4, p, figure, blockquote, ul, ol, dl {
+  margin: 0;
+}
+
+ul, ol {
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand-ink);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* 스크린리더 전용 — 시각적으로 숨기되 읽히게 */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--space-gutter-mobile);
+  top: -100px;
+  z-index: 100;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--size-tap-min);
+  background: var(--brand-primary);
+  color: var(--brand-surface-alt);
+  padding: 0 18px;
+  border-radius: 4px;
+  transition: top 0.15s ease;
+}
+.skip-link:focus {
+  top: 12px;
+}
+
+/* ── layout ───────────────────────────────────────────────── */
+.wrap {
+  padding-inline: var(--space-gutter-mobile);
+}
+
+.section {
+  padding-block: var(--space-section-mobile);
+}
+
+.section--alt {
+  background: var(--brand-surface-alt);
+}
+
+/* 팔레트 A 에는 캠페인 컬러가 없습니다.
+   ver3 문서가 라임에 맡기려던 "브랜드의 에너지 버튼" 역할을 이 역상 블록이 대신합니다. */
+.section--dark {
+  background: var(--brand-primary);
+  color: var(--brand-surface-alt);
+}
+.section--dark .kicker,
+.section--dark .body {
+  color: var(--brand-muted-on-dark);
+}
+
+@media (min-width: 900px) {
+  .wrap {
+    padding-inline: var(--space-gutter-desktop);
+  }
+  .section {
+    padding-block: var(--space-section-desktop);
+  }
+}
+
+/* ── typography ───────────────────────────────────────────── */
+.kicker {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--brand-muted);
+  margin-bottom: 18px;
+}
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(26px, 6.2vw, 44px);
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+.display--tight {
+  line-height: 1.2;
+}
+
+.body {
+  color: var(--brand-muted);
+  font-size: 15px;
+  line-height: 1.85;
+  max-width: var(--size-measure);
+}
+
+.quote {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(19px, 4.6vw, 28px);
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  max-width: 24ch;
+  text-wrap: balance;
+}
+
+@media (min-width: 900px) {
+  .display {
+    font-size: clamp(38px, 3.6vw, 54px);
+  }
+}
+
+/* ── 강조어 밑줄 — 시안 01 의 유일한 액센트 사용처 ────────────── */
+.mark {
+  position: relative;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.mark::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.12em;
+  height: 2px;
+  background: var(--brand-accent-campaign);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--motion-rule-duration) var(--motion-rise-easing) 0.25s;
+}
+.rise.is-in .mark::after {
+  transform: scaleX(1);
+}
+/* 밝은 지반 위에서는 Warm Cream 밑줄이 보이지 않으므로 잉크색으로 대체합니다. */
+.section:not(.section--dark) .mark::after {
+  background: var(--brand-ink);
+}
+
+/* ── 스크롤 등장 ──────────────────────────────────────────── */
+.rise {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity var(--motion-rise-duration) var(--motion-rise-easing),
+    transform var(--motion-rise-duration) var(--motion-rise-easing);
+}
+.rise.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── CTA ──────────────────────────────────────────────────── */
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--size-tap-min);
+  padding-inline: 28px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: var(--brand-primary);
+  color: var(--brand-surface-alt);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.18s ease;
+}
+.cta:hover {
+  opacity: 0.86;
+}
+.cta--inverse {
+  background: var(--brand-surface-alt);
+  color: var(--brand-primary);
+}
+.cta--ghost {
+  background: transparent;
+  color: var(--brand-ink);
+  border-color: var(--color-line);
+}
+
+/* ── 네비게이션 ───────────────────────────────────────────── */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px var(--space-gutter-mobile);
+  background: color-mix(in srgb, var(--brand-surface) 88%, transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.nav__wordmark {
+  display: flex;
+  align-items: center;
+  min-height: var(--size-tap-min);
+}
+.nav__wordmark img {
+  height: 17px;
+  width: auto;
+}
+
+.nav__links {
+  display: none;
+  gap: 26px;
+  font-size: 13px;
+  letter-spacing: 0.03em;
+}
+.nav__links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--size-tap-min);
+  text-decoration: none;
+}
+.nav__links a:hover {
+  text-decoration: underline;
+}
+
+.nav__right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (min-width: 900px) {
+  .nav {
+    padding: 14px var(--space-gutter-desktop);
+  }
+  .nav__wordmark img {
+    height: 21px;
+  }
+  .nav__links {
+    display: flex;
+  }
+}
+
+/* ── 언어 선택 — 모바일 바텀시트 / 데스크톱 패널 ──────────────
+   <dialog> 라 top layer 에 렌더됩니다. .nav 의 backdrop-filter 가 만드는
+   컨테이닝 블록에 갇히지 않는 것이 이 방식을 고른 이유입니다. */
+.lang__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--size-tap-min);
+  min-width: var(--size-tap-min);
+  padding-inline: 12px;
+  background: transparent;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+.lang__sheet {
+  position: fixed;
+  inset: auto 0 0 0;
+  width: 100%;
+  max-width: none;
+  max-height: 80svh;
+  margin: 0;
+  padding: 4px var(--space-gutter-mobile) calc(14px + env(safe-area-inset-bottom));
+  border: 0;
+  border-top: 1px solid var(--color-line);
+  border-radius: 18px 18px 0 0;
+  background: var(--brand-surface);
+  color: var(--brand-ink);
+  overflow-y: auto;
+}
+.lang__sheet::backdrop {
+  background: rgba(35, 41, 31, 0.38);
+}
+
+.lang__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.lang__title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brand-muted);
+  padding-block: 14px 6px;
+}
+.lang__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--size-tap-min);
+  min-width: var(--size-tap-min);
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  font-size: 15px;
+  color: var(--brand-muted);
+  cursor: pointer;
+}
+
+.lang__list {
+  display: grid;
+}
+.lang__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 54px;
+  padding-inline: 2px;
+  border-top: 1px solid var(--color-line);
+  text-decoration: none;
+  font-size: 15.5px;
+}
+.lang__item[aria-current='true'] {
+  font-weight: 600;
+}
+.lang__item span {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--brand-muted);
+  letter-spacing: 0.08em;
+}
+
+@media (min-width: 900px) {
+  .lang__sheet {
+    inset: 74px var(--space-gutter-desktop) auto auto;
+    width: 260px;
+    border: 1px solid var(--color-line);
+    border-radius: 12px;
+    padding: 4px 16px 12px;
+    box-shadow: 0 20px 50px -20px rgba(35, 41, 31, 0.35);
+  }
+  .lang__sheet::backdrop {
+    background: rgba(35, 41, 31, 0.12);
+  }
+}
+
+/* ── 히어로 ───────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  min-height: 78svh;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+.hero__media,
+.hero__media img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.hero__veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--brand-primary) 82%, transparent) 0%,
+    color-mix(in srgb, var(--brand-primary) 42%, transparent) 42%,
+    transparent 72%
+  );
+}
+.hero__copy {
+  position: relative;
+  color: var(--brand-surface-alt);
+  padding: 0 var(--space-gutter-mobile) 44px;
+  max-width: 40ch;
+}
+.hero__thin {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(28px, 8vw, 40px);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  margin-bottom: 14px;
+}
+.hero__bold {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(13px, 3.4vw, 17px);
+  letter-spacing: 0.18em;
+}
+
+@media (min-width: 900px) {
+  .hero {
+    min-height: 88svh;
+  }
+  .hero__copy {
+    padding: 0 var(--space-gutter-desktop) 76px;
+    max-width: 60ch;
+  }
+  .hero__thin {
+    font-size: clamp(48px, 4.6vw, 68px);
+  }
+  .hero__bold {
+    font-size: 19px;
+  }
+}
+
+/* ── 여정 목록 ────────────────────────────────────────────── */
+.journey {
+  display: grid;
+  margin-top: 26px;
+}
+.journey li {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 14px;
+  align-items: baseline;
+  padding-block: 18px;
+  border-top: 1px solid var(--color-line);
+}
+.journey li:last-child {
+  border-bottom: 1px solid var(--color-line);
+}
+.journey__step {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--brand-muted);
+}
+.journey__word {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 400;
+  display: block;
+}
+.journey__body {
+  color: var(--brand-muted);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+
+@media (min-width: 900px) {
+  .journey {
+    grid-template-columns: repeat(5, 1fr);
+  }
+  .journey li {
+    grid-template-columns: 1fr;
+    border-bottom: 0 !important;
+    padding: 24px 22px 44px 0;
+  }
+  .journey__word {
+    font-size: 26px;
+    margin-block: 8px 6px;
+  }
+}
+
+/* ── 프로미스 ─────────────────────────────────────────────── */
+.promise {
+  display: grid;
+  gap: 1px;
+  background: var(--color-line);
+  border: 1px solid var(--color-line);
+  margin-top: 26px;
+}
+.promise > div {
+  background: var(--brand-surface);
+  padding: 26px 22px;
+}
+.section--alt .promise > div {
+  background: var(--brand-surface-alt);
+}
+.promise h3 {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  margin-bottom: 8px;
+}
+.promise p {
+  color: var(--brand-muted);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+
+@media (min-width: 600px) {
+  .promise {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (min-width: 900px) {
+  .promise {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ── 이미지 브레이크 ──────────────────────────────────────── */
+.figure img {
+  width: 100%;
+  height: 58svh;
+  object-fit: cover;
+}
+.figure figcaption {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--brand-muted);
+  padding: 12px var(--space-gutter-mobile) 0;
+}
+@media (min-width: 900px) {
+  .figure figcaption {
+    padding-inline: var(--space-gutter-desktop);
+  }
+}
+
+/* ── 제품 페이지 ──────────────────────────────────────────── */
+.product-hero {
+  display: grid;
+  gap: 28px;
+  align-items: center;
+}
+.product-hero__media img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 4px;
+}
+.product-hero__price {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  margin-block: 10px 22px;
+  font-variant-numeric: tabular-nums;
+}
+.product-hero__price small {
+  color: var(--brand-muted);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+@media (min-width: 900px) {
+  .product-hero {
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+  }
+}
+
+.principles {
+  display: grid;
+  gap: 1px;
+  background: var(--color-line);
+  border-block: 1px solid var(--color-line);
+}
+.principles > div {
+  background: var(--brand-surface);
+  padding: 28px 22px;
+}
+.principles__term {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  margin-bottom: 4px;
+}
+.principles__label {
+  font-weight: 600;
+  font-size: 14.5px;
+  margin-bottom: 8px;
+}
+.principles p {
+  color: var(--brand-muted);
+  font-size: 13.5px;
+  line-height: 1.75;
+}
+@media (min-width: 900px) {
+  .principles {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .principles > div {
+    padding: 44px 34px;
+  }
+}
+
+.spec {
+  margin-top: 22px;
+}
+.spec__row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: baseline;
+  padding-block: 14px;
+  border-bottom: 1px solid var(--color-line);
+}
+.spec__key {
+  font-size: 14.5px;
+}
+.spec__value {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--brand-muted);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.spec__value--pending {
+  opacity: 0.72;
+}
+.spec__note {
+  margin-top: 16px;
+  font-size: 12.5px;
+  color: var(--brand-muted);
+}
+
+.steps {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+  counter-reset: step;
+}
+.steps li {
+  counter-increment: step;
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+  padding: 20px;
+  background: var(--brand-surface);
+}
+.section--alt .steps li {
+  background: var(--brand-surface-alt);
+}
+.steps li::before {
+  content: counter(step, decimal-leading-zero);
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--brand-muted);
+  margin-bottom: 10px;
+}
+.steps strong {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.steps p {
+  color: var(--brand-muted);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+@media (min-width: 900px) {
+  .steps {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* FAQ — GEO 를 위해 details/summary 대신 항상 펼쳐진 마크업을 씁니다.
+   접어두면 초기 HTML 에는 있지만 답변엔진이 본문으로 보지 않을 수 있습니다. */
+.faq {
+  margin-top: 24px;
+  border-top: 1px solid var(--color-line);
+}
+.faq > div {
+  padding-block: 22px;
+  border-bottom: 1px solid var(--color-line);
+}
+.faq h3 {
+  font-size: 15.5px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.faq p {
+  color: var(--brand-muted);
+  font-size: 14px;
+  line-height: 1.85;
+  max-width: var(--size-measure);
+}
+
+/* ── 푸터 ─────────────────────────────────────────────────── */
+.footer {
+  background: var(--brand-primary);
+  color: var(--brand-surface-alt);
+  padding-block: 48px 40px;
+}
+.footer__wordmark {
+  width: 100%;
+  max-width: 520px;
+  margin-bottom: 32px;
+}
+.footer__tagline {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 17px;
+  margin-bottom: 30px;
+}
+.footer__cols {
+  display: grid;
+  gap: 26px;
+  padding-top: 26px;
+  border-top: 1px solid var(--color-line-inverse);
+}
+.footer__col h2 {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brand-muted-on-dark);
+  margin-bottom: 12px;
+}
+.footer__col li a,
+.footer__col li {
+  display: block;
+  font-size: 14px;
+  line-height: 2.1;
+  text-decoration: none;
+}
+.footer__col li a {
+  min-height: var(--size-tap-min);
+  display: flex;
+  align-items: center;
+}
+.footer__col li a:hover {
+  text-decoration: underline;
+}
+.footer__meta {
+  margin-top: 30px;
+  padding-top: 22px;
+  border-top: 1px solid var(--color-line-inverse);
+  color: var(--brand-muted-on-dark);
+  font-size: 12.5px;
+  line-height: 1.9;
+}
+/* 사업자 정보 안의 링크도 탭 영역 44px 를 지킵니다 — 작은 글씨라고 예외는 없습니다. */
+.footer__meta a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--size-tap-min);
+  min-width: var(--size-tap-min);
+  padding-inline: 2px;
+}
+@media (min-width: 720px) {
+  .footer__cols {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ── 404 ──────────────────────────────────────────────────── */
+.notfound {
+  min-height: 64svh;
+  display: grid;
+  align-content: center;
+  gap: 18px;
+}
+
+/* ── 모션 최소화 선호 대응 ────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .rise {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .mark::after {
+    transform: scaleX(1);
+    transition: none;
+  }
+  .lang__sheet,
+  .lang__backdrop,
+  .cta {
+    transition: none;
+  }
+}

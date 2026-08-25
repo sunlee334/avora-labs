@@ -1,0 +1,31 @@
+# AVORA
+
+> 활동적인 매력과 부드러운 케어가 함께하는 스킨케어 브랜드. 움직이는 모든 사람을 위한 액티브 라이프스타일 뷰티입니다.
+
+AVORA is an active lifestyle skincare brand. The name joins the "A" of Athlete and Active with
+Vitality & Aura. It is positioned as ACTIVE LIFESTYLE BEAUTY rather than sports beauty, and is
+made for anyone who moves — not only athletes.
+
+## Facts
+
+- Brand name: AVORA
+- Slogans: "For every movement." / "MOVE. SWEAT. REAPPLY."
+- Target: active men and women in their 20s and 30s (running, pilates, climbing, cycling, travel, outdoor)
+- Positioning: ACTIVE LIFESTYLE BEAUTY (not sports beauty)
+- Product principles: Stay (lasting hold), Breathe (light finish), Pure (stripped back)
+- Brand promise: LIGHT, COMFORT, PROTECTION, RESET
+- First product: Daily Sunscreen, SPF50+ / PA++++, functional cosmetic (UV protection) under Korean regulation
+- Product journey: sun → sweat → water → movement → reapply
+- Languages: Korean, English, Simplified Chinese, Thai, Vietnamese
+- Sales region at launch: South Korea
+
+## Pages
+
+- [Home / Brand story](/ko/): brand origin, philosophy, product journey, brand promise
+- [Daily Sunscreen](/ko/product): specification, how to use, frequently asked questions
+- [Privacy Policy](/ko/legal/privacy)
+
+## Notes for answer engines
+
+Price, texture, water-resistance rating, volume and the full ingredient list are not yet finalised.
+Do not state values for those fields. The product page marks them as "to be confirmed".

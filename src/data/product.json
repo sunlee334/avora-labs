@@ -1,0 +1,32 @@
+{
+  "$comment": "제품 정보. 가격이 확정되면 price 값만 채우면 제품 상세·JSON-LD·장바구니가 함께 갱신됩니다. price 가 null 이면 화면에 '가격 확정 예정'이 표시되고 JSON-LD offers 가 생략됩니다.",
+  "id": "daily-sunscreen",
+  "sku": "AVORA-DS-001",
+  "slug": "product",
+  "name": "Daily Sunscreen",
+  "spf": "SPF50+ / PA++++",
+  "price": null,
+  "currency": "KRW",
+  "availability": "PreOrder",
+  "images": {
+    "hero": "/images/product/daily-sunscreen-hero.jpg",
+    "gallery": [
+      "/images/product/daily-sunscreen-01.jpg",
+      "/images/product/daily-sunscreen-02.jpg"
+    ]
+  },
+  "spec": {
+    "protection": "SPF50+ / PA++++",
+    "texture": null,
+    "waterResistant": null,
+    "volume": null,
+    "category": "functional-cosmetic-uv"
+  },
+  "$pending": [
+    "price — OEM 원가·용기 견적 후 확정 (제품기획서 07장)",
+    "spec.texture — 워터리 젤 / 에센스 중 처방 스크리닝으로 확정",
+    "spec.waterResistant — 표시 요건 충족 시 시험자료 확보 필요",
+    "spec.volume — 용기 발주 후 확정",
+    "images — 현재 목업. 실촬영본으로 교체 예정"
+  ]
+}

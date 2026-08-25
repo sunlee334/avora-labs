@@ -1,0 +1,17 @@
+/* 자동 생성 — scripts/build-fonts.mjs (vi)
+   이 언어 페이지에 실제로 쓰이는 글자만 담은 서브셋입니다.
+   문구를 바꾸면 npm run fonts 로 다시 만드세요. */
+@font-face {
+  font-family: 'AVORA Body';
+  src: url('/fonts/vi/body.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'AVORA Display';
+  src: url('/fonts/vi/display.woff2') format('woff2-variations');
+  font-weight: 300 600;
+  font-style: normal;
+  font-display: swap;
+}

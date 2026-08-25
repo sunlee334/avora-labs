@@ -1,0 +1,109 @@
+{
+  "$comment": "AVORA 디자인 토큰 원본. 이 파일이 유일한 정의처입니다. npm run tokens 를 실행하면 src/styles/tokens.css 가 여기서 생성됩니다. 프레임워크 중립 형식이라 나중에 React Native 앱에서도 그대로 읽을 수 있습니다.",
+  "meta": {
+    "palette": "A — Deep Forest / Warm Cream (AVORA_디자인_가이드.pdf 기준)",
+    "decidedAt": "2026-08-25",
+    "note": "팔레트 값을 바꾸려면 아래 color.brand 값만 수정하고 npm run tokens 를 실행하세요."
+  },
+  "color": {
+    "brand": {
+      "primary": {
+        "value": "#23291F",
+        "name": "Deep Forest",
+        "use": "로고·핵심 브랜드 요소·역상 블록 배경"
+      },
+      "surface": {
+        "value": "#F5F3EC",
+        "name": "Soft Paper",
+        "use": "기본 배경"
+      },
+      "surfaceAlt": {
+        "value": "#E9E4D6",
+        "name": "Warm Cream",
+        "use": "교차 배경 · 역상 잉크"
+      },
+      "muted": {
+        "value": "#6F6D61",
+        "name": "Stone Accent",
+        "use": "보조 텍스트 · 구분선"
+      },
+      "mutedOnDark": {
+        "value": "#A6A38F",
+        "name": "Stone Light",
+        "use": "어두운 면 위 보조 텍스트 — Stone은 Deep Forest 위에서 2.87:1로 기준 미달"
+      },
+      "accentCampaign": {
+        "value": "#E9E4D6",
+        "name": "Warm Cream (대체)",
+        "use": "캠페인 포인트. 팔레트 A에는 전용 캠페인 컬러가 없어 역상 대비로 대체. 나중에 캠페인 컬러를 도입하면 이 값만 교체"
+      }
+    },
+    "semantic": {
+      "ink": {
+        "ref": "color.brand.primary"
+      },
+      "inkInverse": {
+        "ref": "color.brand.surfaceAlt"
+      },
+      "line": {
+        "value": "rgba(35, 41, 31, 0.14)"
+      },
+      "lineInverse": {
+        "value": "rgba(233, 228, 214, 0.20)"
+      }
+    }
+  },
+  "font": {
+    "display": {
+      "value": "'AVORA Display', 'Noto Serif KR', 'Apple SD Gothic Neo', serif",
+      "use": "헤드라인. 언어별 서브셋을 자체 호스팅합니다 (scripts/build-fonts.mjs)"
+    },
+    "body": {
+      "value": "'AVORA Body', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif",
+      "use": "본문·UI. 언어별 서브셋을 자체 호스팅합니다"
+    },
+    "mono": {
+      "value": "'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace",
+      "use": "라벨 · 수치"
+    }
+  },
+  "size": {
+    "tapMin": {
+      "value": "44px",
+      "use": "터치 영역 최소 — 요구사항 7번"
+    },
+    "measure": {
+      "value": "65ch",
+      "use": "본문 최대 너비"
+    },
+    "pageMax": {
+      "value": "1280px"
+    }
+  },
+  "space": {
+    "sectionMobile": {
+      "value": "56px"
+    },
+    "sectionDesktop": {
+      "value": "104px"
+    },
+    "gutterMobile": {
+      "value": "20px"
+    },
+    "gutterDesktop": {
+      "value": "48px"
+    }
+  },
+  "motion": {
+    "riseDuration": {
+      "value": "700ms"
+    },
+    "riseEasing": {
+      "value": "cubic-bezier(0.2, 0.7, 0.3, 1)"
+    },
+    "ruleDuration": {
+      "value": "800ms",
+      "use": "강조어 밑줄이 좌→우로 그어지는 시간"
+    }
+  }
+}

@@ -1,0 +1,147 @@
+---
+/**
+ * 홈 — 원페이지 스토리 스크롤 (시안 01 Minimal Editorial)
+ *
+ * 섹션 순서가 곧 서사입니다: 왜 이 브랜드인가 → 그래서 이 제품.
+ * 순서를 바꾸면 스크롤이 전달하는 이야기가 무너집니다.
+ */
+import { Picture } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import heroImage from '../../assets/images/hero-runner-sunrise.jpg';
+import skinImage from '../../assets/images/skin-sweat.jpg';
+import { LOCALES, type Locale } from '../../config/site';
+import { dict, localePath } from '../../i18n';
+import { organization, website, breadcrumb } from '../../lib/jsonld';
+
+export function getStaticPaths() {
+  return LOCALES.map((lang) => ({ params: { lang } }));
+}
+
+const locale = Astro.params.lang as Locale;
+const t = dict(locale);
+const h = t.home;
+---
+
+<Base
+  locale={locale}
+  path=""
+  title={h.meta.title}
+  description={h.meta.description}
+  ogImageAlt={h.meta.ogAlt}
+  jsonLd={[
+    organization(),
+    website(locale),
+    breadcrumb([{ name: 'AVORA', path: localePath(locale) }]),
+  ]}
+>
+  {/* 1 — Hero */}
+  <section class="hero">
+    <div class="hero__media">
+      <Picture
+        src={heroImage}
+        alt={h.hero.imageAlt}
+        formats={['avif', 'webp']}
+        widths={[390, 780, 1200, 1600]}
+        sizes="100vw"
+        quality={70}
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
+      />
+    </div>
+    <div class="hero__veil"></div>
+    <div class="hero__copy">
+      <h1 class="hero__thin">For every movement.</h1>
+      <p class="hero__bold">MOVE. SWEAT. REAPPLY.</p>
+    </div>
+  </section>
+
+  {/* 2 — Origin */}
+  <section class="section wrap rise" id="story">
+    <p class="kicker">{h.origin.kicker}</p>
+    <p class="display">
+      {h.origin.statementBefore}<span class="mark">{h.origin.statementEmphasis}</span>{
+        h.origin.statementAfter
+      }
+    </p>
+  </section>
+
+  {/* 3 — The Question */}
+  <section class="section section--alt wrap rise">
+    <p class="kicker">{h.question.kicker}</p>
+    <blockquote class="quote">{h.question.quote}</blockquote>
+    <p class="body" style="margin-top: 28px">{h.question.body}</p>
+    <p class="body" style="margin-top: 18px">{h.question.naming}</p>
+  </section>
+
+  {/* 4 — The Journey */}
+  <section class="section wrap rise">
+    <p class="kicker">{h.journey.kicker}</p>
+    <h2 class="display display--tight">{h.journey.lead}</h2>
+    <ol class="journey">
+      {
+        h.journey.steps.map((step, i) => (
+          <li>
+            <span class="journey__step">{String(i + 1).padStart(2, '0')}</span>
+            <div>
+              <strong class="journey__word">{step.word}</strong>
+              <span class="journey__body">{step.body}</span>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  {/* 5 — Visual break */}
+  <figure class="figure rise">
+    <Picture
+      src={skinImage}
+      alt={h.break.imageAlt}
+      formats={['avif', 'webp']}
+      widths={[390, 780]}
+      sizes="100vw"
+      quality={52}
+      loading="lazy"
+      decoding="async"
+    />
+    <figcaption>SKIN</figcaption>
+  </figure>
+
+  {/* 6 — Brand Promise */}
+  <section class="section wrap rise">
+    <p class="kicker">{h.promise.kicker}</p>
+    <h2 class="display display--tight">{h.promise.lead}</h2>
+    <div class="promise">
+      {
+        h.promise.items.map((item) => (
+          <div>
+            <h3>{item.code}</h3>
+            <p>{item.body}</p>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  {/*
+    7 — Philosophy
+    팔레트 A 에는 캠페인 컬러가 없습니다. 밝은 지반이 여섯 섹션 이어지다
+    여기 한 곳만 뒤집히는 대비가 "브랜드의 에너지 버튼" 역할을 대신합니다.
+  */}
+  <section class="section section--dark wrap rise">
+    <p class="kicker">{h.philosophy.kicker}</p>
+    <blockquote class="quote">{h.philosophy.quote}</blockquote>
+    <p class="body" style="margin-top: 28px">{h.philosophy.body}</p>
+  </section>
+
+  {/* 8 — First Product */}
+  <section class="section wrap rise">
+    <p class="kicker">{h.product.kicker}</p>
+    <h2 class="display display--tight">{h.product.name}</h2>
+    <p class="body" style="margin-top: 14px">{h.product.spec}</p>
+    <p style="margin-top: 30px">
+      <a class="cta" href={localePath(locale, 'product')}>{h.product.cta}</a>
+    </p>
+  </section>
+</Base>

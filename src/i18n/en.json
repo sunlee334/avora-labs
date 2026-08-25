@@ -1,0 +1,232 @@
+{
+  "$meta": {
+    "locale": "en",
+    "reviewed": false,
+    "note": "한국어 원본 기준 번역 초안. 원어민 검수 전입니다."
+  },
+  "nav": {
+    "story": "Story",
+    "product": "Product",
+    "cart": "Cart",
+    "language": "Language",
+    "menu": "Menu",
+    "close": "Close"
+  },
+  "home": {
+    "meta": {
+      "title": "AVORA — For every movement.",
+      "description": "AVORA is an active lifestyle skincare brand where athletic energy meets gentle care. First product: Daily Sunscreen SPF50+ / PA++++.",
+      "ogAlt": "Silhouette of a runner against a low sun"
+    },
+    "hero": {
+      "imageAlt": "Silhouette of a runner on a rocky trail against a low sun",
+      "scrollHint": "Scroll"
+    },
+    "origin": {
+      "kicker": "Origin",
+      "statementBefore": "Skincare where athletic energy meets ",
+      "statementEmphasis": "gentle care",
+      "statementAfter": "."
+    },
+    "question": {
+      "kicker": "The Question",
+      "quote": "When our bodies come most alive, why should the skincare our skin feels stay ordinary?",
+      "body": "The beauty market sat at two extremes. Conventional cosmetics chased polish but felt heavy through a day of movement, while sports formulas shouted function and gave up the comfort and refinement skin deserves.",
+      "naming": "AVORA joins the A of Athlete and Active with Vitality & Aura — the clear energy and poise that come from skin in good condition."
+    },
+    "journey": {
+      "kicker": "The Journey",
+      "lead": "Where the product lives",
+      "steps": [
+        {
+          "word": "Sun",
+          "body": "The first application in morning light"
+        },
+        {
+          "word": "Sweat",
+          "body": "Holding through heat and perspiration"
+        },
+        {
+          "word": "Water",
+          "body": "Staying put when water hits"
+        },
+        {
+          "word": "Movement",
+          "body": "A finish that never gets in the way"
+        },
+        {
+          "word": "Reapply",
+          "body": "Reapplying without it being a chore"
+        }
+      ]
+    },
+    "break": {
+      "imageAlt": "Close-up of sweat beading on skin right after activity"
+    },
+    "promise": {
+      "kicker": "Brand Promise",
+      "lead": "What you should feel when you use it",
+      "items": [
+        {
+          "code": "LIGHT",
+          "body": "Never heavy on the skin"
+        },
+        {
+          "code": "COMFORT",
+          "body": "Comfortable however you move"
+        },
+        {
+          "code": "PROTECTION",
+          "body": "Guarding skin from sun and daily exposure"
+        },
+        {
+          "code": "RESET",
+          "body": "Skin settled again after activity"
+        }
+      ]
+    },
+    "philosophy": {
+      "kicker": "Philosophy",
+      "quote": "Movement is the purest, most powerful expression of being alive. From an easy walk at dawn to the moment you take hold of the day, AVORA stays out of the way and lets skin find its own texture.",
+      "body": "Right after you have moved hard, AVORA meets your skin with a precise, unhurried softness. That reversal is what makes it ours."
+    },
+    "product": {
+      "kicker": "First Product",
+      "name": "Daily Sunscreen",
+      "spec": "SPF50+ / PA++++ · Watery gel · Water-resistant formula",
+      "cta": "View product"
+    }
+  },
+  "product": {
+    "meta": {
+      "title": "Daily Sunscreen SPF50+ / PA++++ — AVORA",
+      "description": "AVORA Daily Sunscreen. SPF50+ / PA++++ UV protection in a watery gel that leaves no white cast — light and comfortable through running, pilates and climbing.",
+      "ogAlt": "AVORA Daily Sunscreen on a bright surface"
+    },
+    "hero": {
+      "imageAlt": "AVORA Daily Sunscreen bottle on a bright surface",
+      "headline": "Through every movement, skin still breathes easy.",
+      "priceUnknown": "Price to be announced",
+      "ctaExternal": "Buy on Smart Store",
+      "ctaCart": "Add to cart"
+    },
+    "principles": {
+      "kicker": "Product Principles",
+      "items": [
+        {
+          "term": "Stay",
+          "label": "Protection that holds",
+          "body": "Built to stay put through heat and sweat."
+        },
+        {
+          "term": "Breathe",
+          "label": "Light, never heavy",
+          "body": "A watery gel with no white cast that sinks in without pressing on pores."
+        },
+        {
+          "term": "Pure",
+          "label": "Stripped back",
+          "body": "Designed toward fragrance-free, with artificial scent and colour kept to a minimum."
+        }
+      ]
+    },
+    "spec": {
+      "kicker": "Specification",
+      "labels": {
+        "protection": "Protection",
+        "texture": "Texture",
+        "waterResistant": "Water resistance",
+        "volume": "Volume",
+        "category": "Category"
+      },
+      "values": {
+        "category": "Functional cosmetic (UV protection)",
+        "pending": "To be confirmed"
+      },
+      "note": "Texture, volume and full ingredient list will be updated once the formula is finalised."
+    },
+    "howto": {
+      "kicker": "How to use",
+      "steps": [
+        {
+          "title": "Last step of your routine",
+          "body": "Apply about a coin-sized amount across the face."
+        },
+        {
+          "title": "15–20 minutes before activity",
+          "body": "Give it time to absorb before you head out."
+        },
+        {
+          "title": "Every two hours",
+          "body": "Reapply sooner if you have been sweating heavily."
+        }
+      ]
+    },
+    "faq": {
+      "kicker": "Frequently asked",
+      "items": [
+        {
+          "q": "What kind of brand is AVORA?",
+          "a": "AVORA is an active lifestyle skincare brand for people in their twenties and thirties who move often. The name joins the A of Athlete and Active with Vitality & Aura. It is not a sports-only brand — it is made for anyone who moves."
+        },
+        {
+          "q": "What is the SPF rating of Daily Sunscreen?",
+          "a": "SPF50+ / PA++++, the highest grade under Korean standards, designed for long stretches of outdoor activity."
+        },
+        {
+          "q": "Can I wear it while working out?",
+          "a": "Yes. It is designed toward a water-resistant formula that holds through sweat, with a light finish that does not interfere with movement. If you have been sweating heavily, reapply before the two-hour mark."
+        },
+        {
+          "q": "Does it leave a white cast?",
+          "a": "Minimising white cast is one of the core design goals. The target is a watery gel with no white cast; the final formula is confirmed through sensory evaluation."
+        },
+        {
+          "q": "Is it fragranced?",
+          "a": "It is designed toward fragrance-free, with artificial scent and colour kept to a minimum, and is intended to work for anyone regardless of gender."
+        }
+      ]
+    },
+    "backToStory": "Back to the story"
+  },
+  "footer": {
+    "tagline": "For every movement.",
+    "language": "Language",
+    "legal": {
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "shipping": "Shipping & Returns"
+    },
+    "business": {
+      "registrationNumber": "Business registration no.",
+      "mailOrderNumber": "Mail-order sales no.",
+      "email": "Email"
+    },
+    "copyright": "© 2026 AVORA. All rights reserved."
+  },
+  "legal": {
+    "privacy": {
+      "meta": {
+        "title": "Privacy Policy — AVORA",
+        "description": "The privacy policy for the AVORA website."
+      },
+      "heading": "Privacy Policy",
+      "placeholder": "This document is in preparation and will be published once the data we collect and our business details are confirmed."
+    }
+  },
+  "notFound": {
+    "meta": {
+      "title": "Page not found — AVORA",
+      "description": "We could not find the page you asked for."
+    },
+    "heading": "This path does not exist yet.",
+    "body": "The address may have changed, or the page may have been removed.",
+    "cta": "Back to home"
+  },
+  "a11y": {
+    "skipToContent": "Skip to content",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "selectLanguage": "Select language"
+  }
+}

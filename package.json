@@ -1,0 +1,32 @@
+{
+  "name": "avora-homepage",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "AVORA \ube0c\ub79c\ub4dc \uc6f9\uc0ac\uc774\ud2b8 \u2014 Astro + Cloudflare Workers",
+  "scripts": {
+    "tokens": "node scripts/build-tokens.mjs",
+    "fonts": "node scripts/build-fonts.mjs",
+    "og": "node scripts/build-og.mjs",
+    "check:i18n": "node scripts/check-i18n.mjs",
+    "check:fonts": "node scripts/build-fonts.mjs --check",
+    "prebuild": "npm run tokens && npm run og && npm run check:i18n && npm run check:fonts",
+    "build": "astro build",
+    "dev": "npm run tokens && astro dev",
+    "preview": "npm run build && wrangler dev",
+    "deploy": "npm run build && wrangler deploy",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.3",
+    "astro": "^7.2.6",
+    "lenis": "^1.3.26",
+    "pretendard": "^1.3.9",
+    "sharp": "^0.35.3"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "typescript": "^7.0.2",
+    "wrangler": "^4.125.0"
+  }
+}

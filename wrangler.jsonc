@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "avora-homepage",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-08-25",
+
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    // /api/* 만 Worker 가 먼저 받습니다.
+    // 나머지 경로는 정적 에셋이 우선이라 Worker 가 호출되지 않고(= 과금되지 않고),
+    // 매칭되는 파일이 없을 때만 Worker 로 넘어옵니다.
+    "run_worker_first": ["/api/*"],
+    "not_found_handling": "none"
+  },
+
+  "observability": {
+    "enabled": true
+  }
+
+  // 결제를 켤 때 추가할 것:
+  //   wrangler secret put TOSS_SECRET_KEY
+  //   vars: { "PAYMENT_PROVIDER": "tosspayments" }
+  // 시크릿은 이 파일에 적지 마세요. wrangler secret 으로만 넣습니다.
+}

@@ -1,0 +1,80 @@
+---
+import { dict, localePath } from '../i18n';
+import { BUSINESS, LOCALES, LOCALE_LABELS, LOCALE_TAGS, type Locale } from '../config/site';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = dict(locale);
+
+/** 값이 아직 없는 사업자 정보는 빈 줄을 남기지 않고 통째로 생략합니다. */
+const businessRows = [
+  { label: t.footer.business.registrationNumber, value: BUSINESS.registrationNumber },
+  { label: t.footer.business.mailOrderNumber, value: BUSINESS.mailOrderNumber },
+].filter((row) => row.value);
+---
+
+<footer class="footer">
+  <div class="wrap">
+    {/* 역상 배경이므로 크림 워드마크를 씁니다 */}
+    <img
+      class="footer__wordmark"
+      src="/brand/avora-wordmark-cream.svg"
+      alt="AVORA"
+      width="520"
+      height="92"
+      loading="lazy"
+    />
+    <p class="footer__tagline">{t.footer.tagline}</p>
+
+    <div class="footer__cols">
+      <div class="footer__col">
+        <h2>{t.nav.menu}</h2>
+        <ul>
+          <li><a href={localePath(locale)}>{t.nav.story}</a></li>
+          <li><a href={localePath(locale, 'product')}>{t.nav.product}</a></li>
+        </ul>
+      </div>
+
+      <div class="footer__col">
+        <h2>{t.footer.legal.privacy}</h2>
+        <ul>
+          <li><a href={localePath(locale, 'legal/privacy')}>{t.footer.legal.privacy}</a></li>
+        </ul>
+      </div>
+
+      <div class="footer__col">
+        <h2>{t.footer.language}</h2>
+        <ul>
+          {
+            LOCALES.map((l) => (
+              <li>
+                <a
+                  href={localePath(l)}
+                  hreflang={LOCALE_TAGS[l]}
+                  lang={LOCALE_TAGS[l]}
+                  aria-current={l === locale ? 'true' : undefined}
+                >
+                  {LOCALE_LABELS[l]}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer__meta">
+      {
+        businessRows.map((row) => (
+          <div>
+            {row.label} {row.value}
+          </div>
+        ))
+      }
+      <div>{t.footer.business.email} <a href={`mailto:${BUSINESS.email}`}>{BUSINESS.email}</a></div>
+      <div>{t.footer.copyright}</div>
+    </div>
+  </div>
+</footer>

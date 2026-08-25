@@ -1,0 +1,39 @@
+---
+/**
+ * 개인정보처리방침 — 구조와 배치만 잡아둔 상태입니다.
+ *
+ * 문안은 의도적으로 비워 두었습니다. 실제 수집 항목과 사업자 정보에 따라
+ * 내용이 달라지고 법적 효력이 있는 문서라, 확인된 문안을 받아 채우는 편이 안전합니다.
+ * 채울 때는 src/i18n/{언어}.json 의 legal.privacy 아래에 넣습니다.
+ */
+import Base from '../../../layouts/Base.astro';
+import { LOCALES, type Locale } from '../../../config/site';
+import { dict, localePath } from '../../../i18n';
+import { breadcrumb } from '../../../lib/jsonld';
+
+export function getStaticPaths() {
+  return LOCALES.map((lang) => ({ params: { lang } }));
+}
+
+const locale = Astro.params.lang as Locale;
+const t = dict(locale);
+const page = t.legal.privacy;
+---
+
+<Base
+  locale={locale}
+  path="legal/privacy"
+  title={page.meta.title}
+  description={page.meta.description}
+  jsonLd={[
+    breadcrumb([
+      { name: 'AVORA', path: localePath(locale) },
+      { name: page.heading, path: localePath(locale, 'legal/privacy') },
+    ]),
+  ]}
+>
+  <section class="section wrap">
+    <h1 class="display display--tight">{page.heading}</h1>
+    <p class="body" style="margin-top: 24px">{page.placeholder}</p>
+  </section>
+</Base>
