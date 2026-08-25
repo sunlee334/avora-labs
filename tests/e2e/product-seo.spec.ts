@@ -21,15 +21,15 @@ test.describe('제품 상세', () => {
     expect(types).toContain('BreadcrumbList');
   });
 
-  test('가격이 확정되기 전에는 offers 를 내보내지 않는다', async ({ request }) => {
+  test('Product 구조화 데이터의 기본 정보가 맞다', async ({ request }) => {
     const res = await request.get('/ko/product');
     const product = jsonLdOf(await res.text()).find((s) => s['@type'] === 'Product');
 
     expect(product).toBeTruthy();
-    // 가격 미정 상태에서 offers 를 만들면 검색엔진에 잘못된 사실을 주게 됩니다.
-    expect(product.offers).toBeUndefined();
     expect(product.name).toBe('Daily Sunscreen');
     expect(product.brand.name).toBe('AVORA');
+    // offers 는 가격 유무에 따라 달라지므로 모드별 테스트에서 확인합니다.
+    // (launch: offers 없음 / commerce: 화면 가격과 일치)
   });
 
   test('미확정 스펙은 감추지 않고 "확정 예정" 으로 노출한다', async ({ page }) => {

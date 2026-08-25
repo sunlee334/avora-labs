@@ -43,20 +43,24 @@ export const tossPayments: PaymentAdapter = {
         }),
       });
     } catch (cause) {
+      // 연결 자체가 실패했으므로 승인이 됐는지 알 수 없습니다. 주문을 닫지 않습니다.
       return {
         ok: false,
-        error: { code: 'NETWORK_ERROR', message: '결제사에 연결하지 못했습니다.' },
+        error: { code: 'NETWORK_ERROR', message: '결제사에 연결하지 못했습니다.', retriable: true },
       };
     }
 
     const payload = (await response.json().catch(() => null)) as Record<string, any> | null;
 
     if (!response.ok || !payload) {
+      // 5xx 와 429 는 결제사 쪽 일시적 문제라 결과를 단정할 수 없습니다.
+      const retriable = response.status >= 500 || response.status === 429 || !payload;
       return {
         ok: false,
         error: {
           code: payload?.code ?? `HTTP_${response.status}`,
           message: payload?.message ?? '결제 승인에 실패했습니다.',
+          retriable,
         },
       };
     }

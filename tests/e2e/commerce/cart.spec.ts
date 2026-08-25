@@ -78,6 +78,20 @@ test.describe('장바구니', () => {
     await expect(page.locator('[data-cart-empty]')).toBeVisible();
   });
 
+  test('프로토타입 이름을 상품 id 로 넣어도 무시한다', async ({ page }) => {
+    // `'toString' in CATALOG` 는 참이라, in 연산자를 쓰면 이런 줄이 살아남아
+    // 이름도 가격도 없는 항목이 장바구니에 박힙니다.
+    await page.goto('/ko/');
+    await page.evaluate(() =>
+      localStorage.setItem(
+        'avora.cart.v1',
+        JSON.stringify([{ id: 'toString', qty: 1 }, { id: 'constructor', qty: 2 }]),
+      ),
+    );
+    await page.goto('/ko/cart');
+    await expect(page.locator('[data-cart-empty]')).toBeVisible();
+  });
+
   test('모르는 상품 id 는 무시한다', async ({ page }) => {
     await page.goto('/ko/');
     await page.evaluate(() =>

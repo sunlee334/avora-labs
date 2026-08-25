@@ -25,7 +25,12 @@ const buildEnv =
  * .dev.vars 는 gitignore 대상이라 CI 에는 없으므로 여기서 명시적으로 넘깁니다.
  * launch 모드에서는 넘기지 않아 "PG 미설정" 경로가 그대로 확인됩니다.
  */
-const workerVars = MODE === 'commerce' ? '--var PAYMENT_PROVIDER:mock' : '';
+const workerVars =
+  MODE === 'commerce'
+    // Worker 도 가격을 알아야 합니다 — 이제 서버가 금액을 직접 계산하므로,
+    // 프런트의 PUBLIC_PRODUCT_PRICE 와 같은 값을 Worker 에도 넘깁니다.
+    ? '--var PAYMENT_PROVIDER:mock --var PRODUCT_PRICE:32000'
+    : '';
 
 /** 해당 모드에서만 의미 있는 테스트는 폴더로 갈라 두었습니다. */
 const testIgnore =

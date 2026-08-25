@@ -9,6 +9,7 @@
  */
 import { ORIGIN, absoluteUrl, type Locale } from '../config/site';
 import { localePath } from '../i18n';
+import { PRICE, CURRENCY } from '../config/runtime';
 import product from '../data/product.json';
 
 export function organization() {
@@ -61,11 +62,14 @@ export function productSchema(locale: Locale, name: string, description: string)
   };
 
   // 가격이 확정되기 전에는 offers 를 아예 넣지 않습니다.
-  if (typeof product.price === 'number') {
+  // 화면에 표시하는 값과 같은 출처(runtime)를 읽습니다 — 예전에는 product.json 을
+  // 직접 읽어서, 미리보기 빌드에서 화면에는 가격이 보이는데 구조화 데이터에는
+  // offers 가 없는 모순이 생겼습니다.
+  if (typeof PRICE === 'number') {
     schema.offers = {
       '@type': 'Offer',
-      price: product.price,
-      priceCurrency: product.currency,
+      price: PRICE,
+      priceCurrency: CURRENCY,
       availability: `https://schema.org/${product.availability}`,
       url: absoluteUrl(localePath(locale, 'product')),
     };

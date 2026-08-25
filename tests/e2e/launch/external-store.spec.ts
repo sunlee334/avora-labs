@@ -11,10 +11,18 @@ test.describe('1차 오픈 상태', () => {
     await expect(page.locator('[data-add-to-cart]')).toHaveCount(0);
   });
 
-  test('헤더에 장바구니 배지가 표시되지 않는다', async ({ page }) => {
+  test('헤더에 장바구니 링크 자체가 없다', async ({ page }) => {
+    // 담을 수 없는 장바구니로 가는 링크를 헤더에 두면 막다른 길이 됩니다.
     await page.goto('/ko/');
-    const badge = page.locator('[data-nav-cart-count]');
-    await expect(badge).toHaveAttribute('data-has-items', 'false');
+    await expect(page.locator('[data-nav-cart]')).toHaveCount(0);
+  });
+
+  test('제품 페이지 구조화 데이터에 offers 가 없다', async ({ request }) => {
+    // 가격이 없는 상태에서 offers 를 내보내면 검색엔진에 잘못된 사실을 줍니다.
+    const html = await (await request.get('/ko/product')).text();
+    const blocks = [...html.matchAll(/<script type="application\/ld\+json"[^>]*>(.*?)<\/script>/gs)];
+    const product = blocks.map((m) => JSON.parse(m[1])).find((s) => s['@type'] === 'Product');
+    expect(product.offers).toBeUndefined();
   });
 
   test('체크아웃 페이지는 결제 준비 안내만 보여준다', async ({ page }) => {

@@ -21,7 +21,19 @@ export interface ConfirmResult {
   transactionId?: string;
   status?: string;
   approvedAt?: string;
-  error?: { code: string; message: string };
+  error?: {
+    code: string;
+    message: string;
+    /**
+     * 다시 시도해도 되는 실패인가.
+     *
+     * 네트워크 오류나 PG 서버 오류(5xx)는 결제가 됐는지 안 됐는지 알 수 없습니다.
+     * 이걸 "확정 실패"로 처리해 주문을 닫아버리면, 실제로는 승인이 끝났는데
+     * 주문은 실패로 남는 최악의 상태가 생깁니다. 그런 경우 주문을 pending 으로
+     * 두어 재시도나 대사(reconciliation)가 가능하게 합니다.
+     */
+    retriable?: boolean;
+  };
 }
 
 export interface PaymentAdapter {

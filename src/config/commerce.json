@@ -1,7 +1,6 @@
 {
   "$comment": "커머스 정책. 배송비·수량 한도처럼 사업 판단이 바뀌면 이 파일만 고칩니다. 화면과 계산 로직은 여기 값을 읽습니다.",
   "$note": "배송비는 '전국 무료'를 기본값으로 두었습니다. 확정된 정책이 아니라 가장 단순한 출발점이므로, 실제 정책이 정해지면 아래 값을 바꾸세요.",
-
   "shipping": {
     "policy": "free",
     "flatFee": 0,
@@ -10,13 +9,11 @@
     "remoteAreaSurcharge": 0,
     "$remoteArea": "제주·도서산간 추가금. 0 이면 화면에 표시하지 않습니다."
   },
-
   "order": {
     "maxQuantityPerItem": 10,
     "minOrderAmount": 0,
     "orderIdPrefix": "AVORA"
   },
-
   "cart": {
     "storageKey": "avora.cart.v1",
     "$storageKey": "구조가 바뀌면 v2 로 올리세요. 예전 형식이 남아 있어도 무시됩니다."

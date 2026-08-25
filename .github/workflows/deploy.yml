@@ -61,6 +61,19 @@ jobs:
           cache: npm
 
       - run: npm ci
+
+      # D1 데이터베이스를 아직 만들지 않았으면 wrangler 가 알아보기 어려운 오류를 냅니다.
+      # 여기서 먼저 걸러 무엇을 해야 하는지 알려줍니다.
+      - name: 배포 전 설정 점검
+        run: |
+          if grep -q 'PLACEHOLDER_RUN_WRANGLER_D1_CREATE' wrangler.jsonc; then
+            echo "::error::D1 데이터베이스가 아직 만들어지지 않았습니다."
+            echo "  npx wrangler d1 create avora-orders"
+            echo "  → 출력된 database_id 를 wrangler.jsonc 에 넣고"
+            echo "  npm run db:migrate 로 테이블을 만든 뒤 다시 푸시하세요."
+            exit 1
+          fi
+
       - run: npm run build
 
       - name: 배포

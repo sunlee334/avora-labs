@@ -204,3 +204,17 @@ test.describe('주문 조회', () => {
     expect(res.headers()['cache-control']).toContain('no-store');
   });
 });
+
+test.describe('구조화 데이터가 화면과 일치한다', () => {
+  test('가격이 있으면 offers 도 같은 값을 담는다', async ({ request }) => {
+    // 예전에는 화면은 runtime 가격을, JSON-LD 는 product.json 을 읽어
+    // 미리보기 빌드에서 "화면엔 가격이 있는데 구조화 데이터엔 offers 가 없는" 모순이 있었습니다.
+    const html = await (await request.get('/ko/product')).text();
+    const blocks = [...html.matchAll(/<script type="application\/ld\+json"[^>]*>(.*?)<\/script>/gs)];
+    const product = blocks.map((m) => JSON.parse(m[1])).find((s) => s['@type'] === 'Product');
+
+    expect(product.offers).toBeTruthy();
+    expect(product.offers.price).toBe(32000);
+    expect(product.offers.priceCurrency).toBe('KRW');
+  });
+});

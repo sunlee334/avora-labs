@@ -52,6 +52,8 @@ export function read(): CartLine[] {
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
     // 저장된 값이 손상됐거나 예전 형식이면 조용히 버립니다.
+    // `in` 대신 hasOwn 을 쓰는 이유: `'toString' in CATALOG` 는 참이라,
+    // 그런 id 가 저장돼 있으면 이름도 가격도 없는 줄이 장바구니에 남습니다.
     return parsed
       .filter(
         (line): line is CartLine =>
@@ -59,7 +61,7 @@ export function read(): CartLine[] {
           typeof line.id === 'string' &&
           typeof line.qty === 'number' &&
           line.qty > 0 &&
-          line.id in CATALOG,
+          Object.hasOwn(CATALOG, line.id),
       )
       .map((line) => ({ id: line.id, qty: Math.min(Math.floor(line.qty), MAX) }));
   } catch {

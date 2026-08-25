@@ -1,6 +1,7 @@
 ---
 import LanguageSwitcher from './LanguageSwitcher.astro';
 import { dict, localePath } from '../i18n';
+import { SELLS_DIRECTLY } from '../config/runtime';
 import type { Locale } from '../config/site';
 
 interface Props {
@@ -23,11 +24,19 @@ const t = dict(locale);
   </div>
 
   <div class="nav__right">
-    <a class="nav__cart" href={localePath(locale, 'cart')} data-nav-cart>
-      <span>{t.nav.cart}</span>
-      <span class="nav__cart-count" data-nav-cart-count aria-hidden="true">0</span>
-      <span class="sr-only" data-nav-cart-sr></span>
-    </a>
+    {/*
+      자사 결제가 꺼져 있을 때는 장바구니 링크를 아예 내보내지 않습니다.
+      담을 수 없는 장바구니로 가는 링크를 헤더에 두면 막다른 길이 됩니다.
+    */}
+    {
+      SELLS_DIRECTLY && (
+        <a class="nav__cart" href={localePath(locale, 'cart')} data-nav-cart>
+          <span>{t.nav.cart}</span>
+          <span class="nav__cart-count" data-nav-cart-count aria-hidden="true">0</span>
+          <span class="sr-only" data-nav-cart-sr></span>
+        </a>
+      )
+    }
     <LanguageSwitcher locale={locale} path={path} />
   </div>
 </nav>

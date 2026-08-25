@@ -17,11 +17,12 @@ import {
   getOrder,
   findOrderForCustomer,
   markPaid,
+  forcePaid,
   markFailed,
   publicView,
   type OrderDraft,
-  type OrderItem,
 } from './orders';
+import { priceOrder, currencyOf, isAllowedCurrency } from './catalog';
 
 const LOCALES = ['ko', 'en', 'zh', 'th', 'vi'] as const;
 type Locale = (typeof LOCALES)[number];
@@ -51,6 +52,8 @@ interface Env {
   /** 어떤 PG 어댑터를 쓸지. 미설정이면 결제 엔드포인트가 비활성입니다. */
   PAYMENT_PROVIDER?: string;
   TOSS_SECRET_KEY?: string;
+  /** 가격 확정 전 흐름을 돌려보기 위한 임시 가격. 운영에서는 설정하지 않습니다. */
+  PRODUCT_PRICE?: string;
 }
 
 /**
@@ -108,7 +111,10 @@ function text(value: unknown, max: number): string | null {
 
 /**
  * 주문 생성. 결제창을 띄우기 전에 호출합니다.
- * 금액을 여기서 확정해 두고, 승인 단계에서 이 값과 대조합니다.
+ *
+ * 클라이언트가 보낸 단가와 총액은 **쓰지 않습니다.** 상품 id 와 수량만 받아
+ * 서버가 자기가 아는 가격으로 다시 계산하고, 그 값을 저장합니다.
+ * 승인 단계는 이 저장된 금액만 신뢰합니다.
  */
 async function handleCreateOrder(request: Request, env: Env): Promise<Response> {
   if (!env.DB) {
@@ -130,26 +136,30 @@ async function handleCreateOrder(request: Request, env: Env): Promise<Response> 
     return json({ error: 'INVALID_ORDER_ID' }, 400);
   }
 
-  const amount = Number(body.amount);
-  if (!Number.isInteger(amount) || amount <= 0) {
-    return json({ error: 'INVALID_AMOUNT' }, 400);
+  // 가격은 서버가 정합니다.
+  const priced = priceOrder(body.items, env);
+  if (!priced.ok) {
+    return json({ error: priced.error, message: priced.message }, 400);
   }
 
-  const rawItems = Array.isArray(body.items) ? body.items : null;
-  if (!rawItems || rawItems.length === 0) {
-    return json({ error: 'EMPTY_ITEMS' }, 400);
+  // 클라이언트가 계산한 금액과 어긋나면 진행하지 않습니다.
+  // 조작일 수도 있고, 화면과 서버 설정이 어긋난 것일 수도 있습니다 —
+  // 어느 쪽이든 고객이 본 금액과 다른 금액으로 결제하면 안 됩니다.
+  const claimed = Number(body.amount);
+  if (!Number.isInteger(claimed) || claimed !== priced.total) {
+    return json(
+      {
+        error: 'AMOUNT_MISMATCH',
+        message: '화면에 표시된 금액과 서버가 계산한 금액이 다릅니다. 새로고침 후 다시 시도해 주세요.',
+        expected: priced.total,
+      },
+      400,
+    );
   }
-  const items: OrderItem[] = [];
-  for (const raw of rawItems) {
-    const item = raw as Record<string, unknown>;
-    const id = text(item.id, 60);
-    const name = text(item.name, 120);
-    const qty = Number(item.qty);
-    const unitPrice = Number(item.unitPrice);
-    if (!id || !name || !Number.isInteger(qty) || qty <= 0 || !Number.isInteger(unitPrice)) {
-      return json({ error: 'INVALID_ITEM' }, 400);
-    }
-    items.push({ id, name, qty, unitPrice });
+
+  const currency = text(body.currency, 8) ?? currencyOf();
+  if (!isAllowedCurrency(currency)) {
+    return json({ error: 'INVALID_CURRENCY' }, 400);
   }
 
   const draft: OrderDraft | null = (() => {
@@ -159,9 +169,9 @@ async function handleCreateOrder(request: Request, env: Env): Promise<Response> 
     const address1 = text(body.address1, 200);
     if (!recipientName || !recipientPhone || !postalCode || !address1) return null;
     return {
-      amount,
-      currency: text(body.currency, 8) ?? 'KRW',
-      items,
+      amount: priced.total,
+      currency,
+      items: priced.items,
       locale: text(body.locale, 8) ?? DEFAULT_LOCALE,
       recipientName,
       recipientPhone,
@@ -175,22 +185,22 @@ async function handleCreateOrder(request: Request, env: Env): Promise<Response> 
 
   if (!draft) return json({ error: 'MISSING_FIELDS' }, 400);
 
-  // 항목 합계와 보내온 총액이 어긋나면 받지 않습니다.
-  // (배송비는 아직 무료 정책이라 항목 합계와 총액이 같아야 합니다.)
-  const itemsTotal = items.reduce((sum, item) => sum + item.unitPrice * item.qty, 0);
-  if (itemsTotal !== amount) {
-    return json({ error: 'AMOUNT_MISMATCH', message: '항목 합계와 결제 금액이 다릅니다.' }, 400);
-  }
-
   const now = new Date().toISOString();
   try {
     await createOrder(env.DB, orderId, draft, now);
   } catch (cause) {
-    // 같은 주문번호가 이미 있으면 중복 제출입니다.
-    return json({ error: 'ORDER_EXISTS', message: '이미 접수된 주문번호입니다.' }, 409);
+    // 같은 주문번호가 이미 있는 경우와, DB 자체가 잘못된 경우를 구분합니다.
+    // 예전에는 둘 다 "중복 주문"으로 답해서, 마이그레이션이 안 된 상태의
+    // 진짜 원인이 고객에게도 로그에도 남지 않았습니다.
+    const message = cause instanceof Error ? cause.message : String(cause);
+    if (/UNIQUE|PRIMARY KEY|constraint/i.test(message)) {
+      return json({ error: 'ORDER_EXISTS', message: '이미 접수된 주문번호입니다.' }, 409);
+    }
+    console.error('주문 저장 실패', { orderId, message });
+    return json({ error: 'ORDER_SAVE_FAILED', message: '주문을 저장하지 못했습니다.' }, 500);
   }
 
-  return json({ ok: true, orderId, amount });
+  return json({ ok: true, orderId, amount: priced.total });
 }
 
 /**
@@ -251,7 +261,12 @@ async function handlePaymentConfirm(request: Request, env: Env): Promise<Respons
   }
 
   // 핵심 검증 — 브라우저가 보낸 금액이 서버가 기억하는 금액과 다르면 중단합니다.
-  if (typeof amount === 'number' && amount !== order.amount) {
+  // 값이 없거나 숫자가 아니어도 거절합니다. 예전에는 없으면 검사를 건너뛰어서,
+  // 파라미터를 지우기만 하면 대조를 우회할 수 있었습니다.
+  if (!Number.isInteger(amount)) {
+    return json({ error: 'AMOUNT_REQUIRED', message: 'amount 가 필요합니다.' }, 400);
+  }
+  if (amount !== order.amount) {
     await markFailed(env.DB, orderId, new Date().toISOString());
     return json({ error: 'AMOUNT_TAMPERED', message: '주문 금액이 일치하지 않습니다.' }, 400);
   }
@@ -262,14 +277,36 @@ async function handlePaymentConfirm(request: Request, env: Env): Promise<Respons
   );
 
   const now = new Date().toISOString();
+
   if (!result.ok) {
+    // 결과를 알 수 없는 실패(네트워크·5xx)는 주문을 닫지 않습니다.
+    // 닫아버리면 실제로는 승인이 끝났는데 주문만 실패로 남는 상태가 생깁니다.
+    if (result.error?.retriable) {
+      return json({ ...result, retriable: true }, 503);
+    }
     await markFailed(env.DB, orderId, now);
     return json(result, 502);
   }
 
-  await markPaid(env.DB, orderId, result.transactionId ?? paymentKey, result.status ?? null, result.approvedAt ?? now, now);
-  const updated = await getOrder(env.DB, orderId);
-  return json({ ok: true, order: updated ? publicView(updated) : null });
+  const paymentKeyToStore = result.transactionId ?? paymentKey;
+  const updated = await markPaid(
+    env.DB,
+    orderId,
+    paymentKeyToStore,
+    result.status ?? null,
+    result.approvedAt ?? now,
+    now,
+  );
+
+  if (!updated) {
+    // 승인은 성공했는데 상태가 pending 이 아니어서 갱신되지 않았습니다.
+    // 이미 돈이 빠져나간 상태이므로 실패로 두면 안 됩니다 — 강제로 결제 완료로 맞춥니다.
+    console.error('승인 성공 후 상태 갱신 실패 — 강제 정정', { orderId });
+    await forcePaid(env.DB, orderId, paymentKeyToStore, result.status ?? null, result.approvedAt ?? now, now);
+  }
+
+  const finalOrder = await getOrder(env.DB, orderId);
+  return json({ ok: true, order: finalOrder ? publicView(finalOrder) : null });
 }
 
 /** 비회원 주문 조회 — 주문번호와 연락처가 둘 다 맞아야 합니다. */

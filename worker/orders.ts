@@ -10,7 +10,22 @@
  *   승인 직전에 저장된 금액과 대조합니다.
  */
 
+/** 결제 상태 */
 export type OrderStatus = 'pending' | 'paid' | 'failed' | 'cancelled';
+
+/**
+ * 배송 상태. 결제와 별개의 축입니다 —
+ * "결제는 됐고 아직 발송 전"을 한 칸으로는 표현할 수 없습니다.
+ */
+export type Fulfillment = 'unfulfilled' | 'preparing' | 'shipped' | 'delivered' | 'returned';
+
+export const FULFILLMENTS: readonly Fulfillment[] = [
+  'unfulfilled',
+  'preparing',
+  'shipped',
+  'delivered',
+  'returned',
+];
 
 export interface OrderItem {
   id: string;
@@ -36,10 +51,16 @@ export interface OrderDraft {
 export interface OrderRecord extends OrderDraft {
   id: string;
   status: OrderStatus;
+  fulfillment: Fulfillment;
+  carrier: string | null;
+  trackingNumber: string | null;
+  shippedAt: string | null;
+  adminMemo: string | null;
   paymentKey: string | null;
   paymentMethod: string | null;
   paidAt: string | null;
   createdAt: string;
+  updatedAt: string;
 }
 
 /** 연락처는 표기 방식이 제각각이라 숫자만 남겨 비교합니다. */
@@ -62,10 +83,16 @@ function rowToOrder(row: Record<string, unknown>): OrderRecord {
     address2: (row.address2 as string) ?? undefined,
     memo: (row.memo as string) ?? undefined,
     email: (row.email as string) ?? undefined,
+    fulfillment: ((row.fulfillment as Fulfillment) ?? 'unfulfilled'),
+    carrier: (row.carrier as string) ?? null,
+    trackingNumber: (row.tracking_number as string) ?? null,
+    shippedAt: (row.shipped_at as string) ?? null,
+    adminMemo: (row.admin_memo as string) ?? null,
     paymentKey: (row.payment_key as string) ?? null,
     paymentMethod: (row.payment_method as string) ?? null,
     paidAt: (row.paid_at as string) ?? null,
     createdAt: row.created_at as string,
+    updatedAt: (row.updated_at as string) ?? (row.created_at as string),
   };
 }
 
@@ -123,7 +150,38 @@ export async function findOrderForCustomer(
   return row ? rowToOrder(row as Record<string, unknown>) : null;
 }
 
+/**
+ * 결제 완료로 표시합니다.
+ *
+ * `WHERE status = 'pending'` 이 붙어 있어 이미 다른 요청이 상태를 바꿨다면
+ * 아무 행도 바뀌지 않습니다. **호출한 쪽은 반드시 반환값을 확인해야 합니다** —
+ * 승인은 성공했는데 갱신이 안 된 상태를 성공으로 보고하면,
+ * 돈은 빠져나갔는데 주문은 실패로 남습니다.
+ */
 export async function markPaid(
+  db: D1Database,
+  id: string,
+  paymentKey: string,
+  paymentMethod: string | null,
+  paidAt: string,
+  now: string,
+): Promise<boolean> {
+  const result = await db
+    .prepare(
+      `UPDATE orders
+          SET status = 'paid', payment_key = ?, payment_method = ?, paid_at = ?, updated_at = ?
+        WHERE id = ? AND status = 'pending'`,
+    )
+    .bind(paymentKey, paymentMethod, paidAt, now, id)
+    .run();
+  return (result.meta?.changes ?? 0) > 0;
+}
+
+/**
+ * 승인이 성공했는데 pending 이 아니어서 갱신에 실패한 경우를 되살립니다.
+ * 이 상황은 돈이 이미 빠져나간 상태라, 주문을 실패로 두면 안 됩니다.
+ */
+export async function forcePaid(
   db: D1Database,
   id: string,
   paymentKey: string,
@@ -135,7 +193,7 @@ export async function markPaid(
     .prepare(
       `UPDATE orders
           SET status = 'paid', payment_key = ?, payment_method = ?, paid_at = ?, updated_at = ?
-        WHERE id = ? AND status = 'pending'`,
+        WHERE id = ?`,
     )
     .bind(paymentKey, paymentMethod, paidAt, now, id)
     .run();
@@ -153,6 +211,7 @@ export function publicView(order: OrderRecord) {
   return {
     id: order.id,
     status: order.status,
+    fulfillment: order.fulfillment,
     amount: order.amount,
     currency: order.currency,
     items: order.items,
@@ -160,6 +219,9 @@ export function publicView(order: OrderRecord) {
     postalCode: order.postalCode,
     address1: order.address1,
     address2: order.address2 ?? null,
+    carrier: order.carrier,
+    trackingNumber: order.trackingNumber,
+    shippedAt: order.shippedAt,
     paidAt: order.paidAt,
     createdAt: order.createdAt,
   };
