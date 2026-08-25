@@ -11,7 +11,7 @@
     "types": "wrangler types",
     "check:i18n": "node scripts/check-i18n.mjs",
     "check:fonts": "node scripts/build-fonts.mjs --check",
-    "check:types": "npm run types && tsc --noEmit",
+    "check:types": "npm run types && astro sync && tsc --noEmit",
     "prebuild": "npm run tokens && npm run og && npm run check:i18n && npm run check:fonts && npm run check:types",
     "build": "astro build",
     "dev": "npm run tokens && astro dev",
