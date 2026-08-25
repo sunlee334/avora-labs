@@ -315,11 +315,29 @@ async function handlePaymentConfirm(
     now,
   );
 
+  /**
+   * 이 요청이 pending → paid 전이를 **직접** 해냈는가.
+   *
+   * 완료 화면에서 새로고침을 연타하면 승인 요청이 동시에 여러 개 날아옵니다.
+   * 전부 pending 을 읽고 전부 승인까지 갑니다(결제사 중복 승인은 orderId 를
+   * 멱등 키로 넘겨 막습니다). 그중 markPaid 로 실제 행을 바꾼 것은 하나뿐이고,
+   * 나머지는 0행을 갱신합니다. 판매자에게 알림이 요청 수만큼 가면 안 되므로,
+   * 전이를 해낸 요청만 알립니다.
+   */
+  let didTransition = updated;
+
   if (!updated) {
-    // 승인은 성공했는데 상태가 pending 이 아니어서 갱신되지 않았습니다.
-    // 이미 돈이 빠져나간 상태이므로 실패로 두면 안 됩니다 — 강제로 결제 완료로 맞춥니다.
-    console.error('승인 성공 후 상태 갱신 실패 — 강제 정정', { orderId });
-    await forcePaid(env.DB, orderId, paymentKeyToStore, result.status ?? null, result.approvedAt ?? now, now);
+    // 갱신이 안 된 이유가 둘입니다. 하나는 위의 경쟁이고, 다른 하나는 상태가
+    // 정말로 어긋난 경우(예: failed 로 닫혔는데 뒤늦게 승인이 성공)입니다.
+    // 앞은 정상이고 뒤는 사람이 봐야 하므로 구분해서 다룹니다.
+    const concurrent = (await getOrder(env.DB, orderId))?.status === 'paid';
+
+    if (!concurrent) {
+      // 이미 돈이 빠져나간 상태이므로 실패로 두면 안 됩니다 — 강제로 맞춥니다.
+      console.error('승인 성공 후 상태 갱신 실패 — 강제 정정', { orderId });
+      await forcePaid(env.DB, orderId, paymentKeyToStore, result.status ?? null, result.approvedAt ?? now, now);
+      didTransition = true;
+    }
   }
 
   const finalOrder = await getOrder(env.DB, orderId);
@@ -331,7 +349,7 @@ async function handlePaymentConfirm(
   //
   // waitUntil 로 응답 뒤에 돌립니다 — 고객은 이미 결제를 마쳤고, 알림이
   // 느리다고 완료 화면이 기다려야 할 이유가 없습니다.
-  if (finalOrder) {
+  if (finalOrder && didTransition) {
     const adminUrl = new URL('/admin', request.url).href;
     ctx.waitUntil(
       notifyNewOrder(toNotification(finalOrder, adminUrl), env as unknown as Record<string, unknown>),
@@ -472,12 +490,38 @@ async function handleAdminPatch(request: Request, env: Env, orderId: string): Pr
     return json({ error: 'NOTHING_TO_UPDATE', message: '바꿀 내용이 없습니다.' }, 400);
   }
 
+  const current = await getOrder(env.DB, orderId);
+  if (!current) {
+    return json({ error: 'ORDER_NOT_FOUND', message: '주문을 찾을 수 없습니다.' }, 404);
+  }
+
   // 송장번호를 넣으면서 상태는 그대로 두는 실수를 막습니다.
   if (patch.trackingNumber && patch.fulfillment === undefined) {
-    const current = await getOrder(env.DB, orderId);
-    if (current && current.fulfillment !== 'shipped' && current.fulfillment !== 'delivered') {
+    if (current.fulfillment !== 'shipped' && current.fulfillment !== 'delivered') {
       patch.fulfillment = 'shipped';
     }
+  }
+
+  /**
+   * 결제되지 않은 주문은 발송할 수 없습니다.
+   *
+   * 관리 화면 목록에는 결제 대기·실패 주문도 함께 나옵니다(그래야 무슨 일이
+   * 있었는지 보입니다). 그 상태에서 송장번호를 넣으면 **돈을 받지 않은 주문의
+   * 물건이 나갑니다.** 바쁠 때 한 줄 잘못 눌러 생기는 사고라, 화면 경고만으로는
+   * 부족하고 서버가 막아야 합니다.
+   *
+   * '미발송' 으로 되돌리는 것은 결제 상태와 무관하게 허용합니다 —
+   * 잘못 누른 것을 되돌리는 길까지 막으면 안 됩니다.
+   */
+  if (patch.fulfillment && patch.fulfillment !== 'unfulfilled' && current.status !== 'paid') {
+    return json(
+      {
+        error: 'ORDER_NOT_PAID',
+        message: '결제가 완료되지 않은 주문은 발송 처리할 수 없습니다.',
+        status: current.status,
+      },
+      409,
+    );
   }
 
   const changed = await updateFulfillment(env.DB, orderId, patch, new Date().toISOString());

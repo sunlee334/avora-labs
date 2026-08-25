@@ -161,6 +161,9 @@ const FULFILLMENT_LABEL: Record<string, string> = {
           <input type="text" name="adminMemo" maxlength="300" placeholder="내부용 (고객에게 보이지 않습니다)" />
         </label>
 
+        <p class="detail__notice" data-detail-unpaid hidden>
+          결제가 완료되지 않은 주문입니다. 발송 처리와 송장 등록을 할 수 없습니다.
+        </p>
         <p class="detail__error" data-detail-error hidden></p>
         <button type="submit" data-save>저장</button>
       </form>
@@ -248,6 +251,14 @@ const FULFILLMENT_LABEL: Record<string, string> = {
       .pill[data-tone='ok'] { background: var(--brand-primary); color: var(--brand-surface-alt); border-color: var(--brand-primary); }
       .pill[data-tone='warn'] { border-color: var(--brand-ink); font-weight: 600; }
       .pill[data-tone='dim'] { color: var(--brand-muted); }
+      .detail__notice {
+        margin: 0 0 12px;
+        padding: 10px 12px;
+        border: 1px solid var(--brand-ink);
+        border-radius: 6px;
+        font-size: 13px;
+        line-height: 1.6;
+      }
 
       .pager { display: flex; align-items: center; gap: 14px; justify-content: center; padding-block: 24px; }
       .pager button {
@@ -487,7 +498,18 @@ const FULFILLMENT_LABEL: Record<string, string> = {
 
         $('[data-d-status]').replaceChildren(pill(STATUS as any, order.status));
 
-        (detailForm.elements.namedItem('fulfillment') as HTMLSelectElement).value = order.fulfillment;
+        // 결제되지 않은 주문은 발송할 수 없습니다(서버도 막습니다). 화면에서도
+        // 고를 수 없게 해서, 눌렀다가 오류를 보는 대신 애초에 눌리지 않게 합니다.
+        const paid = order.status === 'paid';
+        const fulfillmentSelect = detailForm.elements.namedItem('fulfillment') as HTMLSelectElement;
+        fulfillmentSelect.value = order.fulfillment;
+        for (const option of Array.from(fulfillmentSelect.options)) {
+          option.disabled = !paid && option.value !== 'unfulfilled';
+        }
+        const unpaidNotice = $('[data-detail-unpaid]');
+        unpaidNotice.hidden = paid;
+        $<HTMLInputElement>('[name="trackingNumber"]').disabled = !paid;
+        $<HTMLInputElement>('[name="carrier"]').disabled = !paid;
         (detailForm.elements.namedItem('carrier') as HTMLInputElement).value = order.carrier ?? '';
         (detailForm.elements.namedItem('trackingNumber') as HTMLInputElement).value = order.trackingNumber ?? '';
         (detailForm.elements.namedItem('adminMemo') as HTMLInputElement).value = order.adminMemo ?? '';

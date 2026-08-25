@@ -45,6 +45,24 @@ async function seedOrder(
   return orderId;
 }
 
+/**
+ * 결제까지 끝난 주문.
+ *
+ * 배송 상태를 만지는 테스트는 이걸 써야 합니다. 결제되지 않은 주문은
+ * 발송 처리가 서버에서 막히기 때문입니다 — 돈을 받지 않은 물건이 나가면 안 됩니다.
+ */
+async function seedPaidOrder(
+  request: APIRequestContext,
+  overrides: Record<string, unknown> = {},
+): Promise<string> {
+  const orderId = await seedOrder(request, overrides);
+  const res = await request.post('/api/payments/confirm', {
+    data: { paymentKey: `ok_${orderId}`, orderId, amount: UNIT_PRICE },
+  });
+  expect(res.status(), '결제 처리 실패').toBe(200);
+  return orderId;
+}
+
 test.describe('관리 API 는 잠겨 있다', () => {
   test('토큰 없이 목록을 볼 수 없다', async ({ request }) => {
     const res = await request.get('/api/admin/orders');
@@ -194,7 +212,7 @@ test.describe('주문 목록', () => {
 
 test.describe('배송 상태 변경', () => {
   test('송장을 넣으면 발송으로 넘어가고 발송 시각이 남는다', async ({ request }) => {
-    const orderId = await seedOrder(request);
+    const orderId = await seedPaidOrder(request);
 
     const res = await request.patch(`/api/admin/orders/${orderId}`, {
       headers: AUTH,
@@ -213,7 +231,7 @@ test.describe('배송 상태 변경', () => {
     // 리뷰가 잡은 결함: API 는 송장번호를 돌려주는데 화면이 그리지 않았습니다.
     // 아래 "고객도 조회할 수 있게 된다" 테스트는 JSON 만 봐서 통과했고,
     // README 와 배송안내 페이지는 화면에 나온다고 적혀 있었습니다 — 둘 다 거짓이었습니다.
-    const orderId = await seedOrder(request);
+    const orderId = await seedPaidOrder(request);
     await request.patch(`/api/admin/orders/${orderId}`, {
       headers: AUTH,
       data: { fulfillment: 'shipped', carrier: '한진택배', trackingNumber: '4444333322' },
@@ -246,7 +264,7 @@ test.describe('배송 상태 변경', () => {
   });
 
   test('고객도 송장번호를 조회할 수 있게 된다', async ({ request }) => {
-    const orderId = await seedOrder(request);
+    const orderId = await seedPaidOrder(request);
     await request.patch(`/api/admin/orders/${orderId}`, {
       headers: AUTH,
       data: { fulfillment: 'shipped', carrier: '롯데택배', trackingNumber: '9876543210' },
@@ -263,7 +281,7 @@ test.describe('배송 상태 변경', () => {
   });
 
   test('발송을 되돌리면 발송 시각도 지워진다', async ({ request }) => {
-    const orderId = await seedOrder(request);
+    const orderId = await seedPaidOrder(request);
     await request.patch(`/api/admin/orders/${orderId}`, {
       headers: AUTH,
       data: { fulfillment: 'shipped', trackingNumber: '111' },
@@ -308,7 +326,7 @@ test.describe('배송 상태 변경', () => {
   });
 
   test('null 을 보내면 지운다', async ({ request }) => {
-    const orderId = await seedOrder(request);
+    const orderId = await seedPaidOrder(request);
     await request.patch(`/api/admin/orders/${orderId}`, {
       headers: AUTH,
       data: { carrier: 'CJ대한통운', trackingNumber: '222' },
@@ -329,7 +347,7 @@ test.describe('관리 화면', () => {
   test.use({ extraHTTPHeaders: AUTH });
 
   test('주문이 표에 뜨고 상세를 열어 발송 처리할 수 있다', async ({ page, request }) => {
-    const orderId = await seedOrder(request);
+    const orderId = await seedPaidOrder(request);
 
     await page.goto('/admin');
     await page.locator('[data-filters] [name="search"]').fill(orderId);
