@@ -162,6 +162,8 @@ npm run fonts
 
 ## 배포
 
+**운영 주소: https://avora-labs.sunlee334.workers.dev**
+
 `main` 브랜치에 푸시하면 GitHub Actions가 자동으로 Cloudflare Workers에 배포합니다.
 
 먼저 저장소 Settings → Secrets and variables → Actions 에 두 값을 등록해야 합니다.
@@ -175,8 +177,13 @@ npm run fonts
 
 ### 도메인
 현재는 `*.workers.dev` 기본 도메인을 씁니다. 커스텀 도메인이 정해지면
-`src/config/site.ts` 의 `ORIGIN` 한 줄만 바꾸면 정규 URL·언어별 대체 URL·
-SNS 공유 주소·사이트맵이 전부 따라옵니다.
+`src/config/site.ts` 의 `ORIGIN` 과 `public/robots.txt` 의 Sitemap 줄을 바꾸면
+정규 URL·언어별 대체 URL·SNS 공유 주소·사이트맵이 전부 따라옵니다.
+(계정 서브도메인만 바꾸는 경우도 같은 두 곳입니다.)
+
+두 값이 어긋나면 정규 URL이 존재하지 않는 주소를 가리키는데, 화면으로는
+드러나지 않고 검색엔진에만 보입니다. `tests/e2e/product-seo.spec.ts` 가
+robots·sitemap·canonical 세 곳이 같은 주소인지 검사합니다.
 
 > ⚠️ 결제를 열기 전에 도메인이 확정돼야 합니다. 국내 PG는 가맹 심사 때
 > 서비스 도메인을 등록하며, 나중에 바꾸면 재심사 대상이 될 수 있습니다.
@@ -228,7 +235,17 @@ SNS 공유 주소·사이트맵이 전부 따라옵니다.
 Cloudflare Access 를 앞에 세웠습니다. 설정을 깜빡한 채 배포하면 주문의 연락처와
 배송지가 인터넷에 그대로 노출되므로, 잠기는 쪽이 기본값입니다.
 
-여는 순서:
+> 🚨 **workers.dev 주소에서는 아직 열 수 없습니다.**
+>
+> Workers & Pages → Settings → Domains & Routes 의 **"Enable Cloudflare Access"**
+> 원클릭 버튼을 누르지 마세요. 그 버튼은 `/admin` 만이 아니라 **호스트 전체**를
+> 로그인 뒤로 보냅니다. 브랜드 사이트 5개 언어가 통째로 비공개가 됩니다.
+>
+> 경로별(`/admin` 만) 보호는 Access 애플리케이션에 호스트와 경로를 지정해야 하고,
+> 그건 본인 소유 도메인이 필요합니다. 그래서 도메인이 확정될 때까지 관리 화면은
+> 403 으로 잠가 둡니다 — 어차피 가격과 PG가 정해지기 전에는 주문도 없습니다.
+
+도메인이 확정된 뒤 여는 순서:
 
 1. Cloudflare Zero Trust → **Access → Applications** → Self-hosted 추가
 2. 도메인은 `<사이트도메인>`, 경로는 `/admin` 과 `/api/admin`
@@ -335,10 +352,10 @@ Discord 는 본문 키가 `content`, 나머지는 `text` 라 URL 호스트를 �
 
 | 항목 | 기준 | 측정값 (모바일) |
 |---|---|---|
-| Lighthouse Performance | ≥ 90 | **96~100** (전 페이지) |
+| Lighthouse Performance | ≥ 90 | **96~100** (로컬) / **95** (운영, 캐시 워밍 후) |
 | Lighthouse Accessibility | ≥ 95 | **100** |
 | Lighthouse SEO | 100 | **100** (색인 대상 페이지) |
-| LCP | ≤ 2.5s | **1.4~2.5s** |
+| LCP | ≤ 2.5s | **1.4~2.5s** (로컬) / **2.6s** (운영) |
 | CLS | ≤ 0.1 | **0** |
 | 탭 영역 | ≥ 44×44px | 테스트로 강제 |
 | 360~430px 가로 스크롤 | 없음 | 테스트로 강제 |
@@ -346,6 +363,11 @@ Discord 는 본문 키가 `content`, 나머지는 `text` 라 URL 호스트를 �
 
 > 장바구니·체크아웃·주문조회는 Lighthouse SEO 가 69 로 나옵니다.
 > `noindex` 페이지를 감점하는 항목 때문이며, 이 세 페이지는 색인되면 안 되는 페이지라 정상입니다.
+
+> 운영 실측은 한국에서 재현했습니다. 배포 직후 엣지 캐시가 비어 있을 때는
+> Performance 89 / LCP 3.2s 까지 떨어지고, 캐시가 데워지면 95 / 2.6s 로
+> 안정됩니다. **배포 직후 값으로 판단하지 마세요.** LCP 가 목표를 0.1초 넘는
+> 것은 엣지까지의 실제 왕복 때문이며, 커스텀 도메인 연결 후 다시 잴 항목입니다.
 
 `npm test` 가 이 중 측정 가능한 항목을 두 모드 모두에서 자동으로 검사합니다.
 
