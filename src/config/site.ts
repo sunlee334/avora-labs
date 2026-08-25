@@ -91,6 +91,6 @@ export const BUSINESS = {
    * 필요해서 보통 PG 계약이 먼저입니다.
    */
   mailOrderNumber: '',
-  phone: '',
-  email: '',
+  phone: '010-2173-6358',
+  email: 'sunlee334@gmail.com',
 } as const;

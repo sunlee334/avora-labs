@@ -55,6 +55,31 @@ test.describe('푸터의 사업자 정보', () => {
     }
   });
 
+  test('구조화 데이터가 푸터와 같은 사업자를 가리킨다', async ({ page }) => {
+    // 답변엔진은 JSON-LD 를 읽습니다. 그것이 화면의 법정 표시와 어긋나면
+    // 검색 결과에는 틀린 사업자 정보가 인용됩니다.
+    await page.goto('/ko/');
+    const blocks = await page.locator('script[type="application/ld+json"]').allTextContents();
+    const org = blocks.map((b) => JSON.parse(b)).find((o) => o['@type'] === 'Organization');
+    expect(org, 'Organization 구조화 데이터가 있어야 합니다').toBeTruthy();
+
+    expect(org.legalName).toBe(BUSINESS.legalName);
+    if (BUSINESS.registrationNumber) expect(org.taxID).toBe(BUSINESS.registrationNumber);
+    if (BUSINESS.address) expect(org.address.streetAddress).toBe(BUSINESS.address);
+    if (BUSINESS.email) expect(org.contactPoint.email).toBe(BUSINESS.email);
+    if (BUSINESS.phone) expect(org.contactPoint.telephone).toBe(BUSINESS.phone);
+  });
+
+  test('확정되지 않은 값은 구조화 데이터에도 넣지 않는다', async ({ page }) => {
+    // 빈 문자열을 넣으면 답변엔진이 "신고번호는 없음" 이 아니라
+    // "신고번호가 빈 값" 이라는 사실을 배웁니다.
+    await page.goto('/ko/');
+    const blocks = await page.locator('script[type="application/ld+json"]').allTextContents();
+    for (const raw of blocks) {
+      expect(raw, '빈 문자열 값이 구조화 데이터에 있습니다').not.toMatch(/:\s*""/);
+    }
+  });
+
   test('모든 언어에서 같은 사업자 정보가 나온다', async ({ page }) => {
     // 법정 표시 사항은 언어와 무관하게 같은 사업자를 가리켜야 합니다.
     for (const lang of ['ko', 'en', 'zh', 'th', 'vi']) {

@@ -7,7 +7,7 @@
  * 원칙: 확정되지 않은 값은 넣지 않습니다. 가격이 없는데 offers 를 만들어
  * 0원이나 빈 문자열을 넣으면 검색엔진에 잘못된 사실을 주게 됩니다.
  */
-import { ORIGIN, absoluteUrl, type Locale } from '../config/site';
+import { ORIGIN, absoluteUrl, BUSINESS, type Locale } from '../config/site';
 import { localePath } from '../i18n';
 import { PRICE, CURRENCY } from '../config/runtime';
 import product from '../data/product.json';
@@ -22,6 +22,26 @@ export function organization() {
     slogan: 'For every movement.',
     description:
       'AVORA is an active lifestyle skincare brand. The name joins the "A" of Athlete and Active with Vitality & Aura. Positioned as ACTIVE LIFESTYLE BEAUTY rather than sports beauty.',
+
+    // 사업자 정보. 답변엔진이 "이 브랜드는 누가 파는가" 에 답할 수 있어야
+    // 하고, 그 답이 푸터의 법정 표시와 어긋나면 안 됩니다.
+    // 확정되지 않은 값은 넣지 않습니다 — 없는 것을 사실로 만들지 않기 위해서입니다.
+    legalName: BUSINESS.legalName,
+    ...(BUSINESS.registrationNumber ? { taxID: BUSINESS.registrationNumber } : {}),
+    ...(BUSINESS.address
+      ? { address: { '@type': 'PostalAddress', streetAddress: BUSINESS.address, addressCountry: 'KR' } }
+      : {}),
+    ...(BUSINESS.email || BUSINESS.phone
+      ? {
+          contactPoint: {
+            '@type': 'ContactPoint',
+            contactType: 'customer support',
+            ...(BUSINESS.email ? { email: BUSINESS.email } : {}),
+            ...(BUSINESS.phone ? { telephone: BUSINESS.phone } : {}),
+            availableLanguage: ['ko', 'en'],
+          },
+        }
+      : {}),
   };
 }
 
