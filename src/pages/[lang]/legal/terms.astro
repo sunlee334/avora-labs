@@ -96,7 +96,9 @@ const methods = payment.countries[payment.defaultCountry as 'KR'].methods
       methods.length > 0 ? (
         <>
           <p class="body">{page.payment.intro}</p>
-          <ul class="pendingList" style="margin-top: 16px">
+          {/* pendingList 가 아닙니다 — 그 스타일의 빈 네모는 "아직 정해지지 않음" 을
+              뜻하는데, 여기 있는 것들은 지금 실제로 쓸 수 있는 결제수단입니다. */}
+          <ul class="factList" style="margin-top: 16px">
             {methods.map((label) => (
               <li>{label}</li>
             ))}

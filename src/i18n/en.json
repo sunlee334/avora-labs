@@ -457,7 +457,8 @@
       "address": "Shipping address",
       "confirming": "Confirming your payment…",
       "home": "Back to home",
-      "lookup": "Look up order"
+      "lookup": "Look up order",
+      "carrierAndTracking": "Shipment"
     },
     "failed": {
       "heading": "Payment did not go through.",
@@ -483,6 +484,9 @@
       "failed": "Payment failed",
       "cancelled": "Cancelled"
     },
-    "statusLabel": "Order status"
+    "statusLabel": "Order status",
+    "fulfillmentLabel": "Delivery",
+    "carrier": "Carrier",
+    "trackingNumber": "Tracking number"
   }
 }

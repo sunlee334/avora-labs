@@ -43,6 +43,12 @@ const l = t.order.lookup;
       <div><dt>{t.order.complete.amount}</dt><dd data-r-amount></dd></div>
       <div><dt>{t.order.complete.recipient}</dt><dd data-r-recipient></dd></div>
       <div><dt>{t.order.complete.address}</dt><dd data-r-address></dd></div>
+      <div><dt>{t.order.fulfillmentLabel}</dt><dd data-r-fulfillment></dd></div>
+      {/* 발송 전에는 보여 줄 것이 없으므로 통째로 감춥니다 — 빈 칸이 뜨면
+          "택배사: —" 를 보고 뭔가 잘못됐다고 읽습니다. */}
+      <div data-r-shipping-row hidden>
+        <dt>{t.order.complete.carrierAndTracking}</dt><dd data-r-tracking></dd>
+      </div>
     </dl>
   </section>
 
@@ -53,6 +59,11 @@ const l = t.order.lookup;
     data-label-cancelled={t.order.status.cancelled}
     data-label-searching={l.searching}
     data-label-submit={l.submit}
+    data-label-unfulfilled={t.legal.shipping.steps.labels.unfulfilled}
+    data-label-preparing={t.legal.shipping.steps.labels.preparing}
+    data-label-shipped={t.legal.shipping.steps.labels.shipped}
+    data-label-delivered={t.legal.shipping.steps.labels.delivered}
+    data-label-returned={t.legal.shipping.steps.labels.returned}
   ></template>
 </Base>
 
@@ -68,6 +79,15 @@ const l = t.order.lookup;
 
     const statusLabel = (s: string) =>
       ({ pending: L.labelPending, paid: L.labelPaid, failed: L.labelFailed, cancelled: L.labelCancelled })[s] ?? s;
+
+    const fulfillmentLabel = (s: string) =>
+      ({
+        unfulfilled: L.labelUnfulfilled,
+        preparing: L.labelPreparing,
+        shipped: L.labelShipped,
+        delivered: L.labelDelivered,
+        returned: L.labelReturned,
+      })[s] ?? s;
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -103,6 +123,14 @@ const l = t.order.lookup;
           );
           set('[data-r-recipient]', o.recipientName);
           set('[data-r-address]', `(${o.postalCode}) ${o.address1} ${o.address2 ?? ''}`.trim());
+
+          // 배송 정보. 판매자가 관리 화면에서 송장번호를 넣으면 여기 나타납니다.
+          set('[data-r-fulfillment]', fulfillmentLabel(o.fulfillment));
+          const shippingRow = result.querySelector<HTMLElement>('[data-r-shipping-row]');
+          const tracking = [o.carrier, o.trackingNumber].filter(Boolean).join(' ');
+          if (shippingRow) shippingRow.hidden = !tracking;
+          set('[data-r-tracking]', tracking);
+
           result.hidden = false;
         } else {
           errorBox.hidden = false;

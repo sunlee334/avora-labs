@@ -375,7 +375,16 @@ const ORDER_STATUSES: readonly OrderStatus[] = ['pending', 'paid', 'failed', 'ca
 /** 한 화면에 뿌릴 최대 건수. 관리자라도 DB 를 통째로 끌어가게 두지 않습니다. */
 const ADMIN_MAX_LIMIT = 100;
 
+/**
+ * 쿼리스트링의 숫자를 범위 안으로 가둡니다.
+ *
+ * 값이 아예 없는 경우를 먼저 걸러야 합니다. Number(null) 과 Number('') 은 둘 다
+ * 0 이고 0 은 정수라, 이 검사를 뒤에 두면 "값 없음" 이 0 으로 통과해 버립니다.
+ * 그러면 limit 기본값 20 이 한 번도 쓰이지 않고 최솟값 1 이 적용됩니다 —
+ * 한 페이지에 한 건만 나오는데 왜인지 알 수 없는 상태가 됩니다.
+ */
 function clampInt(value: string | null, fallback: number, min: number, max: number): number {
+  if (value === null || value.trim() === '') return fallback;
   const n = Number(value);
   if (!Number.isInteger(n)) return fallback;
   return Math.min(Math.max(n, min), max);

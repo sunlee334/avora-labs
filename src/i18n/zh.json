@@ -457,7 +457,8 @@
       "address": "配送地址",
       "confirming": "正在确认支付…",
       "home": "返回首页",
-      "lookup": "查询订单"
+      "lookup": "查询订单",
+      "carrierAndTracking": "配送信息"
     },
     "failed": {
       "heading": "支付未完成。",
@@ -483,6 +484,9 @@
       "failed": "支付失败",
       "cancelled": "已取消"
     },
-    "statusLabel": "订单状态"
+    "statusLabel": "订单状态",
+    "fulfillmentLabel": "配送状态",
+    "carrier": "快递公司",
+    "trackingNumber": "运单号"
   }
 }

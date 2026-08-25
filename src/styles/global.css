@@ -1157,6 +1157,12 @@ button {
     align-items: baseline;
   }
 }
+/* display 를 지정한 줄은 hidden 속성이 먹지 않습니다 — 작성자 규칙이
+   브라우저 기본 [hidden]{display:none} 을 덮습니다. 발송 전 배송 정보 줄을
+   감추려면 여기서 명시적으로 되돌려야 합니다. */
+.orderResult__facts > div[hidden] {
+  display: none;
+}
 .orderResult__facts dt {
   font-size: 13px;
   color: var(--brand-muted);
@@ -1207,6 +1213,31 @@ button {
 }
 .dataTable tr:last-child td {
   border-bottom: 0;
+}
+
+/* 확정된 사실의 목록 — 빈 네모(pendingList)와 채운 점으로 구분합니다. */
+.factList {
+  list-style: none;
+  margin-top: 16px;
+  display: grid;
+  gap: 10px;
+}
+.factList li {
+  position: relative;
+  padding-inline-start: 22px;
+  color: var(--brand-muted);
+  font-size: 15px;
+  line-height: 1.7;
+}
+.factList li::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 2px;
+  top: 0.7em;
+  width: 5px;
+  height: 5px;
+  background: var(--brand-muted);
+  border-radius: 50%;
 }
 
 /* 확정되지 않은 항목 목록 — 법적 문서에서 "무엇이 아직 비어 있는지" 를 드러냅니다. */

@@ -457,7 +457,8 @@
       "address": "배송지",
       "confirming": "결제를 확인하는 중입니다…",
       "home": "홈으로",
-      "lookup": "주문 조회"
+      "lookup": "주문 조회",
+      "carrierAndTracking": "배송 정보"
     },
     "failed": {
       "heading": "결제가 완료되지 않았습니다.",
@@ -483,6 +484,9 @@
       "failed": "결제 실패",
       "cancelled": "취소됨"
     },
-    "statusLabel": "주문 상태"
+    "statusLabel": "주문 상태",
+    "fulfillmentLabel": "배송 상태",
+    "carrier": "택배사",
+    "trackingNumber": "송장번호"
   }
 }

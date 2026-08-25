@@ -26,7 +26,11 @@ function nextOrderId(): string {
   return `AVORA-${stamp}-${suffix}`;
 }
 
-async function seedOrder(request: APIRequestContext, qty = 1): Promise<string> {
+async function seedOrder(
+  request: APIRequestContext,
+  qty = 1,
+  recipientName = '박지훈',
+): Promise<string> {
   const orderId = nextOrderId();
   const res = await request.post('/api/orders', {
     data: {
@@ -35,7 +39,7 @@ async function seedOrder(request: APIRequestContext, qty = 1): Promise<string> {
       currency: 'KRW',
       locale: 'ko',
       items: [{ id: 'daily-sunscreen', qty }],
-      recipientName: '박지훈',
+      recipientName,
       recipientPhone: '010-5555-1234',
       postalCode: '04524',
       address1: '서울 중구 세종대로 110',
@@ -119,6 +123,46 @@ test.describe('알림 문구', () => {
       paidAt: '2026-10-25T12:00:00.000Z',
     });
     expect(message).toContain('1,000');
+  });
+});
+
+test.describe('알림 문구는 채팅 제어 문법으로 읽히지 않는다', () => {
+  // 리뷰가 잡은 결함: 받는 분 이름이 그대로 실려 나갔습니다. Slack 은 <!channel> 을
+  // 전체 멘션으로, <주소|글자> 를 링크로 해석합니다. 이름칸은 인증 없이 누구나
+  // 넣을 수 있어, 고객이 판매자 채널 전체를 호출할 수 있었습니다.
+  const hostile = {
+    orderId: 'AVORA-20261025120000-AB12CD',
+    amount: 32000,
+    currency: 'KRW',
+    items: [{ name: '<!here>', qty: 1 }],
+    recipientName: '<!channel> <http://evil.example|결제확인>',
+    adminUrl: null,
+    paidAt: '2026-10-25T12:00:00.000Z',
+  };
+
+  test('Slack 으로 갈 때는 & < > 를 엔티티로 바꾼다', () => {
+    const escaped = composeMessage(hostile, (v) =>
+      v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'),
+    );
+    expect(escaped).not.toContain('<!channel>');
+    expect(escaped).not.toContain('<http://evil.example|');
+    expect(escaped).toContain('&lt;!channel&gt;');
+  });
+
+  test('실제로 나간 알림에 제어 문법이 남아 있지 않다', async ({ request }) => {
+    const orderId = await seedOrder(request, 1, '<!channel> 김고객');
+
+    const confirm = await request.post('/api/payments/confirm', {
+      data: { paymentKey: 'ok_escape', orderId, amount: UNIT_PRICE },
+    });
+    expect(confirm.status()).toBe(200);
+
+    const hit = await waitForNotification(request, orderId);
+    expect(hit).not.toBeNull();
+
+    const text = hit!.body.text ?? hit!.body.content ?? '';
+    expect(text).not.toContain('<!channel>');
+    expect(text).toContain('김고객');
   });
 });
 

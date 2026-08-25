@@ -140,13 +140,29 @@ test.describe('주문 목록', () => {
 
   test('LIKE 와일드카드를 검색어로 넣어도 전체가 나오지 않는다', async ({ request }) => {
     // '%' 와 '_' 는 LIKE 의 와일드카드라, 그대로 넘기면 검색어가 아니라 패턴이 됩니다.
-    await seedOrder(request);
+    // 이스케이프하면 글자 그대로 찾으므로, 그 글자가 없는 주문은 걸리지 않아야 합니다.
+    //
+    // "결과가 0건" 으로 단정하지 않습니다 — 두 브라우저 프로젝트가 같은 로컬 DB 를
+    // 쓰는 데다, 다른 테스트가 밑줄이 든 이름(__pwned 같은)을 넣어 두기 때문입니다.
+    // 그건 검색이 옳게 동작한 결과이지 결함이 아닙니다.
+    const name = `와일드카드대조${Math.floor(Math.random() * 1e9)}`;
+    await seedOrder(request, { recipientName: name });
+
+    const all = await request.get('/api/admin/orders?limit=1', { headers: AUTH });
+    const everything = (await all.json()).total;
+    expect(everything).toBeGreaterThan(0);
 
     for (const term of ['%', '_']) {
-      const res = await request.get(`/api/admin/orders?search=${encodeURIComponent(term)}`, {
-        headers: AUTH,
-      });
-      expect((await res.json()).total).toBe(0);
+      const res = await request.get(
+        `/api/admin/orders?search=${encodeURIComponent(term)}&limit=100`,
+        { headers: AUTH },
+      );
+      const body = await res.json();
+      expect(body.total, `검색어 "${term}" 가 전체를 반환하면 안 됩니다`).toBeLessThan(everything);
+      expect(
+        body.orders.some((o: { recipientName: string }) => o.recipientName === name),
+        `검색어 "${term}" 가 그 글자 없는 주문을 잡으면 안 됩니다`,
+      ).toBe(false);
     }
   });
 
@@ -155,6 +171,18 @@ test.describe('주문 목록', () => {
       headers: AUTH,
     });
     expect(res.status()).toBe(200);
+  });
+
+  test('limit 을 안 보내면 기본값 20 건이 온다', async ({ request }) => {
+    // 리뷰가 잡은 결함: Number(null) 은 0 이고 0 은 정수라, "값 없음" 검사가
+    // 뒤에 있으면 기본값 20 이 한 번도 쓰이지 않고 최솟값 1 이 적용됐습니다.
+    // 한 페이지에 한 건만 나오는데 왜인지 알 수 없는 상태였습니다.
+    for (let i = 0; i < 21; i++) await seedOrder(request);
+
+    for (const query of ['', '?limit=', '?limit=abc']) {
+      const res = await request.get(`/api/admin/orders${query}`, { headers: AUTH });
+      expect((await res.json()).orders.length, `limit 쿼리: "${query}"`).toBe(20);
+    }
   });
 
   test('한 번에 가져갈 수 있는 건수에 상한이 있다', async ({ request }) => {
@@ -179,6 +207,42 @@ test.describe('배송 상태 변경', () => {
     expect(order.fulfillment).toBe('shipped');
     expect(order.shippedAt).toBeTruthy();
     expect(order.trackingNumber).toBe('1234567890');
+  });
+
+  test('고객 주문조회 화면에 배송 정보가 실제로 그려진다', async ({ page, request }) => {
+    // 리뷰가 잡은 결함: API 는 송장번호를 돌려주는데 화면이 그리지 않았습니다.
+    // 아래 "고객도 조회할 수 있게 된다" 테스트는 JSON 만 봐서 통과했고,
+    // README 와 배송안내 페이지는 화면에 나온다고 적혀 있었습니다 — 둘 다 거짓이었습니다.
+    const orderId = await seedOrder(request);
+    await request.patch(`/api/admin/orders/${orderId}`, {
+      headers: AUTH,
+      data: { fulfillment: 'shipped', carrier: '한진택배', trackingNumber: '4444333322' },
+    });
+
+    await page.goto('/ko/order/lookup');
+    await page.locator('[name="orderId"]').fill(orderId);
+    await page.locator('[name="phone"]').fill('010-2345-6789');
+    await page.locator('[data-lookup-submit]').click();
+
+    const result = page.locator('[data-lookup-result]');
+    await expect(result).toBeVisible();
+    await expect(result.locator('[data-r-fulfillment]')).toHaveText('발송');
+    await expect(result.locator('[data-r-tracking]')).toContainText('한진택배');
+    await expect(result.locator('[data-r-tracking]')).toContainText('4444333322');
+  });
+
+  test('발송 전에는 배송 정보 줄을 아예 감춘다', async ({ page, request }) => {
+    // "택배사: —" 가 보이면 뭔가 잘못됐다고 읽습니다.
+    const orderId = await seedOrder(request);
+
+    await page.goto('/ko/order/lookup');
+    await page.locator('[name="orderId"]').fill(orderId);
+    await page.locator('[name="phone"]').fill('010-2345-6789');
+    await page.locator('[data-lookup-submit]').click();
+
+    await expect(page.locator('[data-lookup-result]')).toBeVisible();
+    await expect(page.locator('[data-r-fulfillment]')).toHaveText('미발송');
+    await expect(page.locator('[data-r-shipping-row]')).toBeHidden();
   });
 
   test('고객도 송장번호를 조회할 수 있게 된다', async ({ request }) => {
@@ -287,6 +351,43 @@ test.describe('관리 화면', () => {
     await expect(detail).toBeHidden();
     // '미발송' 도 '발송' 을 포함하므로 부분 일치로는 구분되지 않습니다.
     await expect(row.locator('.pill').last()).toHaveText('발송');
+  });
+
+  test('고객 이름에 담긴 HTML 이 실행되지 않는다', async ({ page, request }) => {
+    // 리뷰가 잡은 결함: 표를 innerHTML 로 그리면서 수령인 이름을 그대로 넣었습니다.
+    // 이름은 인증 없이 누구나 주문 API 로 보낼 수 있고, 이 화면은 Access 를 통과한
+    // 관리자 세션 안입니다. 실제로 window.__pwned 가 세팅되는 것을 확인했습니다.
+    // 여기서 뚫리면 전 고객의 연락처와 주소가 그대로 새 나갑니다.
+    const orderId = await seedOrder(request, {
+      recipientName: '<img src=x onerror="window.__pwned=1">',
+    });
+
+    await page.goto('/admin');
+    await page.locator('[data-filters] [name="search"]').fill(orderId);
+    await page.locator('[data-filters] [name="search"]').press('Enter');
+
+    const row = page.locator('[data-rows] tr', { hasText: orderId });
+    await expect(row).toBeVisible();
+
+    expect(await page.evaluate(() => (window as any).__pwned)).toBeUndefined();
+    // 태그가 아니라 글자로 보여야 합니다.
+    await expect(row).toContainText('<img src=x');
+    await expect(row.locator('img')).toHaveCount(0);
+  });
+
+  test('상세 패널에서도 실행되지 않는다', async ({ page, request }) => {
+    const orderId = await seedOrder(request, {
+      recipientName: '<img src=x onerror="window.__pwned2=1">',
+      address1: '<svg onload="window.__pwned2=1">서울 중구 세종대로 110',
+    });
+
+    await page.goto('/admin');
+    await page.locator('[data-filters] [name="search"]').fill(orderId);
+    await page.locator('[data-filters] [name="search"]').press('Enter');
+    await page.locator('[data-rows] tr', { hasText: orderId }).click();
+
+    await expect(page.locator('[data-detail]')).toBeVisible();
+    expect(await page.evaluate(() => (window as any).__pwned2)).toBeUndefined();
   });
 
   test('검색엔진에 잡히지 않는다', async ({ page }) => {

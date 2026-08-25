@@ -457,7 +457,8 @@
       "address": "Địa chỉ giao hàng",
       "confirming": "Đang xác nhận thanh toán…",
       "home": "Về trang chủ",
-      "lookup": "Tra cứu đơn hàng"
+      "lookup": "Tra cứu đơn hàng",
+      "carrierAndTracking": "Thông tin vận chuyển"
     },
     "failed": {
       "heading": "Thanh toán chưa hoàn tất.",
@@ -483,6 +484,9 @@
       "failed": "Thanh toán thất bại",
       "cancelled": "Đã huỷ"
     },
-    "statusLabel": "Trạng thái đơn hàng"
+    "statusLabel": "Trạng thái đơn hàng",
+    "fulfillmentLabel": "Trạng thái giao hàng",
+    "carrier": "Đơn vị vận chuyển",
+    "trackingNumber": "Mã vận đơn"
   }
 }

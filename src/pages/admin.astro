@@ -349,6 +349,22 @@ const FULFILLMENT_LABEL: Record<string, string> = {
         : raw.length === 10 ? `${raw.slice(0, 3)}-${raw.slice(3, 6)}-${raw.slice(6)}`
         : raw;
 
+      /**
+       * 표 칸 하나.
+       *
+       * 이 화면은 innerHTML 을 쓰지 않습니다. 여기 들어오는 값 중 수령인 이름은
+       * 인증 없이 누구나 주문 API 로 넣을 수 있는 문자열이고, 이 화면은 Access 를
+       * 통과한 관리자 세션 안입니다. 한 곳만 뚫려도 전 고객의 연락처와 주소가
+       * 새 나갑니다. 그래서 예외 없이 textContent 로만 넣습니다.
+       */
+      function cell(text: string, className?: string, child?: Node) {
+        const td = document.createElement('td');
+        if (className) td.className = className;
+        if (child) td.appendChild(child);
+        else td.textContent = text;
+        return td;
+      }
+
       function pill(map: Record<string, { label: string; tone: string }>, key: string) {
         const entry = map[key] ?? { label: key, tone: 'dim' };
         const el = document.createElement('span');
@@ -403,7 +419,11 @@ const FULFILLMENT_LABEL: Record<string, string> = {
               const n = data.counts?.[key] ?? 0;
               // 미발송이 쌓이면 눈에 띄어야 합니다 — 여기가 실무에서 가장 자주 보는 숫자입니다.
               box.dataset.attention = String(key === 'unfulfilled' && n > 0);
-              box.innerHTML = `<dt>${meta.label}</dt><dd>${n}</dd>`;
+              const dt = document.createElement('dt');
+              dt.textContent = meta.label;
+              const dd = document.createElement('dd');
+              dd.textContent = String(n);
+              box.append(dt, dd);
               return box;
             }),
           );
@@ -417,14 +437,18 @@ const FULFILLMENT_LABEL: Record<string, string> = {
             ...data.orders.map((order: any) => {
               const tr = document.createElement('tr');
               tr.tabIndex = 0;
-              tr.innerHTML = `
-                <td class="oid">${order.id}</td>
-                <td class="when">${when(order.createdAt)}</td>
-                <td>${order.recipientName}</td>
-                <td class="num">${money(order.amount, order.currency)}</td>
-                <td></td><td></td>`;
-              tr.children[4].appendChild(pill(STATUS as any, order.status));
-              tr.children[5].appendChild(pill(FULFILL as any, order.fulfillment));
+              tr.append(
+                cell(order.id, 'oid'),
+                cell(when(order.createdAt), 'when'),
+                // 수령인은 고객이 입력한 값입니다. textContent 로만 넣습니다 —
+                // innerHTML 로 넣으면 이름칸에 담긴 태그가 이 화면에서 실행됩니다.
+                // 여기는 Access 를 통과한 관리자 세션이라, 그 스크립트가 관리 API 를
+                // 그대로 호출할 수 있습니다.
+                cell(order.recipientName),
+                cell(money(order.amount, order.currency), 'num'),
+                cell('', undefined, pill(STATUS as any, order.status)),
+                cell('', undefined, pill(FULFILL as any, order.fulfillment)),
+              );
               const open = () => showDetail(order);
               tr.addEventListener('click', open);
               tr.addEventListener('keydown', (e) => {
