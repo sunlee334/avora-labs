@@ -20,6 +20,9 @@ const buildEnv =
     ? 'PUBLIC_CHECKOUT_MODE=internal PUBLIC_PRODUCT_PRICE=32000'
     : 'PUBLIC_CHECKOUT_MODE=external';
 
+/** commerce 모드 관리 API 테스트가 쓰는 열쇠. 로컬·CI 안에서만 존재합니다. */
+export const ADMIN_DEV_TOKEN = 'e2e-admin-token';
+
 /**
  * commerce 모드에서는 테스트용 결제 어댑터를 켭니다.
  * .dev.vars 는 gitignore 대상이라 CI 에는 없으므로 여기서 명시적으로 넘깁니다.
@@ -29,7 +32,11 @@ const workerVars =
   MODE === 'commerce'
     // Worker 도 가격을 알아야 합니다 — 이제 서버가 금액을 직접 계산하므로,
     // 프런트의 PUBLIC_PRODUCT_PRICE 와 같은 값을 Worker 에도 넘깁니다.
-    ? '--var PAYMENT_PROVIDER:mock --var PRODUCT_PRICE:32000'
+    // ADMIN_DEV_TOKEN: Cloudflare Access 는 요청이 우리에게 닿기 전에 Cloudflare 가
+    // 붙이는 것이라 wrangler dev 로는 재현할 수 없습니다. 관리 API 를 테스트하려면
+    // 다른 문이 필요합니다. 운영에서는 절대 설정하지 않으며, 배포 전 점검이
+    // wrangler.jsonc 에서 이 이름을 발견하면 배포를 멈춥니다.
+    ? `--var PAYMENT_PROVIDER:mock --var PRODUCT_PRICE:32000 --var ADMIN_DEV_TOKEN:${ADMIN_DEV_TOKEN}`
     : '';
 
 /** 해당 모드에서만 의미 있는 테스트는 폴더로 갈라 두었습니다. */

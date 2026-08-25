@@ -226,3 +226,153 @@ export function publicView(order: OrderRecord) {
     createdAt: order.createdAt,
   };
 }
+
+// ── 관리용 조회 ──────────────────────────────────────────────
+// 아래 함수들이 돌려주는 값에는 연락처·메모 같은 개인정보가 들어 있습니다.
+// 반드시 인증을 통과한 요청에서만 호출하세요.
+
+export interface OrderListQuery {
+  status?: OrderStatus;
+  fulfillment?: Fulfillment;
+  /** 주문번호·수령인·연락처 부분 일치 */
+  search?: string;
+  limit: number;
+  offset: number;
+}
+
+export interface OrderListResult {
+  orders: OrderRecord[];
+  total: number;
+}
+
+/** 이스케이프 문자를 명시한 부분 일치 조건. likePattern 과 짝을 이룹니다. */
+const LIKE = "LIKE ? ESCAPE '\\'";
+
+/**
+ * 부분 일치 검색어를 LIKE 패턴으로 만듭니다.
+ *
+ * `%` 와 `_` 는 LIKE 의 와일드카드라 그대로 넘기면 검색어가 아니라 패턴이 됩니다.
+ * 관리자가 `_` 한 글자를 검색하면 전체 주문이 나오는 식입니다.
+ */
+function likePattern(value: string): string {
+  return `%${value.replace(/[\\%_]/g, (ch) => `\\${ch}`)}%`;
+}
+
+export async function listOrders(
+  db: D1Database,
+  query: OrderListQuery,
+): Promise<OrderListResult> {
+  const where: string[] = [];
+  const params: unknown[] = [];
+
+  if (query.status) {
+    where.push('status = ?');
+    params.push(query.status);
+  }
+  if (query.fulfillment) {
+    where.push('fulfillment = ?');
+    params.push(query.fulfillment);
+  }
+  if (query.search) {
+    const terms = [`id ${LIKE}`, `recipient_name ${LIKE}`];
+    params.push(likePattern(query.search), likePattern(query.search));
+
+    // 연락처는 숫자만 저장하므로, 검색어에서도 구분자를 떼고 따로 봅니다.
+    //
+    // 숫자가 하나도 없으면 이 항을 아예 넣지 않습니다. 넣으면 패턴이 '%%' 가 되어
+    // 모든 행에 걸리고, OR 로 묶인 검색 전체가 무력화됩니다 — 이름으로 검색해도
+    // 전체 주문이 나오는 상태가 됩니다.
+    const digits = normalizePhone(query.search);
+    if (digits) {
+      terms.push(`recipient_phone ${LIKE}`);
+      params.push(likePattern(digits));
+    }
+
+    where.push(`(${terms.join(' OR ')})`);
+  }
+
+  const clause = where.length ? `WHERE ${where.join(' AND ')}` : '';
+
+  const countRow = await db
+    .prepare(`SELECT COUNT(*) AS n FROM orders ${clause}`)
+    .bind(...params)
+    .first<{ n: number }>();
+
+  const rows = await db
+    .prepare(
+      `SELECT * FROM orders ${clause} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+    )
+    .bind(...params, query.limit, query.offset)
+    .all();
+
+  return {
+    orders: (rows.results ?? []).map((row) => rowToOrder(row as Record<string, unknown>)),
+    total: Number(countRow?.n ?? 0),
+  };
+}
+
+/** 상태별 건수 — 관리 화면 상단 요약에 씁니다. */
+export async function orderCounts(db: D1Database): Promise<Record<string, number>> {
+  const rows = await db
+    .prepare(
+      `SELECT fulfillment, COUNT(*) AS n FROM orders WHERE status = 'paid' GROUP BY fulfillment`,
+    )
+    .all();
+  const counts: Record<string, number> = {};
+  for (const row of rows.results ?? []) {
+    const r = row as { fulfillment: string; n: number };
+    counts[r.fulfillment] = Number(r.n);
+  }
+  return counts;
+}
+
+export async function updateFulfillment(
+  db: D1Database,
+  id: string,
+  patch: {
+    fulfillment?: Fulfillment;
+    carrier?: string | null;
+    trackingNumber?: string | null;
+    adminMemo?: string | null;
+  },
+  now: string,
+): Promise<boolean> {
+  const sets: string[] = [];
+  const params: unknown[] = [];
+
+  if (patch.fulfillment) {
+    sets.push('fulfillment = ?');
+    params.push(patch.fulfillment);
+    // 발송으로 바뀌는 순간을 기록해 둡니다. 되돌리면 지웁니다.
+    if (patch.fulfillment === 'shipped') {
+      sets.push('shipped_at = COALESCE(shipped_at, ?)');
+      params.push(now);
+    } else if (patch.fulfillment === 'unfulfilled' || patch.fulfillment === 'preparing') {
+      sets.push('shipped_at = NULL');
+    }
+  }
+  if (patch.carrier !== undefined) {
+    sets.push('carrier = ?');
+    params.push(patch.carrier);
+  }
+  if (patch.trackingNumber !== undefined) {
+    sets.push('tracking_number = ?');
+    params.push(patch.trackingNumber);
+  }
+  if (patch.adminMemo !== undefined) {
+    sets.push('admin_memo = ?');
+    params.push(patch.adminMemo);
+  }
+
+  if (!sets.length) return false;
+
+  sets.push('updated_at = ?');
+  params.push(now, id);
+
+  const result = await db
+    .prepare(`UPDATE orders SET ${sets.join(', ')} WHERE id = ?`)
+    .bind(...params)
+    .run();
+
+  return (result.meta?.changes ?? 0) > 0;
+}

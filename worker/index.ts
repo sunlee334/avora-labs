@@ -7,7 +7,8 @@
  *
  *   1. `/`            — 언어를 판별해 /{lang}/ 으로 302
  *   2. `/api/*`       — wrangler.jsonc 의 run_worker_first 로 강제 진입
- *   3. 매칭 실패      — 404 페이지를 언어에 맞춰 돌려주기
+ *   3. `/admin*`      — 같은 이유로 강제 진입. 인증을 통과해야 화면이 나갑니다
+ *   4. 매칭 실패      — 404 페이지를 언어에 맞춰 돌려주기
  */
 import { tossPayments } from './payments/tosspayments';
 import { mockPayments } from './payments/mock';
@@ -20,9 +21,16 @@ import {
   forcePaid,
   markFailed,
   publicView,
+  listOrders,
+  orderCounts,
+  updateFulfillment,
+  FULFILLMENTS,
   type OrderDraft,
+  type OrderStatus,
+  type Fulfillment,
 } from './orders';
 import { priceOrder, currencyOf, isAllowedCurrency } from './catalog';
+import { verifyAdmin, type AdminEnv } from './admin';
 
 const LOCALES = ['ko', 'en', 'zh', 'th', 'vi'] as const;
 type Locale = (typeof LOCALES)[number];
@@ -46,7 +54,7 @@ const ADAPTERS: Record<string, PaymentAdapter> = {
   mock: mockPayments,
 };
 
-interface Env {
+interface Env extends AdminEnv {
   ASSETS: Fetcher;
   DB?: D1Database;
   /** 어떤 PG 어댑터를 쓸지. 미설정이면 결제 엔드포인트가 비활성입니다. */
@@ -334,6 +342,148 @@ async function handleOrderLookup(request: Request, env: Env): Promise<Response> 
   return json({ ok: true, order: publicView(order) });
 }
 
+// ── 관리 화면 ────────────────────────────────────────────────
+// 아래 응답에는 연락처·배송지·요청사항이 그대로 들어갑니다.
+// 모든 진입점이 verifyAdmin 을 먼저 통과하는지 확인하세요.
+
+const ORDER_STATUSES: readonly OrderStatus[] = ['pending', 'paid', 'failed', 'cancelled'];
+
+/** 한 화면에 뿌릴 최대 건수. 관리자라도 DB 를 통째로 끌어가게 두지 않습니다. */
+const ADMIN_MAX_LIMIT = 100;
+
+function clampInt(value: string | null, fallback: number, min: number, max: number): number {
+  const n = Number(value);
+  if (!Number.isInteger(n)) return fallback;
+  return Math.min(Math.max(n, min), max);
+}
+
+async function handleAdminList(request: Request, env: Env, who: string): Promise<Response> {
+  if (!env.DB) {
+    return json({ error: 'ORDERS_NOT_CONFIGURED', message: 'D1 바인딩(DB)이 없습니다.' }, 503);
+  }
+
+  const params = new URL(request.url).searchParams;
+
+  // 모르는 값이 오면 조용히 무시합니다. 필터가 안 걸리는 편이,
+  // 관리자가 이유 없는 오류 화면을 보는 것보다 낫습니다.
+  const rawStatus = params.get('status');
+  const rawFulfillment = params.get('fulfillment');
+  const search = (params.get('search') ?? '').trim().slice(0, 80);
+
+  const result = await listOrders(env.DB, {
+    status: ORDER_STATUSES.includes(rawStatus as OrderStatus)
+      ? (rawStatus as OrderStatus)
+      : undefined,
+    fulfillment: FULFILLMENTS.includes(rawFulfillment as Fulfillment)
+      ? (rawFulfillment as Fulfillment)
+      : undefined,
+    search: search || undefined,
+    limit: clampInt(params.get('limit'), 20, 1, ADMIN_MAX_LIMIT),
+    offset: clampInt(params.get('offset'), 0, 0, Number.MAX_SAFE_INTEGER),
+  });
+
+  return json({
+    orders: result.orders,
+    total: result.total,
+    counts: await orderCounts(env.DB),
+    who,
+  });
+}
+
+async function handleAdminPatch(request: Request, env: Env, orderId: string): Promise<Response> {
+  if (!env.DB) {
+    return json({ error: 'ORDERS_NOT_CONFIGURED', message: 'D1 바인딩(DB)이 없습니다.' }, 503);
+  }
+  if (!ORDER_ID_PATTERN.test(orderId)) {
+    return json({ error: 'INVALID_ORDER_ID' }, 400);
+  }
+
+  let body: Record<string, unknown>;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: 'INVALID_JSON' }, 400);
+  }
+
+  const patch: Parameters<typeof updateFulfillment>[2] = {};
+
+  if (body.fulfillment !== undefined) {
+    if (!FULFILLMENTS.includes(body.fulfillment as Fulfillment)) {
+      return json(
+        { error: 'INVALID_FULFILLMENT', message: '알 수 없는 배송 상태입니다.' },
+        400,
+      );
+    }
+    patch.fulfillment = body.fulfillment as Fulfillment;
+  }
+
+  // null 은 "지우기" 라 undefined 와 구분해서 받습니다.
+  // 빈 문자열도 지우기로 봅니다 — 폼에서 지운 칸이 그렇게 넘어옵니다.
+  for (const key of ['carrier', 'trackingNumber', 'adminMemo'] as const) {
+    if (body[key] === undefined) continue;
+    if (body[key] === null) {
+      patch[key] = null;
+      continue;
+    }
+    const value = text(body[key], key === 'adminMemo' ? 1000 : 60);
+    if (value === null) {
+      return json(
+        { error: 'INVALID_FIELD', message: `${key} 값이 비어 있거나 너무 깁니다.` },
+        400,
+      );
+    }
+    patch[key] = value;
+  }
+
+  if (Object.keys(patch).length === 0) {
+    return json({ error: 'NOTHING_TO_UPDATE', message: '바꿀 내용이 없습니다.' }, 400);
+  }
+
+  // 송장번호를 넣으면서 상태는 그대로 두는 실수를 막습니다.
+  if (patch.trackingNumber && patch.fulfillment === undefined) {
+    const current = await getOrder(env.DB, orderId);
+    if (current && current.fulfillment !== 'shipped' && current.fulfillment !== 'delivered') {
+      patch.fulfillment = 'shipped';
+    }
+  }
+
+  const changed = await updateFulfillment(env.DB, orderId, patch, new Date().toISOString());
+  if (!changed) {
+    return json({ error: 'ORDER_NOT_FOUND', message: '주문을 찾을 수 없습니다.' }, 404);
+  }
+
+  const order = await getOrder(env.DB, orderId);
+  return json({ order });
+}
+
+/**
+ * 관리 화면 페이지 자체도 Worker 를 거치게 해서 잠급니다.
+ *
+ * 이 페이지에 주문 데이터가 박혀 있지는 않지만(전부 API 로 가져옵니다),
+ * 인증이 설정되지 않은 채 화면만 열려 있으면 관리 화면이 있다는 사실과
+ * 그 구조가 그대로 드러납니다. 문은 하나로 잠급니다.
+ */
+async function handleAdminPage(request: Request, env: Env): Promise<Response> {
+  const auth = await verifyAdmin(request, env);
+  if (!auth.ok) {
+    return new Response(`${auth.message}\n`, {
+      status: auth.status,
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-store',
+        // 검색엔진이 잠긴 문 앞에서 서성이지 않게 합니다.
+        'X-Robots-Tag': 'noindex, nofollow',
+      },
+    });
+  }
+  const page = await env.ASSETS.fetch(request);
+  // 공용 PC 의 뒤로가기로 화면이 되살아나지 않게 합니다.
+  const headers = new Headers(page.headers);
+  headers.set('Cache-Control', 'no-store');
+  headers.set('X-Robots-Tag', 'noindex, nofollow');
+  return new Response(page.body, { status: page.status, headers });
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
@@ -355,11 +505,34 @@ export default {
     if (pathname === '/api/payments/confirm') {
       return handlePaymentConfirm(request, env);
     }
+
+    // 관리 API — 무엇을 하려는지 보기 전에 먼저 신원을 확인합니다.
+    if (pathname.startsWith('/api/admin/')) {
+      const auth = await verifyAdmin(request, env);
+      if (!auth.ok) {
+        return json({ error: auth.error, message: auth.message }, auth.status);
+      }
+
+      if (pathname === '/api/admin/orders' && request.method === 'GET') {
+        return handleAdminList(request, env, auth.who);
+      }
+      const detail = pathname.match(/^\/api\/admin\/orders\/([^/]+)$/);
+      if (detail && request.method === 'PATCH') {
+        return handleAdminPatch(request, env, decodeURIComponent(detail[1]));
+      }
+      return json({ error: 'NOT_FOUND' }, 404);
+    }
+
     if (pathname.startsWith('/api/')) {
       return json({ error: 'NOT_FOUND' }, 404);
     }
 
-    // 3 — 그 외에는 정적 에셋에 넘깁니다.
+    // 3 — 관리 화면 페이지
+    if (pathname === '/admin' || pathname.startsWith('/admin/')) {
+      return handleAdminPage(request, env);
+    }
+
+    // 4 — 그 외에는 정적 에셋에 넘깁니다.
     const assetResponse = await env.ASSETS.fetch(request);
 
     // 에셋에도 없으면 언어에 맞는 404 페이지를 상태 코드 404 로 돌려줍니다.

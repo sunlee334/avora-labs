@@ -74,6 +74,20 @@ jobs:
             exit 1
           fi
 
+          # 테스트 전용 설정이 운영 설정에 섞여 들어가면 안 됩니다.
+          # ADMIN_DEV_TOKEN 은 Cloudflare Access 를 우회하는 열쇠고,
+          # mock 결제 어댑터는 돈을 받지 않고 승인된 척합니다.
+          for leaked in ADMIN_DEV_TOKEN PRODUCT_PRICE; do
+            if grep -q "\"$leaked\"" wrangler.jsonc; then
+              echo "::error::$leaked 는 테스트 전용입니다. wrangler.jsonc 에서 지우세요."
+              exit 1
+            fi
+          done
+          if grep -q '"PAYMENT_PROVIDER"[[:space:]]*:[[:space:]]*"mock"' wrangler.jsonc; then
+            echo "::error::mock 결제 어댑터는 실제 결제를 받지 않습니다. 운영 설정에 두면 안 됩니다."
+            exit 1
+          fi
+
       - run: npm run build
 
       - name: 배포

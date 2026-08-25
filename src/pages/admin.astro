@@ -1,0 +1,516 @@
+---
+/**
+ * 주문 관리 화면.
+ *
+ * 브랜드 사이트와 달리 언어 접두어가 없습니다 — 내부 도구라 한국어 하나면 충분하고,
+ * 5개 언어로 복제하면 관리 대상만 늘어납니다.
+ *
+ * ⚠️ 이 화면은 모든 주문의 배송지·연락처를 볼 수 있습니다.
+ *    보호는 Cloudflare Access 가 하고, Worker 가 Access JWT 를 한 번 더 검증합니다.
+ *    화면 자체는 데이터를 담고 있지 않은 껍데기이고, 실제 값은 인증된 API 로만 옵니다.
+ */
+import '../styles/tokens.css';
+import { FULFILLMENTS } from '../../worker/orders';
+
+const STATUS_LABEL: Record<string, string> = {
+  pending: '결제 대기',
+  paid: '결제 완료',
+  failed: '결제 실패',
+  cancelled: '취소됨',
+};
+
+const FULFILLMENT_LABEL: Record<string, string> = {
+  unfulfilled: '미발송',
+  preparing: '준비중',
+  shipped: '발송',
+  delivered: '배송완료',
+  returned: '반품',
+};
+---
+
+<!doctype html>
+<html lang="ko-KR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>주문 관리 — AVORA</title>
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="stylesheet" href="/fonts/ko/fonts.css" />
+  </head>
+
+  <body>
+    <header class="bar">
+      <h1>주문 관리</h1>
+      <div class="bar__right">
+        <span class="who" data-who></span>
+        <button type="button" data-refresh>새로고침</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="summary" data-summary aria-label="상태 요약"></section>
+
+      <form class="filters" data-filters>
+        <label class="filters__search">
+          <span class="sr-only">검색</span>
+          <input
+            type="search"
+            name="search"
+            placeholder="주문번호 · 수령인 · 연락처"
+            enterkeyhint="search"
+          />
+        </label>
+
+        <label>
+          <span class="sr-only">결제 상태</span>
+          <select name="status">
+            <option value="">결제 상태 전체</option>
+            {
+              Object.entries(STATUS_LABEL).map(([value, label]) => (
+                <option value={value}>{label}</option>
+              ))
+            }
+          </select>
+        </label>
+
+        <label>
+          <span class="sr-only">배송 상태</span>
+          <select name="fulfillment">
+            <option value="">배송 상태 전체</option>
+            {
+              FULFILLMENTS.map((value) => (
+                <option value={value}>{FULFILLMENT_LABEL[value]}</option>
+              ))
+            }
+          </select>
+        </label>
+
+        <button type="submit">조회</button>
+      </form>
+
+      <p class="state" data-state>불러오는 중…</p>
+
+      <div class="tableWrap" data-table-wrap hidden>
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">주문번호</th>
+              <th scope="col">주문일시</th>
+              <th scope="col">수령인</th>
+              <th scope="col" class="num">금액</th>
+              <th scope="col">결제</th>
+              <th scope="col">배송</th>
+            </tr>
+          </thead>
+          <tbody data-rows></tbody>
+        </table>
+      </div>
+
+      <nav class="pager" data-pager hidden aria-label="페이지">
+        <button type="button" data-prev>이전</button>
+        <span data-page-info></span>
+        <button type="button" data-next>다음</button>
+      </nav>
+    </main>
+
+    {/* 주문 상세 — 행을 누르면 열립니다 */}
+    <dialog class="detail" data-detail aria-label="주문 상세">
+      <header class="detail__head">
+        <h2 data-d-id></h2>
+        <button type="button" data-detail-close aria-label="닫기">✕</button>
+      </header>
+
+      <dl class="detail__facts">
+        <div><dt>주문일시</dt><dd data-d-created></dd></div>
+        <div><dt>결제</dt><dd data-d-status></dd></div>
+        <div><dt>결제일시</dt><dd data-d-paid></dd></div>
+        <div><dt>금액</dt><dd data-d-amount></dd></div>
+        <div><dt>상품</dt><dd data-d-items></dd></div>
+        <div><dt>수령인</dt><dd data-d-recipient></dd></div>
+        <div><dt>연락처</dt><dd data-d-phone></dd></div>
+        <div><dt>배송지</dt><dd data-d-address></dd></div>
+        <div><dt>요청사항</dt><dd data-d-memo></dd></div>
+        <div><dt>이메일</dt><dd data-d-email></dd></div>
+      </dl>
+
+      <form class="detail__form" data-detail-form>
+        <h3>배송 처리</h3>
+        <div class="row">
+          <label>
+            배송 상태
+            <select name="fulfillment">
+              {
+                FULFILLMENTS.map((value) => (
+                  <option value={value}>{FULFILLMENT_LABEL[value]}</option>
+                ))
+              }
+            </select>
+          </label>
+          <label>
+            택배사
+            <input type="text" name="carrier" maxlength="40" placeholder="CJ대한통운" />
+          </label>
+        </div>
+        <label>
+          송장번호
+          <input type="text" name="trackingNumber" inputmode="numeric" maxlength="40" />
+        </label>
+        <label>
+          관리 메모
+          <input type="text" name="adminMemo" maxlength="300" placeholder="내부용 (고객에게 보이지 않습니다)" />
+        </label>
+
+        <p class="detail__error" data-detail-error hidden></p>
+        <button type="submit" data-save>저장</button>
+      </form>
+    </dialog>
+
+    <style is:global>
+      *, *::before, *::after { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--brand-surface);
+        color: var(--brand-ink);
+        font-family: var(--font-body);
+        font-size: 15px;
+        line-height: 1.7;
+        -webkit-font-smoothing: antialiased;
+        word-break: keep-all;
+      }
+      h1, h2, h3, p, dl, dd { margin: 0; }
+      :focus-visible { outline: 2px solid var(--brand-ink); outline-offset: 2px; }
+
+      .sr-only {
+        position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+        overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+      }
+
+      .bar {
+        display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        padding: 14px 20px;
+        background: var(--brand-primary); color: var(--brand-surface-alt);
+        position: sticky; top: 0; z-index: 5;
+      }
+      .bar h1 { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+      .bar__right { display: flex; align-items: center; gap: 12px; }
+      .who { font-family: var(--font-mono); font-size: 12px; color: var(--brand-muted-on-dark); }
+      .bar button {
+        min-height: 40px; padding-inline: 14px; border-radius: 999px;
+        border: 1px solid var(--color-line-inverse); background: transparent;
+        color: inherit; font: inherit; font-size: 13px; cursor: pointer;
+      }
+
+      main { padding: 20px; max-width: 1200px; margin: 0 auto; }
+
+      .summary { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); margin-bottom: 22px; }
+      .summary div {
+        border: 1px solid var(--color-line); border-radius: 10px; padding: 14px 16px;
+      }
+      .summary dt { font-size: 12px; color: var(--brand-muted); }
+      .summary dd { font-family: var(--font-mono); font-size: 22px; font-variant-numeric: tabular-nums; }
+      .summary div[data-attention='true'] { border-color: var(--brand-ink); border-width: 2px; }
+
+      .filters { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+      .filters__search { flex: 1 1 240px; }
+      .filters input, .filters select {
+        font: inherit; font-size: 16px; min-height: 44px; width: 100%;
+        padding: 8px 12px; border: 1px solid var(--color-line); border-radius: 8px;
+        background: var(--brand-surface); color: var(--brand-ink);
+      }
+      .filters button {
+        min-height: 44px; padding-inline: 22px; border: 0; border-radius: 8px;
+        background: var(--brand-primary); color: var(--brand-surface-alt);
+        font: inherit; font-weight: 600; cursor: pointer;
+      }
+
+      .state { color: var(--brand-muted); padding-block: 30px; font-size: 14px; }
+
+      .tableWrap { overflow-x: auto; border: 1px solid var(--color-line); border-radius: 10px; }
+      table { border-collapse: collapse; width: 100%; min-width: 760px; font-size: 14px; }
+      th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--color-line); }
+      th {
+        font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em;
+        text-transform: uppercase; color: var(--brand-muted); font-weight: 500; white-space: nowrap;
+      }
+      .num { text-align: right; }
+      td.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; }
+      tbody tr { cursor: pointer; }
+      tbody tr:hover { background: var(--brand-surface-alt); }
+      tbody tr:last-child td { border-bottom: 0; }
+      .oid { font-family: var(--font-mono); font-size: 12px; white-space: nowrap; }
+      .when { font-family: var(--font-mono); font-size: 12px; color: var(--brand-muted); white-space: nowrap; }
+
+      .pill {
+        display: inline-block; padding: 3px 10px; border-radius: 999px;
+        font-size: 12px; border: 1px solid var(--color-line); white-space: nowrap;
+      }
+      .pill[data-tone='ok'] { background: var(--brand-primary); color: var(--brand-surface-alt); border-color: var(--brand-primary); }
+      .pill[data-tone='warn'] { border-color: var(--brand-ink); font-weight: 600; }
+      .pill[data-tone='dim'] { color: var(--brand-muted); }
+
+      .pager { display: flex; align-items: center; gap: 14px; justify-content: center; padding-block: 24px; }
+      .pager button {
+        min-height: 44px; padding-inline: 18px; border: 1px solid var(--color-line);
+        border-radius: 999px; background: transparent; font: inherit; cursor: pointer;
+      }
+      .pager button:disabled { opacity: 0.4; cursor: default; }
+      .pager span { font-family: var(--font-mono); font-size: 13px; color: var(--brand-muted); }
+
+      .detail {
+        border: 0; border-radius: 14px; padding: 0; width: min(680px, 94vw);
+        max-height: 88svh; background: var(--brand-surface); color: var(--brand-ink);
+      }
+      .detail::backdrop { background: rgba(35, 41, 31, 0.4); }
+      .detail__head {
+        display: flex; align-items: center; justify-content: space-between; gap: 12px;
+        padding: 16px 20px; border-bottom: 1px solid var(--color-line);
+        position: sticky; top: 0; background: var(--brand-surface);
+      }
+      .detail__head h2 { font-family: var(--font-mono); font-size: 14px; }
+      .detail__head button {
+        min-width: 44px; min-height: 44px; border: 0; background: transparent;
+        font-size: 16px; cursor: pointer; color: var(--brand-muted);
+      }
+      .detail__facts { padding: 6px 20px; }
+      .detail__facts > div {
+        display: grid; grid-template-columns: 92px 1fr; gap: 16px;
+        padding-block: 11px; border-bottom: 1px solid var(--color-line);
+      }
+      .detail__facts dt { font-size: 13px; color: var(--brand-muted); }
+      .detail__facts dd { font-size: 14px; }
+      .detail__form { padding: 20px; display: grid; gap: 14px; }
+      .detail__form h3 { font-size: 14px; font-weight: 600; }
+      .detail__form .row { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
+      .detail__form label { display: grid; gap: 6px; font-size: 13px; color: var(--brand-muted); }
+      .detail__form input, .detail__form select {
+        font: inherit; font-size: 16px; min-height: 44px; padding: 8px 12px;
+        border: 1px solid var(--color-line); border-radius: 8px;
+        background: var(--brand-surface); color: var(--brand-ink); width: 100%;
+      }
+      .detail__form button[type='submit'] {
+        min-height: 48px; border: 0; border-radius: 999px; margin-top: 4px;
+        background: var(--brand-primary); color: var(--brand-surface-alt);
+        font: inherit; font-weight: 600; cursor: pointer;
+      }
+      .detail__error {
+        padding: 12px 14px; border: 1px solid var(--brand-ink); border-radius: 8px; font-size: 13.5px;
+      }
+
+      @media (max-width: 560px) {
+        .detail__form .row { grid-template-columns: 1fr; }
+      }
+    </style>
+
+    <script>
+      const STATUS = {
+        pending: { label: '결제 대기', tone: 'dim' },
+        paid: { label: '결제 완료', tone: 'ok' },
+        failed: { label: '결제 실패', tone: 'warn' },
+        cancelled: { label: '취소됨', tone: 'dim' },
+      } as const;
+
+      const FULFILL = {
+        unfulfilled: { label: '미발송', tone: 'warn' },
+        preparing: { label: '준비중', tone: 'dim' },
+        shipped: { label: '발송', tone: 'ok' },
+        delivered: { label: '배송완료', tone: 'dim' },
+        returned: { label: '반품', tone: 'warn' },
+      } as const;
+
+      const PAGE_SIZE = 25;
+
+      const $ = <T extends Element = HTMLElement>(sel: string) => document.querySelector<T>(sel)!;
+      const state = $('[data-state]');
+      const tableWrap = $('[data-table-wrap]');
+      const rowsBox = $('[data-rows]');
+      const pager = $('[data-pager]');
+      const detail = $<HTMLDialogElement>('[data-detail]');
+      const detailForm = $<HTMLFormElement>('[data-detail-form]');
+      const filters = $<HTMLFormElement>('[data-filters]');
+
+      let page = 0;
+      let total = 0;
+      let openOrder: any = null;
+
+      const money = (v: number, currency: string) =>
+        new Intl.NumberFormat('ko-KR', { style: 'currency', currency, maximumFractionDigits: 0 }).format(v);
+
+      const when = (iso: string | null) =>
+        iso
+          ? new Intl.DateTimeFormat('ko-KR', {
+              year: '2-digit', month: '2-digit', day: '2-digit',
+              hour: '2-digit', minute: '2-digit', hour12: false,
+            }).format(new Date(iso))
+          : '—';
+
+      const phone = (raw: string) =>
+        raw.length === 11 ? `${raw.slice(0, 3)}-${raw.slice(3, 7)}-${raw.slice(7)}`
+        : raw.length === 10 ? `${raw.slice(0, 3)}-${raw.slice(3, 6)}-${raw.slice(6)}`
+        : raw;
+
+      function pill(map: Record<string, { label: string; tone: string }>, key: string) {
+        const entry = map[key] ?? { label: key, tone: 'dim' };
+        const el = document.createElement('span');
+        el.className = 'pill';
+        el.dataset.tone = entry.tone;
+        el.textContent = entry.label;
+        return el;
+      }
+
+      async function api(path: string, init?: RequestInit) {
+        const res = await fetch(path, {
+          ...init,
+          headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
+        });
+        if (res.status === 401 || res.status === 403) {
+          throw new Error('접근 권한이 없습니다. Cloudflare Access 로그인이 필요합니다.');
+        }
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error((body as any).message || (body as any).error || '요청이 실패했습니다.');
+        return body as any;
+      }
+
+      function query() {
+        const data = new FormData(filters);
+        const params = new URLSearchParams();
+        for (const key of ['search', 'status', 'fulfillment']) {
+          const value = String(data.get(key) ?? '').trim();
+          if (value) params.set(key, value);
+        }
+        params.set('limit', String(PAGE_SIZE));
+        params.set('offset', String(page * PAGE_SIZE));
+        return params.toString();
+      }
+
+      async function load() {
+        state.hidden = false;
+        state.textContent = '불러오는 중…';
+        tableWrap.hidden = true;
+        pager.hidden = true;
+
+        try {
+          const data = await api(`/api/admin/orders?${query()}`);
+          total = data.total;
+
+          if (data.who) $('[data-who]').textContent = data.who;
+
+          // 상태 요약
+          const summary = $('[data-summary]');
+          summary.replaceChildren(
+            ...Object.entries(FULFILL).map(([key, meta]) => {
+              const box = document.createElement('div');
+              const n = data.counts?.[key] ?? 0;
+              // 미발송이 쌓이면 눈에 띄어야 합니다 — 여기가 실무에서 가장 자주 보는 숫자입니다.
+              box.dataset.attention = String(key === 'unfulfilled' && n > 0);
+              box.innerHTML = `<dt>${meta.label}</dt><dd>${n}</dd>`;
+              return box;
+            }),
+          );
+
+          if (data.orders.length === 0) {
+            state.textContent = total === 0 ? '아직 주문이 없습니다.' : '조건에 맞는 주문이 없습니다.';
+            return;
+          }
+
+          rowsBox.replaceChildren(
+            ...data.orders.map((order: any) => {
+              const tr = document.createElement('tr');
+              tr.tabIndex = 0;
+              tr.innerHTML = `
+                <td class="oid">${order.id}</td>
+                <td class="when">${when(order.createdAt)}</td>
+                <td>${order.recipientName}</td>
+                <td class="num">${money(order.amount, order.currency)}</td>
+                <td></td><td></td>`;
+              tr.children[4].appendChild(pill(STATUS as any, order.status));
+              tr.children[5].appendChild(pill(FULFILL as any, order.fulfillment));
+              const open = () => showDetail(order);
+              tr.addEventListener('click', open);
+              tr.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+              });
+              return tr;
+            }),
+          );
+
+          state.hidden = true;
+          tableWrap.hidden = false;
+
+          const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+          $('[data-page-info]').textContent = `${page + 1} / ${pages} · 전체 ${total}건`;
+          $<HTMLButtonElement>('[data-prev]').disabled = page === 0;
+          $<HTMLButtonElement>('[data-next]').disabled = page + 1 >= pages;
+          pager.hidden = pages <= 1;
+        } catch (error) {
+          state.textContent = (error as Error).message;
+        }
+      }
+
+      function showDetail(order: any) {
+        openOrder = order;
+        const set = (sel: string, value: string) => { $(sel).textContent = value; };
+        set('[data-d-id]', order.id);
+        set('[data-d-created]', when(order.createdAt));
+        set('[data-d-paid]', when(order.paidAt));
+        set('[data-d-amount]', money(order.amount, order.currency));
+        set('[data-d-items]', order.items.map((i: any) => `${i.name} × ${i.qty}`).join(', '));
+        set('[data-d-recipient]', order.recipientName);
+        set('[data-d-phone]', phone(order.recipientPhone));
+        set('[data-d-address]', `(${order.postalCode}) ${order.address1} ${order.address2 ?? ''}`.trim());
+        set('[data-d-memo]', order.memo || '—');
+        set('[data-d-email]', order.email || '—');
+
+        $('[data-d-status]').replaceChildren(pill(STATUS as any, order.status));
+
+        (detailForm.elements.namedItem('fulfillment') as HTMLSelectElement).value = order.fulfillment;
+        (detailForm.elements.namedItem('carrier') as HTMLInputElement).value = order.carrier ?? '';
+        (detailForm.elements.namedItem('trackingNumber') as HTMLInputElement).value = order.trackingNumber ?? '';
+        (detailForm.elements.namedItem('adminMemo') as HTMLInputElement).value = order.adminMemo ?? '';
+        $('[data-detail-error]').hidden = true;
+
+        detail.showModal();
+      }
+
+      detailForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!openOrder) return;
+        const errorBox = $('[data-detail-error]');
+        errorBox.hidden = true;
+
+        const data = new FormData(detailForm);
+        const save = $<HTMLButtonElement>('[data-save]');
+        save.disabled = true;
+        save.textContent = '저장 중…';
+
+        try {
+          await api(`/api/admin/orders/${encodeURIComponent(openOrder.id)}`, {
+            method: 'PATCH',
+            body: JSON.stringify({
+              fulfillment: data.get('fulfillment'),
+              carrier: String(data.get('carrier') ?? '').trim() || null,
+              trackingNumber: String(data.get('trackingNumber') ?? '').trim() || null,
+              adminMemo: String(data.get('adminMemo') ?? '').trim() || null,
+            }),
+          });
+          detail.close();
+          await load();
+        } catch (error) {
+          errorBox.textContent = (error as Error).message;
+          errorBox.hidden = false;
+        } finally {
+          save.disabled = false;
+          save.textContent = '저장';
+        }
+      });
+
+      $('[data-detail-close]').addEventListener('click', () => detail.close());
+      $('[data-refresh]').addEventListener('click', () => load());
+      filters.addEventListener('submit', (event) => { event.preventDefault(); page = 0; load(); });
+      $('[data-prev]').addEventListener('click', () => { if (page > 0) { page -= 1; load(); } });
+      $('[data-next]').addEventListener('click', () => { page += 1; load(); });
+
+      load();
+    </script>
+  </body>
+</html>

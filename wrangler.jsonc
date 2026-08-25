@@ -7,10 +7,14 @@
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
-    // /api/* 만 Worker 가 먼저 받습니다.
+    // /api/* 와 /admin* 만 Worker 가 먼저 받습니다.
     // 나머지 경로는 정적 에셋이 우선이라 Worker 가 호출되지 않고(= 과금되지 않고),
     // 매칭되는 파일이 없을 때만 Worker 로 넘어옵니다.
-    "run_worker_first": ["/api/*"],
+    //
+    // /admin 이 여기 있는 이유: 관리 화면도 정적 파일이라 이 목록에 없으면
+    // Cloudflare 가 Worker 를 거치지 않고 그냥 내보냅니다. 그러면 인증 코드가
+    // 아예 실행되지 않습니다.
+    "run_worker_first": ["/api/*", "/admin", "/admin/*"],
     "not_found_handling": "none"
   },
 
@@ -30,6 +34,11 @@
     }
   ]
 
+  // 관리 화면을 열 때 추가할 것 (Cloudflare Zero Trust → Access → Applications):
+  //   vars: { "ACCESS_TEAM_DOMAIN": "https://<팀이름>.cloudflareaccess.com",
+  //           "ACCESS_POLICY_AUD": "<애플리케이션 Audience 태그>" }
+  // 둘 중 하나라도 없으면 관리 화면은 잠긴 채로 있습니다(열린 채가 아니라).
+  //
   // 결제를 켤 때 추가할 것:
   //   wrangler secret put TOSS_SECRET_KEY
   //   vars: { "PAYMENT_PROVIDER": "tosspayments" }
