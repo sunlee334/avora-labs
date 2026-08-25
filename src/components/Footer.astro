@@ -38,9 +38,11 @@ const businessRows = [
       </div>
 
       <div class="footer__col">
-        <h2>{t.footer.legal.privacy}</h2>
+        <h2>{t.footer.legal.heading}</h2>
         <ul>
+          <li><a href={localePath(locale, 'legal/terms')}>{t.footer.legal.terms}</a></li>
           <li><a href={localePath(locale, 'legal/privacy')}>{t.footer.legal.privacy}</a></li>
+          <li><a href={localePath(locale, 'legal/shipping')}>{t.footer.legal.shipping}</a></li>
         </ul>
       </div>
 

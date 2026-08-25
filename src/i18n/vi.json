@@ -197,7 +197,8 @@
     "legal": {
       "privacy": "Chính sách bảo mật",
       "terms": "Điều khoản dịch vụ",
-      "shipping": "Vận chuyển và đổi trả"
+      "shipping": "Vận chuyển và đổi trả",
+      "heading": "Điều khoản & chính sách"
     },
     "business": {
       "registrationNumber": "Số đăng ký kinh doanh",
@@ -247,6 +248,111 @@
           "purpose": "Mục đích",
           "when": "Thời điểm"
         }
+      }
+    },
+    "terms": {
+      "meta": {
+        "title": "Điều khoản sử dụng — AVORA",
+        "description": "Điều khoản sử dụng của website AVORA."
+      },
+      "heading": "Điều khoản sử dụng",
+      "intro": "Dưới đây là cách website hoạt động trên thực tế, được viết dựa trên chính mã nguồn. Toàn văn điều khoản vẫn còn trống vì cần thông tin doanh nghiệp và rà soát pháp lý.",
+      "service": {
+        "heading": "Phạm vi bán hàng",
+        "intro": "Tình trạng bán hàng và đơn vị tiền tệ theo từng quốc gia. Nguồn dữ liệu là src/config/payment-config.json; sửa tệp đó thì bảng này đổi theo.",
+        "columns": {
+          "country": "Quốc gia",
+          "currency": "Tiền tệ",
+          "status": "Tình trạng"
+        },
+        "sellable": "Đang bán",
+        "notSellable": "Chỉ giới thiệu thương hiệu",
+        "note": "Ở những quốc gia chưa bán, trang sản phẩm hiển thị câu chuyện thương hiệu thay cho nút mua hàng."
+      },
+      "account": {
+        "heading": "Tài khoản",
+        "body": "Website này không có đăng ký và không có đăng nhập. Mọi đơn hàng đều là đơn của khách vãng lai, bạn không cần tạo tên đăng nhập hay mật khẩu.",
+        "lookup": "Tra cứu đơn hàng bằng mã đơn hàng và số điện thoại đã nhập khi đặt hàng."
+      },
+      "payment": {
+        "heading": "Phương thức thanh toán",
+        "intro": "Các phương thức hiện được hiển thị ở trang thanh toán.",
+        "empty": "Chưa có phương thức thanh toán nào được bật.",
+        "note": "Website này không nhận và không lưu số thẻ hay số tài khoản. Những thông tin đó chỉ được xử lý trong màn hình của đơn vị thanh toán."
+      },
+      "limits": {
+        "heading": "Giới hạn đơn hàng",
+        "quantity": "Tối đa {n} sản phẩm cùng loại trong một đơn hàng.",
+        "lines": "Tối đa {n} loại sản phẩm trong một đơn hàng.",
+        "note": "Máy chủ tính lại toàn bộ số tiền. Nếu số tiền hiển thị trên màn hình khác với số máy chủ tính, đơn hàng sẽ không được tiếp tục."
+      },
+      "pending": {
+        "heading": "Những phần còn để trống",
+        "intro": "Các mục sau cần thông tin doanh nghiệp và nhận định pháp lý nên chúng tôi để trống. Điền vào những câu chữ nghe có vẻ hợp lý đồng nghĩa với việc công bố những cam kết chưa ai kiểm chứng.",
+        "items": [
+          "Mục đích, phạm vi áp dụng, hiệu lực và thủ tục sửa đổi điều khoản",
+          "Nghĩa vụ của công ty và của người dùng",
+          "Thời điểm hợp đồng được xác lập và điều kiện hủy đơn",
+          "Giới hạn trách nhiệm, giải quyết tranh chấp và tòa án có thẩm quyền",
+          "Thông tin doanh nghiệp (tên công ty, người đại diện, số đăng ký, địa chỉ)"
+        ],
+        "note": "Khi văn bản được chốt, hãy đưa vào mục legal.terms trong src/i18n/{ngôn ngữ}.json để cả năm ngôn ngữ cùng cập nhật."
+      }
+    },
+    "shipping": {
+      "meta": {
+        "title": "Giao hàng và đổi trả — AVORA",
+        "description": "Phí giao hàng, các bước giao hàng và chính sách đổi trả của AVORA."
+      },
+      "heading": "Giao hàng và đổi trả",
+      "intro": "Phí giao hàng và các bước giao hàng dưới đây là giá trị mà mã nguồn thực sự áp dụng. Điều kiện đổi trả chưa được chốt nên còn để trống.",
+      "fee": {
+        "heading": "Phí giao hàng",
+        "free": "Miễn phí giao hàng toàn quốc.",
+        "flat": "{fee}, bất kể giá trị đơn hàng.",
+        "threshold": "Miễn phí với đơn từ {threshold}; dưới mức đó là {fee}.",
+        "remote": "Khu vực xa và hải đảo cộng thêm {surcharge}.",
+        "source": "Giá trị này do src/config/commerce.json quyết định. Giỏ hàng, trang thanh toán và máy chủ đều đọc cùng một tệp, nên đổi chính sách là cả ba đổi theo.",
+        "provisional": "Giá trị hiện tại chỉ là điểm khởi đầu đơn giản nhất, chưa phải chính sách đã chốt, và sẽ được cập nhật khi có chính sách thực tế."
+      },
+      "steps": {
+        "heading": "Các bước giao hàng",
+        "intro": "Các bước hiển thị ở trang tra cứu đơn hàng.",
+        "columns": {
+          "step": "Bước",
+          "meaning": "Ý nghĩa"
+        },
+        "unfulfilled": "Đã thanh toán, chưa bắt đầu chuẩn bị.",
+        "preparing": "Đang đóng gói và chuẩn bị xuất kho.",
+        "shipped": "Đã bàn giao cho đơn vị vận chuyển. Từ đây có thể tra mã vận đơn.",
+        "delivered": "Đã giao thành công.",
+        "returned": "Đã xử lý trả hàng.",
+        "labels": {
+          "unfulfilled": "Chưa gửi",
+          "preparing": "Đang chuẩn bị",
+          "shipped": "Đã gửi",
+          "delivered": "Đã giao",
+          "returned": "Đã trả hàng"
+        }
+      },
+      "lookup": {
+        "heading": "Tra cứu đơn hàng và vận chuyển",
+        "body": "Tra cứu bằng mã đơn hàng và số điện thoại đã nhập khi đặt hàng. Sau khi gửi đi, đơn vị vận chuyển và mã vận đơn cũng sẽ hiển thị.",
+        "link": "Tra cứu đơn hàng"
+      },
+      "pending": {
+        "heading": "Những phần còn để trống",
+        "intro": "Các mục sau cần chính sách kinh doanh và nhận định pháp lý nên chúng tôi để trống.",
+        "items": [
+          "Thời hạn và thủ tục hủy đơn khi đổi ý",
+          "Ai chịu phí vận chuyển khi đổi hoặc trả hàng",
+          "Địa chỉ gửi hàng trả lại",
+          "Các trường hợp không nhận đổi trả (đã mở, đã dùng, hư hỏng)",
+          "Quy trình xử lý khi sản phẩm lỗi hoặc giao sai",
+          "Cách hoàn tiền và thời gian hoàn tiền",
+          "Thời gian giao hàng và cách thông báo khi chậm trễ"
+        ],
+        "note": "Với mỹ phẩm, quyền đổi ý có thể bị giới hạn khi sản phẩm đã mở — không nên viết mà chưa kiểm chứng. Khi đã chốt, đưa vào mục legal.shipping trong src/i18n/{ngôn ngữ}.json."
       }
     }
   },

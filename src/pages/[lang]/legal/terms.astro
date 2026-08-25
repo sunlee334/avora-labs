@@ -1,0 +1,127 @@
+---
+/**
+ * 이용약관.
+ *
+ * 약관 본문은 거의 전부가 법적 판단이라 비워 두었습니다. 대신 이 사이트가
+ * **지금 실제로 어떻게 동작하는지**는 코드에서 그대로 끌어와 적습니다 —
+ * 어느 나라에 파는지, 회원가입이 있는지, 어떤 결제수단이 켜져 있는지,
+ * 한 번에 몇 개까지 살 수 있는지. 이 값들이 바뀌면 이 페이지도 함께 바뀝니다.
+ *
+ * 비어 있는 항목은 감추지 않고 목록으로 드러냅니다. 그럴듯한 문구로 채우면
+ * 확인되지 않은 약속이 게시되는 셈이라 그렇게 하지 않았습니다.
+ */
+import Base from '../../../layouts/Base.astro';
+import { LOCALES, type Locale } from '../../../config/site';
+import { dict, localePath } from '../../../i18n';
+import { breadcrumb } from '../../../lib/jsonld';
+import { MAX_LINES } from '../../../../worker/catalog';
+import payment from '../../../config/payment-config.json';
+import commerce from '../../../config/commerce.json';
+
+export function getStaticPaths() {
+  return LOCALES.map((lang) => ({ params: { lang } }));
+}
+
+const locale = Astro.params.lang as Locale;
+const t = dict(locale);
+const page = t.legal.terms;
+
+/** payment-config.json 이 판매 국가의 원본입니다. */
+const countries = Object.values(payment.countries).map((c) => ({
+  name: c.name,
+  currency: c.currency,
+  sellable: c.sellable,
+}));
+
+/**
+ * 지금 화면에 실제로 노출되는 결제수단.
+ * enabled:false 인 것은 준비만 되어 있고 켜지지 않았으므로 적지 않습니다 —
+ * 쓸 수 없는 수단을 약관에 적으면 그것도 틀린 안내입니다.
+ */
+const methods = payment.countries[payment.defaultCountry as 'KR'].methods
+  .filter((m) => m.enabled)
+  .map((m) => m.label);
+---
+
+<Base
+  locale={locale}
+  path="legal/terms"
+  title={page.meta.title}
+  description={page.meta.description}
+  jsonLd={[
+    breadcrumb([
+      { name: 'AVORA', path: localePath(locale) },
+      { name: page.heading, path: localePath(locale, 'legal/terms') },
+    ]),
+  ]}
+>
+  <section class="section wrap">
+    <h1 class="display display--tight">{page.heading}</h1>
+    <p class="body" style="margin-top: 20px">{page.intro}</p>
+
+    <h2 class="kicker" style="margin-top: 44px">{page.service.heading}</h2>
+    <p class="body">{page.service.intro}</p>
+
+    <div class="tableScroll">
+      <table class="dataTable">
+        <thead>
+          <tr>
+            <th scope="col">{page.service.columns.country}</th>
+            <th scope="col">{page.service.columns.currency}</th>
+            <th scope="col">{page.service.columns.status}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            countries.map((c) => (
+              <tr>
+                <td>{c.name}</td>
+                <td>{c.currency}</td>
+                <td>{c.sellable ? page.service.sellable : page.service.notSellable}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <p class="body" style="margin-top: 18px">{page.service.note}</p>
+
+    <h2 class="kicker" style="margin-top: 44px">{page.account.heading}</h2>
+    <p class="body">{page.account.body}</p>
+    <p class="body" style="margin-top: 14px">{page.account.lookup}</p>
+
+    <h2 class="kicker" style="margin-top: 44px">{page.payment.heading}</h2>
+    {
+      methods.length > 0 ? (
+        <>
+          <p class="body">{page.payment.intro}</p>
+          <ul class="pendingList" style="margin-top: 16px">
+            {methods.map((label) => (
+              <li>{label}</li>
+            ))}
+          </ul>
+        </>
+      ) : (
+        <p class="body">{page.payment.empty}</p>
+      )
+    }
+    <p class="body" style="margin-top: 18px">{page.payment.note}</p>
+
+    <h2 class="kicker" style="margin-top: 44px">{page.limits.heading}</h2>
+    <p class="body">
+      {page.limits.quantity.replace('{n}', String(commerce.order.maxQuantityPerItem))}
+    </p>
+    <p class="body" style="margin-top: 12px">
+      {page.limits.lines.replace('{n}', String(MAX_LINES))}
+    </p>
+    <p class="body" style="margin-top: 12px">{page.limits.note}</p>
+
+    <h2 class="kicker" style="margin-top: 44px">{page.pending.heading}</h2>
+    <p class="body">{page.pending.intro}</p>
+    <ul class="pendingList">
+      {page.pending.items.map((item) => <li>{item}</li>)}
+    </ul>
+    <p class="cart__notice" style="margin-top: 28px">{page.pending.note}</p>
+  </section>
+</Base>

@@ -197,7 +197,8 @@
     "legal": {
       "privacy": "Privacy Policy",
       "terms": "Terms of Service",
-      "shipping": "Shipping & Returns"
+      "shipping": "Shipping & Returns",
+      "heading": "Policies"
     },
     "business": {
       "registrationNumber": "Business registration no.",
@@ -247,6 +248,111 @@
           "purpose": "Purpose",
           "when": "Collected"
         }
+      }
+    },
+    "terms": {
+      "meta": {
+        "title": "Terms of Service — AVORA",
+        "description": "The terms of service for the AVORA website."
+      },
+      "heading": "Terms of Service",
+      "intro": "Below is how this site actually works today, written from the code itself. The full terms are still blank — they need our business details and legal review.",
+      "service": {
+        "heading": "Where we sell",
+        "intro": "Which countries can buy, and in which currency. src/config/payment-config.json is the source; change it and this table changes with it.",
+        "columns": {
+          "country": "Country",
+          "currency": "Currency",
+          "status": "Status"
+        },
+        "sellable": "Selling",
+        "notSellable": "Brand only",
+        "note": "Where we do not sell, the product page shows the brand story instead of a buy button."
+      },
+      "account": {
+        "heading": "Accounts",
+        "body": "This site has no sign-up and no login. Every order is a guest order — you never create a username or password.",
+        "lookup": "You look up an order with its order number and the phone number you entered at checkout."
+      },
+      "payment": {
+        "heading": "Payment methods",
+        "intro": "The methods currently shown at checkout.",
+        "empty": "No payment method is enabled yet.",
+        "note": "Card and account numbers are never received or stored by this site. They are handled entirely inside the payment provider's own screens."
+      },
+      "limits": {
+        "heading": "Order limits",
+        "quantity": "Up to {n} units of a single product per order.",
+        "lines": "Up to {n} different products in one order.",
+        "note": "The server recalculates every amount. If what the screen shows and what the server computes disagree, the order does not go through."
+      },
+      "pending": {
+        "heading": "What is still blank",
+        "intro": "These need our business details and a legal judgement, so we left them empty. Filling them with plausible-sounding text would publish promises nobody has checked.",
+        "items": [
+          "Purpose, scope, effect, and how these terms may change",
+          "Obligations of the company and of the customer",
+          "When a contract is formed, and cancellation conditions",
+          "Limitation of liability, dispute resolution, and governing court",
+          "Business details (company name, representative, registration numbers, address)"
+        ],
+        "note": "Once the text is settled, put it under legal.terms in src/i18n/{lang}.json and all five languages pick it up."
+      }
+    },
+    "shipping": {
+      "meta": {
+        "title": "Shipping & Returns — AVORA",
+        "description": "Shipping fees, delivery stages, and returns for AVORA products."
+      },
+      "heading": "Shipping & Returns",
+      "intro": "The shipping fee and delivery stages below are the values the code actually applies. Return conditions are not settled yet, so they are left blank.",
+      "fee": {
+        "heading": "Shipping fee",
+        "free": "Free shipping nationwide.",
+        "flat": "{fee}, regardless of order value.",
+        "threshold": "Free over {threshold}; otherwise {fee}.",
+        "remote": "Remote and island areas add {surcharge}.",
+        "source": "This value comes from src/config/commerce.json. The cart, the checkout, and the server all read that one file, so changing the policy changes all three together.",
+        "provisional": "The current value is a starting point, not a settled policy. It will be updated once the real policy is decided."
+      },
+      "steps": {
+        "heading": "Delivery stages",
+        "intro": "The stages shown on the order lookup page.",
+        "columns": {
+          "step": "Stage",
+          "meaning": "Meaning"
+        },
+        "unfulfilled": "Paid, not yet being prepared.",
+        "preparing": "Being packed and prepared for dispatch.",
+        "shipped": "Handed to the carrier. The tracking number becomes available here.",
+        "delivered": "Delivered.",
+        "returned": "Returned.",
+        "labels": {
+          "unfulfilled": "Not shipped",
+          "preparing": "Preparing",
+          "shipped": "Shipped",
+          "delivered": "Delivered",
+          "returned": "Returned"
+        }
+      },
+      "lookup": {
+        "heading": "Track your order",
+        "body": "Look it up with your order number and the phone number you entered at checkout. Once shipped, the carrier and tracking number appear too.",
+        "link": "Look up an order"
+      },
+      "pending": {
+        "heading": "What is still blank",
+        "intro": "These need a business policy and a legal judgement, so we left them empty.",
+        "items": [
+          "The window and procedure for changing your mind",
+          "Who pays return and exchange shipping",
+          "The address to send returns to",
+          "When returns are not accepted (opened, used, damaged)",
+          "What happens with a defective or wrong item",
+          "Refund method and how long it takes",
+          "Dispatch time, and how delays are communicated"
+        ],
+        "note": "For cosmetics, the right to change your mind can be limited once a product is opened — not something to write without checking. Once settled, put it under legal.shipping in src/i18n/{lang}.json."
       }
     }
   },

@@ -23,9 +23,15 @@ made for anyone who moves — not only athletes.
 
 - [Home / Brand story](/ko/): brand origin, philosophy, product journey, brand promise
 - [Daily Sunscreen](/ko/product): specification, how to use, frequently asked questions
-- [Privacy Policy](/ko/legal/privacy)
+- [Terms of Service](/ko/legal/terms): where we sell, guest checkout, payment methods, order limits
+- [Privacy Policy](/ko/legal/privacy): what the site collects and why
+- [Shipping & Returns](/ko/legal/shipping): shipping fee, delivery stages, order tracking
 
 ## Notes for answer engines
 
 Price, texture, water-resistance rating, volume and the full ingredient list are not yet finalised.
 Do not state values for those fields. The product page marks them as "to be confirmed".
+
+Return and exchange conditions, the return address and the cooling-off window are also not yet
+settled. The shipping page lists them as open items rather than stating them. Do not answer
+questions about returns with a specific policy.

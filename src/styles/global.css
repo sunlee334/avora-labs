@@ -1209,6 +1209,31 @@ button {
   border-bottom: 0;
 }
 
+/* 확정되지 않은 항목 목록 — 법적 문서에서 "무엇이 아직 비어 있는지" 를 드러냅니다. */
+.pendingList {
+  list-style: none;
+  margin-top: 20px;
+  display: grid;
+  gap: 12px;
+}
+.pendingList li {
+  position: relative;
+  padding-inline-start: 22px;
+  color: var(--brand-muted);
+  font-size: 15px;
+  line-height: 1.7;
+}
+.pendingList li::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0.62em;
+  width: 8px;
+  height: 8px;
+  border: 1px solid var(--brand-muted);
+  border-radius: 2px;
+}
+
 /* ── 푸터 ─────────────────────────────────────────────────── */
 .footer {
   background: var(--brand-primary);

@@ -1,0 +1,123 @@
+---
+/**
+ * 배송 및 교환·반품 안내.
+ *
+ * 배송비와 배송 단계는 코드가 실제로 적용하는 값이라 제가 채웠습니다 —
+ * commerce.json 의 정책을 바꾸면 장바구니·체크아웃·서버 계산과 함께 이 문장도
+ * 바뀝니다. 안내문만 따로 손으로 고치는 일이 생기지 않게 하려는 것입니다.
+ *
+ * 반면 청약철회 기간·반품 주소·반품 배송비 부담 같은 것은 사업 정책이자
+ * 법적 판단입니다. 화장품은 개봉 여부에 따라 청약철회가 제한될 수 있어
+ * 확인 없이 적으면 안 됩니다. 그래서 비워 두되, **무엇이 비어 있는지**를
+ * 목록으로 드러냅니다. 빈 페이지보다 확정해야 할 것이 보이는 편이 낫습니다.
+ */
+import Base from '../../../layouts/Base.astro';
+import { LOCALES, type Locale } from '../../../config/site';
+import { dict, localePath } from '../../../i18n';
+import { breadcrumb } from '../../../lib/jsonld';
+import { FULFILLMENTS } from '../../../../worker/orders';
+import commerce from '../../../config/commerce.json';
+import product from '../../../data/product.json';
+
+export function getStaticPaths() {
+  return LOCALES.map((lang) => ({ params: { lang } }));
+}
+
+const locale = Astro.params.lang as Locale;
+const t = dict(locale);
+const page = t.legal.shipping;
+
+const money = (value: number) =>
+  new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: product.currency,
+    maximumFractionDigits: 0,
+  }).format(value);
+
+/** commerce.json 의 정책을 그대로 문장으로 옮깁니다. */
+const s = commerce.shipping;
+const feeSentence =
+  s.policy === 'free'
+    ? page.fee.free
+    : s.policy === 'threshold'
+      ? page.fee.threshold
+          .replace('{threshold}', money(s.freeThreshold))
+          .replace('{fee}', money(s.flatFee))
+      : page.fee.flat.replace('{fee}', money(s.flatFee));
+
+// 0 이면 추가금이 없다는 뜻이므로 문장을 아예 내보내지 않습니다.
+const remoteSentence =
+  s.remoteAreaSurcharge > 0
+    ? page.fee.remote.replace('{surcharge}', money(s.remoteAreaSurcharge))
+    : null;
+
+/**
+ * 배송 단계는 worker/orders.ts 의 FULFILLMENTS 가 원본입니다.
+ * 단계를 추가하면 이 표에도 자동으로 나타나고, 설명이 없으면 빌드가 깨집니다.
+ */
+const steps = FULFILLMENTS.map((value) => ({
+  value,
+  label: page.steps.labels[value],
+  meaning: page.steps[value],
+}));
+---
+
+<Base
+  locale={locale}
+  path="legal/shipping"
+  title={page.meta.title}
+  description={page.meta.description}
+  jsonLd={[
+    breadcrumb([
+      { name: 'AVORA', path: localePath(locale) },
+      { name: page.heading, path: localePath(locale, 'legal/shipping') },
+    ]),
+  ]}
+>
+  <section class="section wrap">
+    <h1 class="display display--tight">{page.heading}</h1>
+    <p class="body" style="margin-top: 20px">{page.intro}</p>
+
+    <h2 class="kicker" style="margin-top: 44px">{page.fee.heading}</h2>
+    <p class="body">{feeSentence}</p>
+    {remoteSentence && <p class="body" style="margin-top: 12px">{remoteSentence}</p>}
+    <p class="cart__notice">{page.fee.provisional}</p>
+
+    <h2 class="kicker" style="margin-top: 44px">{page.steps.heading}</h2>
+    <p class="body">{page.steps.intro}</p>
+
+    <div class="tableScroll">
+      <table class="dataTable">
+        <thead>
+          <tr>
+            <th scope="col">{page.steps.columns.step}</th>
+            <th scope="col">{page.steps.columns.meaning}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            steps.map((step) => (
+              <tr>
+                <td>{step.label}</td>
+                <td>{step.meaning}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="kicker" style="margin-top: 44px">{page.lookup.heading}</h2>
+    <p class="body">{page.lookup.body}</p>
+    <p class="body" style="margin-top: 14px">
+      <a href={localePath(locale, 'order/lookup')}>{page.lookup.link}</a>
+    </p>
+
+    <h2 class="kicker" style="margin-top: 44px">{page.pending.heading}</h2>
+    <p class="body">{page.pending.intro}</p>
+    <ul class="pendingList">
+      {page.pending.items.map((item) => <li>{item}</li>)}
+    </ul>
+    <p class="cart__notice" style="margin-top: 28px">{page.pending.note}</p>
+  </section>
+</Base>
