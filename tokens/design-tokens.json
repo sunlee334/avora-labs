@@ -31,7 +31,8 @@
       "mutedOnDark": {
         "value": "#A6A38F",
         "name": "Stone Light",
-        "use": "어두운 면 위 보조 텍스트 — Stone은 Deep Forest 위에서 2.87:1로 기준 미달"
+        "use": "어두운 면 위 보조 텍스트",
+        "note": "이 토큰이 따로 있는 이유: muted(Stone Accent)를 Deep Forest 위에 그대로 쓰면 2.55:1 로 읽을 수 없습니다. 이 값은 5.86:1 입니다. tests/e2e/tokens-contrast.spec.ts 가 지킵니다."
       },
       "accentCampaign": {
         "value": "#E9E4D6",
