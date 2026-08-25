@@ -6,6 +6,9 @@ dist/
 .astro/
 .wrangler/
 
+# wrangler 가 생성하는 Cloudflare 런타임 타입 (약 580KB, 빌드 때 자동 생성)
+worker-configuration.d.ts
+
 # env & secrets
 .env
 .env.*
