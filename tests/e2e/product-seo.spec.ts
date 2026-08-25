@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { ORIGIN } from '../../src/config/site';
 
 /**
  * 제품 페이지와 구조화 데이터.
@@ -59,6 +60,22 @@ test.describe('사이트 전역 SEO', () => {
     const body = await res.text();
     expect(body).toContain('Disallow: /*/cart');
     expect(body).toContain('Sitemap:');
+  });
+
+  test('robots·sitemap·canonical 이 모두 같은 주소를 가리킨다', async ({ page, request }) => {
+    // Worker 이름을 바꿨을 때 robots.txt 에 옛 주소가 그대로 남아 있었습니다.
+    // 사람 눈에는 보이지 않고 검색엔진에만 보이는 종류의 오류라, 여기서 묶어 둡니다.
+    const robots = await (await request.get('/robots.txt')).text();
+    expect(robots).toContain(`Sitemap: ${ORIGIN}/sitemap-index.xml`);
+
+    const sitemap = await (await request.get('/sitemap-0.xml')).text();
+    expect(sitemap).toContain(`${ORIGIN}/ko/`);
+
+    await page.goto('/ko/product');
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      'href',
+      `${ORIGIN}/ko/product`,
+    );
   });
 
   test('sitemap 에 5개 언어 홈이 모두 있다', async ({ request }) => {
