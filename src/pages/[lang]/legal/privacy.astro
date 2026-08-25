@@ -40,7 +40,9 @@ const c = page.collect;
     <h2 class="kicker" style="margin-top: 40px">{c.heading}</h2>
     <p class="body">{c.intro}</p>
 
-    <div class="tableScroll">
+    {/* 가로로 스크롤되는 영역은 키보드로도 스크롤할 수 있어야 합니다.
+        tabindex 가 없으면 마우스·터치 없이는 오른쪽 칸을 볼 방법이 없습니다. */}
+    <div class="tableScroll" tabindex="0" role="group" aria-label={c.heading}>
       <table class="dataTable">
         <thead>
           <tr>

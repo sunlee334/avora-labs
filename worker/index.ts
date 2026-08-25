@@ -543,15 +543,24 @@ async function handleAdminPatch(request: Request, env: Env, orderId: string): Pr
 async function handleAdminPage(request: Request, env: Env): Promise<Response> {
   const auth = await verifyAdmin(request, env);
   if (!auth.ok) {
-    return new Response(`${auth.message}\n`, {
-      status: auth.status,
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Cache-Control': 'no-store',
-        // 검색엔진이 잠긴 문 앞에서 서성이지 않게 합니다.
-        'X-Robots-Tag': 'noindex, nofollow',
+    // 평문으로 돌려주면 브라우저가 lang 도 title 도 없는 빈 문서로 감쌉니다.
+    // 화면을 못 보는 사람에게는 "제목 없음" 만 읽히므로 최소한의 문서를 만듭니다.
+    const escaped = auth.message.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+    return new Response(
+      `<!doctype html><html lang="ko"><head><meta charset="utf-8">` +
+        `<meta name="viewport" content="width=device-width,initial-scale=1">` +
+        `<title>접근 권한 없음 — AVORA 주문 관리</title></head>` +
+        `<body><main><h1>접근 권한이 없습니다</h1><p>${escaped}</p></main></body></html>`,
+      {
+        status: auth.status,
+        headers: {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'no-store',
+          // 검색엔진이 잠긴 문 앞에서 서성이지 않게 합니다.
+          'X-Robots-Tag': 'noindex, nofollow',
+        },
       },
-    });
+    );
   }
   const page = await env.ASSETS.fetch(request);
   // 공용 PC 의 뒤로가기로 화면이 되살아나지 않게 합니다.

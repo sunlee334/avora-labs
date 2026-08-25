@@ -8,7 +8,7 @@
   --brand-primary: #23291F; /* Deep Forest — 로고·핵심 브랜드 요소·역상 블록 배경 */
   --brand-surface: #F5F3EC; /* Soft Paper — 기본 배경 */
   --brand-surface-alt: #E9E4D6; /* Warm Cream — 교차 배경 · 역상 잉크 */
-  --brand-muted: #6F6D61; /* Stone Accent — 보조 텍스트 · 구분선 */
+  --brand-muted: #67655A; /* Stone Accent — 보조 텍스트 · 구분선 */
   --brand-muted-on-dark: #A6A38F; /* Stone Light — 어두운 면 위 보조 텍스트 — Stone은 Deep Forest 위에서 2.87:1로 기준 미달 */
   --brand-accent-campaign: #E9E4D6; /* Warm Cream (대체) — 캠페인 포인트. 팔레트 A에는 전용 캠페인 컬러가 없어 역상 대비로 대체. 나중에 캠페인 컬러를 도입하면 이 값만 교체 */
 
