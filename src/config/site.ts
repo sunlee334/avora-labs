@@ -63,12 +63,34 @@ export function absoluteUrl(path: string): string {
   return new URL(path, ORIGIN).href;
 }
 
-/** 사업자 정보 — 푸터 및 Organization JSON-LD에 사용. */
+/**
+ * 사업자 정보 — 푸터 및 Organization JSON-LD에 사용.
+ *
+ * 전자상거래법 제10조가 표시를 요구하는 항목입니다: 상호·대표자 성명·주소·
+ * 전화번호·전자우편주소·사업자등록번호·통신판매업 신고번호.
+ *
+ * **비어 있는 값은 푸터에 렌더링되지 않습니다.** 지어내지 말고 비워 두세요 —
+ * 없는 신고번호를 적는 것은 없는 것보다 나쁩니다.
+ *
+ * 출처: 사업자등록증명 (2026-07-22 발급, 마포세무서)
+ */
 export const BUSINESS = {
-  legalName: 'AVORA',
-  email: 'hello@avora.example',
-  /** 실제 값 확정 후 채웁니다. 비어 있으면 푸터에 렌더링되지 않습니다. */
-  registrationNumber: '',
+  /** 브랜드명. 화면과 JSON-LD 에 쓰입니다. */
+  brandName: 'AVORA',
+  /** 등기상 상호. 법이 요구하는 표시 항목입니다. */
+  legalName: '아보라랩스',
+  representative: '이영규',
+  registrationNumber: '392-32-01888',
+  address: '서울특별시 마포구 월드컵북로20안길 22, 301호(성산동)',
+
+  /**
+   * 아직 없는 것들. 확인되면 채우세요.
+   *
+   * mailOrderNumber(통신판매업 신고번호)는 사업자등록만으로는 생기지 않습니다.
+   * 관할 구청에 따로 신고해야 하고, 신고할 때 구매안전서비스 이용확인증이
+   * 필요해서 보통 PG 계약이 먼저입니다.
+   */
   mailOrderNumber: '',
-  address: '',
+  phone: '',
+  email: '',
 } as const;

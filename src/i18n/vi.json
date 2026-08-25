@@ -204,7 +204,11 @@
     "business": {
       "registrationNumber": "Số đăng ký kinh doanh",
       "mailOrderNumber": "Số khai báo bán hàng qua bưu chính",
-      "email": "Email"
+      "email": "Email",
+      "legalName": "Tên doanh nghiệp",
+      "representative": "Người đại diện",
+      "address": "Địa chỉ kinh doanh",
+      "phone": "Điện thoại"
     },
     "copyright": "© 2026 AVORA. All rights reserved."
   },

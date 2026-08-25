@@ -204,7 +204,11 @@
     "business": {
       "registrationNumber": "Business registration no.",
       "mailOrderNumber": "Mail-order sales no.",
-      "email": "Email"
+      "email": "Email",
+      "legalName": "Company",
+      "representative": "Representative",
+      "address": "Address",
+      "phone": "Phone"
     },
     "copyright": "© 2026 AVORA. All rights reserved."
   },

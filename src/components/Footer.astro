@@ -10,8 +10,12 @@ const t = dict(locale);
 
 /** 값이 아직 없는 사업자 정보는 빈 줄을 남기지 않고 통째로 생략합니다. */
 const businessRows = [
+  { label: t.footer.business.legalName, value: BUSINESS.legalName },
+  { label: t.footer.business.representative, value: BUSINESS.representative },
+  { label: t.footer.business.address, value: BUSINESS.address },
   { label: t.footer.business.registrationNumber, value: BUSINESS.registrationNumber },
   { label: t.footer.business.mailOrderNumber, value: BUSINESS.mailOrderNumber },
+  { label: t.footer.business.phone, value: BUSINESS.phone },
 ].filter((row) => row.value);
 ---
 
@@ -75,7 +79,14 @@ const businessRows = [
           </div>
         ))
       }
-      <div>{t.footer.business.email} <a href={`mailto:${BUSINESS.email}`}>{BUSINESS.email}</a></div>
+      {
+        BUSINESS.email && (
+          <div>
+            {t.footer.business.email}{' '}
+            <a href={`mailto:${BUSINESS.email}`}>{BUSINESS.email}</a>
+          </div>
+        )
+      }
       <div>{t.footer.copyright}</div>
     </div>
   </div>

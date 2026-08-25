@@ -204,7 +204,11 @@
     "business": {
       "registrationNumber": "营业执照号",
       "mailOrderNumber": "通信销售申报号",
-      "email": "电子邮箱"
+      "email": "电子邮箱",
+      "legalName": "商号",
+      "representative": "代表人",
+      "address": "营业场所地址",
+      "phone": "电话"
     },
     "copyright": "© 2026 AVORA. All rights reserved."
   },

@@ -204,7 +204,11 @@
     "business": {
       "registrationNumber": "사업자등록번호",
       "mailOrderNumber": "통신판매업신고번호",
-      "email": "이메일"
+      "email": "이메일",
+      "legalName": "상호",
+      "representative": "대표자",
+      "address": "사업장 소재지",
+      "phone": "전화"
     },
     "copyright": "© 2026 AVORA. All rights reserved."
   },
