@@ -39,6 +39,16 @@
   //           "ACCESS_POLICY_AUD": "<애플리케이션 Audience 태그>" }
   // 둘 중 하나라도 없으면 관리 화면은 잠긴 채로 있습니다(열린 채가 아니라).
   //
+  // 새 주문 알림을 켤 때 (둘 다 선택, 설정한 채널로만 나갑니다):
+  //   웹훅 — Slack/Discord 에서 Incoming Webhook URL 을 만들고
+  //     npx wrangler secret put NOTIFY_WEBHOOK_URL
+  //     URL 자체가 발송 권한이라 vars 가 아니라 secret 으로 넣습니다.
+  //   이메일 — Cloudflare Email Routing 이 필요하며 도메인이 먼저 있어야 합니다.
+  //     보내는 주소는 등록된 도메인, 받는 주소는 인증된 주소여야 합니다.
+  //     "send_email": [{ "name": "SEND_EMAIL", "destination_address": "<받는주소>" }]
+  //     vars: { "NOTIFY_EMAIL_FROM": "orders@<도메인>", "NOTIFY_EMAIL_TO": "<받는주소>" }
+  //     ⚠ 도메인 등록 전에 바인딩을 걸면 배포가 깨지므로 주석으로 둡니다.
+  //
   // 결제를 켤 때 추가할 것:
   //   wrangler secret put TOSS_SECRET_KEY
   //   vars: { "PAYMENT_PROVIDER": "tosspayments" }

@@ -31,6 +31,7 @@ import {
 } from './orders';
 import { priceOrder, currencyOf, isAllowedCurrency } from './catalog';
 import { verifyAdmin, type AdminEnv } from './admin';
+import { notifyNewOrder, toNotification } from './notify';
 
 const LOCALES = ['ko', 'en', 'zh', 'th', 'vi'] as const;
 type Locale = (typeof LOCALES)[number];
@@ -62,6 +63,10 @@ interface Env extends AdminEnv {
   TOSS_SECRET_KEY?: string;
   /** 가격 확정 전 흐름을 돌려보기 위한 임시 가격. 운영에서는 설정하지 않습니다. */
   PRODUCT_PRICE?: string;
+  /** 새 주문 알림을 보낼 웹훅(Slack·Discord 등). 없으면 알림을 건너뜁니다. */
+  NOTIFY_WEBHOOK_URL?: string;
+  NOTIFY_EMAIL_FROM?: string;
+  NOTIFY_EMAIL_TO?: string;
 }
 
 /**
@@ -217,7 +222,11 @@ async function handleCreateOrder(request: Request, env: Env): Promise<Response> 
  * 순서가 중요합니다 — 저장된 주문의 금액과 대조한 다음에야 PG 에 승인을 요청합니다.
  * 클라이언트가 보낸 amount 는 검증용으로만 쓰고, 실제 승인에는 서버 금액을 씁니다.
  */
-async function handlePaymentConfirm(request: Request, env: Env): Promise<Response> {
+async function handlePaymentConfirm(
+  request: Request,
+  env: Env,
+  ctx: ExecutionContext,
+): Promise<Response> {
   if (request.method !== 'POST') {
     return json({ error: 'METHOD_NOT_ALLOWED' }, 405);
   }
@@ -314,6 +323,21 @@ async function handlePaymentConfirm(request: Request, env: Env): Promise<Respons
   }
 
   const finalOrder = await getOrder(env.DB, orderId);
+
+  // 발송할 것이 생겼으니 판매자에게 알립니다.
+  //
+  // 여기까지 온 요청만 알립니다. 위쪽의 "이미 결제됨" 분기가 먼저 돌아가므로,
+  // 완료 페이지를 새로고침하거나 승인을 재시도해도 알림은 한 번만 나갑니다.
+  //
+  // waitUntil 로 응답 뒤에 돌립니다 — 고객은 이미 결제를 마쳤고, 알림이
+  // 느리다고 완료 화면이 기다려야 할 이유가 없습니다.
+  if (finalOrder) {
+    const adminUrl = new URL('/admin', request.url).href;
+    ctx.waitUntil(
+      notifyNewOrder(toNotification(finalOrder, adminUrl), env as unknown as Record<string, unknown>),
+    );
+  }
+
   return json({ ok: true, order: finalOrder ? publicView(finalOrder) : null });
 }
 
@@ -485,7 +509,7 @@ async function handleAdminPage(request: Request, env: Env): Promise<Response> {
 }
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
     const { pathname } = url;
 
@@ -503,7 +527,7 @@ export default {
       return handleOrderLookup(request, env);
     }
     if (pathname === '/api/payments/confirm') {
-      return handlePaymentConfirm(request, env);
+      return handlePaymentConfirm(request, env, ctx);
     }
 
     // 관리 API — 무엇을 하려는지 보기 전에 먼저 신원을 확인합니다.

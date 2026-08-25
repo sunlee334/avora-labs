@@ -77,7 +77,9 @@ jobs:
           # 테스트 전용 설정이 운영 설정에 섞여 들어가면 안 됩니다.
           # ADMIN_DEV_TOKEN 은 Cloudflare Access 를 우회하는 열쇠고,
           # mock 결제 어댑터는 돈을 받지 않고 승인된 척합니다.
-          for leaked in ADMIN_DEV_TOKEN PRODUCT_PRICE; do
+          # NOTIFY_WEBHOOK_URL 은 그 자체가 발송 권한이라 secret 으로만 넣습니다.
+          # wrangler.jsonc 는 저장소에 그대로 올라가므로 여기 적히면 URL 이 공개됩니다.
+          for leaked in ADMIN_DEV_TOKEN PRODUCT_PRICE NOTIFY_WEBHOOK_URL; do
             if grep -q "\"$leaked\"" wrangler.jsonc; then
               echo "::error::$leaked 는 테스트 전용입니다. wrangler.jsonc 에서 지우세요."
               exit 1
