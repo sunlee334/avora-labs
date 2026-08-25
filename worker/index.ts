@@ -32,6 +32,8 @@ import {
 import { priceOrder, currencyOf, isAllowedCurrency } from './catalog';
 import { verifyAdmin, type AdminEnv } from './admin';
 import { notifyNewOrder, toNotification } from './notify';
+import { handleLogin, handleCallback, handleLogout, currentUser, providerFor, type AuthEnv } from './auth';
+import { publicUser, ordersForUser, saveAddress, claimOrder } from './accounts';
 
 const LOCALES = ['ko', 'en', 'zh', 'th', 'vi'] as const;
 type Locale = (typeof LOCALES)[number];
@@ -55,7 +57,7 @@ const ADAPTERS: Record<string, PaymentAdapter> = {
   mock: mockPayments,
 };
 
-interface Env extends AdminEnv {
+interface Env extends AdminEnv, AuthEnv {
   ASSETS: Fetcher;
   DB?: D1Database;
   /** 어떤 PG 어댑터를 쓸지. 미설정이면 결제 엔드포인트가 비활성입니다. */
@@ -199,8 +201,13 @@ async function handleCreateOrder(request: Request, env: Env): Promise<Response> 
   if (!draft) return json({ error: 'MISSING_FIELDS' }, 400);
 
   const now = new Date().toISOString();
+
+  // 로그인 상태면 주문을 계정에 잇고, 배송지를 기억해 둡니다.
+  // 로그인하지 않았어도 주문은 그대로 진행됩니다.
+  const buyer = await currentUser(request, env);
+
   try {
-    await createOrder(env.DB, orderId, draft, now);
+    await createOrder(env.DB, orderId, draft, now, buyer?.id ?? null);
   } catch (cause) {
     // 같은 주문번호가 이미 있는 경우와, DB 자체가 잘못된 경우를 구분합니다.
     // 예전에는 둘 다 "중복 주문"으로 답해서, 마이그레이션이 안 된 상태의
@@ -211,6 +218,21 @@ async function handleCreateOrder(request: Request, env: Env): Promise<Response> 
     }
     console.error('주문 저장 실패', { orderId, message });
     return json({ error: 'ORDER_SAVE_FAILED', message: '주문을 저장하지 못했습니다.' }, 500);
+  }
+
+  if (buyer) {
+    await saveAddress(
+      env.DB,
+      buyer.id,
+      {
+        recipientName: draft.recipientName,
+        recipientPhone: draft.recipientPhone,
+        postalCode: draft.postalCode,
+        address1: draft.address1,
+        address2: draft.address2,
+      },
+      now,
+    );
   }
 
   return json({ ok: true, orderId, amount: priced.total });
@@ -382,6 +404,88 @@ async function handleOrderLookup(request: Request, env: Env): Promise<Response> 
   if (!order) return json({ error: 'ORDER_NOT_FOUND' }, 404);
 
   return json({ ok: true, order: publicView(order) });
+}
+
+// ── 회원 계정 ────────────────────────────────────────────────
+// 로그인은 선택입니다. 비회원 주문은 앞으로도 계속 받습니다 —
+// 결제 직전에 로그인을 요구하면 거기서 이탈합니다.
+
+async function handleAccountMe(request: Request, env: Env): Promise<Response> {
+  const user = await currentUser(request, env);
+  if (!user) return json({ error: 'NOT_LOGGED_IN' }, 401);
+  return json({ user: publicUser(user) });
+}
+
+async function handleAccountOrders(request: Request, env: Env): Promise<Response> {
+  const user = await currentUser(request, env);
+  if (!user) return json({ error: 'NOT_LOGGED_IN' }, 401);
+  if (!env.DB) return json({ error: 'ACCOUNTS_NOT_CONFIGURED' }, 503);
+
+  const orders = await ordersForUser(env.DB, user.id);
+  return json({ orders: orders.map(publicView) });
+}
+
+async function handleAccountAddress(request: Request, env: Env): Promise<Response> {
+  const user = await currentUser(request, env);
+  if (!user) return json({ error: 'NOT_LOGGED_IN' }, 401);
+  if (!env.DB) return json({ error: 'ACCOUNTS_NOT_CONFIGURED' }, 503);
+
+  let body: Record<string, unknown>;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: 'INVALID_JSON' }, 400);
+  }
+
+  const recipientName = text(body.recipientName, 60);
+  const recipientPhone = text(body.recipientPhone, 30);
+  const postalCode = text(body.postalCode, 12);
+  const address1 = text(body.address1, 200);
+  if (!recipientName || !recipientPhone || !postalCode || !address1) {
+    return json({ error: 'MISSING_FIELDS' }, 400);
+  }
+
+  await saveAddress(
+    env.DB,
+    user.id,
+    { recipientName, recipientPhone, postalCode, address1, address2: text(body.address2, 200) ?? undefined },
+    new Date().toISOString(),
+  );
+  const refreshed = await currentUser(request, env);
+  return json({ user: refreshed ? publicUser(refreshed) : null });
+}
+
+/**
+ * 로그인 전에 넣은 주문을 계정으로 가져옵니다.
+ *
+ * 연락처만으로 자동 연결하지 않는 이유는 accounts.ts 에 적어 두었습니다 —
+ * 번호는 재사용되고 오타도 나서, 남의 주문이 붙을 수 있습니다.
+ */
+async function handleAccountClaim(request: Request, env: Env): Promise<Response> {
+  const user = await currentUser(request, env);
+  if (!user) return json({ error: 'NOT_LOGGED_IN' }, 401);
+  if (!env.DB) return json({ error: 'ACCOUNTS_NOT_CONFIGURED' }, 503);
+
+  let body: { orderId?: string; phone?: string };
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: 'INVALID_JSON' }, 400);
+  }
+
+  const orderId = text(body.orderId, 40);
+  const phone = text(body.phone, 30);
+  if (!orderId || !phone || !ORDER_ID_PATTERN.test(orderId)) {
+    return json({ error: 'INVALID_REQUEST' }, 400);
+  }
+
+  const result = await claimOrder(env.DB, user.id, orderId, phone, new Date().toISOString());
+  if (result === 'not_found') {
+    // 이미 다른 계정에 붙은 주문도 여기로 옵니다. 구분해서 알려주면
+    // "이 주문번호는 누군가의 계정에 있다" 를 알려주는 셈이 됩니다.
+    return json({ error: 'ORDER_NOT_FOUND', message: '일치하는 주문을 찾을 수 없습니다.' }, 404);
+  }
+  return json({ ok: true, alreadyClaimed: result === 'already_claimed' });
 }
 
 // ── 관리 화면 ────────────────────────────────────────────────
@@ -590,6 +694,31 @@ export default {
     }
     if (pathname === '/api/payments/confirm') {
       return handlePaymentConfirm(request, env, ctx);
+    }
+
+    // 로그인
+    if (pathname === '/api/auth/login' && request.method === 'GET') {
+      return handleLogin(request, env);
+    }
+    if (pathname === '/api/auth/callback' && request.method === 'GET') {
+      return handleCallback(request, env);
+    }
+    if (pathname === '/api/auth/logout' && request.method === 'POST') {
+      return handleLogout(request, env);
+    }
+
+    // 계정
+    if (pathname === '/api/account/me' && request.method === 'GET') {
+      return handleAccountMe(request, env);
+    }
+    if (pathname === '/api/account/orders' && request.method === 'GET') {
+      return handleAccountOrders(request, env);
+    }
+    if (pathname === '/api/account/address' && request.method === 'PUT') {
+      return handleAccountAddress(request, env);
+    }
+    if (pathname === '/api/account/claim' && request.method === 'POST') {
+      return handleAccountClaim(request, env);
     }
 
     // 관리 API — 무엇을 하려는지 보기 전에 먼저 신원을 확인합니다.

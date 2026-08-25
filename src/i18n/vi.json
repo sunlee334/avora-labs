@@ -10,7 +10,8 @@
     "cart": "Giỏ hàng",
     "language": "Chọn ngôn ngữ",
     "menu": "Menu",
-    "close": "Đóng"
+    "close": "Đóng",
+    "account": "Trang của tôi"
   },
   "home": {
     "meta": {
@@ -272,7 +273,9 @@
       "account": {
         "heading": "Tài khoản",
         "body": "Website này không có đăng ký và không có đăng nhập. Mọi đơn hàng đều là đơn của khách vãng lai, bạn không cần tạo tên đăng nhập hay mật khẩu.",
-        "lookup": "Tra cứu đơn hàng bằng mã đơn hàng và số điện thoại đã nhập khi đặt hàng."
+        "lookup": "Tra cứu đơn hàng bằng mã đơn hàng và số điện thoại đã nhập khi đặt hàng.",
+        "bodyWithAccounts": "Bạn có thể đăng nhập bằng tài khoản Kakao. Trang này không nhận và không lưu mật khẩu.",
+        "guestStillAllowed": "Đăng nhập là tùy chọn. Bạn vẫn đặt hàng được mà không cần tài khoản."
       },
       "payment": {
         "heading": "Phương thức thanh toán",
@@ -488,5 +491,37 @@
     "fulfillmentLabel": "Trạng thái giao hàng",
     "carrier": "Đơn vị vận chuyển",
     "trackingNumber": "Mã vận đơn"
+  },
+  "account": {
+    "meta": {
+      "title": "Trang của tôi — AVORA",
+      "description": "Lịch sử đơn hàng và địa chỉ giao hàng."
+    },
+    "heading": "Trang của tôi",
+    "loginHeading": "Đăng nhập",
+    "loginBody": "Đăng nhập bằng tài khoản Kakao để lưu lịch sử đơn hàng và địa chỉ giao hàng.",
+    "loginButton": "Đăng nhập bằng Kakao",
+    "logout": "Đăng xuất",
+    "guestNote": "Bạn vẫn đặt hàng được mà không cần đăng nhập. Đăng nhập chỉ giúp lần đặt sau nhanh hơn.",
+    "orders": {
+      "heading": "Lịch sử đơn hàng",
+      "empty": "Chưa có đơn hàng nào.",
+      "loading": "Đang tải…"
+    },
+    "address": {
+      "heading": "Địa chỉ đã lưu",
+      "empty": "Chưa có địa chỉ nào được lưu. Địa chỉ sẽ được ghi nhớ từ đơn hàng tiếp theo.",
+      "note": "Sẽ được điền sẵn ở lần sau."
+    },
+    "claim": {
+      "heading": "Thêm đơn hàng trước đó",
+      "body": "Đơn đặt trước khi đăng nhập có thể thêm vào tài khoản bằng mã đơn hàng và số điện thoại.",
+      "orderId": "Mã đơn hàng",
+      "phone": "Số điện thoại",
+      "submit": "Thêm",
+      "success": "Đã thêm đơn hàng.",
+      "notFound": "Không tìm thấy đơn hàng khớp. Vui lòng kiểm tra lại mã đơn hàng và số điện thoại."
+    },
+    "error": "Không xử lý được yêu cầu. Vui lòng thử lại sau."
   }
 }

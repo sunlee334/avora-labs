@@ -10,7 +10,8 @@
     "cart": "Cart",
     "language": "Language",
     "menu": "Menu",
-    "close": "Close"
+    "close": "Close",
+    "account": "My Page"
   },
   "home": {
     "meta": {
@@ -272,7 +273,9 @@
       "account": {
         "heading": "Accounts",
         "body": "This site has no sign-up and no login. Every order is a guest order — you never create a username or password.",
-        "lookup": "You look up an order with its order number and the phone number you entered at checkout."
+        "lookup": "You look up an order with its order number and the phone number you entered at checkout.",
+        "bodyWithAccounts": "You can sign in with a Kakao account. This site never receives or stores a password.",
+        "guestStillAllowed": "Signing in is optional. You can order without an account."
       },
       "payment": {
         "heading": "Payment methods",
@@ -488,5 +491,37 @@
     "fulfillmentLabel": "Delivery",
     "carrier": "Carrier",
     "trackingNumber": "Tracking number"
+  },
+  "account": {
+    "meta": {
+      "title": "My Page — AVORA",
+      "description": "Your orders and saved address."
+    },
+    "heading": "My Page",
+    "loginHeading": "Sign in",
+    "loginBody": "Sign in with Kakao to keep your orders and address.",
+    "loginButton": "Sign in with Kakao",
+    "logout": "Sign out",
+    "guestNote": "You can order without signing in. Signing in only makes the next order quicker.",
+    "orders": {
+      "heading": "Orders",
+      "empty": "No orders yet.",
+      "loading": "Loading…"
+    },
+    "address": {
+      "heading": "Saved address",
+      "empty": "No saved address yet. It is remembered from your next order.",
+      "note": "Filled in automatically next time."
+    },
+    "claim": {
+      "heading": "Add an earlier order",
+      "body": "Orders placed before signing in can be added with the order number and phone.",
+      "orderId": "Order number",
+      "phone": "Phone",
+      "submit": "Add",
+      "success": "Order added.",
+      "notFound": "No matching order. Check the order number and phone."
+    },
+    "error": "Something went wrong. Please try again."
   }
 }

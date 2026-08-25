@@ -68,7 +68,7 @@ export function normalizePhone(value: string): string {
   return value.replace(/\D/g, '');
 }
 
-function rowToOrder(row: Record<string, unknown>): OrderRecord {
+export function rowToOrder(row: Record<string, unknown>): OrderRecord {
   return {
     id: row.id as string,
     status: row.status as OrderStatus,
@@ -101,14 +101,16 @@ export async function createOrder(
   id: string,
   draft: OrderDraft,
   now: string,
+  /** 로그인 상태로 주문했다면 그 계정. 비회원 주문이면 null 입니다. */
+  userId: string | null = null,
 ): Promise<void> {
   await db
     .prepare(
       `INSERT INTO orders (
          id, status, amount, currency, items, locale,
          recipient_name, recipient_phone, postal_code, address1, address2, memo, email,
-         created_at, updated_at
-       ) VALUES (?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         created_at, updated_at, user_id
+       ) VALUES (?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .bind(
       id,
@@ -125,6 +127,7 @@ export async function createOrder(
       draft.email ?? null,
       now,
       now,
+      userId,
     )
     .run();
 }

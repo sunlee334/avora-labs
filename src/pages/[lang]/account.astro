@@ -1,0 +1,236 @@
+---
+/**
+ * 마이페이지 — 1단계.
+ *
+ * 주문 내역, 저장된 배송지, 이전 주문 가져오기.
+ *
+ * 회원 기능이 꺼져 있으면(기본값) 이 페이지 자체를 만들지 않습니다.
+ * 눌러도 아무 일이 없는 로그인 버튼을 보여주는 것은 없는 것만 못합니다.
+ *
+ * 화면에 주문자 정보가 그려지므로 색인 대상이 아닙니다.
+ */
+import Base from '../../layouts/Base.astro';
+import { LOCALES, type Locale } from '../../config/site';
+import { dict, localePath } from '../../i18n';
+import { ACCOUNTS_ENABLED } from '../../config/runtime';
+
+export function getStaticPaths() {
+  if (!ACCOUNTS_ENABLED) return [];
+  return LOCALES.map((lang) => ({ params: { lang } }));
+}
+
+const locale = Astro.params.lang as Locale;
+const t = dict(locale);
+const a = t.account;
+---
+
+<Base
+  locale={locale}
+  path="account"
+  title={a.meta.title}
+  description={a.meta.description}
+  noindex
+>
+  <section class="section wrap account" data-account data-locale={locale}>
+    <h1 class="display display--tight">{a.heading}</h1>
+
+    {/* 로그인 전 */}
+    <div data-account-anon hidden>
+      <h2 class="kicker" style="margin-top: 36px">{a.loginHeading}</h2>
+      <p class="body">{a.loginBody}</p>
+      <a class="cta" style="margin-top: 20px; display: inline-flex" data-login-link href="#">
+        {a.loginButton}
+      </a>
+      <p class="cart__notice">{a.guestNote}</p>
+    </div>
+
+    {/* 로그인 후 */}
+    <div data-account-signed hidden>
+      <p class="body" style="margin-top: 20px">
+        <span data-account-name></span>
+        <button class="linkButton" type="button" data-logout>{a.logout}</button>
+      </p>
+
+      <h2 class="kicker" style="margin-top: 40px">{a.orders.heading}</h2>
+      <p class="body" data-orders-state>{a.orders.loading}</p>
+      <dl class="orderResult__facts" data-orders hidden></dl>
+
+      <h2 class="kicker" style="margin-top: 40px">{a.address.heading}</h2>
+      <p class="body" data-address-empty hidden>{a.address.empty}</p>
+      <dl class="orderResult__facts" data-address hidden>
+        <div><dt>{t.order.complete.recipient}</dt><dd data-addr-name></dd></div>
+        <div><dt>{t.order.lookup.phone}</dt><dd data-addr-phone></dd></div>
+        <div><dt>{t.order.complete.address}</dt><dd data-addr-line></dd></div>
+      </dl>
+      <p class="cart__notice" data-address-note hidden>{a.address.note}</p>
+
+      <h2 class="kicker" style="margin-top: 40px">{a.claim.heading}</h2>
+      <p class="body">{a.claim.body}</p>
+      <form class="checkout__form" data-claim style="margin-top: 20px">
+        <label class="field">
+          <span class="field__label">{a.claim.orderId}</span>
+          <input class="field__input" type="text" name="orderId" required autocomplete="off" />
+        </label>
+        <label class="field">
+          <span class="field__label">{a.claim.phone}</span>
+          <input class="field__input" type="tel" name="phone" required inputmode="numeric" autocomplete="tel" />
+        </label>
+        <p class="field__error" data-claim-error hidden></p>
+        <p class="body" data-claim-success hidden>{a.claim.success}</p>
+        <button class="cta" type="submit" data-claim-submit>{a.claim.submit}</button>
+      </form>
+    </div>
+  </section>
+
+  <template
+    data-account-labels
+    data-label-notfound={a.claim.notFound}
+    data-label-error={a.error}
+    data-label-empty-orders={a.orders.empty}
+    data-label-loading={a.orders.loading}
+    data-label-success={a.claim.success}
+    data-label-submit={a.claim.submit}
+    data-path-lookup={localePath(locale, 'order/lookup')}
+  ></template>
+</Base>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-account]');
+  const labels = document.querySelector<HTMLTemplateElement>('[data-account-labels]');
+
+  if (root && labels) {
+    const L = labels.dataset;
+    const locale = root.dataset.locale!;
+    const $ = <T extends Element = HTMLElement>(sel: string) => root.querySelector<T>(sel)!;
+
+    const anon = $('[data-account-anon]');
+    const signed = $('[data-account-signed]');
+
+    // 로그인 후 이 페이지로 돌아옵니다.
+    $<HTMLAnchorElement>('[data-login-link]').href =
+      `/api/auth/login?returnTo=${encodeURIComponent(location.pathname)}`;
+
+    const money = (v: number, currency: string) => {
+      try {
+        return new Intl.NumberFormat(locale, { style: 'currency', currency, maximumFractionDigits: 0 }).format(v);
+      } catch {
+        return `${v.toLocaleString(locale)} ${currency}`;
+      }
+    };
+
+    const when = (iso: string | null) =>
+      iso ? new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(new Date(iso)) : '—';
+
+    function row(term: string, value: string): HTMLElement {
+      const box = document.createElement('div');
+      const dt = document.createElement('dt');
+      dt.textContent = term;
+      const dd = document.createElement('dd');
+      // 주문 데이터는 사람이 입력한 값이라 textContent 로만 넣습니다.
+      dd.textContent = value;
+      box.append(dt, dd);
+      return box;
+    }
+
+    async function load() {
+      const meRes = await fetch('/api/account/me');
+      if (meRes.status === 401) {
+        anon.hidden = false;
+        return;
+      }
+      if (!meRes.ok) {
+        anon.hidden = false;
+        return;
+      }
+
+      const { user } = await meRes.json();
+      signed.hidden = false;
+      $('[data-account-name]').textContent = user.name ?? user.email ?? '';
+
+      // 저장된 배송지
+      if (user.address) {
+        $('[data-address]').hidden = false;
+        $('[data-address-note]').hidden = false;
+        $('[data-addr-name]').textContent = user.address.recipientName;
+        $('[data-addr-phone]').textContent = user.address.recipientPhone ?? '';
+        $('[data-addr-line]').textContent =
+          `(${user.address.postalCode}) ${user.address.address1} ${user.address.address2 ?? ''}`.trim();
+      } else {
+        $('[data-address-empty]').hidden = false;
+      }
+
+      await loadOrders();
+    }
+
+    async function loadOrders() {
+      const state = $('[data-orders-state]');
+      const box = $('[data-orders]');
+      state.textContent = L.labelLoading!;
+      state.hidden = false;
+      box.hidden = true;
+
+      const res = await fetch('/api/account/orders');
+      if (!res.ok) {
+        state.textContent = L.labelError!;
+        return;
+      }
+      const { orders } = await res.json();
+      if (!orders.length) {
+        state.textContent = L.labelEmptyOrders!;
+        return;
+      }
+
+      box.replaceChildren(
+        ...orders.map((o: any) =>
+          row(`${when(o.createdAt)} · ${o.id}`, `${money(o.amount, o.currency)}`),
+        ),
+      );
+      state.hidden = true;
+      box.hidden = false;
+    }
+
+    $('[data-logout]').addEventListener('click', async () => {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      location.reload();
+    });
+
+    $<HTMLFormElement>('[data-claim]').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const form = event.currentTarget as HTMLFormElement;
+      const error = $('[data-claim-error]');
+      const success = $('[data-claim-success]');
+      const submit = $<HTMLButtonElement>('[data-claim-submit]');
+      error.hidden = true;
+      success.hidden = true;
+      submit.disabled = true;
+
+      try {
+        const data = new FormData(form);
+        const res = await fetch('/api/account/claim', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orderId: String(data.get('orderId') ?? '').trim(),
+            phone: String(data.get('phone') ?? '').trim(),
+          }),
+        });
+
+        if (res.ok) {
+          success.hidden = false;
+          form.reset();
+          await loadOrders();
+        } else {
+          error.textContent = res.status === 404 ? L.labelNotfound! : L.labelError!;
+          error.hidden = false;
+        }
+      } catch {
+        error.textContent = L.labelError!;
+        error.hidden = false;
+      } finally {
+        submit.disabled = false;
+      }
+    });
+
+    load();
+  }
+</script>

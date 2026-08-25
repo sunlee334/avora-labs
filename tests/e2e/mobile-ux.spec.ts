@@ -5,7 +5,22 @@ import { test, expect } from '@playwright/test';
  * Round 8 에서 정한 정량 기준을 그대로 검사합니다.
  */
 
-const PAGES = ['/ko/', '/ko/product', '/en/', '/th/'];
+/**
+ * 가로 넘침을 검사할 페이지.
+ *
+ * 새 페이지를 만들면 **여기에 직접 추가해야 합니다.** 목록 기반이라 자동으로
+ * 늘지 않습니다. 실제로 법적 페이지와 계정 페이지가 한동안 빠져 있었습니다.
+ *
+ * 언어는 글꼴과 줄바꿈이 달라 넘침도 다르게 납니다 — 한국어만 보면 안 됩니다.
+ */
+const PAGES = [
+  '/ko/', '/ko/product',
+  '/ko/legal/terms', '/ko/legal/privacy', '/ko/legal/shipping',
+  '/en/', '/th/', '/vi/', '/zh/',
+];
+
+/** 자사 결제·회원 기능이 켜진 빌드에서만 존재하는 페이지. */
+const COMMERCE_PAGES = ['/ko/cart', '/ko/checkout', '/ko/order/lookup', '/ko/account'];
 
 test.describe('모바일 레이아웃', () => {
   for (const path of PAGES) {
@@ -25,10 +40,8 @@ test.describe('모바일 레이아웃', () => {
     });
   }
 
-  test('탭 가능한 요소가 최소 44×44px 를 확보한다', async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('/ko/');
-
+  /** 화면 하나의 탭 영역을 모두 재서 44px 미만인 것을 모읍니다. */
+  async function tooSmallTargets(page: import('@playwright/test').Page): Promise<string[]> {
     const targets = page.locator('a[href], button');
     const count = await targets.count();
     expect(count).toBeGreaterThan(0);
@@ -44,8 +57,17 @@ test.describe('모바일 레이아웃', () => {
         tooSmall.push(`"${text}" ${Math.round(box.width)}×${Math.round(box.height)}`);
       }
     }
-    expect(tooSmall, `터치 영역 부족: ${tooSmall.join(' / ')}`).toEqual([]);
-  });
+    return tooSmall;
+  }
+
+  for (const path of ['/ko/', '/ko/product', '/ko/legal/shipping']) {
+    test(`${path} — 탭 가능한 요소가 최소 44×44px`, async ({ page }) => {
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.goto(path);
+      const tooSmall = await tooSmallTargets(page);
+      expect(tooSmall, `${path} 터치 영역 부족: ${tooSmall.join(' / ')}`).toEqual([]);
+    });
+  }
 });
 
 test.describe('모션 접근성', () => {

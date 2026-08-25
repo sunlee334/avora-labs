@@ -10,7 +10,8 @@
     "cart": "购物车",
     "language": "选择语言",
     "menu": "菜单",
-    "close": "关闭"
+    "close": "关闭",
+    "account": "我的页面"
   },
   "home": {
     "meta": {
@@ -272,7 +273,9 @@
       "account": {
         "heading": "账户",
         "body": "本网站没有注册与登录功能。所有订单均为访客订单，不需要创建账号与密码。",
-        "lookup": "使用订单编号与下单时填写的联系电话查询订单。"
+        "lookup": "使用订单编号与下单时填写的联系电话查询订单。",
+        "bodyWithAccounts": "可使用 Kakao 账号登录。本网站不接收也不保存密码。",
+        "guestStillAllowed": "登录为可选项。不登录也可以下单。"
       },
       "payment": {
         "heading": "支付方式",
@@ -488,5 +491,37 @@
     "fulfillmentLabel": "配送状态",
     "carrier": "快递公司",
     "trackingNumber": "运单号"
+  },
+  "account": {
+    "meta": {
+      "title": "我的页面 — AVORA",
+      "description": "订单记录与配送地址。"
+    },
+    "heading": "我的页面",
+    "loginHeading": "登录",
+    "loginBody": "使用 Kakao 账号登录后，订单记录与配送地址会被保存。",
+    "loginButton": "使用 Kakao 登录",
+    "logout": "退出登录",
+    "guestNote": "不登录也可以下单。登录只是为了让下次下单更方便。",
+    "orders": {
+      "heading": "订单记录",
+      "empty": "还没有订单。",
+      "loading": "加载中…"
+    },
+    "address": {
+      "heading": "已保存的配送地址",
+      "empty": "尚未保存配送地址。下单时填写后会记录在这里。",
+      "note": "下次下单时自动填入。"
+    },
+    "claim": {
+      "heading": "添加此前的订单",
+      "body": "登录前的订单可凭订单编号与联系电话添加到账号。",
+      "orderId": "订单编号",
+      "phone": "联系电话",
+      "submit": "添加",
+      "success": "已添加订单。",
+      "notFound": "未找到匹配的订单。请再次确认订单编号与联系电话。"
+    },
+    "error": "处理失败，请稍后重试。"
   }
 }

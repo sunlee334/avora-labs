@@ -15,6 +15,7 @@ import { LOCALES, type Locale } from '../../../config/site';
 import { dict, localePath } from '../../../i18n';
 import { breadcrumb } from '../../../lib/jsonld';
 import { MAX_LINES } from '../../../../worker/catalog';
+import { ACCOUNTS_ENABLED } from '../../../config/runtime';
 import payment from '../../../config/payment-config.json';
 import commerce from '../../../config/commerce.json';
 
@@ -90,7 +91,18 @@ const methods = payment.countries[payment.defaultCountry as 'KR'].methods
     <p class="body" style="margin-top: 18px">{page.service.note}</p>
 
     <h2 class="kicker" style="margin-top: 44px">{page.account.heading}</h2>
-    <p class="body">{page.account.body}</p>
+    {/* 이 문단은 실제 상태를 말해야 합니다. 회원 기능이 꺼져 있는 동안
+        "로그인할 수 있습니다" 라고 적으면 그건 거짓입니다. */}
+    {
+      ACCOUNTS_ENABLED ? (
+        <>
+          <p class="body">{page.account.bodyWithAccounts}</p>
+          <p class="body" style="margin-top: 14px">{page.account.guestStillAllowed}</p>
+        </>
+      ) : (
+        <p class="body">{page.account.body}</p>
+      )
+    }
     <p class="body" style="margin-top: 14px">{page.account.lookup}</p>
 
     <h2 class="kicker" style="margin-top: 44px">{page.payment.heading}</h2>

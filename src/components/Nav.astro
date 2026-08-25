@@ -1,7 +1,7 @@
 ---
 import LanguageSwitcher from './LanguageSwitcher.astro';
 import { dict, localePath } from '../i18n';
-import { SELLS_DIRECTLY } from '../config/runtime';
+import { SELLS_DIRECTLY, ACCOUNTS_ENABLED } from '../config/runtime';
 import type { Locale } from '../config/site';
 
 interface Props {
@@ -34,6 +34,15 @@ const t = dict(locale);
           <span>{t.nav.cart}</span>
           <span class="nav__cart-count" data-nav-cart-count aria-hidden="true">0</span>
           <span class="sr-only" data-nav-cart-sr></span>
+        </a>
+      )
+    }
+    {/* 회원 기능이 꺼져 있으면 링크도 내보내지 않습니다 — 장바구니와 같은 이유로,
+        갈 수 없는 곳으로 가는 링크는 막다른 길입니다. */}
+    {
+      ACCOUNTS_ENABLED && (
+        <a class="nav__link" href={localePath(locale, 'account')} data-nav-account>
+          {t.nav.account}
         </a>
       )
     }

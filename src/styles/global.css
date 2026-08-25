@@ -925,7 +925,9 @@ button {
 .toast a {
   display: inline-flex;
   align-items: center;
-  min-height: 40px;
+  /* 40px 이었습니다 — 기준(44px)에 4px 모자랐는데, 제품 페이지가 탭 영역
+     검사 목록에 없어서 오래 드러나지 않았습니다. */
+  min-height: var(--size-tap-min);
   padding-inline: 14px;
   border-radius: 999px;
   background: var(--brand-surface-alt);
@@ -937,6 +939,23 @@ button {
 }
 
 /* 헤더 장바구니 */
+/* 헤더의 마이페이지 링크. 장바구니와 같은 탭 영역을 확보합니다 —
+   글자만 두면 세로가 28px 이라 손가락으로 정확히 누르기 어렵습니다. */
+.nav__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--size-tap-min);
+  padding-inline: 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--brand-primary);
+  text-decoration: none;
+}
+.nav__link:hover {
+  text-decoration: underline;
+}
+
 .nav__cart {
   display: inline-flex;
   align-items: center;
@@ -1223,6 +1242,40 @@ button {
   border-bottom: 0;
 }
 
+/* 마이페이지.
+   로그인 여부를 확인한 뒤에야 내용이 드러나므로, 자리를 미리 잡아두지 않으면
+   그 순간 푸터가 밀립니다(측정값 CLS 0.262). 체크아웃과 같은 처방입니다. */
+.account {
+  min-height: 72svh;
+}
+
+/* 글자처럼 보이지만 버튼인 것.
+   CSS 를 만들지 않으면 브라우저 기본 버튼(#c0c0c0 배경)으로 그려집니다 —
+   대비 3.21:1 로 기준 미달이고 탭 영역도 33px 밖에 안 됩니다. */
+.linkButton {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--size-tap-min);
+  padding-inline: 8px;
+  margin-inline-start: 4px;
+  background: none;
+  border: 0;
+  font: inherit;
+  color: var(--brand-muted);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.linkButton:hover {
+  color: var(--brand-primary);
+}
+
+/* 본문 안의 단독 링크. 글자만 두면 세로가 18px 이라 누르기 어렵습니다. */
+.body a.tapLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--size-tap-min);
+}
+
 /* 확정된 사실의 목록 — 빈 네모(pendingList)와 채운 점으로 구분합니다. */
 .factList {
   list-style: none;
@@ -1231,6 +1284,7 @@ button {
   gap: 10px;
 }
 .factList li {
+  min-width: 0;
   position: relative;
   padding-inline-start: 22px;
   color: var(--brand-muted);
@@ -1256,6 +1310,10 @@ button {
   gap: 12px;
 }
 .pendingList li {
+  /* grid 항목의 기본 min-width:auto 는 내용보다 작아지지 못하게 막습니다.
+     본문에 word-break:keep-all(한국어 낱말 보존)이 걸려 있어서, 긴 문장이
+     줄바꿈되지 못한 채 화면 밖으로 밀려납니다. 0 으로 풀어야 줄이 바뀝니다. */
+  min-width: 0;
   position: relative;
   padding-inline-start: 22px;
   color: var(--brand-muted);

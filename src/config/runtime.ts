@@ -47,5 +47,17 @@ export const SELLS_EXTERNALLY = CHECKOUT_MODE === 'external';
 
 export const EXTERNAL_STORE_URL: string | null = country.externalStoreUrl || null;
 
+/**
+ * 회원 기능(로그인·마이페이지)을 노출할지.
+ *
+ * 카카오·네이버 연동은 도메인과 사업자 정보가 있어야 켤 수 있습니다.
+ * 그때까지는 꺼 둡니다 — 눌러도 아무 일이 없는 로그인 버튼을 보여주는 것은
+ * 없는 것만 못하고, 이용약관의 "회원가입이 없습니다" 문구도 이 값을 따라
+ * 바뀌므로 켜지 않으면 계속 사실입니다.
+ *
+ *   PUBLIC_ACCOUNTS=on npm run build   회원 기능을 켠 채로 빌드합니다
+ */
+export const ACCOUNTS_ENABLED = import.meta.env.PUBLIC_ACCOUNTS === 'on';
+
 /** 이 빌드가 기본 설정과 다른 상태인지 — 개발 중 혼동을 막기 위한 표시용. */
 export const IS_OVERRIDDEN = Boolean(modeOverride || priceOverride);

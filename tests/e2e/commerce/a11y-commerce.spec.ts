@@ -107,6 +107,27 @@ test.describe('구매 흐름', () => {
   });
 });
 
+test.describe('마이페이지', () => {
+  test('로그인 전', async ({ page }, testInfo) => {
+    await page.goto('/ko/account');
+    await expect(page.locator('[data-account-anon]')).toBeVisible();
+    expect(await scan(page, testInfo)).toEqual([]);
+  });
+
+  test('로그인 후 — 주문내역과 가져오기 폼이 그려진 상태', async ({ page }, testInfo) => {
+    const start = await page.request.get('/api/auth/login?returnTo=%2Fko%2Faccount', {
+      maxRedirects: 0,
+    });
+    const callback = new URL(start.headers()['location']);
+    callback.searchParams.set('code', 'a11y-account-user');
+    await page.request.get(callback.href, { maxRedirects: 0 });
+
+    await page.goto('/ko/account');
+    await expect(page.locator('[data-account-signed]')).toBeVisible();
+    expect(await scan(page, testInfo)).toEqual([]);
+  });
+});
+
 test.describe('관리 화면', () => {
   test.use({ extraHTTPHeaders: { 'X-Admin-Dev-Token': ADMIN_DEV_TOKEN } });
 

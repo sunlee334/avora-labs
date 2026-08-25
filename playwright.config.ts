@@ -17,7 +17,7 @@ const PORT = 8787;
 
 const buildEnv =
   MODE === 'commerce'
-    ? 'PUBLIC_CHECKOUT_MODE=internal PUBLIC_PRODUCT_PRICE=32000'
+    ? 'PUBLIC_CHECKOUT_MODE=internal PUBLIC_PRODUCT_PRICE=32000 PUBLIC_ACCOUNTS=on'
     : 'PUBLIC_CHECKOUT_MODE=external';
 
 /** commerce 모드 관리 API 테스트가 쓰는 열쇠. 로컬·CI 안에서만 존재합니다. */
@@ -47,7 +47,7 @@ const workerVars =
     // 다른 문이 필요합니다. 운영에서는 절대 설정하지 않으며, 배포 전 점검이
     // wrangler.jsonc 에서 이 이름을 발견하면 배포를 멈춥니다.
     ? `--var PAYMENT_PROVIDER:mock --var PRODUCT_PRICE:32000 --var ADMIN_DEV_TOKEN:${ADMIN_DEV_TOKEN}` +
-      ` --var NOTIFY_WEBHOOK_URL:${CAPTURE_URL}/hook`
+      ` --var NOTIFY_WEBHOOK_URL:${CAPTURE_URL}/hook --var AUTH_PROVIDER:mock`
     : '';
 
 /** 해당 모드에서만 의미 있는 테스트는 폴더로 갈라 두었습니다. */
