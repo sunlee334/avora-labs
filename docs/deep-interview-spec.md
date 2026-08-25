@@ -508,3 +508,57 @@ A: 10월 = 브랜드사이트 오픈, 결제는 2차
 
 ### 2차 오픈 선행조건 3가지
 도메인 확정 · PG 가맹 심사 완료 · 통신판매업 신고. 셋 중 하나라도 미완이면 결제 스위치를 켤 수 없음.
+
+---
+
+## Step 4 — 개발 완료 (2026-08-25)
+
+커밋: `09aff73` · 저장소: https://github.com/sunlee334/avora-labs (private, main)
+
+### 구현된 것
+- Astro 7 정적 생성 + Cloudflare Workers 단독 호스팅
+- `[lang]` 동적 라우트 4개 파일 → 20페이지 (5언어 × 홈·제품·개인정보·404)
+- Worker: 루트 `Accept-Language` 302 · `/api/payments/confirm` · 언어별 404
+- 결제 어댑터 인터페이스 + 토스페이먼츠 구현 (미설정 시 이유를 담아 503)
+- 언어 전환 바텀시트(`<dialog>`), 스크롤 등장, Lenis 스무스 스크롤(LCP 이후 지연 로딩)
+- SEO/GEO 전량: hreflang·canonical·OG·sitemap·robots·llms.txt·JSON-LD 5종
+
+### 측정 결과 (모바일 Lighthouse 실측)
+| 페이지 | Perf | A11y | SEO | BP | LCP | CLS |
+|---|---|---|---|---|---|---|
+| /ko/ | 99 | 100 | 100 | 100 | 2.1s | 0 |
+| /ko/product | 99 | 100 | 100 | 100 | 2.2s | 0 |
+| /en/ | 100 | 100 | 100 | 100 | 1.4s | 0 |
+| /th/ | 100 | 100 | 100 | 100 | 1.4s | 0 |
+| /vi/ | 100 | 100 | 100 | 100 | 1.5s | 0 |
+
+E2E 90개 통과 (모바일 WebKit iPhone 14 + 데스크톱 Chromium 1280)
+
+### 개발 중 확정된 기술 결정 (Step 1~3 계획과 다른 부분)
+1. **Astro 내장 i18n 라우팅 대신 `[lang]` 동적 라우트** — `prefixDefaultLocale: true` 는 언어 수만큼 폴더 복제가 필요해 페이지 하나를 5벌로 관리하게 됨
+2. **Tailwind 미사용, 순수 CSS 변수** — 사용자 승인 (2026-08-25)
+3. **폰트는 언어별 서브셋 자체 호스팅** — Google Fonts 사용 시 외부 호스트에서 210KB, 모바일 Performance 59. 서브셋 후 99~100
+4. **`public/images/` 대신 `src/assets/images/` + `astro:assets`** — 빌드가 webp·avif 변환과 폭별 크기를 자동 생성
+5. **GSAP 미사용** — 시안 01 의 모션은 IntersectionObserver + CSS 로 충분 (약 50KB 절약)
+
+### 개발 중 발견·수정한 결함
+| 결함 | 원인 | 조치 |
+|---|---|---|
+| 모바일 Performance 59 | Google Fonts 210KB 외부 로드 | 언어별 서브셋 자체 호스팅 |
+| 언어 시트가 닫혀도 보임 | `.nav` 의 `backdrop-filter` 가 `position:fixed` 컨테이닝 블록 생성 | `<dialog>` 로 교체 (top layer) |
+| 한국어 단어 중간 줄바꿈 | `word-break` 기본값 | `word-break: keep-all` |
+| 푸터 이메일 링크 119×15px | 인라인 링크에 탭 영역 미적용 | `min-height: 44px` |
+
+### 남은 제약
+- **중국어·태국어 본문 일부는 기기 기본 서체로 표시** — Pretendard·Noto Serif KR 에 해당 글자 없음. 전용 서체 필요 시 같은 방식으로 서브셋 추가
+- **법적 고지 문안 비어 있음** — 구조·배치만. 법적 효력 문서라 확인된 문안 필요
+- **GitHub Actions 시크릿 미등록** — `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` 등록 전까지 배포 단계 실패
+- **미확정 값** — 가격, 제형, 내수성, 용량, 실촬영 이미지, 도메인, PG 계약
+
+### 2차 오픈 체크리스트
+1. 도메인 확정 → `src/config/site.ts` 의 `ORIGIN` 교체
+2. PG 계약 → `wrangler secret put TOSS_SECRET_KEY`
+3. `wrangler.jsonc` 에 `vars: { PAYMENT_PROVIDER: "tosspayments" }`
+4. `payment-config.json` 의 `KR.checkout` → `"internal"`
+5. 통신판매업 신고 완료 → 푸터 `BUSINESS` 값 채우기
+6. 장바구니·체크아웃·주문완료 페이지 개발 + 해당 E2E 추가
