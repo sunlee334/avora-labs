@@ -29,7 +29,7 @@
     {
       "binding": "DB",
       "database_name": "avora-orders",
-      "database_id": "PLACEHOLDER_RUN_WRANGLER_D1_CREATE",
+      "database_id": "1c29eb05-7776-4b48-a1e1-b07113ab4325",
       "migrations_dir": "migrations"
     }
   ]
