@@ -8,12 +8,14 @@
 /**
  * 서비스 도메인. 커스텀 도메인 확정 전까지는 workers.dev 주소를 씁니다.
  *
- * 형식은 <Worker 이름>.<계정 서브도메인>.workers.dev 입니다. wrangler.jsonc 의
+ * 형식은 <Worker 이름>.<계정 서브도메인>.workers.dev 입니다. 서브도메인은
+ * 대시보드(Workers & Pages → Account details → Subdomain)에서 바꿀 수 있고,
+ * 바꾸면 이 값과 public/robots.txt 의 Sitemap 줄을 함께 고쳐야 합니다. wrangler.jsonc 의
  * name 을 바꾸면 이 값도 함께 바꿔야 합니다 — 어긋나면 canonical 과 sitemap 이
  * 존재하지 않는 주소를 가리키게 되고, 그건 검색엔진에만 보이는 오류라
  * 화면을 아무리 봐도 드러나지 않습니다.
  */
-export const ORIGIN = 'https://avora-labs.avora.workers.dev';
+export const ORIGIN = 'https://avora-labs.sunlee334.workers.dev';
 
 /** 지원 언어. 순서가 언어 선택 UI의 노출 순서입니다. */
 export const LOCALES = ['ko', 'en', 'zh', 'th', 'vi'] as const;
