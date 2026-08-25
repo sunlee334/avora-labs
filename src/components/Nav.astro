@@ -23,6 +23,26 @@ const t = dict(locale);
   </div>
 
   <div class="nav__right">
+    <a class="nav__cart" href={localePath(locale, 'cart')} data-nav-cart>
+      <span>{t.nav.cart}</span>
+      <span class="nav__cart-count" data-nav-cart-count aria-hidden="true">0</span>
+      <span class="sr-only" data-nav-cart-sr></span>
+    </a>
     <LanguageSwitcher locale={locale} path={path} />
   </div>
 </nav>
+
+<script>
+  import { subscribe, itemCount } from '../lib/cart';
+
+  const badge = document.querySelector<HTMLElement>('[data-nav-cart-count]');
+  const sr = document.querySelector<HTMLElement>('[data-nav-cart-sr]');
+  if (badge) {
+    subscribe((lines) => {
+      const n = itemCount(lines);
+      badge.textContent = String(n);
+      badge.dataset.hasItems = String(n > 0);
+      if (sr) sr.textContent = n > 0 ? String(n) : '';
+    });
+  }
+</script>

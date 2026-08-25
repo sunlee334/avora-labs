@@ -16,7 +16,19 @@
 
   "observability": {
     "enabled": true
-  }
+  },
+
+  // 주문 저장소. 배송지·연락처가 여기 들어가므로 개인정보 보관 정책이 필요합니다.
+  // 최초 1회: wrangler d1 create avora-orders  → 나온 database_id 를 아래에 넣고
+  //           wrangler d1 migrations apply avora-orders --remote
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "avora-orders",
+      "database_id": "PLACEHOLDER_RUN_WRANGLER_D1_CREATE",
+      "migrations_dir": "migrations"
+    }
+  ]
 
   // 결제를 켤 때 추가할 것:
   //   wrangler secret put TOSS_SECRET_KEY

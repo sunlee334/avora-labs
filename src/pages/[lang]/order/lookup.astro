@@ -1,0 +1,118 @@
+---
+/**
+ * 비회원 주문 조회.
+ * 주문번호와 연락처가 둘 다 맞아야 결과를 돌려줍니다 — 번호만으로 열면
+ * 번호를 추측해 남의 배송지를 볼 수 있습니다.
+ */
+import Base from '../../../layouts/Base.astro';
+import { LOCALES, type Locale } from '../../../config/site';
+import { dict, localePath } from '../../../i18n';
+
+export function getStaticPaths() {
+  return LOCALES.map((lang) => ({ params: { lang } }));
+}
+
+const locale = Astro.params.lang as Locale;
+const t = dict(locale);
+const l = t.order.lookup;
+---
+
+<Base locale={locale} path="order/lookup" title={l.meta.title} description={l.meta.description} noindex>
+  <section class="section wrap">
+    <h1 class="display display--tight">{l.heading}</h1>
+    <p class="body" style="margin-top: 14px">{l.body}</p>
+
+    <form class="checkout" novalidate data-lookup data-locale={locale} style="margin-top: 28px">
+      <div class="field">
+        <label for="orderId">{l.orderId}</label>
+        <input id="orderId" name="orderId" type="text" enterkeyhint="next"
+          placeholder="AVORA-00000000000000-XXXXXX" required maxlength="40" autocomplete="off" />
+      </div>
+      <div class="field">
+        <label for="phone">{l.phone}</label>
+        <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel"
+          enterkeyhint="search" placeholder="010-0000-0000" required maxlength="20" />
+      </div>
+      <p class="checkout__error" data-lookup-error hidden>{l.notFound}</p>
+      <button class="cta checkout__pay" type="submit" data-lookup-submit>{l.submit}</button>
+    </form>
+
+    <dl class="orderResult__facts" data-lookup-result hidden>
+      <div><dt>{t.order.complete.orderNumber}</dt><dd data-r-id></dd></div>
+      <div><dt>{t.order.statusLabel}</dt><dd data-r-status></dd></div>
+      <div><dt>{t.order.complete.amount}</dt><dd data-r-amount></dd></div>
+      <div><dt>{t.order.complete.recipient}</dt><dd data-r-recipient></dd></div>
+      <div><dt>{t.order.complete.address}</dt><dd data-r-address></dd></div>
+    </dl>
+  </section>
+
+  <template data-lookup-labels
+    data-label-pending={t.order.status.pending}
+    data-label-paid={t.order.status.paid}
+    data-label-failed={t.order.status.failed}
+    data-label-cancelled={t.order.status.cancelled}
+    data-label-searching={l.searching}
+    data-label-submit={l.submit}
+  ></template>
+</Base>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-lookup]');
+  const labels = document.querySelector<HTMLElement>('[data-lookup-labels]');
+  if (form && labels) {
+    const L = labels.dataset;
+    const locale = form.dataset.locale!;
+    const errorBox = document.querySelector<HTMLElement>('[data-lookup-error]')!;
+    const result = document.querySelector<HTMLElement>('[data-lookup-result]')!;
+    const submit = form.querySelector<HTMLButtonElement>('[data-lookup-submit]')!;
+
+    const statusLabel = (s: string) =>
+      ({ pending: L.labelPending, paid: L.labelPaid, failed: L.labelFailed, cancelled: L.labelCancelled })[s] ?? s;
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      errorBox.hidden = true;
+      result.hidden = true;
+
+      const data = new FormData(form);
+      const orderId = String(data.get('orderId') ?? '').trim();
+      const phone = String(data.get('phone') ?? '').trim();
+      if (!orderId || !phone) return;
+
+      submit.disabled = true;
+      submit.textContent = L.labelSearching!;
+
+      try {
+        const res = await fetch('/api/orders/lookup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId, phone }),
+        });
+        const payload = await res.json().catch(() => ({}));
+        if (res.ok && payload.ok) {
+          const o = payload.order;
+          const set = (sel: string, v: string) => {
+            const el = result.querySelector<HTMLElement>(sel);
+            if (el) el.textContent = v;
+          };
+          set('[data-r-id]', o.id);
+          set('[data-r-status]', statusLabel(o.status));
+          set(
+            '[data-r-amount]',
+            new Intl.NumberFormat(locale, { style: 'currency', currency: o.currency, maximumFractionDigits: 0 }).format(o.amount),
+          );
+          set('[data-r-recipient]', o.recipientName);
+          set('[data-r-address]', `(${o.postalCode}) ${o.address1} ${o.address2 ?? ''}`.trim());
+          result.hidden = false;
+        } else {
+          errorBox.hidden = false;
+        }
+      } catch {
+        errorBox.hidden = false;
+      } finally {
+        submit.disabled = false;
+        submit.textContent = L.labelSubmit!;
+      }
+    });
+  }
+</script>

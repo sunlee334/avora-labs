@@ -38,11 +38,26 @@
       "kicker": "The Journey",
       "lead": "Nơi sản phẩm hiện diện",
       "steps": [
-        { "word": "Sun", "body": "Lần thoa đầu tiên dưới nắng sớm" },
-        { "word": "Sweat", "body": "Giữ vững trước mồ hôi và hơi nóng" },
-        { "word": "Water", "body": "Vẫn bám khi gặp nước" },
-        { "word": "Movement", "body": "Kết thúc nhẹ tênh, không cản trở chuyển động" },
-        { "word": "Reapply", "body": "Thoa lại mà không thấy phiền" }
+        {
+          "word": "Sun",
+          "body": "Lần thoa đầu tiên dưới nắng sớm"
+        },
+        {
+          "word": "Sweat",
+          "body": "Giữ vững trước mồ hôi và hơi nóng"
+        },
+        {
+          "word": "Water",
+          "body": "Vẫn bám khi gặp nước"
+        },
+        {
+          "word": "Movement",
+          "body": "Kết thúc nhẹ tênh, không cản trở chuyển động"
+        },
+        {
+          "word": "Reapply",
+          "body": "Thoa lại mà không thấy phiền"
+        }
       ]
     },
     "break": {
@@ -52,10 +67,22 @@
       "kicker": "Brand Promise",
       "lead": "Điều bạn nên cảm nhận khi dùng",
       "items": [
-        { "code": "LIGHT", "body": "Cảm giác không hề nặng mặt" },
-        { "code": "COMFORT", "body": "Da vẫn dễ chịu dù bạn chuyển động thế nào" },
-        { "code": "PROTECTION", "body": "Bảo vệ da khỏi nắng và tác động thường ngày" },
-        { "code": "RESET", "body": "Cảm giác da được sắp xếp lại sau khi vận động" }
+        {
+          "code": "LIGHT",
+          "body": "Cảm giác không hề nặng mặt"
+        },
+        {
+          "code": "COMFORT",
+          "body": "Da vẫn dễ chịu dù bạn chuyển động thế nào"
+        },
+        {
+          "code": "PROTECTION",
+          "body": "Bảo vệ da khỏi nắng và tác động thường ngày"
+        },
+        {
+          "code": "RESET",
+          "body": "Cảm giác da được sắp xếp lại sau khi vận động"
+        }
       ]
     },
     "philosophy": {
@@ -81,14 +108,28 @@
       "headline": "Qua mọi chuyển động, làn da vẫn thở thật dễ chịu.",
       "priceUnknown": "Giá sẽ được công bố",
       "ctaExternal": "Mua tại Smart Store",
-      "ctaCart": "Thêm vào giỏ"
+      "ctaCart": "Thêm vào giỏ",
+      "added": "Đã thêm vào giỏ",
+      "viewCart": "Xem giỏ hàng"
     },
     "principles": {
       "kicker": "Product Principles",
       "items": [
-        { "term": "Stay", "label": "Bền vững không trôi", "body": "Được thiết kế để giữ vững trước mồ hôi và hơi nóng." },
-        { "term": "Breathe", "label": "Nhẹ tênh, không nặng mặt", "body": "Gel dạng nước không để lại vệt trắng, thẩm thấu nhẹ nhàng mà không đè lên lỗ chân lông." },
-        { "term": "Pure", "label": "Thuần khiết tối giản", "body": "Giảm tối đa hương liệu và màu nhân tạo, hướng đến công thức không mùi." }
+        {
+          "term": "Stay",
+          "label": "Bền vững không trôi",
+          "body": "Được thiết kế để giữ vững trước mồ hôi và hơi nóng."
+        },
+        {
+          "term": "Breathe",
+          "label": "Nhẹ tênh, không nặng mặt",
+          "body": "Gel dạng nước không để lại vệt trắng, thẩm thấu nhẹ nhàng mà không đè lên lỗ chân lông."
+        },
+        {
+          "term": "Pure",
+          "label": "Thuần khiết tối giản",
+          "body": "Giảm tối đa hương liệu và màu nhân tạo, hướng đến công thức không mùi."
+        }
       ]
     },
     "spec": {
@@ -109,9 +150,18 @@
     "howto": {
       "kicker": "How to use",
       "steps": [
-        { "title": "Bước cuối của quy trình dưỡng da", "body": "Lấy lượng khoảng một đồng xu thoa đều khắp mặt." },
-        { "title": "Trước khi vận động 15–20 phút", "body": "Để sản phẩm có thời gian thấm trước khi ra ngoài." },
-        { "title": "Thoa lại mỗi hai giờ", "body": "Nếu ra nhiều mồ hôi, hãy thoa lại sớm hơn." }
+        {
+          "title": "Bước cuối của quy trình dưỡng da",
+          "body": "Lấy lượng khoảng một đồng xu thoa đều khắp mặt."
+        },
+        {
+          "title": "Trước khi vận động 15–20 phút",
+          "body": "Để sản phẩm có thời gian thấm trước khi ra ngoài."
+        },
+        {
+          "title": "Thoa lại mỗi hai giờ",
+          "body": "Nếu ra nhiều mồ hôi, hãy thoa lại sớm hơn."
+        }
       ]
     },
     "faq": {
@@ -163,7 +213,41 @@
         "description": "Chính sách bảo mật của website AVORA."
       },
       "heading": "Chính sách bảo mật",
-      "placeholder": "Tài liệu này đang được chuẩn bị và sẽ được công bố khi các mục dữ liệu thu thập và thông tin doanh nghiệp được xác nhận."
+      "placeholder": "Tài liệu này đang được chuẩn bị và sẽ được công bố khi các mục dữ liệu thu thập và thông tin doanh nghiệp được xác nhận.",
+      "collect": {
+        "heading": "Thông tin chúng tôi thu thập",
+        "intro": "Dưới đây là những mục mà trang này thực sự thu thập và lưu trữ, được viết dựa trên chính mã nguồn và cập nhật khi mã thay đổi.",
+        "rows": [
+          {
+            "item": "Tên người nhận, số điện thoại, mã bưu chính, địa chỉ",
+            "purpose": "Xử lý đơn hàng và giao hàng",
+            "when": "Khi đặt hàng (bắt buộc)"
+          },
+          {
+            "item": "Email",
+            "purpose": "Thông báo về đơn hàng",
+            "when": "Khi đặt hàng (không bắt buộc)"
+          },
+          {
+            "item": "Ghi chú giao hàng",
+            "purpose": "Tham khảo khi giao hàng",
+            "when": "Khi đặt hàng (không bắt buộc)"
+          },
+          {
+            "item": "Sản phẩm đã đặt, số tiền, trạng thái thanh toán",
+            "purpose": "Hồ sơ đơn hàng và thanh toán",
+            "when": "Khi đặt hàng (tự động)"
+          }
+        ],
+        "notCollected": "Trang này không nhận và không lưu số thẻ hay số tài khoản. Những thông tin đó chỉ được xử lý bên trong màn hình của đơn vị thanh toán.",
+        "retention": "Thời gian lưu trữ tuân theo quy định pháp luật hiện hành. Thời hạn cụ thể sẽ được công bố cùng nội dung đầy đủ bên dưới.",
+        "pending": "Nội dung đầy đủ bên dưới đang được chuẩn bị và sẽ được công bố cùng thông tin doanh nghiệp.",
+        "columns": {
+          "item": "Mục",
+          "purpose": "Mục đích",
+          "when": "Thời điểm"
+        }
+      }
     }
   },
   "notFound": {
@@ -179,6 +263,120 @@
     "skipToContent": "Chuyển đến nội dung",
     "openMenu": "Mở menu",
     "closeMenu": "Đóng menu",
-    "selectLanguage": "Chọn ngôn ngữ"
+    "selectLanguage": "Chọn ngôn ngữ",
+    "cartCount": "Giỏ hàng"
+  },
+  "cart": {
+    "meta": {
+      "title": "Giỏ hàng — AVORA",
+      "description": "Giỏ hàng AVORA của bạn."
+    },
+    "heading": "Giỏ hàng",
+    "empty": "Giỏ hàng của bạn đang trống.",
+    "emptyCta": "Xem sản phẩm",
+    "continueShopping": "Tiếp tục xem",
+    "quantity": "Số lượng",
+    "decrease": "Giảm số lượng",
+    "increase": "Tăng số lượng",
+    "remove": "Xoá",
+    "removed": "Đã xoá khỏi giỏ hàng.",
+    "subtotal": "Tạm tính",
+    "shipping": "Phí vận chuyển",
+    "shippingFree": "Miễn phí",
+    "total": "Tổng thanh toán",
+    "checkout": "Đặt hàng",
+    "priceUnknown": "Có thể đặt hàng khi giá được xác nhận.",
+    "itemCount": "{count} sản phẩm"
+  },
+  "checkout": {
+    "meta": {
+      "title": "Thanh toán — AVORA",
+      "description": "Trang đặt hàng và thanh toán của AVORA."
+    },
+    "heading": "Đặt hàng · Thanh toán",
+    "shippingSection": "Thông tin giao hàng",
+    "paymentSection": "Phương thức thanh toán",
+    "summarySection": "Tóm tắt đơn hàng",
+    "fields": {
+      "recipientName": "Người nhận",
+      "recipientPhone": "Số điện thoại",
+      "postalCode": "Mã bưu chính",
+      "address1": "Địa chỉ",
+      "address2": "Địa chỉ chi tiết",
+      "memo": "Ghi chú giao hàng",
+      "email": "Email"
+    },
+    "placeholders": {
+      "recipientName": "Họ và tên",
+      "recipientPhone": "010-0000-0000",
+      "postalCode": "00000",
+      "address1": "Địa chỉ đường phố",
+      "address2": "Toà nhà, tầng, số phòng",
+      "memo": "Để trước cửa (không bắt buộc)",
+      "email": "Nơi nhận thông tin đơn hàng (không bắt buộc)"
+    },
+    "findPostcode": "Tìm mã bưu chính",
+    "optional": "Không bắt buộc",
+    "errors": {
+      "required": "Mục này là bắt buộc.",
+      "phone": "Vui lòng kiểm tra lại số điện thoại.",
+      "email": "Địa chỉ email không hợp lệ.",
+      "postal": "Mã bưu chính gồm 5 chữ số.",
+      "agree": "Vui lòng đồng ý cho phép thu thập thông tin cá nhân.",
+      "network": "Kết nối thất bại. Vui lòng thử lại sau.",
+      "orderFailed": "Không thể tạo đơn hàng.",
+      "paymentNotReady": "Thanh toán chưa sẵn sàng."
+    },
+    "agree": {
+      "label": "Tôi đồng ý cho thu thập và sử dụng thông tin cá nhân để xử lý đơn hàng này.",
+      "detail": "Thông tin thu thập: người nhận, số điện thoại, địa chỉ, email (không bắt buộc) · Mục đích: xử lý đơn hàng và giao hàng · Thời gian lưu: theo quy định pháp luật",
+      "link": "Xem chính sách bảo mật"
+    },
+    "pay": "Thanh toán",
+    "paying": "Đang mở cửa sổ thanh toán…",
+    "emptyCart": "Giỏ hàng của bạn đang trống.",
+    "backToCart": "Quay lại giỏ hàng"
+  },
+  "order": {
+    "complete": {
+      "meta": {
+        "title": "Đặt hàng thành công — AVORA",
+        "description": "Đơn hàng của bạn đã được tiếp nhận."
+      },
+      "heading": "Đơn hàng đã hoàn tất.",
+      "body": "Bạn có thể tra cứu đơn hàng bằng mã đơn bên dưới.",
+      "orderNumber": "Mã đơn hàng",
+      "amount": "Số tiền đã thanh toán",
+      "recipient": "Người nhận",
+      "address": "Địa chỉ giao hàng",
+      "confirming": "Đang xác nhận thanh toán…",
+      "home": "Về trang chủ",
+      "lookup": "Tra cứu đơn hàng"
+    },
+    "failed": {
+      "heading": "Thanh toán chưa hoàn tất.",
+      "body": "Thanh toán đã bị huỷ hoặc có sự cố trong quá trình duyệt. Vui lòng thử lại.",
+      "retry": "Quay lại giỏ hàng"
+    },
+    "lookup": {
+      "meta": {
+        "title": "Tra cứu đơn hàng — AVORA",
+        "description": "Tra cứu đơn hàng bằng mã đơn và số điện thoại."
+      },
+      "heading": "Tra cứu đơn hàng",
+      "body": "Nhập mã đơn hàng và số điện thoại bạn đã dùng khi đặt.",
+      "orderId": "Mã đơn hàng",
+      "phone": "Số điện thoại",
+      "submit": "Tra cứu",
+      "searching": "Đang tra cứu…",
+      "notFound": "Không tìm thấy đơn hàng khớp. Vui lòng kiểm tra lại mã đơn và số điện thoại."
+    },
+    "status": {
+      "pending": "Chờ thanh toán",
+      "paid": "Đã thanh toán",
+      "failed": "Thanh toán thất bại",
+      "cancelled": "Đã huỷ"
+    },
+    "statusLabel": "Trạng thái đơn hàng"
   }
 }

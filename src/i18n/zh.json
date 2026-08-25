@@ -38,11 +38,26 @@
       "kicker": "The Journey",
       "lead": "产品所处的场景",
       "steps": [
-        { "word": "Sun", "body": "晨光下的第一次涂抹" },
-        { "word": "Sweat", "body": "在汗水与高温中依然稳固" },
-        { "word": "Water", "body": "接触水后仍能坚持" },
-        { "word": "Movement", "body": "不妨碍动作的轻盈质感" },
-        { "word": "Reapply", "body": "让补涂不再麻烦" }
+        {
+          "word": "Sun",
+          "body": "晨光下的第一次涂抹"
+        },
+        {
+          "word": "Sweat",
+          "body": "在汗水与高温中依然稳固"
+        },
+        {
+          "word": "Water",
+          "body": "接触水后仍能坚持"
+        },
+        {
+          "word": "Movement",
+          "body": "不妨碍动作的轻盈质感"
+        },
+        {
+          "word": "Reapply",
+          "body": "让补涂不再麻烦"
+        }
       ]
     },
     "break": {
@@ -52,10 +67,22 @@
       "kicker": "Brand Promise",
       "lead": "使用后应有的感受",
       "items": [
-        { "code": "LIGHT", "body": "毫不厚重的肤感" },
-        { "code": "COMFORT", "body": "活动时肌肤依然舒适" },
-        { "code": "PROTECTION", "body": "抵御阳光与日常侵扰" },
-        { "code": "RESET", "body": "活动后重新整顿肌肤的感觉" }
+        {
+          "code": "LIGHT",
+          "body": "毫不厚重的肤感"
+        },
+        {
+          "code": "COMFORT",
+          "body": "活动时肌肤依然舒适"
+        },
+        {
+          "code": "PROTECTION",
+          "body": "抵御阳光与日常侵扰"
+        },
+        {
+          "code": "RESET",
+          "body": "活动后重新整顿肌肤的感觉"
+        }
       ]
     },
     "philosophy": {
@@ -81,14 +108,28 @@
       "headline": "在每一次移动中，肌肤依然自在呼吸。",
       "priceUnknown": "价格待定",
       "ctaExternal": "前往 Smart Store 购买",
-      "ctaCart": "加入购物车"
+      "ctaCart": "加入购物车",
+      "added": "已加入购物车",
+      "viewCart": "查看购物车"
     },
     "principles": {
       "kicker": "Product Principles",
       "items": [
-        { "term": "Stay", "label": "不易脱妆的持久", "body": "针对汗水与高温设计，力求持久稳固。" },
-        { "term": "Breathe", "label": "轻盈不厚重", "body": "无泛白的水感凝胶，轻盈渗透，不压迫毛孔。" },
-        { "term": "Pure", "label": "减法的纯粹", "body": "最大限度减少人工香料与色素，趋向无香设计。" }
+        {
+          "term": "Stay",
+          "label": "不易脱妆的持久",
+          "body": "针对汗水与高温设计，力求持久稳固。"
+        },
+        {
+          "term": "Breathe",
+          "label": "轻盈不厚重",
+          "body": "无泛白的水感凝胶，轻盈渗透，不压迫毛孔。"
+        },
+        {
+          "term": "Pure",
+          "label": "减法的纯粹",
+          "body": "最大限度减少人工香料与色素，趋向无香设计。"
+        }
       ]
     },
     "spec": {
@@ -109,9 +150,18 @@
     "howto": {
       "kicker": "How to use",
       "steps": [
-        { "title": "护肤的最后一步", "body": "面部取约一枚硬币大小的用量涂抹均匀。" },
-        { "title": "活动前 15~20 分钟", "body": "涂抹后留出充分吸收的时间。" },
-        { "title": "每两小时补涂", "body": "若大量出汗，请提前补涂。" }
+        {
+          "title": "护肤的最后一步",
+          "body": "面部取约一枚硬币大小的用量涂抹均匀。"
+        },
+        {
+          "title": "活动前 15~20 分钟",
+          "body": "涂抹后留出充分吸收的时间。"
+        },
+        {
+          "title": "每两小时补涂",
+          "body": "若大量出汗，请提前补涂。"
+        }
       ]
     },
     "faq": {
@@ -163,7 +213,41 @@
         "description": "AVORA 网站的隐私政策。"
       },
       "heading": "隐私政策",
-      "placeholder": "本文件正在准备中，待实际收集项目与企业信息确定后发布。"
+      "placeholder": "本文件正在准备中，待实际收集项目与企业信息确定后发布。",
+      "collect": {
+        "heading": "收集的项目",
+        "intro": "以下是本网站实际收集与保存的项目，依据代码撰写，项目变更时会一并更新。",
+        "rows": [
+          {
+            "item": "收件人姓名、联系电话、邮政编码、地址",
+            "purpose": "订单处理与配送",
+            "when": "下单时（必填）"
+          },
+          {
+            "item": "电子邮箱",
+            "purpose": "订单信息通知",
+            "when": "下单时（选填）"
+          },
+          {
+            "item": "配送备注",
+            "purpose": "配送时参考",
+            "when": "下单时（选填）"
+          },
+          {
+            "item": "订购商品、金额、支付状态",
+            "purpose": "订单与支付记录",
+            "when": "下单时（自动）"
+          }
+        ],
+        "notCollected": "本网站不会接收或保存卡号、账号等支付方式信息。这些信息仅在支付机构的页面内处理。",
+        "retention": "保存期限遵循相关法律规定。具体期限与销毁流程将随下方正文一并公布。",
+        "pending": "下方正文（完整告知事项）正在准备中，将与企业信息一并公布。",
+        "columns": {
+          "item": "项目",
+          "purpose": "目的",
+          "when": "收集时点"
+        }
+      }
     }
   },
   "notFound": {
@@ -179,6 +263,120 @@
     "skipToContent": "跳到正文",
     "openMenu": "打开菜单",
     "closeMenu": "关闭菜单",
-    "selectLanguage": "选择语言"
+    "selectLanguage": "选择语言",
+    "cartCount": "购物车"
+  },
+  "cart": {
+    "meta": {
+      "title": "购物车 — AVORA",
+      "description": "AVORA 购物车。"
+    },
+    "heading": "购物车",
+    "empty": "购物车是空的。",
+    "emptyCta": "去看看产品",
+    "continueShopping": "继续浏览",
+    "quantity": "数量",
+    "decrease": "减少数量",
+    "increase": "增加数量",
+    "remove": "删除",
+    "removed": "已从购物车中删除。",
+    "subtotal": "商品金额",
+    "shipping": "运费",
+    "shippingFree": "免费",
+    "total": "应付金额",
+    "checkout": "去结算",
+    "priceUnknown": "价格确定后即可下单。",
+    "itemCount": "{count} 件"
+  },
+  "checkout": {
+    "meta": {
+      "title": "订单 · 结算 — AVORA",
+      "description": "AVORA 订单结算页面。"
+    },
+    "heading": "订单 · 结算",
+    "shippingSection": "配送信息",
+    "paymentSection": "支付方式",
+    "summarySection": "订单摘要",
+    "fields": {
+      "recipientName": "收件人",
+      "recipientPhone": "联系电话",
+      "postalCode": "邮政编码",
+      "address1": "地址",
+      "address2": "详细地址",
+      "memo": "配送备注",
+      "email": "电子邮箱"
+    },
+    "placeholders": {
+      "recipientName": "姓名",
+      "recipientPhone": "010-0000-0000",
+      "postalCode": "00000",
+      "address1": "街道地址",
+      "address2": "楼栋·门牌号",
+      "memo": "放在门口即可（选填）",
+      "email": "用于接收订单信息（选填）"
+    },
+    "findPostcode": "查找邮编",
+    "optional": "选填",
+    "errors": {
+      "required": "此项为必填。",
+      "phone": "请再次确认联系电话。",
+      "email": "邮箱格式不正确。",
+      "postal": "邮政编码为 5 位数字。",
+      "agree": "请同意收集及使用个人信息。",
+      "network": "通信失败，请稍后再试。",
+      "orderFailed": "未能提交订单。",
+      "paymentNotReady": "支付尚未准备就绪。"
+    },
+    "agree": {
+      "label": "我同意为处理本订单收集及使用个人信息。",
+      "detail": "收集项目：收件人、联系电话、地址、邮箱（选填）· 目的：订单处理与配送 · 保存期限：相关法律规定的期限",
+      "link": "查看隐私政策"
+    },
+    "pay": "去支付",
+    "paying": "正在打开支付窗口…",
+    "emptyCart": "购物车是空的。",
+    "backToCart": "返回购物车"
+  },
+  "order": {
+    "complete": {
+      "meta": {
+        "title": "下单成功 — AVORA",
+        "description": "您的订单已成功提交。"
+      },
+      "heading": "下单成功。",
+      "body": "可凭下方订单号查询订单。",
+      "orderNumber": "订单号",
+      "amount": "支付金额",
+      "recipient": "收件人",
+      "address": "配送地址",
+      "confirming": "正在确认支付…",
+      "home": "返回首页",
+      "lookup": "查询订单"
+    },
+    "failed": {
+      "heading": "支付未完成。",
+      "body": "支付已取消，或在确认过程中出现问题。请重试。",
+      "retry": "返回购物车"
+    },
+    "lookup": {
+      "meta": {
+        "title": "订单查询 — AVORA",
+        "description": "使用订单号与联系电话查询订单。"
+      },
+      "heading": "订单查询",
+      "body": "请输入订单号与下单时填写的联系电话。",
+      "orderId": "订单号",
+      "phone": "联系电话",
+      "submit": "查询",
+      "searching": "查询中…",
+      "notFound": "未找到匹配的订单。请再次确认订单号与联系电话。"
+    },
+    "status": {
+      "pending": "待支付",
+      "paid": "已支付",
+      "failed": "支付失败",
+      "cancelled": "已取消"
+    },
+    "statusLabel": "订单状态"
   }
 }

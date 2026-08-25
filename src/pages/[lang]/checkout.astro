@@ -1,0 +1,377 @@
+---
+/**
+ * 체크아웃.
+ *
+ * 흐름:
+ *   1. 폼 검증 → 2. Worker /api/orders 로 주문 생성(서버가 금액을 기억)
+ *   → 3. PG 결제창 호출 → 4. 성공하면 완료 페이지로 리다이렉트
+ *
+ * 2번을 먼저 하는 이유는 금액 조작을 막기 위해서입니다. 승인 단계에서
+ * 브라우저가 보낸 금액이 아니라 서버에 저장된 금액을 씁니다.
+ *
+ * 카드번호 같은 결제 수단 정보는 이 폼이 받지 않습니다 — PG 결제창 안에서만 오갑니다.
+ */
+import Base from '../../layouts/Base.astro';
+import { LOCALES, type Locale } from '../../config/site';
+import { dict, localePath } from '../../i18n';
+import { SELLS_DIRECTLY, CURRENCY } from '../../config/runtime';
+import paymentConfig from '../../config/payment-config.json';
+
+export function getStaticPaths() {
+  return LOCALES.map((lang) => ({ params: { lang } }));
+}
+
+const locale = Astro.params.lang as Locale;
+const t = dict(locale);
+const c = t.checkout;
+
+const country = paymentConfig.countries[paymentConfig.defaultCountry as 'KR'];
+const methods = country.methods.filter((m) => m.enabled);
+---
+
+<Base
+  locale={locale}
+  path="checkout"
+  title={c.meta.title}
+  description={c.meta.description}
+  noindex
+>
+  <section class="section wrap">
+    <h1 class="display display--tight">{c.heading}</h1>
+
+    {
+      !SELLS_DIRECTLY ? (
+        <p class="cart__notice" style="margin-top: 28px">{c.errors.paymentNotReady}</p>
+      ) : (
+        <form
+          class="checkout"
+          novalidate
+          data-checkout
+          data-locale={locale}
+          data-currency={CURRENCY}
+          data-complete-href={localePath(locale, 'order/complete')}
+          data-cart-href={localePath(locale, 'cart')}
+        >
+          {/* 장바구니가 비었을 때 */}
+          <div class="checkout__empty" data-checkout-empty hidden>
+            <p class="body">{c.emptyCart}</p>
+            <p style="margin-top: 20px">
+              <a class="cta" href={localePath(locale, 'product')}>{t.cart.emptyCta}</a>
+            </p>
+          </div>
+
+          <div data-checkout-body hidden>
+            <fieldset class="checkout__group">
+              <legend class="kicker">{c.shippingSection}</legend>
+
+              <div class="field">
+                <label for="recipientName">{c.fields.recipientName}</label>
+                <input id="recipientName" name="recipientName" type="text" autocomplete="name"
+                  enterkeyhint="next" placeholder={c.placeholders.recipientName} required maxlength="60" />
+                <p class="field__error" data-error-for="recipientName" hidden></p>
+              </div>
+
+              <div class="field">
+                <label for="recipientPhone">{c.fields.recipientPhone}</label>
+                {/* 숫자 키패드가 뜨도록 inputmode 를 지정합니다 — 요구사항 7번 */}
+                <input id="recipientPhone" name="recipientPhone" type="tel" inputmode="tel"
+                  autocomplete="tel" enterkeyhint="next" placeholder={c.placeholders.recipientPhone}
+                  required maxlength="20" />
+                <p class="field__error" data-error-for="recipientPhone" hidden></p>
+              </div>
+
+              <div class="field field--postal">
+                <div>
+                  <label for="postalCode">{c.fields.postalCode}</label>
+                  <input id="postalCode" name="postalCode" type="text" inputmode="numeric"
+                    autocomplete="postal-code" placeholder={c.placeholders.postalCode}
+                    required maxlength="6" pattern="[0-9]*" />
+                </div>
+                <button type="button" class="cta cta--ghost" data-find-postcode>
+                  {c.findPostcode}
+                </button>
+                <p class="field__error" data-error-for="postalCode" hidden></p>
+              </div>
+
+              <div class="field">
+                <label for="address1">{c.fields.address1}</label>
+                <input id="address1" name="address1" type="text" autocomplete="address-line1"
+                  enterkeyhint="next" placeholder={c.placeholders.address1} required maxlength="200" />
+                <p class="field__error" data-error-for="address1" hidden></p>
+              </div>
+
+              <div class="field">
+                <label for="address2">
+                  {c.fields.address2} <span class="field__optional">{c.optional}</span>
+                </label>
+                <input id="address2" name="address2" type="text" autocomplete="address-line2"
+                  enterkeyhint="next" placeholder={c.placeholders.address2} maxlength="200" />
+              </div>
+
+              <div class="field">
+                <label for="email">
+                  {c.fields.email} <span class="field__optional">{c.optional}</span>
+                </label>
+                <input id="email" name="email" type="email" inputmode="email" autocomplete="email"
+                  enterkeyhint="next" placeholder={c.placeholders.email} maxlength="160" />
+                <p class="field__error" data-error-for="email" hidden></p>
+              </div>
+
+              <div class="field">
+                <label for="memo">
+                  {c.fields.memo} <span class="field__optional">{c.optional}</span>
+                </label>
+                <input id="memo" name="memo" type="text" enterkeyhint="done"
+                  placeholder={c.placeholders.memo} maxlength="300" />
+              </div>
+            </fieldset>
+
+            <fieldset class="checkout__group">
+              <legend class="kicker">{c.paymentSection}</legend>
+              <div class="methods">
+                {
+                  methods.map((method, i) => (
+                    <label class="method">
+                      <input type="radio" name="paymentMethod" value={method.code} checked={i === 0} />
+                      <span>{method.label}</span>
+                    </label>
+                  ))
+                }
+              </div>
+            </fieldset>
+
+            <section class="checkout__group">
+              <p class="kicker">{c.summarySection}</p>
+              <ul class="checkout__lines" data-checkout-lines></ul>
+              <dl class="cart__totals">
+                <div>
+                  <dt>{t.cart.subtotal}</dt>
+                  <dd data-sum-subtotal></dd>
+                </div>
+                <div>
+                  <dt>{t.cart.shipping}</dt>
+                  <dd data-sum-shipping></dd>
+                </div>
+                <div class="cart__totals-grand">
+                  <dt>{t.cart.total}</dt>
+                  <dd data-sum-total></dd>
+                </div>
+              </dl>
+            </section>
+
+            <div class="agree">
+              <label class="agree__row">
+                <input type="checkbox" name="agree" required />
+                <span>{c.agree.label}</span>
+              </label>
+              <p class="agree__detail">{c.agree.detail}</p>
+              <p>
+                <a href={localePath(locale, 'legal/privacy')}>{c.agree.link}</a>
+              </p>
+              <p class="field__error" data-error-for="agree" hidden></p>
+            </div>
+
+            <p class="checkout__error" data-form-error hidden></p>
+
+            <button class="cta checkout__pay" type="submit" data-pay>{c.pay}</button>
+
+            <p style="margin-top: 18px">
+              <a class="cta cta--ghost" href={localePath(locale, 'cart')}>{c.backToCart}</a>
+            </p>
+          </div>
+        </form>
+      )
+    }
+  </section>
+
+  <template data-checkout-labels
+    data-label-required={c.errors.required}
+    data-label-phone={c.errors.phone}
+    data-label-email={c.errors.email}
+    data-label-postal={c.errors.postal}
+    data-label-agree={c.errors.agree}
+    data-label-network={c.errors.network}
+    data-label-order-failed={c.errors.orderFailed}
+    data-label-paying={c.paying}
+    data-label-pay={c.pay}
+    data-label-free={t.cart.shippingFree}
+  ></template>
+</Base>
+
+<script>
+  import { detailed, totals, newOrderId, isPurchasable } from '../../lib/cart';
+
+  const form = document.querySelector<HTMLFormElement>('[data-checkout]');
+  const labels = document.querySelector<HTMLElement>('[data-checkout-labels]');
+  if (form && labels && isPurchasable()) {
+    const L = labels.dataset;
+    const locale = form.dataset.locale!;
+    const currency = form.dataset.currency!;
+    const emptyBox = form.querySelector<HTMLElement>('[data-checkout-empty]')!;
+    const bodyBox = form.querySelector<HTMLElement>('[data-checkout-body]')!;
+    const payButton = form.querySelector<HTMLButtonElement>('[data-pay]')!;
+    const formError = form.querySelector<HTMLElement>('[data-form-error]')!;
+
+    const money = (v: number) =>
+      new Intl.NumberFormat(locale, { style: 'currency', currency, maximumFractionDigits: 0 }).format(v);
+
+    // ── 주문 요약 ────────────────────────────────────────────
+    const lines = detailed();
+    const sums = totals();
+    emptyBox.hidden = lines.length > 0;
+    bodyBox.hidden = lines.length === 0;
+
+    if (lines.length > 0) {
+      const list = form.querySelector<HTMLElement>('[data-checkout-lines]')!;
+      list.replaceChildren(
+        ...lines.map((line) => {
+          const li = document.createElement('li');
+          li.innerHTML = `<span>${line.name} × ${line.qty}</span><span>${line.lineTotal != null ? money(line.lineTotal) : ''}</span>`;
+          return li;
+        }),
+      );
+      const set = (sel: string, v: string) => {
+        const el = form.querySelector<HTMLElement>(sel);
+        if (el) el.textContent = v;
+      };
+      set('[data-sum-subtotal]', sums.subtotal != null ? money(sums.subtotal) : '—');
+      set('[data-sum-shipping]', sums.shipping === 0 ? L.labelFree! : sums.shipping != null ? money(sums.shipping) : '—');
+      set('[data-sum-total]', sums.total != null ? money(sums.total) : '—');
+    }
+
+    // ── 검증 ─────────────────────────────────────────────────
+    const showError = (name: string, message: string | null) => {
+      const box = form.querySelector<HTMLElement>(`[data-error-for="${name}"]`);
+      const input = form.elements.namedItem(name) as HTMLInputElement | null;
+      if (box) {
+        box.textContent = message ?? '';
+        box.hidden = !message;
+      }
+      input?.setAttribute('aria-invalid', message ? 'true' : 'false');
+    };
+
+    function validate(): Record<string, string> | null {
+      const data = new FormData(form!);
+      const get = (k: string) => String(data.get(k) ?? '').trim();
+      const errors: Record<string, string> = {};
+
+      for (const name of ['recipientName', 'recipientPhone', 'postalCode', 'address1']) {
+        if (!get(name)) errors[name] = L.labelRequired!;
+      }
+      const phone = get('recipientPhone').replace(/\D/g, '');
+      if (get('recipientPhone') && (phone.length < 9 || phone.length > 11)) {
+        errors.recipientPhone = L.labelPhone!;
+      }
+      if (get('postalCode') && !/^\d{5}$/.test(get('postalCode'))) {
+        errors.postalCode = L.labelPostal!;
+      }
+      const email = get('email');
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errors.email = L.labelEmail!;
+      }
+      if (!data.get('agree')) errors.agree = L.labelAgree!;
+
+      for (const name of ['recipientName', 'recipientPhone', 'postalCode', 'address1', 'email', 'agree']) {
+        showError(name, errors[name] ?? null);
+      }
+      return Object.keys(errors).length ? errors : null;
+    }
+
+    // 한 번 틀린 항목은 고치는 즉시 다시 봐 줍니다.
+    form.addEventListener('input', (event) => {
+      const target = event.target as HTMLInputElement;
+      if (target.getAttribute('aria-invalid') === 'true') validate();
+    });
+
+    // ── 우편번호 찾기 ────────────────────────────────────────
+    // 외부 스크립트라 버튼을 누를 때만 불러옵니다. 실패해도 직접 입력할 수 있습니다.
+    form.querySelector<HTMLButtonElement>('[data-find-postcode]')?.addEventListener('click', async () => {
+      const anyWindow = window as any;
+      if (!anyWindow.daum?.Postcode) {
+        await new Promise<void>((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = '//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+          s.onload = () => resolve();
+          s.onerror = () => reject();
+          document.head.appendChild(s);
+        }).catch(() => undefined);
+      }
+      if (!anyWindow.daum?.Postcode) return; // 못 불러오면 직접 입력하면 됩니다
+      new anyWindow.daum.Postcode({
+        oncomplete: (data: any) => {
+          (form.elements.namedItem('postalCode') as HTMLInputElement).value = data.zonecode;
+          (form.elements.namedItem('address1') as HTMLInputElement).value =
+            data.roadAddress || data.jibunAddress;
+          (form.elements.namedItem('address2') as HTMLInputElement).focus();
+          validate();
+        },
+      }).open();
+    });
+
+    // ── 제출 ─────────────────────────────────────────────────
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      formError.hidden = true;
+
+      const errors = validate();
+      if (errors) {
+        const first = form.querySelector<HTMLElement>('[aria-invalid="true"]');
+        first?.focus();
+        first?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        return;
+      }
+
+      const data = new FormData(form);
+      const get = (k: string) => String(data.get(k) ?? '').trim();
+      const orderId = newOrderId();
+      const amount = totals().total!;
+
+      payButton.disabled = true;
+      payButton.textContent = L.labelPaying!;
+
+      try {
+        // 1 — 서버에 주문을 만들어 금액을 확정합니다.
+        const res = await fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orderId,
+            amount,
+            currency,
+            locale,
+            items: detailed().map((l) => ({ id: l.id, name: l.name, qty: l.qty, unitPrice: l.price })),
+            recipientName: get('recipientName'),
+            recipientPhone: get('recipientPhone'),
+            postalCode: get('postalCode'),
+            address1: get('address1'),
+            address2: get('address2') || undefined,
+            memo: get('memo') || undefined,
+            email: get('email') || undefined,
+          }),
+        });
+
+        if (!res.ok) {
+          const payload = await res.json().catch(() => ({}));
+          formError.textContent = payload.message || L.labelOrderFailed!;
+          formError.hidden = false;
+          payButton.disabled = false;
+          payButton.textContent = L.labelPay!;
+          return;
+        }
+
+        // 2 — PG 결제창.
+        //     PG 가 아직 정해지지 않아 SDK 를 붙이지 않았습니다. 여기가 그 자리이고,
+        //     지금은 완료 페이지로 넘겨 승인 흐름을 이어서 확인할 수 있게 해 둡니다.
+        const complete = new URL(form.dataset.completeHref!, location.origin);
+        complete.searchParams.set('orderId', orderId);
+        complete.searchParams.set('amount', String(amount));
+        location.assign(complete.href);
+      } catch {
+        formError.textContent = L.labelNetwork!;
+        formError.hidden = false;
+        payButton.disabled = false;
+        payButton.textContent = L.labelPay!;
+      }
+    });
+  }
+</script>

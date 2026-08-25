@@ -32,8 +32,12 @@ jobs:
       - name: Playwright 브라우저 설치
         run: npx playwright install --with-deps webkit chromium
 
-      - name: E2E 테스트
+      # 사이트는 두 모드로 동작합니다. 한 쪽만 돌리면 나머지는 아무도 확인하지 않은 채 나갑니다.
+      - name: E2E 테스트 — commerce (2차 자사 결제)
         run: npm run test:e2e
+
+      - name: E2E 테스트 — launch (1차 외부몰)
+        run: npm run test:e2e:launch
 
       - name: 테스트 리포트 보관
         if: failure()

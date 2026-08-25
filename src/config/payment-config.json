@@ -2,9 +2,7 @@
   "$comment": "국가코드 → 노출 결제수단 매핑. 국가를 추가/제거하거나 PG를 교체할 때 이 파일만 고치면 됩니다. sellable:false 인 국가는 구매 버튼이 외부몰 링크로 동작합니다.",
   "$decidedAt": "2026-08-25",
   "$note": "Round 7 결정 — 1차는 한국만 판매(KRW 단일). 나머지 국가는 구조·UI만 준비하고 sellable:false 로 둡니다.",
-
   "defaultCountry": "KR",
-
   "countries": {
     "KR": {
       "name": "대한민국",
@@ -14,12 +12,36 @@
       "checkout": "external",
       "externalStoreUrl": "",
       "methods": [
-        { "code": "card",       "label": "신용·체크카드", "enabled": true },
-        { "code": "naverpay",   "label": "네이버페이",   "enabled": true },
-        { "code": "kakaopay",   "label": "카카오페이",   "enabled": true },
-        { "code": "tosspay",    "label": "토스페이",     "enabled": true },
-        { "code": "transfer",   "label": "계좌이체",     "enabled": false },
-        { "code": "vbank",      "label": "가상계좌",     "enabled": false }
+        {
+          "code": "card",
+          "label": "신용·체크카드",
+          "enabled": true
+        },
+        {
+          "code": "naverpay",
+          "label": "네이버페이",
+          "enabled": true
+        },
+        {
+          "code": "kakaopay",
+          "label": "카카오페이",
+          "enabled": true
+        },
+        {
+          "code": "tosspay",
+          "label": "토스페이",
+          "enabled": true
+        },
+        {
+          "code": "transfer",
+          "label": "계좌이체",
+          "enabled": false
+        },
+        {
+          "code": "vbank",
+          "label": "가상계좌",
+          "enabled": false
+        }
       ]
     },
     "US": {
@@ -28,11 +50,28 @@
       "currency": "USD",
       "sellable": false,
       "checkout": "none",
+      "externalStoreUrl": "",
       "methods": [
-        { "code": "card",      "label": "Credit card",  "enabled": false },
-        { "code": "paypal",    "label": "PayPal",       "enabled": false },
-        { "code": "applepay",  "label": "Apple Pay",    "enabled": false },
-        { "code": "googlepay", "label": "Google Pay",   "enabled": false }
+        {
+          "code": "card",
+          "label": "Credit card",
+          "enabled": false
+        },
+        {
+          "code": "paypal",
+          "label": "PayPal",
+          "enabled": false
+        },
+        {
+          "code": "applepay",
+          "label": "Apple Pay",
+          "enabled": false
+        },
+        {
+          "code": "googlepay",
+          "label": "Google Pay",
+          "enabled": false
+        }
       ]
     },
     "CN": {
@@ -41,11 +80,24 @@
       "currency": "CNY",
       "sellable": false,
       "checkout": "none",
+      "externalStoreUrl": "",
       "$blocker": "선크림은 특수화장품으로 NMPA 등록이 필요할 수 있음 — 확인 필요",
       "methods": [
-        { "code": "alipay",    "label": "支付宝",   "enabled": false },
-        { "code": "wechatpay", "label": "微信支付", "enabled": false },
-        { "code": "unionpay",  "label": "银联",     "enabled": false }
+        {
+          "code": "alipay",
+          "label": "支付宝",
+          "enabled": false
+        },
+        {
+          "code": "wechatpay",
+          "label": "微信支付",
+          "enabled": false
+        },
+        {
+          "code": "unionpay",
+          "label": "银联",
+          "enabled": false
+        }
       ]
     },
     "TH": {
@@ -54,10 +106,23 @@
       "currency": "THB",
       "sellable": false,
       "checkout": "none",
+      "externalStoreUrl": "",
       "methods": [
-        { "code": "promptpay", "label": "PromptPay",       "enabled": false },
-        { "code": "truemoney", "label": "TrueMoney Wallet","enabled": false },
-        { "code": "card",      "label": "บัตรเครดิต",       "enabled": false }
+        {
+          "code": "promptpay",
+          "label": "PromptPay",
+          "enabled": false
+        },
+        {
+          "code": "truemoney",
+          "label": "TrueMoney Wallet",
+          "enabled": false
+        },
+        {
+          "code": "card",
+          "label": "บัตรเครดิต",
+          "enabled": false
+        }
       ]
     },
     "VN": {
@@ -66,11 +131,28 @@
       "currency": "VND",
       "sellable": false,
       "checkout": "none",
+      "externalStoreUrl": "",
       "methods": [
-        { "code": "momo",    "label": "MoMo",       "enabled": false },
-        { "code": "zalopay", "label": "ZaloPay",    "enabled": false },
-        { "code": "vnpay",   "label": "VNPay",      "enabled": false },
-        { "code": "card",    "label": "Thẻ tín dụng","enabled": false }
+        {
+          "code": "momo",
+          "label": "MoMo",
+          "enabled": false
+        },
+        {
+          "code": "zalopay",
+          "label": "ZaloPay",
+          "enabled": false
+        },
+        {
+          "code": "vnpay",
+          "label": "VNPay",
+          "enabled": false
+        },
+        {
+          "code": "card",
+          "label": "Thẻ tín dụng",
+          "enabled": false
+        }
       ]
     }
   }

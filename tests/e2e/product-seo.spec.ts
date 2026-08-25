@@ -50,12 +50,6 @@ test.describe('제품 상세', () => {
     expect(html).toContain('What kind of brand is AVORA?');
     expect(html).toContain('SPF50+ / PA++++');
   });
-
-  test('1차 오픈에서는 자사 결제 버튼이 활성화되지 않는다', async ({ page }) => {
-    await page.goto('/ko/product');
-    // 장바구니 담기 버튼이 없어야 합니다 (payment-config 의 checkout: "external")
-    await expect(page.locator('button.cta')).toHaveCount(0);
-  });
 });
 
 test.describe('사이트 전역 SEO', () => {

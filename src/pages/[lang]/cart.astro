@@ -1,0 +1,166 @@
+---
+/**
+ * 장바구니.
+ *
+ * 서버에 저장하지 않으므로 화면 자체는 비어 있는 껍데기로 빌드되고,
+ * 브라우저에서 localStorage 를 읽어 채웁니다. 그래서 검색엔진에는 색인되지 않게 두었습니다.
+ */
+import Base from '../../layouts/Base.astro';
+import { LOCALES, type Locale } from '../../config/site';
+import { dict, localePath } from '../../i18n';
+import productData from '../../data/product.json';
+import commerce from '../../config/commerce.json';
+import { SELLS_DIRECTLY, CURRENCY } from '../../config/runtime';
+
+export function getStaticPaths() {
+  return LOCALES.map((lang) => ({ params: { lang } }));
+}
+
+const locale = Astro.params.lang as Locale;
+const t = dict(locale);
+const c = t.cart;
+const purchasable = SELLS_DIRECTLY;
+---
+
+<Base
+  locale={locale}
+  path="cart"
+  title={c.meta.title}
+  description={c.meta.description}
+  noindex
+>
+  <section class="section wrap">
+    <h1 class="display display--tight">{c.heading}</h1>
+
+    <div
+      class="cart"
+      data-cart
+      data-locale={locale}
+      data-currency={CURRENCY}
+      data-purchasable={String(purchasable)}
+      data-checkout-href={localePath(locale, 'checkout')}
+      data-product-href={localePath(locale, 'product')}
+    >
+      {/* 비어 있는 상태 — 기본값입니다. JS 가 장바구니를 읽고 내용이 있으면 감춥니다. */}
+      <div class="cart__empty" data-cart-empty>
+        <p class="body">{c.empty}</p>
+        <p style="margin-top: 22px">
+          <a class="cta" href={localePath(locale, 'product')}>{c.emptyCta}</a>
+        </p>
+      </div>
+
+      <div class="cart__filled" data-cart-filled hidden>
+        <ul class="cart__lines" data-cart-lines></ul>
+
+        <dl class="cart__totals">
+          <div>
+            <dt>{c.subtotal}</dt>
+            <dd data-cart-subtotal></dd>
+          </div>
+          <div>
+            <dt>{c.shipping}</dt>
+            <dd data-cart-shipping></dd>
+          </div>
+          <div class="cart__totals-grand">
+            <dt>{c.total}</dt>
+            <dd data-cart-total></dd>
+          </div>
+        </dl>
+
+        {
+          purchasable ? (
+            <a class="cta cart__checkout" href={localePath(locale, 'checkout')} data-cart-checkout>
+              {c.checkout}
+            </a>
+          ) : (
+            <p class="cart__notice">{c.priceUnknown}</p>
+          )
+        }
+
+        <p style="margin-top: 20px">
+          <a class="cta cta--ghost" href={localePath(locale, 'product')}>{c.continueShopping}</a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {/* 문구는 마크업에 심어 스크립트가 번역 파일을 다시 불러오지 않게 합니다. */}
+  <template data-cart-labels
+    data-label-quantity={c.quantity}
+    data-label-decrease={c.decrease}
+    data-label-increase={c.increase}
+    data-label-remove={c.remove}
+    data-label-free={c.shippingFree}
+    data-label-max={String(commerce.order.maxQuantityPerItem)}
+  ></template>
+</Base>
+
+<script>
+  import { detailed, totals, setQty, remove, subscribe } from '../../lib/cart';
+
+  const root = document.querySelector<HTMLElement>('[data-cart]');
+  const labels = document.querySelector<HTMLElement>('[data-cart-labels]');
+  if (root && labels) {
+    const locale = root.dataset.locale!;
+    const currency = root.dataset.currency!;
+    const emptyBox = root.querySelector<HTMLElement>('[data-cart-empty]')!;
+    const filledBox = root.querySelector<HTMLElement>('[data-cart-filled]')!;
+    const linesBox = root.querySelector<HTMLElement>('[data-cart-lines]')!;
+    const maxQty = Number(labels.dataset.labelMax);
+
+    const money = (value: number) =>
+      new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency,
+        maximumFractionDigits: 0,
+      }).format(value);
+
+    function render() {
+      const lines = detailed();
+      const sums = totals();
+
+      emptyBox.hidden = lines.length > 0;
+      filledBox.hidden = lines.length === 0;
+      if (lines.length === 0) return;
+
+      linesBox.replaceChildren(
+        ...lines.map((line) => {
+          const li = document.createElement('li');
+          li.className = 'cart__line';
+          li.innerHTML = `
+            <img class="cart__thumb" src="${line.image}" alt="" width="88" height="118" loading="lazy">
+            <div class="cart__line-body">
+              <p class="cart__line-name">${line.name}</p>
+              <p class="cart__line-price">${line.price != null ? money(line.price) : ''}</p>
+              <div class="cart__qty" role="group" aria-label="${labels!.dataset.labelQuantity}">
+                <button type="button" data-dec aria-label="${labels!.dataset.labelDecrease}">−</button>
+                <output>${line.qty}</output>
+                <button type="button" data-inc aria-label="${labels!.dataset.labelIncrease}" ${line.qty >= maxQty ? 'disabled' : ''}>+</button>
+              </div>
+            </div>
+            <div class="cart__line-side">
+              <p class="cart__line-total">${line.lineTotal != null ? money(line.lineTotal) : ''}</p>
+              <button class="cart__remove" type="button" data-remove>${labels!.dataset.labelRemove}</button>
+            </div>`;
+          li.querySelector('[data-dec]')!.addEventListener('click', () => setQty(line.id, line.qty - 1));
+          li.querySelector('[data-inc]')!.addEventListener('click', () => setQty(line.id, line.qty + 1));
+          li.querySelector('[data-remove]')!.addEventListener('click', () => remove(line.id));
+          return li;
+        }),
+      );
+
+      const set = (sel: string, text: string) => {
+        const el = root!.querySelector<HTMLElement>(sel);
+        if (el) el.textContent = text;
+      };
+      set('[data-cart-subtotal]', sums.subtotal != null ? money(sums.subtotal) : '—');
+      set(
+        '[data-cart-shipping]',
+        sums.shipping == null ? '—' : sums.shipping === 0 ? labels!.dataset.labelFree! : money(sums.shipping),
+      );
+      set('[data-cart-total]', sums.total != null ? money(sums.total) : '—');
+    }
+
+    subscribe(render);
+  }
+</script>

@@ -36,21 +36,7 @@ test.describe('루트 진입 시 언어 판별', () => {
   });
 });
 
-test.describe('결제 승인 엔드포인트', () => {
-  test('PG 미설정 상태에서는 503 과 이유를 돌려준다', async ({ request }) => {
-    const res = await request.post('/api/payments/confirm', {
-      data: { paymentKey: 'test_key', orderId: 'AVORA-TEST-1', amount: 32000 },
-    });
-    expect(res.status()).toBe(503);
-    const body = await res.json();
-    expect(body.error).toBe('PAYMENT_NOT_CONFIGURED');
-  });
-
-  test('GET 은 405', async ({ request }) => {
-    const res = await request.get('/api/payments/confirm');
-    expect(res.status()).toBe(405);
-  });
-
+test.describe('API 라우팅', () => {
   test('없는 API 경로는 404 JSON', async ({ request }) => {
     const res = await request.get('/api/nope');
     expect(res.status()).toBe(404);

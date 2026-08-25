@@ -14,7 +14,7 @@ import { LOCALES, type Locale } from '../../config/site';
 import { dict, localePath } from '../../i18n';
 import { breadcrumb, productSchema, faqPage } from '../../lib/jsonld';
 import productData from '../../data/product.json';
-import paymentConfig from '../../config/payment-config.json';
+import { SELLS_DIRECTLY, EXTERNAL_STORE_URL, PRICE, CURRENCY } from '../../config/runtime';
 
 export function getStaticPaths() {
   return LOCALES.map((lang) => ({ params: { lang } }));
@@ -25,21 +25,19 @@ const t = dict(locale);
 const p = t.product;
 
 /**
- * 1차 오픈에서는 자사 결제를 열지 않습니다(Round 15).
- * 이 판단은 payment-config.json 이 내리며, 여기서는 그 결과만 읽습니다.
- * 결제를 켤 때는 이 파일이 아니라 설정 파일을 고칩니다.
+ * 자사 결제를 여는 판단은 payment-config.json 과 product.json 이 내립니다.
+ * 여기서는 결과만 읽습니다 — 결제를 켤 때 고칠 곳은 이 파일이 아니라 설정입니다.
  */
-const country = paymentConfig.countries[paymentConfig.defaultCountry as 'KR'];
-const sellsDirectly = country.sellable && country.checkout === 'internal';
-const externalUrl = country.externalStoreUrl || null;
+const sellsDirectly = SELLS_DIRECTLY;
+const externalUrl = EXTERNAL_STORE_URL;
 
 const priceLabel =
-  typeof productData.price === 'number'
+  PRICE != null
     ? new Intl.NumberFormat(locale, {
         style: 'currency',
-        currency: productData.currency,
+        currency: CURRENCY,
         maximumFractionDigits: 0,
-      }).format(productData.price)
+      }).format(PRICE)
     : null;
 
 const specRows = [
@@ -95,7 +93,7 @@ const specRows = [
 
         {
           sellsDirectly ? (
-            <button class="cta" type="button">
+            <button class="cta" type="button" data-add-to-cart data-product-id={productData.id}>
               {p.hero.ctaCart}
             </button>
           ) : externalUrl ? (
@@ -195,4 +193,32 @@ const specRows = [
       <a class="cta cta--ghost" href={localePath(locale)}>{p.backToStory}</a>
     </p>
   </section>
+
+  {
+    sellsDirectly && (
+      <div class="toast" role="status" aria-live="polite" data-toast>
+        <span>{p.hero.added}</span>
+        <a href={localePath(locale, 'cart')}>{p.hero.viewCart}</a>
+      </div>
+    )
+  }
 </Base>
+
+<script>
+  import { add } from '../../lib/cart';
+
+  const button = document.querySelector<HTMLButtonElement>('[data-add-to-cart]');
+  const toast = document.querySelector<HTMLElement>('[data-toast]');
+  let timer: number | undefined;
+
+  button?.addEventListener('click', () => {
+    add(button.dataset.productId!, 1);
+    if (!toast) return;
+    toast.dataset.open = 'true';
+    window.clearTimeout(timer);
+    // 담은 직후 장바구니로 갈 사람에게는 링크가 남아 있어야 하니 넉넉히 둡니다.
+    timer = window.setTimeout(() => {
+      toast.dataset.open = 'false';
+    }, 5000);
+  });
+</script>

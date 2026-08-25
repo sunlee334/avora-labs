@@ -5,7 +5,8 @@
 
 - **프레임워크** Astro 7 (정적 생성)
 - **호스팅** Cloudflare Workers — 정적 파일과 API가 같은 도메인에서 동작합니다
-- **상태** 1차(브랜드 사이트) 개발 완료 · 자사 결제는 2차
+- **주문 저장** Cloudflare D1
+- **상태** 1차(브랜드 사이트)와 2차(자사 결제) 코드 모두 완료 · 결제 스위치는 꺼져 있음
 
 ---
 
@@ -17,7 +18,8 @@
 | 바꾸고 싶은 것 | 고칠 파일 | 따라 바뀌는 것 |
 |---|---|---|
 | **브랜드 컬러** | `tokens/design-tokens.json` | 사이트 전체 색 |
-| **제품 가격** | `src/data/product.json` | 제품 상세 · 검색엔진용 구조화 데이터 |
+| **제품 가격** | `src/data/product.json` | 제품 상세 · 장바구니 · 체크아웃 · 구조화 데이터 |
+| **배송비 정책** | `src/config/commerce.json` | 장바구니·체크아웃의 배송비 계산 |
 | **문구 (언어별)** | `src/i18n/{ko,en,zh,th,vi}.json` | 해당 언어의 모든 화면 · 이미지 대체텍스트 |
 | **판매 국가 · 결제수단** | `src/config/payment-config.json` | 결제수단 노출 · 구매 버튼 동작 |
 | **도메인** | `src/config/site.ts` 의 `ORIGIN` | 정규 URL · 언어별 대체 URL · SNS 공유 · 사이트맵 |
@@ -51,11 +53,30 @@
 
 ```bash
 npm install
-npm run dev        # 개발 서버 (http://localhost:4321)
-npm run build      # 정적 빌드 → dist/
-npm run preview    # Worker 까지 포함해 실제와 같은 환경으로 확인
-npm run test:e2e   # 브라우저 테스트 (모바일 Safari + 데스크톱 Chrome)
+npm run dev               # 개발 서버 (http://localhost:4321)
+npm run build             # 정적 빌드 → dist/
+npm run preview           # Worker 까지 포함해 실제와 같은 환경으로 확인
+npm run db:migrate:local  # 로컬 주문 DB 준비 (최초 1회)
+npm test                  # 브라우저 테스트 — 두 모드 모두
 ```
+
+### 두 가지 모드
+
+이 사이트는 설정에 따라 두 모드로 동작하고, 테스트도 둘 다 돕니다.
+
+| 모드 | 구매 버튼 | 언제 |
+|---|---|---|
+| **launch** (1차) | 외부몰로 이동 | 지금. `payment-config.json` 의 `KR.checkout` 이 `"external"` |
+| **commerce** (2차) | 자사 장바구니·결제 | PG 계약·도메인 확정 후 |
+
+2차 흐름을 미리 보고 싶다면 설정을 바꾸지 않고도 켤 수 있습니다.
+
+```bash
+PUBLIC_CHECKOUT_MODE=internal PUBLIC_PRODUCT_PRICE=32000 npm run build
+```
+
+실제로 열 때는 환경변수가 아니라 `payment-config.json` 과 `product.json` 을 고치세요 —
+그래야 무엇이 켜져 있는지가 저장소에 남습니다.
 
 `npm run build` 는 앞서 다음을 자동으로 실행합니다.
 
@@ -65,6 +86,7 @@ npm run test:e2e   # 브라우저 테스트 (모바일 Safari + 데스크톱 Chr
 | `og` | SNS 공유 이미지 1200×630 생성 |
 | `check:i18n` | 5개 언어 번역 파일의 키 구조가 한국어와 일치하는지 검사 |
 | `check:fonts` | 폰트 서브셋이 현재 문구의 모든 글자를 담고 있는지 검사 |
+| `check:types` | Cloudflare 런타임 타입 생성 후 타입 오류 검사 |
 
 검사에서 걸리면 빌드가 멈춥니다. 화면에 무엇이 빠졌는지 나오니 그대로 고치면 됩니다.
 
@@ -77,6 +99,9 @@ tokens/design-tokens.json   ★ 컬러·타이포·간격의 유일한 원본
 src/
   config/site.ts            도메인·언어 목록·사업자 정보
   config/payment-config.json  국가코드 → 결제수단
+  config/commerce.json      배송비·수량 한도
+  config/runtime.ts         빌드 시점 오버라이드 (미리보기용)
+  lib/cart.ts               장바구니 (localStorage)
   data/product.json         제품 정보·가격
   i18n/{언어}.json          번역 문구
   styles/tokens.css         ⚠️ 자동 생성 — 직접 고치지 마세요
@@ -88,7 +113,10 @@ public/
   fonts/{언어}/             언어별 폰트 서브셋 (자동 생성, 커밋함)
   brand/                    로고
   robots.txt  llms.txt
-worker/index.ts             루트 언어 판별 + 결제 승인 API
+worker/index.ts             루트 언어 판별 + 주문·결제 API
+worker/orders.ts            주문 저장·조회
+worker/payments/            PG 어댑터 (tosspayments · types · mock)
+migrations/                 D1 스키마
 tests/e2e/                  브라우저 테스트
 docs/                       기획·리서치 문서
 ```
@@ -102,11 +130,11 @@ docs/                       기획·리서치 문서
 
 | 언어 | 본문 | 헤드라인 |
 |---|---|---|
-| 한국어 | 74KB | 55KB |
+| 한국어 | 78KB | 55KB |
 | 영어 | 20KB | 19KB |
 | 중국어 | 21KB | 44KB |
 | 태국어 | 20KB | 19KB |
-| 베트남어 | 23KB | 22KB |
+| 베트남어 | 24KB | 22KB |
 
 처음에는 Google Fonts로 불러왔는데, 한글 조각 5개 + CSS로 **약 210KB**가 외부 서버에서
 내려오면서 모바일 LCP가 7.5초, Lighthouse 성능 점수가 59까지 떨어졌습니다.
@@ -157,19 +185,47 @@ SNS 공유 주소·사이트맵이 전부 따라옵니다.
 
 ## 결제 (2차)
 
-1차 오픈에서는 구매 버튼이 외부몰로 연결되고 자사 결제는 꺼져 있습니다.
-결제 승인 엔드포인트(`/api/payments/confirm`)는 이미 만들어져 있으며,
-설정이 없으면 이유를 담아 503을 돌려줍니다.
+장바구니 · 체크아웃 · 주문 완료 · 주문 조회가 모두 만들어져 있고, 스위치만 꺼져 있습니다.
 
-켜는 순서는 이렇습니다.
+### 주문 흐름
 
-1. PG 계약 완료 (Step 1 리서치의 비교표 참고 — `docs/step1-reference-research.md`)
-2. `wrangler secret put TOSS_SECRET_KEY` 로 시크릿 등록
-3. `wrangler.jsonc` 에 `"vars": { "PAYMENT_PROVIDER": "tosspayments" }` 추가
-4. `src/config/payment-config.json` 의 `KR.checkout` 을 `"internal"` 로 변경
+```
+체크아웃 폼
+  → POST /api/orders          주문을 D1 에 pending 으로 저장 (서버가 금액을 기억)
+  → PG 결제창
+  → /order/complete
+  → POST /api/payments/confirm  저장된 금액과 대조한 뒤 PG 에 승인 요청 → paid
+```
+
+**주문을 먼저 저장하는 이유는 금액 조작을 막기 위해서입니다.** 승인 단계에서
+브라우저가 보낸 금액을 그대로 믿으면 값을 바꿔 싸게 결제할 수 있습니다.
+서버는 저장해 둔 금액과 대조하고, 어긋나면 승인하지 않고 그 주문을 실패 처리합니다.
+
+### 켜는 순서
+
+1. **PG 계약** — 비교표는 `docs/step1-reference-research.md`
+2. **D1 준비**
+   ```bash
+   npx wrangler d1 create avora-orders     # 나온 database_id 를 wrangler.jsonc 에 넣기
+   npm run db:migrate                       # 운영 DB 에 테이블 생성
+   ```
+3. **시크릿 등록** — `npx wrangler secret put TOSS_SECRET_KEY`
+4. **`wrangler.jsonc`** 에 `"vars": { "PAYMENT_PROVIDER": "tosspayments" }` 추가
+5. **`src/data/product.json`** 의 `price` 채우기
+6. **`src/config/payment-config.json`** 의 `KR.checkout` 을 `"internal"` 로 변경
+7. **`src/config/commerce.json`** 의 배송비 정책 확정
+8. **`checkout.astro`** 의 PG SDK 호출 부분 연결 (주석으로 자리를 표시해 두었습니다)
 
 다른 PG를 쓰려면 `worker/payments/` 에 어댑터 파일 하나를 추가하고
 `worker/index.ts` 의 `ADAPTERS` 에 등록하면 됩니다. **화면 코드는 고치지 않습니다.**
+
+### 개인정보
+
+주문에는 받는 분·연락처·주소가 들어갑니다. 저장 위치는 Cloudflare D1 이며,
+`/{언어}/legal/privacy` 의 수집 항목 표는 **코드가 실제로 받는 것**을 적어 두었습니다.
+다만 고지 사항 전문은 사업자 정보와 법적 판단이 필요해 비워 두었습니다.
+
+카드번호·계좌번호 같은 결제수단 정보는 이 사이트가 받지도, 저장하지도 않습니다.
 
 ---
 
@@ -179,16 +235,19 @@ SNS 공유 주소·사이트맵이 전부 따라옵니다.
 
 | 항목 | 기준 | 측정값 (모바일) |
 |---|---|---|
-| Lighthouse Performance | ≥ 90 | **99~100** |
+| Lighthouse Performance | ≥ 90 | **96~100** (전 페이지) |
 | Lighthouse Accessibility | ≥ 95 | **100** |
-| Lighthouse SEO | 100 | **100** |
-| LCP | ≤ 2.5s | **1.4~2.2s** |
+| Lighthouse SEO | 100 | **100** (색인 대상 페이지) |
+| LCP | ≤ 2.5s | **1.4~2.5s** |
 | CLS | ≤ 0.1 | **0** |
 | 탭 영역 | ≥ 44×44px | 테스트로 강제 |
 | 360~430px 가로 스크롤 | 없음 | 테스트로 강제 |
-| 브라우저 테스트 | 전부 통과 | **90개 통과** |
+| 브라우저 테스트 | 전부 통과 | **254개 통과** (commerce 156 + launch 98) |
 
-`npm run test:e2e` 가 이 중 측정 가능한 항목을 자동으로 검사합니다.
+> 장바구니·체크아웃·주문조회는 Lighthouse SEO 가 69 로 나옵니다.
+> `noindex` 페이지를 감점하는 항목 때문이며, 이 세 페이지는 색인되면 안 되는 페이지라 정상입니다.
+
+`npm test` 가 이 중 측정 가능한 항목을 두 모드 모두에서 자동으로 검사합니다.
 
 ---
 

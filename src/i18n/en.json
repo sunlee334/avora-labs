@@ -108,7 +108,9 @@
       "headline": "Through every movement, skin still breathes easy.",
       "priceUnknown": "Price to be announced",
       "ctaExternal": "Buy on Smart Store",
-      "ctaCart": "Add to cart"
+      "ctaCart": "Add to cart",
+      "added": "Added to your cart",
+      "viewCart": "View cart"
     },
     "principles": {
       "kicker": "Product Principles",
@@ -211,7 +213,41 @@
         "description": "The privacy policy for the AVORA website."
       },
       "heading": "Privacy Policy",
-      "placeholder": "This document is in preparation and will be published once the data we collect and our business details are confirmed."
+      "placeholder": "This document is in preparation and will be published once the data we collect and our business details are confirmed.",
+      "collect": {
+        "heading": "What we collect",
+        "intro": "These are the items this site actually collects and stores, written from the code itself and updated when the code changes.",
+        "rows": [
+          {
+            "item": "Recipient name, phone, postal code, address",
+            "purpose": "Order processing and delivery",
+            "when": "At checkout (required)"
+          },
+          {
+            "item": "Email",
+            "purpose": "Order updates",
+            "when": "At checkout (optional)"
+          },
+          {
+            "item": "Delivery note",
+            "purpose": "Reference during delivery",
+            "when": "At checkout (optional)"
+          },
+          {
+            "item": "Items ordered, amount, payment status",
+            "purpose": "Order and payment records",
+            "when": "At checkout (automatic)"
+          }
+        ],
+        "notCollected": "Card and account numbers are never received or stored by this site. They are handled entirely inside the payment provider’s own screens.",
+        "retention": "Retention follows the periods set by applicable law. Exact periods and deletion procedures will be published with the full text below.",
+        "pending": "The full policy text below is in preparation and will be published once our business details are confirmed.",
+        "columns": {
+          "item": "Item",
+          "purpose": "Purpose",
+          "when": "Collected"
+        }
+      }
     }
   },
   "notFound": {
@@ -227,6 +263,120 @@
     "skipToContent": "Skip to content",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
-    "selectLanguage": "Select language"
+    "selectLanguage": "Select language",
+    "cartCount": "Cart"
+  },
+  "cart": {
+    "meta": {
+      "title": "Cart — AVORA",
+      "description": "Your AVORA cart."
+    },
+    "heading": "Cart",
+    "empty": "Your cart is empty.",
+    "emptyCta": "View the product",
+    "continueShopping": "Keep browsing",
+    "quantity": "Quantity",
+    "decrease": "Decrease quantity",
+    "increase": "Increase quantity",
+    "remove": "Remove",
+    "removed": "Removed from your cart.",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "shippingFree": "Free",
+    "total": "Total",
+    "checkout": "Checkout",
+    "priceUnknown": "Ordering opens once the price is confirmed.",
+    "itemCount": "{count} item(s)"
+  },
+  "checkout": {
+    "meta": {
+      "title": "Checkout — AVORA",
+      "description": "Complete your AVORA order."
+    },
+    "heading": "Checkout",
+    "shippingSection": "Shipping details",
+    "paymentSection": "Payment method",
+    "summarySection": "Order summary",
+    "fields": {
+      "recipientName": "Recipient",
+      "recipientPhone": "Phone",
+      "postalCode": "Postal code",
+      "address1": "Address",
+      "address2": "Address line 2",
+      "memo": "Delivery note",
+      "email": "Email"
+    },
+    "placeholders": {
+      "recipientName": "Full name",
+      "recipientPhone": "010-0000-0000",
+      "postalCode": "00000",
+      "address1": "Street address",
+      "address2": "Unit, floor",
+      "memo": "Leave at the door (optional)",
+      "email": "Where to send your receipt (optional)"
+    },
+    "findPostcode": "Find postal code",
+    "optional": "Optional",
+    "errors": {
+      "required": "This field is required.",
+      "phone": "Please check the phone number.",
+      "email": "That email address is not valid.",
+      "postal": "Postal code must be 5 digits.",
+      "agree": "Please agree to the collection of your details.",
+      "network": "The request failed. Please try again in a moment.",
+      "orderFailed": "We could not place your order.",
+      "paymentNotReady": "Payment is not available yet."
+    },
+    "agree": {
+      "label": "I agree to the collection and use of my details for this order.",
+      "detail": "Collected: recipient, phone, address, email (optional) · Purpose: order processing and delivery · Retention: as required by applicable law",
+      "link": "Read the privacy policy"
+    },
+    "pay": "Pay",
+    "paying": "Opening the payment window…",
+    "emptyCart": "Your cart is empty.",
+    "backToCart": "Back to cart"
+  },
+  "order": {
+    "complete": {
+      "meta": {
+        "title": "Order complete — AVORA",
+        "description": "Your order has been placed."
+      },
+      "heading": "Your order is complete.",
+      "body": "You can look up your order with the order number below.",
+      "orderNumber": "Order number",
+      "amount": "Amount paid",
+      "recipient": "Recipient",
+      "address": "Shipping address",
+      "confirming": "Confirming your payment…",
+      "home": "Back to home",
+      "lookup": "Look up order"
+    },
+    "failed": {
+      "heading": "Payment did not go through.",
+      "body": "The payment was cancelled or something went wrong during approval. Please try again.",
+      "retry": "Back to cart"
+    },
+    "lookup": {
+      "meta": {
+        "title": "Order lookup — AVORA",
+        "description": "Look up an order by number and phone."
+      },
+      "heading": "Order lookup",
+      "body": "Enter your order number and the phone number you used.",
+      "orderId": "Order number",
+      "phone": "Phone",
+      "submit": "Look up",
+      "searching": "Looking up…",
+      "notFound": "We could not find a matching order. Please check the number and phone."
+    },
+    "status": {
+      "pending": "Awaiting payment",
+      "paid": "Paid",
+      "failed": "Payment failed",
+      "cancelled": "Cancelled"
+    },
+    "statusLabel": "Order status"
   }
 }

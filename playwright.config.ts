@@ -1,14 +1,39 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * E2E 는 `wrangler dev` 위에서 돕니다.
- * astro preview 가 아니라 Worker 를 태우는 이유: 루트 302 와 결제 API 가
- * Worker 안에 있어서, 정적 서버로 띄우면 그 둘을 검증할 수 없습니다.
+ * 이 사이트는 설정에 따라 두 모드로 동작합니다.
+ *
+ *   launch   (1차) 구매 버튼이 외부몰로 이동. 장바구니·체크아웃 라우트 비활성
+ *   commerce (2차) 자사 결제. 장바구니·체크아웃·주문조회 동작
+ *
+ * 한 모드만 테스트하면 나머지 모드는 아무도 확인하지 않은 채 배포됩니다.
+ * 그래서 E2E_MODE 로 빌드와 대상 테스트를 함께 바꾸고, CI 는 둘 다 돌립니다.
+ *
+ *   npm run test:e2e          commerce 모드
+ *   npm run test:e2e:launch   launch 모드
  */
+const MODE = (process.env.E2E_MODE ?? 'commerce') as 'commerce' | 'launch';
 const PORT = 8787;
+
+const buildEnv =
+  MODE === 'commerce'
+    ? 'PUBLIC_CHECKOUT_MODE=internal PUBLIC_PRODUCT_PRICE=32000'
+    : 'PUBLIC_CHECKOUT_MODE=external';
+
+/**
+ * commerce 모드에서는 테스트용 결제 어댑터를 켭니다.
+ * .dev.vars 는 gitignore 대상이라 CI 에는 없으므로 여기서 명시적으로 넘깁니다.
+ * launch 모드에서는 넘기지 않아 "PG 미설정" 경로가 그대로 확인됩니다.
+ */
+const workerVars = MODE === 'commerce' ? '--var PAYMENT_PROVIDER:mock' : '';
+
+/** 해당 모드에서만 의미 있는 테스트는 폴더로 갈라 두었습니다. */
+const testIgnore =
+  MODE === 'commerce' ? ['**/launch/**'] : ['**/commerce/**'];
 
 export default defineConfig({
   testDir: './tests/e2e',
+  testIgnore,
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -32,9 +57,17 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: `npx wrangler dev --port ${PORT} --local`,
+    // 매번 해당 모드로 새로 빌드합니다 — 이전 모드의 dist 로 도는 사고를 막습니다.
+    // D1 마이그레이션도 함께 돌립니다. CI 는 .wrangler 상태가 비어 있어
+    // 이걸 빼면 로컬에서만 통과하는 테스트가 됩니다.
+    command: [
+      buildEnv,
+      'npm run build &&',
+      'npx wrangler d1 migrations apply avora-orders --local &&',
+      `npx wrangler dev --port ${PORT} --local ${workerVars}`,
+    ].join(' '),
     url: `http://127.0.0.1:${PORT}/ko/`,
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
+    reuseExistingServer: false,
+    timeout: 180_000,
   },
 });

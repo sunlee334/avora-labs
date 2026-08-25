@@ -108,7 +108,9 @@
       "headline": "움직이는 모든 순간에도, 피부는 편안하게 숨 쉽니다.",
       "priceUnknown": "가격 확정 예정",
       "ctaExternal": "스마트스토어에서 구매",
-      "ctaCart": "장바구니에 담기"
+      "ctaCart": "장바구니에 담기",
+      "added": "장바구니에 담았습니다",
+      "viewCart": "장바구니 보기"
     },
     "principles": {
       "kicker": "Product Principles",
@@ -211,7 +213,41 @@
         "description": "AVORA 웹사이트의 개인정보처리방침입니다."
       },
       "heading": "개인정보처리방침",
-      "placeholder": "본 문서는 준비 중입니다. 실제 수집 항목과 사업자 정보가 확정되면 게시됩니다."
+      "placeholder": "본 문서는 준비 중입니다. 실제 수집 항목과 사업자 정보가 확정되면 게시됩니다.",
+      "collect": {
+        "heading": "수집하는 항목",
+        "intro": "아래는 이 사이트가 실제로 수집·저장하는 항목입니다. 코드 기준으로 작성했으며, 항목이 바뀌면 함께 갱신됩니다.",
+        "rows": [
+          {
+            "item": "받는 분 이름 · 연락처 · 우편번호 · 주소",
+            "purpose": "주문 처리 및 배송",
+            "when": "주문 시 (필수)"
+          },
+          {
+            "item": "이메일",
+            "purpose": "주문 내역 안내",
+            "when": "주문 시 (선택)"
+          },
+          {
+            "item": "배송 요청사항",
+            "purpose": "배송 시 참고",
+            "when": "주문 시 (선택)"
+          },
+          {
+            "item": "주문 상품 · 금액 · 결제 상태",
+            "purpose": "주문 및 결제 기록",
+            "when": "주문 시 (자동)"
+          }
+        ],
+        "notCollected": "카드번호·계좌번호 등 결제수단 정보는 이 사이트가 받지도, 저장하지도 않습니다. 결제사 화면 안에서만 처리됩니다.",
+        "retention": "보유기간은 관련 법령이 정하는 기간을 따릅니다. 구체적인 기간과 파기 절차는 아래 본문이 확정되면 함께 게시됩니다.",
+        "pending": "아래 본문(고지 사항 전문)은 준비 중입니다. 사업자 정보와 함께 확정되면 게시됩니다.",
+        "columns": {
+          "item": "항목",
+          "purpose": "목적",
+          "when": "수집 시점"
+        }
+      }
     }
   },
   "notFound": {
@@ -227,6 +263,120 @@
     "skipToContent": "본문으로 건너뛰기",
     "openMenu": "메뉴 열기",
     "closeMenu": "메뉴 닫기",
-    "selectLanguage": "언어 선택"
+    "selectLanguage": "언어 선택",
+    "cartCount": "장바구니"
+  },
+  "cart": {
+    "meta": {
+      "title": "장바구니 — AVORA",
+      "description": "AVORA 장바구니입니다."
+    },
+    "heading": "장바구니",
+    "empty": "장바구니가 비어 있습니다.",
+    "emptyCta": "제품 보러 가기",
+    "continueShopping": "계속 둘러보기",
+    "quantity": "수량",
+    "decrease": "수량 줄이기",
+    "increase": "수량 늘리기",
+    "remove": "삭제",
+    "removed": "장바구니에서 삭제했습니다.",
+    "subtotal": "상품 금액",
+    "shipping": "배송비",
+    "shippingFree": "무료",
+    "total": "결제 예정 금액",
+    "checkout": "주문하기",
+    "priceUnknown": "가격이 확정되면 주문할 수 있습니다.",
+    "itemCount": "{count}개"
+  },
+  "checkout": {
+    "meta": {
+      "title": "주문 · 결제 — AVORA",
+      "description": "AVORA 주문 및 결제 페이지입니다."
+    },
+    "heading": "주문 · 결제",
+    "shippingSection": "배송 정보",
+    "paymentSection": "결제수단",
+    "summarySection": "주문 요약",
+    "fields": {
+      "recipientName": "받는 분",
+      "recipientPhone": "연락처",
+      "postalCode": "우편번호",
+      "address1": "주소",
+      "address2": "상세주소",
+      "memo": "배송 요청사항",
+      "email": "이메일"
+    },
+    "placeholders": {
+      "recipientName": "홍길동",
+      "recipientPhone": "010-0000-0000",
+      "postalCode": "00000",
+      "address1": "도로명 주소",
+      "address2": "동·호수 등",
+      "memo": "문 앞에 놓아주세요 (선택)",
+      "email": "주문 내역을 받을 주소 (선택)"
+    },
+    "findPostcode": "우편번호 찾기",
+    "optional": "선택",
+    "errors": {
+      "required": "필수 항목입니다.",
+      "phone": "연락처를 다시 확인해 주세요.",
+      "email": "이메일 형식이 올바르지 않습니다.",
+      "postal": "우편번호는 숫자 5자리입니다.",
+      "agree": "개인정보 수집·이용에 동의해 주세요.",
+      "network": "통신에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+      "orderFailed": "주문을 접수하지 못했습니다.",
+      "paymentNotReady": "결제 준비가 아직 완료되지 않았습니다."
+    },
+    "agree": {
+      "label": "주문 처리를 위한 개인정보 수집·이용에 동의합니다.",
+      "detail": "수집 항목: 받는 분, 연락처, 주소, 이메일(선택) · 목적: 주문 처리 및 배송 · 보유기간: 관련 법령이 정하는 기간",
+      "link": "개인정보처리방침 보기"
+    },
+    "pay": "결제하기",
+    "paying": "결제창을 여는 중…",
+    "emptyCart": "장바구니가 비어 있습니다.",
+    "backToCart": "장바구니로 돌아가기"
+  },
+  "order": {
+    "complete": {
+      "meta": {
+        "title": "주문이 완료되었습니다 — AVORA",
+        "description": "주문이 정상적으로 접수되었습니다."
+      },
+      "heading": "주문이 완료되었습니다.",
+      "body": "주문 내역은 아래 주문번호로 조회하실 수 있습니다.",
+      "orderNumber": "주문번호",
+      "amount": "결제 금액",
+      "recipient": "받는 분",
+      "address": "배송지",
+      "confirming": "결제를 확인하는 중입니다…",
+      "home": "홈으로",
+      "lookup": "주문 조회"
+    },
+    "failed": {
+      "heading": "결제가 완료되지 않았습니다.",
+      "body": "결제가 취소되었거나 승인 과정에서 문제가 있었습니다. 다시 시도해 주세요.",
+      "retry": "장바구니로 돌아가기"
+    },
+    "lookup": {
+      "meta": {
+        "title": "주문 조회 — AVORA",
+        "description": "주문번호와 연락처로 주문을 조회합니다."
+      },
+      "heading": "주문 조회",
+      "body": "주문번호와 주문 시 입력한 연락처를 입력해 주세요.",
+      "orderId": "주문번호",
+      "phone": "연락처",
+      "submit": "조회하기",
+      "searching": "조회 중…",
+      "notFound": "일치하는 주문을 찾을 수 없습니다. 주문번호와 연락처를 다시 확인해 주세요."
+    },
+    "status": {
+      "pending": "결제 대기",
+      "paid": "결제 완료",
+      "failed": "결제 실패",
+      "cancelled": "취소됨"
+    },
+    "statusLabel": "주문 상태"
   }
 }

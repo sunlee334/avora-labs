@@ -17,7 +17,11 @@
     "dev": "npm run tokens && astro dev",
     "preview": "npm run build && wrangler dev",
     "deploy": "npm run build && wrangler deploy",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:launch": "E2E_MODE=launch playwright test",
+    "test": "npm run test:e2e && npm run test:e2e:launch",
+    "db:migrate:local": "wrangler d1 migrations apply avora-orders --local",
+    "db:migrate": "wrangler d1 migrations apply avora-orders --remote"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",
