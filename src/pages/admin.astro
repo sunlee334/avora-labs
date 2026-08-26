@@ -389,13 +389,37 @@ const FULFILLMENT_LABEL: Record<string, string> = {
         return el;
       }
 
+      /*
+       * 인증이 막혔을 때 "로그인하세요" 하나로 뭉뚱그리면 안 됩니다.
+       *
+       * 특히 위험한 경우: Access 애플리케이션이 `/admin` 만 덮고 `/api/admin` 을
+       * 빠뜨리면, **로그인은 되어 화면은 열리는데 데이터만 오지 않습니다.**
+       * Worker 는 쿠키가 아니라 `Cf-Access-Jwt-Assertion` 헤더를 보는데,
+       * Cloudflare 는 그 헤더를 Access 가 덮는 경로에만 붙이기 때문입니다.
+       * 이때 "로그인이 필요합니다" 라고 하면 이미 로그인한 사람을 로그인
+       * 화면으로 계속 돌려보내게 됩니다.
+       */
+      const ACCESS_HELP: Record<string, string> = {
+        ACCESS_NOT_CONFIGURED:
+          '관리 화면 인증이 아직 설정되지 않았습니다. Cloudflare Zero Trust 에서 Access 애플리케이션을 만들고, ACCESS_TEAM_DOMAIN 과 ACCESS_POLICY_AUD 를 설정한 뒤 다시 배포하세요.',
+        ACCESS_TOKEN_MISSING:
+          'Cloudflare Access 가 이 요청에 인증 토큰을 붙이지 않았습니다. Access 애플리케이션에 /api/admin 경로가 빠져 있을 가능성이 큽니다 — 이 화면만 보호하면 화면은 열리지만 데이터는 오지 않습니다.',
+        ACCESS_TOKEN_INVALID:
+          '인증 정보가 만료되었거나 다른 애플리케이션의 것입니다. 페이지를 새로고침해 다시 로그인해 주세요.',
+      };
+
       async function api(path: string, init?: RequestInit) {
         const res = await fetch(path, {
           ...init,
           headers: { 'Content-Type': 'application/json', ...(init?.headers ?? {}) },
         });
         if (res.status === 401 || res.status === 403) {
-          throw new Error('접근 권한이 없습니다. Cloudflare Access 로그인이 필요합니다.');
+          const reason = (await res.json().catch(() => ({}))) as { error?: string; message?: string };
+          throw new Error(
+            (reason.error && ACCESS_HELP[reason.error]) ||
+              reason.message ||
+              '접근 권한이 없습니다.',
+          );
         }
         const body = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error((body as any).message || (body as any).error || '요청이 실패했습니다.');

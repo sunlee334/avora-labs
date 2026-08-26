@@ -275,31 +275,69 @@ robots·sitemap·canonical 세 곳이 같은 주소인지 검사합니다.
 Cloudflare Access 를 앞에 세웠습니다. 설정을 깜빡한 채 배포하면 주문의 연락처와
 배송지가 인터넷에 그대로 노출되므로, 잠기는 쪽이 기본값입니다.
 
-> ⚠️ **아직 설정 전이라 403 으로 잠겨 있습니다.** 도메인(avoralabs.co)이
-> 붙었으므로 이제 경로별 보호가 가능합니다 — 아래 순서로 열면 됩니다.
->
-> Workers & Pages → Settings → Domains & Routes 의 **"Enable Cloudflare Access"**
-> 원클릭 버튼은 누르지 마세요. 그 버튼은 `/admin` 만이 아니라 **호스트 전체**를
+현재 설정:
+
+| | 값 |
+|---|---|
+| 팀 도메인 | `https://avoralabs.cloudflareaccess.com` |
+| Access 애플리케이션 | `avoralabs.co/admin` · `avoralabs.co/api/admin` |
+| 세션 | 24시간 |
+
+> 🚨 **Workers & Pages → Domains & Routes 의 "Enable Cloudflare Access"
+> 원클릭 버튼은 누르지 마세요.** 그 버튼은 `/admin` 만이 아니라 **호스트 전체**를
 > 로그인 뒤로 보냅니다. 브랜드 사이트 5개 언어가 통째로 비공개가 됩니다.
->
-> 대신 Zero Trust → Access → Applications 에서 **Self-hosted** 애플리케이션을
-> 만들고 도메인 `avoralabs.co`, 경로 `admin` 을 지정하세요. 그다음 나온
-> **Audience 태그**와 팀 도메인을 `wrangler.jsonc` 의 vars 에 넣습니다.
-> 둘 중 하나라도 없으면 관리 화면은 잠긴 채로 있습니다(열린 채가 아니라).
+> 경로별 보호는 아래처럼 Zero Trust 애플리케이션으로 합니다.
 
-도메인이 확정된 뒤 여는 순서:
+### `/api/admin` 을 빠뜨리면 안 됩니다
 
-1. Cloudflare Zero Trust → **Access → Applications** → Self-hosted 추가
-2. 도메인은 `<사이트도메인>`, 경로는 `/admin` 과 `/api/admin`
-3. 정책에 로그인을 허용할 이메일(또는 도메인)을 넣기
-4. `wrangler.jsonc` 에 두 값을 넣고 배포
+Access 애플리케이션의 Destinations 에 경로가 **두 개** 있어야 합니다.
+
+```
+avoralabs.co / admin        ← 화면
+avoralabs.co / api/admin    ← 화면이 부르는 API
+```
+
+Cloudflare 는 `Cf-Access-Jwt-Assertion` 헤더를 **Access 가 덮는 경로에만** 붙입니다.
+`/admin` 만 걸면 로그인은 성공해 화면까지 오는데, 화면이 부르는 API 는 토큰이
+없어 전부 401 이 됩니다. 증상은 "표가 영원히 불러오는 중" 이라 원인이 안 보입니다.
+
+그래서 관리 화면은 그 경우 "로그인이 필요합니다" 가 아니라 **경로 설정을
+지목하는 메시지**를 띄웁니다. `tests/e2e/commerce/admin.spec.ts` 가
+`/api/admin` 요청에서만 토큰을 떼어내 그 상황을 재현합니다.
+
+### 처음부터 설정하는 순서
+
+1. Zero Trust → **Settings** 에서 팀 이름 정하기 (로그인 페이지 주소가 됩니다)
+2. **Access → Applications** → Self-hosted 추가
+3. Destinations 에 위의 경로 두 개
+4. Policies 에 Allow 정책 하나 — 비어 있으면 default-deny 라 본인도 못 들어갑니다
+5. **Additional settings** 탭의 Application Audience (AUD) Tag 복사
+6. `wrangler.jsonc` 의 vars 에 두 값을 넣고 배포
 
    ```jsonc
    "vars": {
      "ACCESS_TEAM_DOMAIN": "https://<팀이름>.cloudflareaccess.com",
-     "ACCESS_POLICY_AUD": "<애플리케이션 Audience 태그>"
+     "ACCESS_POLICY_AUD": "<64자 16진수 AUD 태그>"
    }
    ```
+
+   둘 중 하나라도 없거나 비면 관리 화면은 **잠긴 채로** 있습니다(열린 채가 아니라).
+   `tests/e2e/commerce/admin.spec.ts` 가 이 파일을 직접 읽어 두 값의 형식까지
+   확인합니다 — Access 는 로컬에서 재현할 수 없어 그렇게라도 봐야 합니다.
+
+> ⚠️ **팀 이름을 바꾸면 `ACCESS_TEAM_DOMAIN` 도 함께 바꿔야 합니다.**
+> Worker 가 이 값을 JWT 의 issuer 로 대조하므로, 어긋나면 로그인에 성공해도
+> 통과하지 못합니다.
+
+### 로컬 테스트는 어떻게 도나
+
+Access 는 요청이 Worker 에 닿기 전에 Cloudflare 가 처리하는 것이라
+`wrangler dev` 로는 재현할 수 없습니다. 그리고 `worker/admin.ts` 는 **Access 가
+설정돼 있으면 개발용 토큰을 아예 읽지 않습니다** — 운영에 개발용 토큰이 섞여도
+통로가 열리지 않게 하려는 의도적인 순서입니다.
+
+그래서 `playwright.config.ts` 가 로컬 서버에 한해 두 값을 빈 문자열로 덮습니다
+(`accessOff`). 그 덮어쓰기는 거기에만 있고 운영 배포에는 존재하지 않습니다.
 
 검증은 `worker/admin.ts` 가 합니다. Cloudflare 가 붙여 주는 `Cf-Access-Jwt-Assertion`
 헤더의 서명을 팀 공개키로 확인하고, 발급자와 대상(aud)까지 대조합니다.
@@ -499,7 +537,7 @@ npx wrangler secret put KAKAO_CLIENT_SECRET    # 활성화한 경우만
 | 탭 영역 | ≥ 44×44px | 테스트로 강제 |
 | 320~430px 가로 스크롤 | 없음 | 테스트로 강제 (5개 언어 전부) |
 | 접근성 자동 검사 (axe, WCAG 2.1 AA) | 위반 0 | **위반 0** (44개 화면·상태) |
-| 브라우저 테스트 | 전부 통과 | **982개 통과** (commerce 666 + launch 316) |
+| 브라우저 테스트 | 전부 통과 | **992개 통과** (commerce 676 + launch 316) |
 
 > 장바구니·체크아웃·주문조회는 Lighthouse SEO 가 69 로 나옵니다.
 > `noindex` 페이지를 감점하는 항목 때문이며, 이 세 페이지는 색인되면 안 되는 페이지라 정상입니다.

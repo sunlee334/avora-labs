@@ -38,6 +38,24 @@ export const CAPTURE_URL = `http://127.0.0.1:${CAPTURE_PORT}`;
  * .dev.vars 는 gitignore 대상이라 CI 에는 없으므로 여기서 명시적으로 넘깁니다.
  * launch 모드에서는 넘기지 않아 "PG 미설정" 경로가 그대로 확인됩니다.
  */
+/**
+ * 운영 설정을 로컬에서만 되돌리는 값.
+ *
+ * wrangler.jsonc 에 Cloudflare Access 설정(ACCESS_TEAM_DOMAIN·ACCESS_POLICY_AUD)이
+ * 들어 있고 `wrangler dev` 는 그 파일을 그대로 읽습니다. 그런데 Access 는
+ * 요청이 Worker 에 닿기 전에 Cloudflare 가 처리하는 것이라 로컬에서는 재현할
+ * 수 없습니다.
+ *
+ * worker/admin.ts 는 **Access 가 설정돼 있으면 개발용 토큰을 아예 읽지 않습니다.**
+ * 운영에 개발용 토큰이 섞여 들어와도 통로가 열리지 않게 하려는 의도적인
+ * 순서입니다. 그래서 로컬에서는 두 값을 빈 문자열로 덮어 그 문을 되돌립니다.
+ *
+ * 이 덮어쓰기는 여기에만 있습니다. 운영 배포에는 존재하지 않으며,
+ * tests/e2e/commerce/admin.spec.ts 가 wrangler.jsonc 에 두 값이 실제로
+ * 들어 있는지 따로 확인합니다.
+ */
+const accessOff = '--var ACCESS_TEAM_DOMAIN: --var ACCESS_POLICY_AUD:';
+
 const workerVars =
   MODE === 'commerce'
     // Worker 도 가격을 알아야 합니다 — 이제 서버가 금액을 직접 계산하므로,
@@ -46,9 +64,10 @@ const workerVars =
     // 붙이는 것이라 wrangler dev 로는 재현할 수 없습니다. 관리 API 를 테스트하려면
     // 다른 문이 필요합니다. 운영에서는 절대 설정하지 않으며, 배포 전 점검이
     // wrangler.jsonc 에서 이 이름을 발견하면 배포를 멈춥니다.
-    ? `--var PAYMENT_PROVIDER:mock --var PRODUCT_PRICE:32000 --var ADMIN_DEV_TOKEN:${ADMIN_DEV_TOKEN}` +
+    ? `${accessOff} --var PAYMENT_PROVIDER:mock --var PRODUCT_PRICE:32000` +
+      ` --var ADMIN_DEV_TOKEN:${ADMIN_DEV_TOKEN}` +
       ` --var NOTIFY_WEBHOOK_URL:${CAPTURE_URL}/hook --var AUTH_PROVIDER:mock`
-    : '';
+    : accessOff;
 
 /** 해당 모드에서만 의미 있는 테스트는 폴더로 갈라 두었습니다. */
 const testIgnore =

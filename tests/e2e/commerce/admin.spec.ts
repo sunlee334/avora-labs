@@ -1,4 +1,5 @@
 import { test, expect, type APIRequestContext } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 import { ADMIN_DEV_TOKEN } from '../../../playwright.config';
 
 /**
@@ -414,5 +415,80 @@ test.describe('관리 화면', () => {
       'content',
       /noindex/,
     );
+  });
+});
+
+test.describe('Access 설정이 어긋났을 때 무엇이 잘못됐는지 알려준다', () => {
+  /**
+   * Cloudflare Access 를 붙일 때 가장 빠지기 쉬운 함정을 재현합니다.
+   *
+   * Access 애플리케이션을 `/admin` 에만 걸고 `/api/admin` 을 빠뜨리면,
+   * 사람은 로그인에 성공해 화면까지 옵니다. 그런데 Cloudflare 는
+   * `Cf-Access-Jwt-Assertion` 헤더를 **Access 가 덮는 경로에만** 붙이므로
+   * 화면이 부르는 API 에는 토큰이 없습니다.
+   *
+   * 이때 "로그인이 필요합니다" 라고 안내하면, 이미 로그인한 사람을 로그인
+   * 화면으로 무한히 돌려보내게 됩니다. 진짜 원인은 경로 설정입니다.
+   */
+  test.use({ extraHTTPHeaders: AUTH });
+
+  test('화면은 열렸는데 API 에만 토큰이 없으면 경로 설정을 지목한다', async ({ page }) => {
+    // 페이지 요청에는 토큰이 붙고, /api/admin 요청에서만 떼어냅니다.
+    await page.route('**/api/admin/**', async (route) => {
+      const headers = { ...route.request().headers() };
+      delete headers['x-admin-dev-token'];
+      await route.continue({ headers });
+    });
+
+    await page.goto('/admin');
+
+    const state = page.locator('[data-state]');
+    await expect(state).toBeVisible();
+    await expect(state).toContainText('/api/admin');
+    // 이미 로그인한 사람에게 다시 로그인하라고 하지 않습니다.
+    await expect(state).not.toContainText('로그인이 필요합니다');
+  });
+});
+
+test.describe('운영 배포 설정에 Access 가 실제로 들어 있다', () => {
+  /**
+   * 이 테스트가 보는 것은 **로컬 서버가 아니라 배포 설정 파일**입니다.
+   *
+   * Cloudflare Access 는 요청이 Worker 에 닿기 전에 Cloudflare 가 처리하는
+   * 것이라 `wrangler dev` 로는 재현할 수 없습니다. 그래서 위의 테스트들은
+   * 전부 개발용 토큰으로 돕니다 — 즉 **운영에 Access 가 설정돼 있는지는
+   * 아무도 확인하지 않습니다.**
+   *
+   * 설정이 비면 화면은 잠긴 채로 있으므로(열리지 않으므로) 정보가 새지는
+   * 않습니다. 대신 주문이 들어와도 아무도 못 여는 상태가 조용히 지속됩니다.
+   * 그래서 여기서 파일을 직접 읽어 확인합니다.
+   */
+  const wrangler = readFileSync(new URL('../../../wrangler.jsonc', import.meta.url), 'utf-8');
+  const varOf = (name: string): string | null => {
+    const m = wrangler.match(new RegExp(`"${name}"\\s*:\\s*"([^"]*)"`));
+    return m ? m[1] : null;
+  };
+
+  test('팀 도메인과 AUD 가 둘 다 있다', () => {
+    // 하나만 있으면 worker/admin.ts 는 "미설정" 으로 보고 잠급니다.
+    expect(varOf('ACCESS_TEAM_DOMAIN'), 'ACCESS_TEAM_DOMAIN 이 없습니다').toBeTruthy();
+    expect(varOf('ACCESS_POLICY_AUD'), 'ACCESS_POLICY_AUD 가 없습니다').toBeTruthy();
+  });
+
+  test('팀 도메인 형식이 JWT 의 issuer 와 맞는다', () => {
+    // jwtVerify 가 issuer 를 문자열 그대로 비교하므로 끝 슬래시 하나로 어긋납니다.
+    const domain = varOf('ACCESS_TEAM_DOMAIN')!;
+    expect(domain).toMatch(/^https:\/\/[a-z0-9-]+\.cloudflareaccess\.com$/);
+  });
+
+  test('AUD 가 애플리케이션 태그 형식이다', () => {
+    // 64자 16진수입니다. 다른 값을 넣으면 로그인은 되는데 검증에서 떨어집니다.
+    expect(varOf('ACCESS_POLICY_AUD')!).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  test('테스트 전용 열쇠가 배포 설정에 섞여 있지 않다', () => {
+    // 배포 전 점검(.github/workflows/deploy.yml)도 같은 것을 보지만,
+    // 그건 푸시한 뒤에야 돕니다. 여기서 먼저 걸립니다.
+    expect(wrangler).not.toContain('ADMIN_DEV_TOKEN');
   });
 });

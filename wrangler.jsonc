@@ -36,6 +36,25 @@
     "not_found_handling": "none"
   },
 
+  // 관리 화면 인증. Cloudflare Access 가 사람을 확인하고, Worker 가 그 서명을
+  // 한 번 더 검증합니다(worker/admin.ts).
+  //
+  // 둘 다 비밀값이 아닙니다 — 팀 도메인은 로그인 페이지 주소이고, AUD 는
+  // 애플리케이션 식별자입니다. 그래서 저장소에 그대로 둡니다.
+  // 반대로 둘 중 하나라도 비면 관리 화면은 열린 채가 아니라 **잠깁니다.**
+  //
+  // ⚠️ 팀 이름을 바꾸면 여기도 함께 바꿔야 합니다. Worker 가 이 값을 JWT 의
+  //    issuer 로 검증하므로, 어긋나면 로그인에 성공해도 통과하지 못합니다.
+  //
+  // ⚠️ Access 애플리케이션의 Destinations 에 `/admin` 과 `/api/admin` 이
+  //    **둘 다** 있어야 합니다. Cloudflare 는 Access 가 덮는 경로에만
+  //    Cf-Access-Jwt-Assertion 헤더를 붙이므로, 하나만 걸면 로그인은 되는데
+  //    화면이 부르는 API 가 전부 401 이 됩니다.
+  "vars": {
+    "ACCESS_TEAM_DOMAIN": "https://avoralabs.cloudflareaccess.com",
+    "ACCESS_POLICY_AUD": "ccfcc41b65327c106b50761011b64b90000cf6b5862c7674fda16ece0b353b1f"
+  },
+
   "observability": {
     "enabled": true
   },
