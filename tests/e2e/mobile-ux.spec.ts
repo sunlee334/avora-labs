@@ -13,19 +13,39 @@ import { test, expect } from '@playwright/test';
  *
  * 언어는 글꼴과 줄바꿈이 달라 넘침도 다르게 납니다 — 한국어만 보면 안 됩니다.
  */
-const PAGES = [
-  '/ko/', '/ko/product',
-  '/ko/legal/terms', '/ko/legal/privacy', '/ko/legal/shipping',
-  '/en/', '/th/', '/vi/', '/zh/',
-];
+const LOCALES = ['ko', 'en', 'zh', 'th', 'vi'] as const;
+
+/**
+ * 한 언어만 검사하면 나머지 넷은 아무도 안 봅니다.
+ *
+ * 실제로 한국어만 보던 시기에 태국어 /th/product 가 360px 에서 13px 넘쳤고,
+ * body 에 overflow-x:hidden 이 걸려 있어 **가로 스크롤바조차 없이 글자만
+ * 잘려 있었습니다.** 언어마다 글꼴 폭과 줄바꿈 규칙이 달라 넘침도 다릅니다.
+ */
+const PAGES = LOCALES.flatMap((l) => [
+  `/${l}/`,
+  `/${l}/product`,
+  `/${l}/legal/terms`,
+  `/${l}/legal/privacy`,
+  `/${l}/legal/shipping`,
+]);
+
+/**
+ * 검사할 폭.
+ *
+ * 320 은 WCAG 2.1 의 1.4.10 Reflow 기준입니다 — 데스크톱을 200% 확대한 것과
+ * 같은 폭이고, 아직 쓰이는 작은 단말(iPhone SE 1세대, 갤럭시 폴드 커버)이
+ * 여기에 해당합니다. 430 은 iPhone Pro Max 계열입니다.
+ */
+const WIDTHS = [320, 360, 390, 430];
 
 /** 자사 결제·회원 기능이 켜진 빌드에서만 존재하는 페이지. */
 const COMMERCE_PAGES = ['/ko/cart', '/ko/checkout', '/ko/order/lookup', '/ko/account'];
 
 test.describe('모바일 레이아웃', () => {
   for (const path of PAGES) {
-    test(`${path} — 360~430px 폭에서 가로 스크롤이 없다`, async ({ page }) => {
-      for (const width of [360, 390, 430]) {
+    test(`${path} — 320~430px 폭에서 가로 스크롤이 없다`, async ({ page }) => {
+      for (const width of WIDTHS) {
         await page.setViewportSize({ width, height: 800 });
         await page.goto(path);
         // CSS 와 이미지가 적용된 뒤에 잽니다. domcontentloaded 시점에는 스타일이
@@ -60,7 +80,7 @@ test.describe('모바일 레이아웃', () => {
     return tooSmall;
   }
 
-  for (const path of ['/ko/', '/ko/product', '/ko/legal/shipping']) {
+  for (const path of PAGES) {
     test(`${path} — 탭 가능한 요소가 최소 44×44px`, async ({ page }) => {
       await page.setViewportSize({ width: 390, height: 844 });
       await page.goto(path);
@@ -130,5 +150,66 @@ test.describe('시맨틱 마크업', () => {
 
     await skip.press('Enter');
     await expect(page).toHaveURL(/#main$/);
+  });
+});
+
+test.describe('언어별 줄바꿈 규칙', () => {
+  /**
+   * 줄바꿈 규칙 하나를 전 언어에 통일하면 반드시 한쪽이 깨집니다.
+   *
+   *   keep-all  한국어에는 필요합니다. 없으면 "부드러운 케어" 가
+   *             "부드러 / 운 케어" 로 잘립니다.
+   *             그러나 띄어쓰기가 없는 중국어·태국어에 걸면 문장 전체가
+   *             낱말 하나가 되어 줄바꿈 지점을 잃습니다.
+   *
+   * 이 테스트가 없으면 다음에 누가 body 에 keep-all 을 되돌려도 아무도
+   * 모릅니다 — 한국어 화면은 멀쩡해 보이기 때문입니다.
+   */
+  const EXPECTED: Record<string, string> = {
+    ko: 'keep-all',
+    en: 'normal',
+    zh: 'normal',
+    th: 'normal',
+    vi: 'normal',
+  };
+
+  for (const [lang, expected] of Object.entries(EXPECTED)) {
+    test(`/${lang}/ 본문의 word-break 는 ${expected}`, async ({ page }) => {
+      await page.goto(`/${lang}/`);
+      const value = await page
+        .locator('main p')
+        .first()
+        .evaluate((el) => getComputedStyle(el).wordBreak);
+      expect(value, `${lang} 의 줄바꿈 규칙`).toBe(expected);
+    });
+  }
+});
+
+test.describe('관리 화면 스타일이 공개 페이지로 새지 않는다', () => {
+  /**
+   * Astro 는 사이트의 모든 `is:global` CSS 를 **한 파일로 묶어 모든 페이지에**
+   * 링크합니다. admin.astro 의 `<style is:global>` 에 `body`, `table`,
+   * `tbody tr` 같은 맨몸 선택자가 있으면 5개 언어 공개 페이지가 전부 그것을
+   * 받습니다. 실제로 거기 있던 word-break:keep-all 때문에 태국어 페이지의
+   * 글자가 화면 밖으로 잘렸습니다.
+   */
+  test('법적 고지의 표는 클릭 대상처럼 보이지 않는다', async ({ page }) => {
+    await page.goto('/ko/legal/shipping');
+    const row = page.locator('.dataTable tbody tr').first();
+    await expect(row).toBeVisible();
+    // 관리 화면의 `tbody tr { cursor: pointer }` 가 새면 여기서 pointer 가 됩니다.
+    await expect(row).toHaveCSS('cursor', 'auto');
+  });
+
+  test('공개 페이지의 표에 관리 화면의 최소 폭이 걸리지 않는다', async ({ page }) => {
+    // 관리 화면 표는 min-width:760px 입니다. 그 값이 새면 좁은 화면에서
+    // 훨씬 많이 넘치고, 가로 스크롤 컨테이너의 의미가 사라집니다.
+    await page.setViewportSize({ width: 360, height: 800 });
+    await page.goto('/ko/legal/shipping');
+    const minWidth = await page
+      .locator('.dataTable')
+      .first()
+      .evaluate((el) => getComputedStyle(el).minWidth);
+    expect(minWidth).toBe('520px');
   });
 });

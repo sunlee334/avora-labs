@@ -10,7 +10,19 @@ import { test, expect, type Page } from '@playwright/test';
  * 새 커머스 화면을 만들면 아래 목록에 추가하세요.
  */
 
-const PAGES = ['/ko/cart', '/ko/checkout', '/ko/order/lookup', '/ko/account'];
+const LOCALES = ['ko', 'en', 'zh', 'th', 'vi'] as const;
+
+/** 5개 언어 모두 봅니다 — 언어마다 글꼴 폭과 줄바꿈 규칙이 달라 넘침도 다릅니다. */
+const PAGES = LOCALES.flatMap((l) => [
+  `/${l}/cart`,
+  `/${l}/checkout`,
+  `/${l}/order/lookup`,
+  `/${l}/order/complete`,
+  `/${l}/account`,
+]);
+
+/** 320 은 WCAG 1.4.10 Reflow 기준 폭입니다. */
+const WIDTHS = [320, 360, 390, 430];
 
 /** 로그인한 상태의 마이페이지도 봐야 합니다 — 내용이 그때 채워집니다. */
 async function loginAs(page: Page, providerUserId: string): Promise<void> {
@@ -24,8 +36,8 @@ async function loginAs(page: Page, providerUserId: string): Promise<void> {
 
 test.describe('가로 스크롤', () => {
   for (const path of PAGES) {
-    test(`${path} — 360~430px 에서 넘치지 않는다`, async ({ page }) => {
-      for (const width of [360, 390, 430]) {
+    test(`${path} — 320~430px 에서 넘치지 않는다`, async ({ page }) => {
+      for (const width of WIDTHS) {
         await page.setViewportSize({ width, height: 800 });
         await page.goto(path);
         await page.waitForLoadState('load');
@@ -53,7 +65,7 @@ test.describe('가로 스크롤', () => {
       },
     });
 
-    for (const width of [360, 390, 430]) {
+    for (const width of WIDTHS) {
       await page.setViewportSize({ width, height: 800 });
       await page.goto('/ko/account');
       await expect(page.locator('[data-account-signed]')).toBeVisible();
