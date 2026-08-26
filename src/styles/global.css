@@ -25,7 +25,7 @@ html {
 body {
   margin: 0;
   background: var(--brand-surface);
-  color: var(--brand-ink);
+  color: var(--color-ink);
   font-family: var(--font-body);
   font-size: 16px;
   font-weight: 400;
@@ -89,7 +89,7 @@ button {
 }
 
 :focus-visible {
-  outline: 2px solid var(--brand-ink);
+  outline: 2px solid var(--color-ink);
   outline-offset: 3px;
   border-radius: 2px;
 }
@@ -226,7 +226,7 @@ button {
 }
 /* 밝은 지반 위에서는 Warm Cream 밑줄이 보이지 않으므로 잉크색으로 대체합니다. */
 .section:not(.section--dark) .mark::after {
-  background: var(--brand-ink);
+  background: var(--color-ink);
 }
 
 /* ── 스크롤 등장 ──────────────────────────────────────────── */
@@ -269,7 +269,7 @@ button {
 }
 .cta--ghost {
   background: transparent;
-  color: var(--brand-ink);
+  color: var(--color-ink);
   border-color: var(--color-line);
 }
 
@@ -363,7 +363,7 @@ button {
   border-top: 1px solid var(--color-line);
   border-radius: 18px 18px 0 0;
   background: var(--brand-surface);
-  color: var(--brand-ink);
+  color: var(--color-ink);
   overflow-y: auto;
 }
 .lang__sheet::backdrop {
@@ -886,7 +886,7 @@ button {
   padding-top: 14px !important;
 }
 .cart__totals-grand dt {
-  color: var(--brand-ink);
+  color: var(--color-ink);
   font-weight: 600;
   font-size: 15px;
 }
@@ -1040,19 +1040,19 @@ button {
   border: 1px solid var(--color-line);
   border-radius: 8px;
   background: var(--brand-surface);
-  color: var(--brand-ink);
+  color: var(--color-ink);
   width: 100%;
 }
 .field input::placeholder {
   color: color-mix(in srgb, var(--brand-muted) 70%, transparent);
 }
 .field input[aria-invalid='true'] {
-  border-color: var(--brand-ink);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-ink) 14%, transparent);
+  border-color: var(--color-ink);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-ink) 14%, transparent);
 }
 .field__error {
   font-size: 13px;
-  color: var(--brand-ink);
+  color: var(--color-ink);
   font-weight: 500;
 }
 .field--postal {
@@ -1084,8 +1084,8 @@ button {
   font-size: 15px;
 }
 .method:has(input:checked) {
-  border-color: var(--brand-ink);
-  box-shadow: inset 0 0 0 1px var(--brand-ink);
+  border-color: var(--color-ink);
+  box-shadow: inset 0 0 0 1px var(--color-ink);
 }
 .method input {
   width: 18px;
@@ -1149,7 +1149,7 @@ button {
 .checkout__error {
   padding: 14px 16px;
   margin-bottom: 18px;
-  border: 1px solid var(--brand-ink);
+  border: 1px solid var(--color-ink);
   border-radius: 8px;
   font-size: 14px;
 }
@@ -1611,8 +1611,6 @@ button {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  /* --brand-ink 가 아니라 --color-ink 입니다. 전자는 이 저장소 어디에도
-     정의돼 있지 않아 배경이 그냥 투명해집니다(README 참고). */
   background: var(--color-ink);
 }
 

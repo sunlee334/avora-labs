@@ -185,7 +185,7 @@ const FULFILLMENT_LABEL: Record<string, string> = {
        */
       body.admin, .admin *, .admin *::before, .admin *::after { box-sizing: border-box; }
       .admin h1, .admin h2, .admin h3, .admin p, .admin dl, .admin dd { margin: 0; }
-      .admin :focus-visible { outline: 2px solid var(--brand-ink); outline-offset: 2px; }
+      .admin :focus-visible { outline: 2px solid var(--color-ink); outline-offset: 2px; }
 
       .admin .sr-only {
         position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
@@ -216,14 +216,14 @@ const FULFILLMENT_LABEL: Record<string, string> = {
       }
       .admin .summary dt { font-size: 12px; color: var(--brand-muted); }
       .admin .summary dd { font-family: var(--font-mono); font-size: 22px; font-variant-numeric: tabular-nums; }
-      .admin .summary div[data-attention='true'] { border-color: var(--brand-ink); border-width: 2px; }
+      .admin .summary div[data-attention='true'] { border-color: var(--color-ink); border-width: 2px; }
 
       .admin .filters { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
       .admin .filters__search { flex: 1 1 240px; }
       .admin .filters input, .admin .filters select {
         font: inherit; font-size: 16px; min-height: 44px; width: 100%;
         padding: 8px 12px; border: 1px solid var(--color-line); border-radius: 8px;
-        background: var(--brand-surface); color: var(--brand-ink);
+        background: var(--brand-surface); color: var(--color-ink);
       }
       .admin .filters button {
         min-height: 44px; padding-inline: 22px; border: 0; border-radius: 8px;
@@ -253,12 +253,12 @@ const FULFILLMENT_LABEL: Record<string, string> = {
         font-size: 12px; border: 1px solid var(--color-line); white-space: nowrap;
       }
       .admin .pill[data-tone='ok'] { background: var(--brand-primary); color: var(--brand-surface-alt); border-color: var(--brand-primary); }
-      .admin .pill[data-tone='warn'] { border-color: var(--brand-ink); font-weight: 600; }
+      .admin .pill[data-tone='warn'] { border-color: var(--color-ink); font-weight: 600; }
       .admin .pill[data-tone='dim'] { color: var(--brand-muted); }
       .admin .detail__notice {
         margin: 0 0 12px;
         padding: 10px 12px;
-        border: 1px solid var(--brand-ink);
+        border: 1px solid var(--color-ink);
         border-radius: 6px;
         font-size: 13px;
         line-height: 1.6;
@@ -274,7 +274,7 @@ const FULFILLMENT_LABEL: Record<string, string> = {
 
       .admin .detail {
         border: 0; border-radius: 14px; padding: 0; width: min(680px, 94vw);
-        max-height: 88svh; background: var(--brand-surface); color: var(--brand-ink);
+        max-height: 88svh; background: var(--brand-surface); color: var(--color-ink);
       }
       .admin .detail::backdrop { background: rgba(35, 41, 31, 0.4); }
       .admin .detail__head {
@@ -301,7 +301,7 @@ const FULFILLMENT_LABEL: Record<string, string> = {
       .admin .detail__form input, .admin .detail__form select {
         font: inherit; font-size: 16px; min-height: 44px; padding: 8px 12px;
         border: 1px solid var(--color-line); border-radius: 8px;
-        background: var(--brand-surface); color: var(--brand-ink); width: 100%;
+        background: var(--brand-surface); color: var(--color-ink); width: 100%;
       }
       .admin .detail__form button[type='submit'] {
         min-height: 48px; border: 0; border-radius: 999px; margin-top: 4px;
@@ -309,7 +309,7 @@ const FULFILLMENT_LABEL: Record<string, string> = {
         font: inherit; font-weight: 600; cursor: pointer;
       }
       .admin .detail__error {
-        padding: 12px 14px; border: 1px solid var(--brand-ink); border-radius: 8px; font-size: 13.5px;
+        padding: 12px 14px; border: 1px solid var(--color-ink); border-radius: 8px; font-size: 13.5px;
       }
 
       @media (max-width: 560px) {
