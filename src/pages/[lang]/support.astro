@@ -1,0 +1,230 @@
+---
+/**
+ * 고객센터.
+ *
+ * ── 이 페이지의 원칙 ────────────────────────────────────────
+ * **답할 수 있는 질문만 질문으로 만듭니다.**
+ *
+ * 배송 소요일·결제수단·교환반품 조건은 아직 정해지지 않았습니다. 그것들을
+ * 질문으로 늘어놓고 전부 "확정 예정" 이라고 답하면, 사용자는 답을 못 얻고
+ * 답변엔진은 "AVORA 는 이 질문에 답하지 않는다" 를 배웁니다. 그래서 미확정
+ * 항목은 개별 질문으로 만들지 않고 아래쪽에 한 블록으로 묶어, 이미 목록을
+ * 갖고 있는 배송·교환반품 페이지로 보냅니다. 같은 목록을 두 곳에서 관리하지
+ * 않기 위해서입니다.
+ *
+ * ── 답은 설정에서 옵니다 ────────────────────────────────────
+ * 배송비는 commerce.json, 판매 국가는 payment-config.json, 연락처는 site.ts 가
+ * 정합니다. 문장에 값을 적어 넣지 않으므로 정책이 바뀌면 이 페이지가 따라오고,
+ * 결제 화면과 어긋날 수가 없습니다.
+ *
+ * ── 구조화 데이터에는 확정된 답만 ───────────────────────────
+ * 배송비는 아직 잠정값이라 화면에는 단서와 함께 내보내되 FAQPage 스키마에서는
+ * 뺍니다. "아직 정해지지 않았습니다" 를 구조화 데이터로 내보내는 것은 답변엔진에
+ * 그 문장을 먹이는 일입니다.
+ */
+import Base from '../../layouts/Base.astro';
+import { LOCALES, BUSINESS, type Locale } from '../../config/site';
+import { dict, localePath } from '../../i18n';
+import { breadcrumb, faqPage } from '../../lib/jsonld';
+import { ACCOUNTS_ENABLED } from '../../config/runtime';
+import commerce from '../../config/commerce.json';
+import payment from '../../config/payment-config.json';
+import product from '../../data/product.json';
+
+export function getStaticPaths() {
+  return LOCALES.map((lang) => ({ params: { lang } }));
+}
+
+const locale = Astro.params.lang as Locale;
+const t = dict(locale);
+const page = t.support;
+const q = page.items;
+
+const money = (value: number) =>
+  new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: product.currency,
+    maximumFractionDigits: 0,
+  }).format(value);
+
+/**
+ * 배송비 문장은 배송 안내 페이지와 **같은 문구 키를 씁니다.**
+ * 따로 쓰면 정책이 바뀔 때 한쪽만 고쳐질 수 있습니다.
+ */
+const s = commerce.shipping;
+const feeCopy = t.legal.shipping.fee;
+const feeAnswer =
+  s.policy === 'free'
+    ? feeCopy.free
+    : s.policy === 'threshold'
+      ? feeCopy.threshold
+          .replace('{threshold}', money(s.freeThreshold))
+          .replace('{fee}', money(s.flatFee))
+      : feeCopy.flat.replace('{fee}', money(s.flatFee));
+
+const remoteAnswer =
+  s.remoteAreaSurcharge > 0
+    ? feeCopy.remote.replace('{surcharge}', money(s.remoteAreaSurcharge))
+    : null;
+
+/** 판매 국가는 payment-config.json 이 원본입니다. */
+const sellable = Object.values(payment.countries)
+  .filter((c) => c.sellable)
+  .map((c) => c.name);
+const countriesAnswer = q.countries.a.replace('{countries}', sellable.join(' · '));
+
+/**
+ * 질문 목록.
+ *
+ * `schema: false` 인 항목은 화면에는 나오지만 FAQPage 구조화 데이터에서 빠집니다.
+ * 지금은 배송비 하나뿐입니다 — 값이 잠정이기 때문입니다.
+ */
+type Item = {
+  id: string;
+  group: 'order' | 'delivery' | 'etc';
+  q: string;
+  a: string;
+  note?: string | null;
+  link?: { label: string; href: string };
+  schema?: boolean;
+};
+
+const items: Item[] = [
+  {
+    id: 'signup',
+    group: 'order',
+    q: q.signup.q,
+    a: ACCOUNTS_ENABLED ? q.signup.aMember : q.signup.aGuest,
+  },
+  {
+    id: 'order-lookup',
+    group: 'order',
+    q: q.lookup.q,
+    a: q.lookup.a,
+    link: { label: q.lookup.link, href: localePath(locale, 'order/lookup') },
+  },
+  {
+    id: 'countries',
+    group: 'delivery',
+    q: q.countries.q,
+    a: countriesAnswer,
+    link: { label: q.countries.link, href: localePath(locale, 'legal/terms') },
+  },
+  {
+    id: 'shipping-fee',
+    group: 'delivery',
+    q: q.fee.q,
+    a: remoteAnswer ? `${feeAnswer} ${remoteAnswer}` : feeAnswer,
+    note: q.fee.provisional,
+    schema: false, // 잠정값이라 구조화 데이터에서 뺍니다
+  },
+  {
+    id: 'tracking',
+    group: 'delivery',
+    q: q.tracking.q,
+    a: q.tracking.a,
+  },
+  {
+    id: 'privacy',
+    group: 'etc',
+    q: q.privacy.q,
+    a: q.privacy.a,
+    link: { label: q.privacy.link, href: localePath(locale, 'legal/privacy') },
+  },
+];
+
+const GROUPS = ['order', 'delivery', 'etc'] as const;
+const grouped = GROUPS.map((group) => ({
+  group,
+  label: page.groups[group],
+  items: items.filter((item) => item.group === group),
+})).filter((g) => g.items.length > 0);
+
+/** 확정된 답만 답변엔진에 내보냅니다. */
+const schemaItems = items
+  .filter((item) => item.schema !== false)
+  .map((item) => ({ q: item.q, a: item.a }));
+---
+
+<Base
+  locale={locale}
+  path="support"
+  title={page.meta.title}
+  description={page.meta.description}
+  jsonLd={[
+    faqPage(schemaItems),
+    breadcrumb([
+      { name: 'AVORA', path: localePath(locale) },
+      { name: page.heading, path: localePath(locale, 'support') },
+    ]),
+  ]}
+>
+  <section class="section wrap">
+    <h1 class="display display--tight">{page.heading}</h1>
+    <p class="body" style="margin-top: 20px">{page.intro}</p>
+
+    {
+      grouped.map((group) => (
+        <>
+          <h2 class="kicker" style="margin-top: 48px">{group.label}</h2>
+          <div class="faq">
+            {group.items.map((item) => (
+              /* id 를 달아 두면 답변엔진이 특정 답을 가리켜 인용할 수 있습니다. */
+              <div id={item.id}>
+                <h3>{item.q}</h3>
+                <p>{item.a}</p>
+                {item.note && <p class="support__note">{item.note}</p>}
+                {item.link && (
+                  <p style="margin-top: 10px">
+                    <a class="tapLink" href={item.link.href}>{item.link.label}</a>
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
+      ))
+    }
+
+    <div class="support__card">
+      <h2>{page.product.heading}</h2>
+      <p>{page.product.body}</p>
+      <p><a class="tapLink" href={localePath(locale, 'product')}>{page.product.link}</a></p>
+    </div>
+
+    <div class="support__card">
+      <h2>{page.pending.heading}</h2>
+      <p>{page.pending.body}</p>
+      <p>
+        <a class="tapLink" href={localePath(locale, 'legal/shipping')}>{page.pending.link}</a>
+      </p>
+    </div>
+
+    <h2 class="kicker" style="margin-top: 48px">{page.contact.heading}</h2>
+    <p class="body">{page.contact.body}</p>
+    <dl class="support__contact">
+      {
+        BUSINESS.email && (
+          <div>
+            <dt>{page.contact.email}</dt>
+            <dd>
+              <a class="tapLink" href={`mailto:${BUSINESS.email}`}>{BUSINESS.email}</a>
+            </dd>
+          </div>
+        )
+      }
+      {
+        BUSINESS.phone && (
+          <div>
+            <dt>{page.contact.phone}</dt>
+            <dd>
+              <a class="tapLink" href={`tel:${BUSINESS.phone.replace(/[^0-9+]/g, '')}`}>
+                {BUSINESS.phone}
+              </a>
+            </dd>
+          </div>
+        )
+      }
+    </dl>
+  </section>
+</Base>

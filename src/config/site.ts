@@ -94,5 +94,8 @@ export const BUSINESS = {
    */
   mailOrderNumber: '',
   phone: '010-2173-6358',
-  email: 'sunlee334@gmail.com',
+  // 브랜드 공용 주소입니다. 5개 언어 푸터와 고객센터에 공개되므로 개인 주소를
+  // 쓰지 않습니다. 나중에 Cloudflare Email Routing 으로 hello@avoralabs.co 를
+  // 만들어 이 주소로 넘기면, 여기 한 줄만 바꾸면 됩니다.
+  email: 'hello.avoralabs@gmail.com',
 } as const;

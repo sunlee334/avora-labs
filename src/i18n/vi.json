@@ -11,7 +11,8 @@
     "language": "Chọn ngôn ngữ",
     "menu": "Menu",
     "close": "Đóng",
-    "account": "Trang của tôi"
+    "account": "Trang của tôi",
+    "support": "Hỗ trợ"
   },
   "home": {
     "meta": {
@@ -191,6 +192,65 @@
       ]
     },
     "backToStory": "Quay lại câu chuyện thương hiệu"
+  },
+  "support": {
+    "meta": {
+      "title": "Hỗ trợ khách hàng — AVORA",
+      "description": "Giải đáp các câu hỏi thường gặp về đặt hàng, giao hàng và quyền riêng tư của AVORA."
+    },
+    "heading": "Hỗ trợ khách hàng",
+    "intro": "Những câu hỏi thường gặp về đặt hàng và giao hàng. Điều gì chưa được quyết định, chúng tôi ghi rõ là chưa.",
+    "groups": {
+      "order": "Đặt hàng",
+      "delivery": "Giao hàng",
+      "etc": "Khác"
+    },
+    "items": {
+      "signup": {
+        "q": "Có cần tài khoản để đặt hàng không?",
+        "aGuest": "Không. Bạn có thể đặt hàng mà không cần tạo tài khoản. Sau khi đặt, bạn kiểm tra tình trạng giao hàng bằng mã đơn hàng và số điện thoại.",
+        "aMember": "Bạn có thể đặt hàng mà không cần tài khoản. Nếu đặt với tư cách thành viên, các đơn đã đặt được lưu chung trong trang tài khoản."
+      },
+      "lookup": {
+        "q": "Xem đơn hàng của tôi ở đâu?",
+        "a": "Tại trang tra cứu đơn hàng, bằng mã đơn hàng và số điện thoại bạn đã nhập khi đặt.",
+        "link": "Tra cứu đơn hàng"
+      },
+      "countries": {
+        "q": "Có thể đặt hàng từ những nước nào?",
+        "a": "Hiện chỉ đặt được tại {countries}. Ở các nước khác, trang chỉ giới thiệu thương hiệu và sản phẩm.",
+        "link": "Xem phạm vi bán hàng"
+      },
+      "fee": {
+        "q": "Phí giao hàng là bao nhiêu?",
+        "provisional": "Đây là điểm khởi đầu, chưa phải chính sách cuối cùng. Khi được chốt, trang này và trang thanh toán sẽ thay đổi cùng lúc."
+      },
+      "tracking": {
+        "q": "Theo dõi đơn đang giao bằng cách nào?",
+        "a": "Sau khi gửi hàng, trang tra cứu đơn hàng sẽ hiển thị đơn vị vận chuyển và mã vận đơn. Dùng mã đó để xem vị trí kiện hàng tại đơn vị vận chuyển."
+      },
+      "privacy": {
+        "q": "Thông tin nhập khi đặt hàng được xử lý thế nào?",
+        "a": "Chúng tôi chỉ nhận thông tin cần cho việc giao hàng. Thông tin thẻ và tài khoản ngân hàng không đi vào máy chủ của chúng tôi mà chỉ nằm trong hệ thống của đơn vị thanh toán. Những gì được thu thập và lưu bao lâu đều ghi trong chính sách quyền riêng tư.",
+        "link": "Chính sách quyền riêng tư"
+      }
+    },
+    "product": {
+      "heading": "Câu hỏi về sản phẩm",
+      "body": "Chỉ số chống nắng, vệt trắng, mùi hương và các câu hỏi về bản thân sản phẩm nằm ở trang sản phẩm.",
+      "link": "Câu hỏi thường gặp về sản phẩm"
+    },
+    "pending": {
+      "heading": "Những điều chúng tôi chưa thể trả lời",
+      "body": "Thời gian giao hàng, phương thức thanh toán, điều kiện đổi trả vẫn chưa được quyết định. Chúng tôi để trống còn hơn viết ra điều chưa chốt. Khi có, sẽ đăng ngay tại đây.",
+      "link": "Giao hàng, đổi và trả hàng"
+    },
+    "contact": {
+      "heading": "Vẫn chưa giải quyết được?",
+      "body": "Hãy liên hệ với chúng tôi.",
+      "email": "Email",
+      "phone": "Điện thoại"
+    }
   },
   "footer": {
     "tagline": "For every movement.",

@@ -73,7 +73,7 @@ test.describe('검사기 자체', () => {
 });
 
 /** 언어에 관계없이 같은 구조라, 전체 페이지는 한국어로 훑습니다. */
-const KO_PAGES = ['', 'product', 'legal/terms', 'legal/privacy', 'legal/shipping', '404'];
+const KO_PAGES = ['', 'product', 'support', 'legal/terms', 'legal/privacy', 'legal/shipping', '404'];
 
 test.describe('정적 화면', () => {
   for (const path of KO_PAGES) {

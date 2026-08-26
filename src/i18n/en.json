@@ -11,7 +11,8 @@
     "language": "Language",
     "menu": "Menu",
     "close": "Close",
-    "account": "My Page"
+    "account": "My Page",
+    "support": "Support"
   },
   "home": {
     "meta": {
@@ -191,6 +192,65 @@
       ]
     },
     "backToStory": "Back to the story"
+  },
+  "support": {
+    "meta": {
+      "title": "Support — AVORA",
+      "description": "Answers to common questions about AVORA orders, shipping and privacy."
+    },
+    "heading": "Support",
+    "intro": "Common questions about ordering and shipping. Where something is not settled yet, we say so.",
+    "groups": {
+      "order": "Ordering",
+      "delivery": "Shipping",
+      "etc": "Other"
+    },
+    "items": {
+      "signup": {
+        "q": "Do I need an account to order?",
+        "aGuest": "No. You can order without creating an account. Afterwards you can check your delivery with your order number and phone number.",
+        "aMember": "You can order without an account. If you order as a member, your past orders are kept together on your account page."
+      },
+      "lookup": {
+        "q": "Where can I see my order?",
+        "a": "On the order lookup page, using your order number and the phone number you entered when ordering.",
+        "link": "Look up an order"
+      },
+      "countries": {
+        "q": "Which countries can order?",
+        "a": "Right now you can order only in {countries}. Elsewhere the site shows the brand and the product without a buy option.",
+        "link": "See where we sell"
+      },
+      "fee": {
+        "q": "How much is shipping?",
+        "provisional": "This is a starting point, not a settled policy. Once it is settled, this page and the checkout change together."
+      },
+      "tracking": {
+        "q": "How do I track a shipment?",
+        "a": "Once an order ships, the carrier and tracking number appear on the order lookup page. Use that number with the carrier to see where the parcel is."
+      },
+      "privacy": {
+        "q": "What happens to the details I enter when ordering?",
+        "a": "We take only what delivery needs. Card and bank details never reach our servers — they stay inside the payment provider. What we collect and how long we keep it is set out in the privacy policy.",
+        "link": "Privacy policy"
+      }
+    },
+    "product": {
+      "heading": "Questions about the product",
+      "body": "SPF, white cast, fragrance and other questions about the product itself are answered on the product page.",
+      "link": "Product FAQ"
+    },
+    "pending": {
+      "heading": "What we cannot answer yet",
+      "body": "Delivery times, payment methods and exchange or return conditions are not decided yet. We would rather leave them blank than write down something unsettled. They go up here as soon as they are fixed.",
+      "link": "Shipping, exchanges and returns"
+    },
+    "contact": {
+      "heading": "Still stuck?",
+      "body": "Get in touch.",
+      "email": "Email",
+      "phone": "Phone"
+    }
   },
   "footer": {
     "tagline": "For every movement.",
