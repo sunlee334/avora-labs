@@ -162,7 +162,7 @@ npm run fonts
 
 ## 배포
 
-**운영 주소: https://avora-labs.sunlee334.workers.dev**
+**운영 주소: https://avoralabs.co**
 
 `main` 브랜치에 푸시하면 GitHub Actions가 자동으로 Cloudflare Workers에 배포합니다.
 
@@ -176,17 +176,44 @@ npm run fonts
 수동 배포는 `npm run deploy` 입니다.
 
 ### 도메인
-현재는 `*.workers.dev` 기본 도메인을 씁니다. 커스텀 도메인이 정해지면
-`src/config/site.ts` 의 `ORIGIN` 과 `public/robots.txt` 의 Sitemap 줄을 바꾸면
-정규 URL·언어별 대체 URL·SNS 공유 주소·사이트맵이 전부 따라옵니다.
-(계정 서브도메인만 바꾸는 경우도 같은 두 곳입니다.)
 
-두 값이 어긋나면 정규 URL이 존재하지 않는 주소를 가리키는데, 화면으로는
-드러나지 않고 검색엔진에만 보입니다. `tests/e2e/product-seo.spec.ts` 가
+정식 주소는 **avoralabs.co** 하나입니다(Cloudflare Registrar).
+
+| 주소 | 하는 일 |
+|---|---|
+| `avoralabs.co` | 정식 주소. canonical·hreflang·sitemap·OG·JSON-LD 가 전부 이 주소 |
+| `www.avoralabs.co` | Redirect Rule 이 apex 로 **301** |
+| `*.workers.dev` | **꺼짐** (`workers_dev: false`) |
+
+workers.dev 를 끈 이유는 같은 내용을 두 주소가 서빙하면 검색엔진이 색인을
+나눠 갖고, canonical 이 가리키지 않는 쪽이 먼저 잡히기도 하기 때문입니다.
+
+#### www 301 은 Worker 가 아니라 Redirect Rule 이 합니다
+
+Worker 안에서 `www` 를 처리하면 **안 됩니다.** `/ko/` 같은 정적 경로는
+`run_worker_first` 목록에 없어서 Worker 가 호출조차 되지 않고, 그대로
+`www` 주소로 서빙됩니다. Redirect Rule 은 요청 처리 순서상 Worker 보다 먼저
+돌기 때문에 정적 파일까지 빠짐없이 잡습니다.
+
+대시보드에서 한 번만 만들면 됩니다:
+
+```
+Cloudflare → avoralabs.co → Rules → Redirect Rules → Create rule
+  When incoming requests match…   Hostname  equals  www.avoralabs.co
+  Then…  Dynamic redirect
+         URL       concat("https://avoralabs.co", http.request.uri.path)
+         Status    301
+         Preserve query string  ✅
+```
+
+#### 주소를 바꿔야 할 때
+
+`src/config/site.ts` 의 `ORIGIN`, `public/robots.txt` 의 Sitemap 줄,
+`wrangler.jsonc` 의 `routes` — 세 곳입니다.
+
+어긋나면 정규 URL이 존재하지 않는 주소를 가리키는데, 화면으로는 드러나지
+않고 검색엔진에만 보입니다. `tests/e2e/product-seo.spec.ts` 가
 robots·sitemap·canonical 세 곳이 같은 주소인지 검사합니다.
-
-> ⚠️ 결제를 열기 전에 도메인이 확정돼야 합니다. 국내 PG는 가맹 심사 때
-> 서비스 도메인을 등록하며, 나중에 바꾸면 재심사 대상이 될 수 있습니다.
 
 ---
 
@@ -235,15 +262,17 @@ robots·sitemap·canonical 세 곳이 같은 주소인지 검사합니다.
 Cloudflare Access 를 앞에 세웠습니다. 설정을 깜빡한 채 배포하면 주문의 연락처와
 배송지가 인터넷에 그대로 노출되므로, 잠기는 쪽이 기본값입니다.
 
-> 🚨 **workers.dev 주소에서는 아직 열 수 없습니다.**
+> ⚠️ **아직 설정 전이라 403 으로 잠겨 있습니다.** 도메인(avoralabs.co)이
+> 붙었으므로 이제 경로별 보호가 가능합니다 — 아래 순서로 열면 됩니다.
 >
 > Workers & Pages → Settings → Domains & Routes 의 **"Enable Cloudflare Access"**
-> 원클릭 버튼을 누르지 마세요. 그 버튼은 `/admin` 만이 아니라 **호스트 전체**를
+> 원클릭 버튼은 누르지 마세요. 그 버튼은 `/admin` 만이 아니라 **호스트 전체**를
 > 로그인 뒤로 보냅니다. 브랜드 사이트 5개 언어가 통째로 비공개가 됩니다.
 >
-> 경로별(`/admin` 만) 보호는 Access 애플리케이션에 호스트와 경로를 지정해야 하고,
-> 그건 본인 소유 도메인이 필요합니다. 그래서 도메인이 확정될 때까지 관리 화면은
-> 403 으로 잠가 둡니다 — 어차피 가격과 PG가 정해지기 전에는 주문도 없습니다.
+> 대신 Zero Trust → Access → Applications 에서 **Self-hosted** 애플리케이션을
+> 만들고 도메인 `avoralabs.co`, 경로 `admin` 을 지정하세요. 그다음 나온
+> **Audience 태그**와 팀 도메인을 `wrangler.jsonc` 의 vars 에 넣습니다.
+> 둘 중 하나라도 없으면 관리 화면은 잠긴 채로 있습니다(열린 채가 아니라).
 
 도메인이 확정된 뒤 여는 순서:
 
@@ -344,8 +373,8 @@ Discord 는 본문 키가 `content`, 나머지는 `text` 라 URL 호스트를 �
 
 카카오 로그인은 두 가지가 먼저 있어야 합니다.
 
-1. **도메인** — Redirect URI 를 등록해야 하고, 인가 코드는 등록된 주소로만
-   전달됩니다. workers.dev 로 등록하면 도메인 확정 시 다시 등록해야 합니다.
+1. **도메인** — ✅ `avoralabs.co` 확정. Redirect URI 는
+   `https://avoralabs.co/api/auth/callback` 로 등록하면 됩니다.
 2. **사업자등록번호** — 이메일을 필수 동의로 받으려면 비즈 앱이어야 하고,
    비즈 앱 전환에는 사업자등록번호 등록(또는 전화번호 본인인증)이 필요합니다.
 
@@ -457,7 +486,7 @@ npx wrangler secret put KAKAO_CLIENT_SECRET    # 활성화한 경우만
 | 탭 영역 | ≥ 44×44px | 테스트로 강제 |
 | 320~430px 가로 스크롤 | 없음 | 테스트로 강제 (5개 언어 전부) |
 | 접근성 자동 검사 (axe, WCAG 2.1 AA) | 위반 0 | **위반 0** (44개 화면·상태) |
-| 브라우저 테스트 | 전부 통과 | **958개 통과** (commerce 654 + launch 304) |
+| 브라우저 테스트 | 전부 통과 | **970개 통과** (commerce 660 + launch 310) |
 
 > 장바구니·체크아웃·주문조회는 Lighthouse SEO 가 69 로 나옵니다.
 > `noindex` 페이지를 감점하는 항목 때문이며, 이 세 페이지는 색인되면 안 되는 페이지라 정상입니다.

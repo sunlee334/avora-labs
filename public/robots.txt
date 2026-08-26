@@ -5,4 +5,4 @@ Disallow: /*/cart
 Disallow: /*/checkout
 Disallow: /*/order/
 
-Sitemap: https://avora-labs.sunlee334.workers.dev/sitemap-index.xml
+Sitemap: https://avoralabs.co/sitemap-index.xml

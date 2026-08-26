@@ -6,16 +6,18 @@
  */
 
 /**
- * 서비스 도메인. 커스텀 도메인 확정 전까지는 workers.dev 주소를 씁니다.
+ * 서비스 도메인. **이 값 하나가 정식 주소를 정합니다.**
  *
- * 형식은 <Worker 이름>.<계정 서브도메인>.workers.dev 입니다. 서브도메인은
- * 대시보드(Workers & Pages → Account details → Subdomain)에서 바꿀 수 있고,
- * 바꾸면 이 값과 public/robots.txt 의 Sitemap 줄을 함께 고쳐야 합니다. wrangler.jsonc 의
- * name 을 바꾸면 이 값도 함께 바꿔야 합니다 — 어긋나면 canonical 과 sitemap 이
- * 존재하지 않는 주소를 가리키게 되고, 그건 검색엔진에만 보이는 오류라
- * 화면을 아무리 봐도 드러나지 않습니다.
+ * canonical · hreflang · Open Graph · sitemap.xml · JSON-LD 가 전부 여기서 나옵니다.
+ * 그래서 이 값이 실제로 응답하는 주소와 어긋나면, 검색엔진과 답변엔진만
+ * 존재하지 않는 주소를 보게 됩니다 — 화면을 아무리 봐도 드러나지 않는 오류입니다.
+ *
+ * www 는 정식 주소가 아닙니다. Cloudflare Redirect Rule 이 apex 로 301 을 보내며,
+ * 그 규칙이 없으면 www 가 같은 내용을 그대로 서빙해 색인이 둘로 갈립니다.
+ *
+ * 바꿀 때 함께 봐야 할 곳: wrangler.jsonc 의 routes, public/robots.txt 의 Sitemap 줄.
  */
-export const ORIGIN = 'https://avora-labs.sunlee334.workers.dev';
+export const ORIGIN = 'https://avoralabs.co';
 
 /** 지원 언어. 순서가 언어 선택 UI의 노출 순서입니다. */
 export const LOCALES = ['ko', 'en', 'zh', 'th', 'vi'] as const;

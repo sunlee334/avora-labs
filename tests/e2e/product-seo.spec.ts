@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 import { ORIGIN } from '../../src/config/site';
 
 /**
@@ -108,5 +109,35 @@ test.describe('사이트 전역 SEO', () => {
     expect(titleOf(product)).toBeTruthy();
     expect(titleOf(home)).not.toBe(titleOf(product));
     expect(descOf(home)).not.toBe(descOf(product));
+  });
+});
+
+test.describe('배포 설정과 정식 주소가 어긋나지 않는다', () => {
+  /**
+   * `ORIGIN` 은 canonical·hreflang·sitemap·OG·JSON-LD 가 가리키는 주소이고,
+   * `wrangler.jsonc` 의 `routes` 는 **실제로 응답하는** 주소입니다.
+   *
+   * 둘이 어긋나면 사이트는 멀쩡히 열리는데 검색엔진과 답변엔진만 존재하지
+   * 않는 주소를 봅니다. 화면을 아무리 봐도 드러나지 않는 종류의 오류라
+   * 여기서 묶어 둡니다.
+   */
+  const wrangler = readFileSync(new URL('../../wrangler.jsonc', import.meta.url), 'utf-8');
+  const patterns = [...wrangler.matchAll(/"pattern"\s*:\s*"([^"]+)"/g)].map((m) => m[1]);
+
+  test('ORIGIN 의 호스트가 Worker 라우트에 있다', () => {
+    expect(patterns.length, 'wrangler.jsonc 에 routes 가 없습니다').toBeGreaterThan(0);
+    expect(patterns).toContain(new URL(ORIGIN).host);
+  });
+
+  test('정식 주소는 https 이고 끝에 슬래시가 없다', () => {
+    // 슬래시가 붙으면 new URL(path, ORIGIN) 이 만드는 주소가 // 로 겹칩니다.
+    expect(ORIGIN).toMatch(/^https:\/\//);
+    expect(ORIGIN.endsWith('/'), `${ORIGIN} 끝에 슬래시가 있습니다`).toBe(false);
+  });
+
+  test('workers.dev 주소가 정식 주소로 남아 있지 않다', () => {
+    // 임시 주소로 되돌아간 채 배포되면 PG 가맹 심사에 등록한 도메인과
+    // 실제 서비스 주소가 달라집니다.
+    expect(ORIGIN).not.toContain('workers.dev');
   });
 });
