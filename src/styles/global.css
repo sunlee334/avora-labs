@@ -958,20 +958,6 @@ button {
 /* 헤더 장바구니 */
 /* 헤더의 마이페이지 링크. 장바구니와 같은 탭 영역을 확보합니다 —
    글자만 두면 세로가 28px 이라 손가락으로 정확히 누르기 어렵습니다. */
-.nav__link {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--size-tap-min);
-  padding-inline: 10px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.04em;
-  color: var(--brand-primary);
-  text-decoration: none;
-}
-.nav__link:hover {
-  text-decoration: underline;
-}
 
 .nav__cart {
   display: inline-flex;
@@ -1510,5 +1496,129 @@ button {
     grid-template-columns: 120px 1fr;
     align-items: baseline;
     gap: 20px;
+  }
+}
+
+/* ── 모바일 메뉴 ──────────────────────────────────────────── */
+
+.menu__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--size-tap-min);
+  min-height: var(--size-tap-min);
+  padding-inline: 12px;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  background: none;
+  cursor: pointer;
+}
+
+/* 3줄 아이콘. 이미지 요청 없이 선 세 개로 그립니다. */
+.menu__bars {
+  position: relative;
+}
+.menu__bars,
+.menu__bars::before,
+.menu__bars::after {
+  display: block;
+  width: 16px;
+  height: 1.5px;
+  border-radius: 1px;
+  background: var(--brand-primary);
+}
+.menu__bars::before,
+.menu__bars::after {
+  content: '';
+  position: absolute;
+  left: 0;
+}
+.menu__bars::before {
+  top: -5px;
+}
+.menu__bars::after {
+  top: 5px;
+}
+
+/*
+ * 시트는 언어 전환과 같은 구조입니다 — 같은 헤더에서 열리는 것이 둘인데
+ * 형태가 다르면 사용자가 상호작용을 두 번 배워야 합니다.
+ */
+.menu__sheet {
+  position: fixed;
+  inset: auto 0 0;
+  width: 100%;
+  max-width: none;
+  max-height: 80svh;
+  margin: 0;
+  padding: 4px var(--space-gutter-mobile) calc(14px + env(safe-area-inset-bottom));
+  border: 0;
+  border-top: 1px solid var(--color-line);
+  border-radius: 18px 18px 0 0;
+  background: var(--brand-surface);
+  overflow-y: auto;
+}
+.menu__sheet::backdrop {
+  background: rgba(35, 41, 31, 0.38);
+}
+.menu__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.menu__title {
+  padding-block: 14px 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brand-muted);
+}
+.menu__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--size-tap-min);
+  min-height: var(--size-tap-min);
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--brand-muted);
+  font-size: 15px;
+  cursor: pointer;
+}
+.menu__list {
+  display: grid;
+}
+.menu__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 54px;
+  padding-inline: 2px;
+  border-top: 1px solid var(--color-line);
+  font-size: 15.5px;
+  text-decoration: none;
+}
+/* 지금 보고 있는 항목. 굵기만으로는 색만 보는 사람에게 약해서 점을 함께 찍습니다. */
+.menu__item[aria-current='page'] {
+  font-weight: 600;
+}
+.menu__item[aria-current='page']::after {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  /* --brand-ink 가 아니라 --color-ink 입니다. 전자는 이 저장소 어디에도
+     정의돼 있지 않아 배경이 그냥 투명해집니다(README 참고). */
+  background: var(--color-ink);
+}
+
+@media (min-width: 900px) {
+  /* 이 폭부터는 헤더에 링크가 그대로 나와 있어 메뉴 버튼이 할 일이 없습니다. */
+  .menu {
+    display: none;
   }
 }

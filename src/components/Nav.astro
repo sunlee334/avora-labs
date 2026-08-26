@@ -1,7 +1,8 @@
 ---
 import LanguageSwitcher from './LanguageSwitcher.astro';
+import MenuSheet from './MenuSheet.astro';
 import { dict, localePath } from '../i18n';
-import { SELLS_DIRECTLY, ACCOUNTS_ENABLED } from '../config/runtime';
+import { SELLS_DIRECTLY } from '../config/runtime';
 import type { Locale } from '../config/site';
 
 interface Props {
@@ -38,16 +39,12 @@ const t = dict(locale);
         </a>
       )
     }
-    {/* 회원 기능이 꺼져 있으면 링크도 내보내지 않습니다 — 장바구니와 같은 이유로,
-        갈 수 없는 곳으로 가는 링크는 막다른 길입니다. */}
-    {
-      ACCOUNTS_ENABLED && (
-        <a class="nav__link" href={localePath(locale, 'account')} data-nav-account>
-          {t.nav.account}
-        </a>
-      )
-    }
+    {/* 마이페이지는 헤더가 아니라 메뉴 시트 안에 있습니다.
+        커머스를 켜면 헤더 우측이 장바구니·마이페이지·언어·메뉴 넷이 되는데,
+        360px 에서 워드마크와 여백을 빼면 200px 밖에 남지 않아 들어가지 않습니다.
+        장바구니는 배지가 붙는 거래 단축키라 남기고, 마이페이지가 한 단계 들어갑니다. */}
     <LanguageSwitcher locale={locale} path={path} />
+    <MenuSheet locale={locale} path={path} />
   </div>
 </nav>
 

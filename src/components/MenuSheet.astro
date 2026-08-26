@@ -1,0 +1,116 @@
+---
+/**
+ * 모바일 메뉴.
+ *
+ * 헤더의 링크 묶음(`.nav__links`)은 900px 미만에서 숨겨집니다. 그래서 모바일에서
+ * 브랜드 스토리·제품·고객센터로 가는 길이 푸터뿐이었습니다. 이 시트가 그 길을
+ * 헤더에도 만듭니다.
+ *
+ * ── 왜 바텀시트인가 ─────────────────────────────────────────
+ * 같은 헤더의 언어 전환이 이미 바텀시트입니다. 형태가 다른 열림을 하나 더 만들면
+ * 사용자가 같은 화면에서 두 가지 상호작용을 배워야 합니다. 구조를 그대로 따릅니다.
+ *
+ * ── 왜 <dialog> 인가 ────────────────────────────────────────
+ * LanguageSwitcher 와 같은 이유입니다. `.nav` 에 backdrop-filter 가 걸려 있어
+ * position:fixed 자손의 기준이 뷰포트가 아니라 nav 가 됩니다. <dialog showModal()>
+ * 은 top layer 에 그려져 그 영향을 받지 않고, 백드롭·Esc·포커스 가둠을 브라우저가
+ * 대신 해 줍니다.
+ *
+ * ── JS 가 없으면 ────────────────────────────────────────────
+ * 이 시트는 열리지 않습니다. 그래서 같은 링크를 푸터에 평문으로 항상 둡니다 —
+ * 메뉴가 안 열려도 갈 곳을 잃지 않습니다.
+ */
+import { dict, localePath } from '../i18n';
+import { ACCOUNTS_ENABLED } from '../config/runtime';
+import type { Locale } from '../config/site';
+
+interface Props {
+  locale: Locale;
+  /** 언어 접두어를 뺀 현재 경로. 지금 보고 있는 항목을 표시하는 데 씁니다. */
+  path?: string;
+}
+const { locale, path = '' } = Astro.props;
+const t = dict(locale);
+
+/**
+ * 법적 페이지는 넣지 않습니다.
+ * 메뉴는 짧을수록 쓸모 있고, 약관·개인정보·배송의 정본 자리는 푸터입니다.
+ */
+const links: Array<{ href: string; label: string; match: string }> = [
+  { href: localePath(locale), label: t.nav.story, match: '' },
+  { href: localePath(locale, 'product'), label: t.nav.product, match: 'product' },
+  { href: localePath(locale, 'support'), label: t.nav.support, match: 'support' },
+];
+
+// 마이페이지는 헤더가 아니라 여기에 둡니다. 커머스를 켜면 헤더 우측이
+// 장바구니·마이페이지·언어·메뉴 넷이 되는데, 360px 에서는 들어가지 않습니다.
+// 장바구니는 배지가 붙는 거래 단축키라 헤더에 남기고, 마이페이지는 한 단계 들어갑니다.
+if (ACCOUNTS_ENABLED) {
+  links.push({ href: localePath(locale, 'account'), label: t.nav.account, match: 'account' });
+}
+---
+
+<div class="menu">
+  <button
+    class="menu__toggle"
+    type="button"
+    aria-haspopup="dialog"
+    aria-label={t.a11y.openMenu}
+    data-menu-open
+  >
+    {/* 3줄 아이콘. "MENU" 라고 영어로 쓰면 5개 언어 중 하나만 특별대우가 됩니다. */}
+    <span class="menu__bars" aria-hidden="true"></span>
+  </button>
+
+  <dialog class="menu__sheet" aria-label={t.nav.menu} data-menu-sheet>
+    <div class="menu__head">
+      <p class="menu__title">{t.nav.menu}</p>
+      <button class="menu__close" type="button" aria-label={t.a11y.closeMenu} data-menu-close>
+        <span aria-hidden="true">✕</span>
+      </button>
+    </div>
+    <ul class="menu__list">
+      {
+        links.map((link) => (
+          <li>
+            <a
+              class="menu__item"
+              href={link.href}
+              aria-current={link.match === path ? 'page' : undefined}
+            >
+              {link.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </dialog>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.menu').forEach((root) => {
+    const open = root.querySelector<HTMLButtonElement>('[data-menu-open]');
+    const close = root.querySelector<HTMLButtonElement>('[data-menu-close]');
+    const sheet = root.querySelector<HTMLDialogElement>('[data-menu-sheet]');
+    if (!open || !sheet || typeof sheet.showModal !== 'function') return;
+
+    open.addEventListener('click', () => sheet.showModal());
+    close?.addEventListener('click', () => sheet.close());
+
+    // 백드롭(시트 바깥)을 누르면 닫습니다. dialog 자체가 백드롭 클릭도 받으므로
+    // 클릭 지점이 시트 영역 밖인지 좌표로 판별합니다.
+    sheet.addEventListener('click', (event) => {
+      const box = sheet.getBoundingClientRect();
+      const outside =
+        event.clientX < box.left ||
+        event.clientX > box.right ||
+        event.clientY < box.top ||
+        event.clientY > box.bottom;
+      if (outside) sheet.close();
+    });
+
+    // 닫힌 뒤 포커스를 열었던 버튼으로 돌려줍니다. 없으면 포커스가 문서 처음으로
+    // 튀어, 키보드 사용자는 메뉴를 닫을 때마다 자리를 잃습니다.
+    sheet.addEventListener('close', () => open.focus());
+  });
+</script>

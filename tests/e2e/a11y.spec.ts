@@ -107,6 +107,15 @@ test.describe('움직인 뒤의 상태', () => {
     expect(await scan(page, testInfo)).toEqual([]);
   });
 
+  test('모바일 메뉴를 연 상태', async ({ page }, testInfo) => {
+    // 이 폭에서만 나오는 요소라, 데스크톱 크기로만 검사하면 아무도 보지 않습니다.
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/ko/');
+    await page.locator('[data-menu-open]').click();
+    await expect(page.locator('[data-menu-sheet]')).toBeVisible();
+    expect(await scan(page, testInfo)).toEqual([]);
+  });
+
   test('언어 시트를 닫은 직후', async ({ page }, testInfo) => {
     // 닫을 때 초점이 갈 곳을 잃으면 키보드 사용자는 페이지 맨 위로 튕깁니다.
     await page.goto('/ko/');
