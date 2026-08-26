@@ -396,7 +396,9 @@ Discord 는 본문 키가 `content`, 나머지는 `text` 라 URL 호스트를 �
 아닙니다. 알림이 안 왔다고 주문이 사라지는 것도 아닙니다 — 주문은 D1 에 있고
 관리 화면에서 보입니다.
 
-이메일은 도메인이 확정되면 `wrangler.jsonc` 의 주석대로 켜면 됩니다.
+이메일 알림은 이제 켤 수 있습니다 — Cloudflare Email Routing 이 도메인을
+요구했는데 `avoralabs.co` 가 붙었습니다. `wrangler.jsonc` 의 주석대로 바인딩과
+vars 를 넣으면 됩니다(보내는 주소는 `orders@avoralabs.co` 같은 형태).
 **실제로 한 번 발송해 보기 전까지는 "된다" 고 말하지 마세요** — 이 코드는 아직
 실제 발송을 거쳐 본 적이 없습니다.
 
