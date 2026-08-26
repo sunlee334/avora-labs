@@ -141,3 +141,60 @@ test.describe('배포 설정과 정식 주소가 어긋나지 않는다', () => 
     expect(ORIGIN).not.toContain('workers.dev');
   });
 });
+
+test.describe('사이트맵과 색인 신호가 서로 어긋나지 않는다', () => {
+  /**
+   * 사이트맵은 "이 주소를 색인해 달라" 는 제출입니다. 그런데 그 안에
+   * noindex 페이지나 robots.txt 가 막은 경로가 들어 있으면, 우리가 서로
+   * 반대되는 신호를 동시에 보내는 셈입니다.
+   *
+   * 실제로 46개 주소 중 26개가 그랬고, **관리 화면 경로(/admin/)까지
+   * 공개 사이트맵에 실려 있었습니다.** 화면으로는 드러나지 않고
+   * Search Console 에만 오류로 보이는 종류입니다.
+   */
+  async function sitemapUrls(request: import('@playwright/test').APIRequestContext) {
+    const xml = await (await request.get('/sitemap-0.xml')).text();
+    return [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
+  }
+
+  test('사이트맵의 모든 주소가 실제로 색인 가능하다', async ({ request }) => {
+    const urls = await sitemapUrls(request);
+    expect(urls.length, '사이트맵이 비어 있습니다').toBeGreaterThan(0);
+
+    const blocked: string[] = [];
+    for (const url of urls) {
+      const path = new URL(url).pathname;
+      const res = await request.get(path);
+      expect(res.status(), `${path} 가 열리지 않습니다`).toBe(200);
+      if (/<meta[^>]+name="robots"[^>]+noindex/i.test(await res.text())) blocked.push(path);
+    }
+    expect(blocked, `noindex 인데 사이트맵에 있습니다: ${blocked.join(' / ')}`).toEqual([]);
+  });
+
+  test('robots.txt 가 막은 경로는 사이트맵에 없다', async ({ request }) => {
+    const robots = await (await request.get('/robots.txt')).text();
+    const disallowed = [...robots.matchAll(/^Disallow:\s*(\S+)$/gm)].map((m) => m[1]);
+    expect(disallowed.length, 'robots.txt 에 Disallow 가 없습니다').toBeGreaterThan(0);
+
+    // robots.txt 의 * 는 정규식이 아니라 "임의 문자열" 입니다.
+    const patterns = disallowed.map(
+      (rule) => new RegExp('^' + rule.split('*').map(escapeRegExp).join('.*')),
+    );
+
+    const conflicts = (await sitemapUrls(request)).filter((url) =>
+      patterns.some((re) => re.test(new URL(url).pathname)),
+    );
+    expect(conflicts, `robots.txt 가 막은 주소가 사이트맵에 있습니다: ${conflicts.join(' / ')}`).toEqual([]);
+  });
+
+  test('관리 화면 경로가 사이트맵에 없다', async ({ request }) => {
+    // robots.txt 가 /admin 을 막고 있지 않으므로 위 검사에 걸리지 않습니다.
+    // 관리 화면 주소를 공개 사이트맵으로 알려 줄 이유는 없습니다.
+    const urls = await sitemapUrls(request);
+    expect(urls.filter((u) => u.includes('/admin'))).toEqual([]);
+  });
+});
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.+?^${}()|[\]\\]/g, '\\$&');
+}

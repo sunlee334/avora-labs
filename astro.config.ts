@@ -32,7 +32,28 @@ export default defineConfig({
           LOCALES.map((l) => [l, LOCALE_TAGS[l]]),
         ) as Record<string, string>,
       },
-      filter: (page) => !page.includes('/404'),
+      /*
+       * 사이트맵은 "이 주소를 색인해 달라" 는 제출입니다.
+       * 그러니 noindex 를 단 페이지나 robots.txt 가 막은 경로가 여기 들어가면,
+       * 우리가 서로 반대되는 신호를 동시에 보내는 셈입니다.
+       * Search Console 은 이것을 오류로 보고합니다.
+       *
+       * 실제로 46개 주소 중 26개가 그런 상태였고, **관리 화면 경로까지
+       * 공개 사이트맵에 실려 있었습니다.**
+       *
+       * 새 페이지에 noindex 를 달면 여기에도 넣으세요.
+       * `tests/e2e/product-seo.spec.ts` 가 사이트맵의 모든 주소를 실제로
+       * 열어 보고 noindex 가 섞여 있으면 실패합니다.
+       */
+      filter: (page) =>
+        ![
+          '/404',
+          '/admin',
+          '/cart',
+          '/checkout',
+          '/account',
+          '/order/',
+        ].some((excluded) => page.includes(excluded)),
     }),
   ],
   vite: {

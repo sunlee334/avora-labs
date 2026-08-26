@@ -206,6 +206,19 @@ Cloudflare → avoralabs.co → Rules → Redirect Rules → Create rule
          Preserve query string  ✅
 ```
 
+#### 사이트맵에는 색인할 것만 넣습니다
+
+사이트맵은 "이 주소를 색인해 달라" 는 제출입니다. noindex 페이지나
+robots.txt 가 막은 경로가 거기 들어가면 서로 반대되는 신호를 동시에 보내는
+셈이고, Search Console 은 이것을 오류로 보고합니다.
+
+한동안 46개 주소 중 26개가 그 상태였고, **관리 화면 경로(`/admin/`)까지
+공개 사이트맵에 실려 있었습니다.** 지금은 `astro.config.ts` 의 sitemap
+`filter` 가 걸러냅니다. 새 페이지에 `noindex` 를 달면 그 목록에도 넣으세요.
+
+`tests/e2e/product-seo.spec.ts` 가 사이트맵의 모든 주소를 실제로 열어 보고
+noindex 가 섞여 있으면 실패합니다. robots.txt 의 Disallow 규칙과도 대조합니다.
+
 #### 주소를 바꿔야 할 때
 
 `src/config/site.ts` 의 `ORIGIN`, `public/robots.txt` 의 Sitemap 줄,
@@ -486,7 +499,7 @@ npx wrangler secret put KAKAO_CLIENT_SECRET    # 활성화한 경우만
 | 탭 영역 | ≥ 44×44px | 테스트로 강제 |
 | 320~430px 가로 스크롤 | 없음 | 테스트로 강제 (5개 언어 전부) |
 | 접근성 자동 검사 (axe, WCAG 2.1 AA) | 위반 0 | **위반 0** (44개 화면·상태) |
-| 브라우저 테스트 | 전부 통과 | **970개 통과** (commerce 660 + launch 310) |
+| 브라우저 테스트 | 전부 통과 | **982개 통과** (commerce 666 + launch 316) |
 
 > 장바구니·체크아웃·주문조회는 Lighthouse SEO 가 69 로 나옵니다.
 > `noindex` 페이지를 감점하는 항목 때문이며, 이 세 페이지는 색인되면 안 되는 페이지라 정상입니다.
