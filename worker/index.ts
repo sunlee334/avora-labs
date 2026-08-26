@@ -31,6 +31,7 @@ import {
 } from './orders';
 import { priceOrder, currencyOf, isAllowedCurrency } from './catalog';
 import { verifyAdmin, type AdminEnv } from './admin';
+import { canonicalHostRedirect } from './canonical-host';
 import { notifyNewOrder, toNotification } from './notify';
 import { handleLogin, handleCallback, handleLogout, currentUser, providerFor, type AuthEnv } from './auth';
 import { publicUser, ordersForUser, saveAddress, claimOrder } from './accounts';
@@ -678,6 +679,11 @@ export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
     const { pathname } = url;
+
+    // 0 — 정식 호스트가 아니면(www 등) 여기서 301 로 보냅니다.
+    //     규칙과 이유는 worker/canonical-host.ts 에 있습니다.
+    const canonical = canonicalHostRedirect(request);
+    if (canonical) return canonical;
 
     // 1 — 루트 진입: 언어를 골라 보냅니다.
     if (pathname === '/' || pathname === '') {

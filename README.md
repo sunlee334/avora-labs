@@ -182,29 +182,46 @@ npm run fonts
 | 주소 | 하는 일 |
 |---|---|
 | `avoralabs.co` | 정식 주소. canonical·hreflang·sitemap·OG·JSON-LD 가 전부 이 주소 |
-| `www.avoralabs.co` | Redirect Rule 이 apex 로 **301** |
+| `www.avoralabs.co` | Worker 가 apex 로 **301** (경로·쿼리 보존) |
 | `*.workers.dev` | **꺼짐** (`workers_dev: false`) |
 
 workers.dev 를 끈 이유는 같은 내용을 두 주소가 서빙하면 검색엔진이 색인을
 나눠 갖고, canonical 이 가리키지 않는 쪽이 먼저 잡히기도 하기 때문입니다.
 
-#### www 301 은 Worker 가 아니라 Redirect Rule 이 합니다
+#### www 301 은 Worker 가 합니다
 
-Worker 안에서 `www` 를 처리하면 **안 됩니다.** `/ko/` 같은 정적 경로는
-`run_worker_first` 목록에 없어서 Worker 가 호출조차 되지 않고, 그대로
-`www` 주소로 서빙됩니다. Redirect Rule 은 요청 처리 순서상 Worker 보다 먼저
-돌기 때문에 정적 파일까지 빠짐없이 잡습니다.
+원래 이 일은 Cloudflare **Redirect Rule** 의 몫입니다. 그 규칙은 요청 처리
+순서상 Worker 보다 먼저 돌아 정적 파일까지 잡습니다. 그것을 쓸 수 없어
+Worker 에서 처리하며(`worker/canonical-host.ts`), 그 대신
+`wrangler.jsonc` 의 `run_worker_first` 가 **페이지 경로 전체**를 포함합니다.
 
-대시보드에서 한 번만 만들면 됩니다:
-
+```jsonc
+"run_worker_first": [
+  "/*",
+  "!/_astro/*", "!/fonts/*", "!/brand/*",
+  "!/og/*", "!/product/*", "!/favicon.ico"
+]
 ```
-Cloudflare → avoralabs.co → Rules → Redirect Rules → Create rule
-  When incoming requests match…   Hostname  equals  www.avoralabs.co
-  Then…  Dynamic redirect
-         URL       concat("https://avoralabs.co", http.request.uri.path)
-         Status    301
-         Preserve query string  ✅
-```
+
+해시가 붙은 정적 자산을 제외한 이유: 사람이 그 주소로 **이동하지 않습니다.**
+첫 페이지에서 이미 apex 로 넘어가 있으므로 뒤따르는 자산 요청은 apex 로
+나갑니다. 제외해 두면 이미지·글꼴·CSS 요청이 Worker 를 거치지 않아 예전과
+같은 비용으로 나갑니다. 대신 **HTML 요청 한 건마다 Worker 가 한 번 돕니다**
+(이전에는 0회). 실측 영향은 아래 품질 기준의 운영 수치에 반영돼 있습니다.
+
+`run_worker_first` 에서 `/*` 가 빠지면 정적 페이지가 Worker 를 거치지 않게 되어
+**리다이렉트가 조용히 사라집니다.** 화면으로는 아무 문제가 없어 보이는 종류의
+회귀라, `tests/e2e/www-redirect.spec.ts` 가 이 설정을 직접 읽어 확인합니다.
+
+#### 로컬에서는 이 분기를 HTTP 로 검증할 수 없습니다
+
+`wrangler dev` 는 Host 를 Worker 에 넘기지 않습니다 — Worker 는 127.0.0.1 을
+보고, 응답의 `Location` 만 앞단 프록시가 다시 씁니다. 그래서 Host 헤더를
+붙여 요청해도 **통과한 것처럼 보이는** 오해가 생깁니다.
+
+그래서 리다이렉트 규칙을 의존이 없는 함수(`worker/canonical-host.ts`)로 떼어
+두고, 테스트가 그 함수를 직접 부릅니다. `worker/index.ts` 는 D1·결제·인증
+어댑터를 줄줄이 불러오므로 그것만 세우려고 전부를 띄울 수는 없습니다.
 
 #### 사이트맵에는 색인할 것만 넣습니다
 
@@ -607,15 +624,15 @@ npx wrangler secret put KAKAO_CLIENT_SECRET    # 활성화한 경우만
 
 | 항목 | 기준 | 측정값 (모바일) |
 |---|---|---|
-| Lighthouse Performance | ≥ 90 | **96~100** (로컬) / **95** (운영, 캐시 워밍 후) |
+| Lighthouse Performance | ≥ 90 | **96~100** (로컬) / **96** (운영, avoralabs.co) |
 | Lighthouse Accessibility | ≥ 95 | **100** |
 | Lighthouse SEO | 100 | **100** (색인 대상 페이지) |
-| LCP | ≤ 2.5s | **1.4~2.5s** (로컬) / **2.6s** (운영) |
+| LCP | ≤ 2.5s | **1.4~2.5s** (로컬) / **2.2s** (운영, avoralabs.co) |
 | CLS | ≤ 0.1 | **0** |
 | 탭 영역 | ≥ 44×44px | 테스트로 강제 |
 | 320~430px 가로 스크롤 | 없음 | 테스트로 강제 (5개 언어 전부) |
 | 접근성 자동 검사 (axe, WCAG 2.1 AA) | 위반 0 | **위반 0** (44개 화면·상태) |
-| 브라우저 테스트 | 전부 통과 | **1,152개 통과** (commerce 756 + launch 396) |
+| 브라우저 테스트 | 전부 통과 | **1,196개 통과** (commerce 778 + launch 418) |
 
 > 장바구니·체크아웃·주문조회는 Lighthouse SEO 가 69 로 나옵니다.
 > `noindex` 페이지를 감점하는 항목 때문이며, 이 세 페이지는 색인되면 안 되는 페이지라 정상입니다.
