@@ -50,6 +50,22 @@ function el<T extends HTMLElement>(root: HTMLElement, selector: string): T | nul
   return root.querySelector<T>(selector);
 }
 
+/**
+ * 실패한 응답의 본문을 읽어 버립니다.
+ *
+ * 상태 코드만 보고 빠져나가면 응답 스트림이 열린 채 남습니다. 화면 동작에는
+ * 영향이 없지만 브라우저의 네트워크가 조용해지지 않아 `networkidle` 에
+ * 도달하지 못하고, 그 상태를 기준으로 재는 도구(Lighthouse 등)의 측정값이
+ * 실제보다 늘어납니다. 같은 401 을 본문만 읽고/안 읽고 비교해 확인했습니다.
+ */
+async function drain(res: Response): Promise<void> {
+  try {
+    await res.arrayBuffer();
+  } catch {
+    // 이미 닫혔으면 그것으로 된 것입니다.
+  }
+}
+
 /** 목록을 그립니다. 요소는 전부 createElement + textContent 로 만듭니다. */
 function render(root: HTMLElement, inquiries: InquiryView[], copy: InquiryCopy): void {
   const state = el(root, '[data-inquiry-state]');
@@ -144,6 +160,7 @@ async function load(
     if (!res.ok) {
       // 로그인이 풀렸거나 기능이 꺼진 경우입니다. 목록을 비우고 폼만 둡니다 —
       // 오류 문구로 화면을 채우면 남길 수 있다는 사실이 가려집니다.
+      await drain(res);
       render(root, [], copy);
       return;
     }
@@ -207,6 +224,7 @@ export function mountInquiry(
       });
 
       if (!res.ok) {
+        await drain(res);
         showError(copy.error.failed);
         return;
       }

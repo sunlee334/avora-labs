@@ -333,6 +333,9 @@ const a = t.account;
     async function load() {
       const meRes = await fetch('/api/account/me');
       if (meRes.status === 401 || !meRes.ok) {
+        // 로그인하지 않은 사람은 항상 이 길로 옵니다. 본문을 읽지 않으면
+        // 응답 스트림이 열린 채 남아 네트워크가 조용해지지 않습니다.
+        await meRes.arrayBuffer().catch(() => {});
         anon.hidden = false;
         void drawLoginButtons();
         return;
