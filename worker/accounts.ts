@@ -321,6 +321,68 @@ export async function claimOrder(
 }
 
 /** 화면에 내보낼 계정 정보. 제공자 쪽 id 는 밖으로 내보내지 않습니다. */
+/**
+ * 제공자 쪽에서 연결이 끊겼을 때 그 로그인 수단을 지웁니다.
+ *
+ * 사용자가 카카오 앱 목록에서 우리 앱을 지우거나 카카오계정을 탈퇴하면
+ * 우리는 그 사실을 알 방법이 없습니다. 그대로 두면 **탈퇴한 사람의 이메일·
+ * 이름·배송지가 계속 남습니다.** 개인정보처리방침에 적은 것과 어긋납니다.
+ *
+ * ── 주문은 지우지 않습니다 ──────────────────────────────────
+ * 전자상거래법은 계약·청약철회 기록과 대금결제 기록을 5년간 보존하도록
+ * 합니다. 그래서 주문 자체는 남기고, 계정과의 연결만 끊습니다(user_id 를
+ * 비웁니다). 남은 주문은 비회원 주문과 같은 상태가 되고, 주문번호와
+ * 연락처로는 여전히 조회됩니다.
+ */
+export interface RemoveIdentityResult {
+  found: boolean;
+  /** 마지막 수단이어서 계정까지 정리했는가 */
+  userRemoved: boolean;
+  /** 계정과의 연결이 끊긴 주문 수 */
+  ordersDetached: number;
+}
+
+export async function removeIdentity(
+  db: D1Database,
+  provider: string,
+  providerUserId: string,
+): Promise<RemoveIdentityResult> {
+  const identity = await db
+    .prepare('SELECT user_id FROM identities WHERE provider = ? AND provider_user_id = ?')
+    .bind(provider, providerUserId)
+    .first<{ user_id: string }>();
+
+  // 이미 지워졌거나 우리 쪽에 없는 사람입니다. 카카오는 같은 이벤트를 다시
+  // 보낼 수 있으므로, 없다고 해서 오류로 답하지 않습니다.
+  if (!identity) return { found: false, userRemoved: false, ordersDetached: 0 };
+
+  await db
+    .prepare('DELETE FROM identities WHERE provider = ? AND provider_user_id = ?')
+    .bind(provider, providerUserId)
+    .run();
+
+  const remaining = await identitiesForUser(db, identity.user_id);
+  if (remaining.length > 0) {
+    return { found: true, userRemoved: false, ordersDetached: 0 };
+  }
+
+  // 남은 로그인 수단이 없습니다 — 이 계정에는 아무도 들어올 수 없으므로
+  // 개인정보(이메일·이름·저장된 배송지)를 남길 이유가 없습니다.
+  const detached = await db
+    .prepare('UPDATE orders SET user_id = NULL WHERE user_id = ?')
+    .bind(identity.user_id)
+    .run();
+
+  // 세션은 users 를 ON DELETE CASCADE 로 참조하므로 함께 사라집니다.
+  await db.prepare('DELETE FROM users WHERE id = ?').bind(identity.user_id).run();
+
+  return {
+    found: true,
+    userRemoved: true,
+    ordersDetached: detached.meta?.changes ?? 0,
+  };
+}
+
 export function publicUser(user: User) {
   return {
     name: user.name,

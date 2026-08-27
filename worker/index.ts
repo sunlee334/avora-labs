@@ -33,6 +33,7 @@ import { priceOrder, currencyOf, isAllowedCurrency } from './catalog';
 import { verifyAdmin, type AdminEnv } from './admin';
 import { canonicalHostRedirect } from './canonical-host';
 import { renderReviewsPage } from './reviews-page';
+import { handleKakaoWebhook } from './auth/kakao-webhook';
 import {
   createReview,
   getReview,
@@ -895,6 +896,17 @@ export default {
     }
     if (pathname === '/api/auth/providers' && request.method === 'GET') {
       return handleProviders(request, env);
+    }
+
+    /*
+     * 카카오 계정 상태 변경 웹훅.
+     *
+     * 사용자가 우리 사이트 밖에서(카카오 앱 목록·계정 탈퇴) 연결을 끊었을 때
+     * 알림을 받습니다. 받지 못하면 탈퇴한 사람의 개인정보가 계속 남습니다.
+     * 본문은 카카오가 서명한 JWT 이고, 서명·발급자·대상을 모두 확인합니다.
+     */
+    if (pathname === '/api/webhooks/kakao' && request.method === 'POST') {
+      return handleKakaoWebhook(request, env);
     }
     if (pathname === '/api/auth/logout' && request.method === 'POST') {
       return handleLogout(request, env);
