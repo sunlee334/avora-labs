@@ -192,6 +192,28 @@
         }
       ]
     },
+    "disclosure": {
+      "kicker": "Công bố thông tin sản phẩm",
+      "note": "Hiển thị theo quy định công bố thông tin hàng hoá trong thương mại điện tử của Hàn Quốc. Mục nào chưa được quyết định, chúng tôi ghi rõ là chưa — tất cả sẽ được điền trước khi bắt đầu bán.",
+      "columns": {
+        "item": "Mục",
+        "value": "Nội dung"
+      },
+      "labels": {
+        "volume": "Dung tích hoặc khối lượng",
+        "features": "Thông số chính của sản phẩm",
+        "expiry": "Hạn sử dụng hoặc thời hạn sau khi mở nắp",
+        "usage": "Cách dùng",
+        "ingredients": "Toàn bộ thành phần theo luật mỹ phẩm",
+        "functionalReview": "Mỹ phẩm chức năng — tình trạng thẩm định MFDS",
+        "cautions": "Lưu ý khi sử dụng",
+        "manufacturer": "Đơn vị sản xuất mỹ phẩm",
+        "seller": "Đơn vị chịu trách nhiệm phân phối mỹ phẩm",
+        "countryOfOrigin": "Nước sản xuất",
+        "customerService": "Điện thoại tư vấn khách hàng"
+      },
+      "pending": "Sẽ xác nhận"
+    },
     "backToStory": "Quay lại câu chuyện thương hiệu"
   },
   "support": {

@@ -10,7 +10,7 @@ import { Picture } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import productImage from '../../assets/images/product-daily-sunscreen.jpg';
 import waterImage from '../../assets/images/water-droplets.jpg';
-import { LOCALES, type Locale } from '../../config/site';
+import { LOCALES, BUSINESS, type Locale } from '../../config/site';
 import { dict, localePath } from '../../i18n';
 import { breadcrumb, productSchema, faqPage } from '../../lib/jsonld';
 import productData from '../../data/product.json';
@@ -23,6 +23,40 @@ export function getStaticPaths() {
 const locale = Astro.params.lang as Locale;
 const t = dict(locale);
 const p = t.product;
+
+/*
+ * 제품 정보 고시.
+ *
+ * 「전자상거래 등에서의 상품 등의 정보제공에 관한 고시」가 화장품에 요구하는
+ * 항목입니다. 값은 product.json 이, 이름표는 번역 파일이 정합니다.
+ *
+ * **확정되지 않은 항목을 감추지 않습니다.** 법이 요구하는 목록이므로, 무엇이
+ * 아직 없는지가 보이는 편이 빈 표보다 낫습니다. 감추면 그 항목이 있어야 한다는
+ * 사실 자체를 잊게 됩니다.
+ *
+ * 사용방법과 소비자상담 전화는 이미 사이트가 갖고 있는 값을 그대로 씁니다 —
+ * 같은 사실을 두 곳에 적어 두면 한쪽만 낡습니다.
+ */
+const d = productData.disclosure;
+const usageText = p.howto.steps.map((step) => `${step.title} — ${step.body}`).join(' / ');
+const sellerText =
+  d.sellerName && d.sellerNumber
+    ? `${d.sellerName} (등록번호 ${d.sellerNumber})`
+    : (d.sellerName ?? null);
+
+const disclosureRows: Array<{ key: string; label: string; value: string | null }> = [
+  { key: 'volume', label: p.disclosure.labels.volume, value: d.volume },
+  { key: 'features', label: p.disclosure.labels.features, value: d.features },
+  { key: 'expiry', label: p.disclosure.labels.expiry, value: d.expiry },
+  { key: 'usage', label: p.disclosure.labels.usage, value: usageText },
+  { key: 'ingredients', label: p.disclosure.labels.ingredients, value: d.ingredients },
+  { key: 'functionalReview', label: p.disclosure.labels.functionalReview, value: d.functionalReview },
+  { key: 'cautions', label: p.disclosure.labels.cautions, value: d.cautions },
+  { key: 'manufacturer', label: p.disclosure.labels.manufacturer, value: d.manufacturer },
+  { key: 'seller', label: p.disclosure.labels.seller, value: sellerText },
+  { key: 'countryOfOrigin', label: p.disclosure.labels.countryOfOrigin, value: d.countryOfOrigin },
+  { key: 'customerService', label: p.disclosure.labels.customerService, value: BUSINESS.phone || null },
+];
 
 /**
  * 자사 결제를 여는 판단은 payment-config.json 과 product.json 이 내립니다.
@@ -193,6 +227,38 @@ const specRows = [
       <a class="cta cta--ghost" href={localePath(locale, 'reviews')}>{t.nav.reviews}</a>
       <a class="cta cta--ghost" href={localePath(locale)}>{p.backToStory}</a>
     </p>
+  </section>
+
+  <section class="section section--alt wrap rise" id="disclosure">
+    <p class="kicker">{p.disclosure.kicker}</p>
+
+    {/* 가로로 스크롤되는 영역은 키보드로도 스크롤할 수 있어야 합니다. */}
+    <div class="tableScroll" tabindex="0" role="group" aria-label={p.disclosure.kicker}>
+      <table class="dataTable">
+        <thead>
+          <tr>
+            <th scope="col">{p.disclosure.columns.item}</th>
+            <th scope="col">{p.disclosure.columns.value}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            disclosureRows.map((row) => (
+              <tr data-disclosure={row.key}>
+                <td>{row.label}</td>
+                <td>
+                  {row.value ?? (
+                    <span class="spec__value--pending">{p.disclosure.pending}</span>
+                  )}
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <p class="spec__note">{p.disclosure.note}</p>
   </section>
 
   {

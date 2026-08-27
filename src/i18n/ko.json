@@ -192,6 +192,28 @@
         }
       ]
     },
+    "disclosure": {
+      "kicker": "제품 정보 고시",
+      "note": "「전자상거래 등에서의 상품 등의 정보제공에 관한 고시」에 따른 표시입니다. 아직 정해지지 않은 항목은 정해지지 않았다고 적었습니다 — 판매를 시작하기 전에 모두 채웁니다.",
+      "columns": {
+        "item": "항목",
+        "value": "내용"
+      },
+      "labels": {
+        "volume": "용량 또는 중량",
+        "features": "제품 주요 사양",
+        "expiry": "사용기한 또는 개봉 후 사용기간",
+        "usage": "사용방법",
+        "ingredients": "화장품법에 따른 전성분",
+        "functionalReview": "기능성화장품 식약처 심사필 여부",
+        "cautions": "사용할 때의 주의사항",
+        "manufacturer": "화장품제조업자",
+        "seller": "화장품책임판매업자",
+        "countryOfOrigin": "제조국",
+        "customerService": "소비자상담 관련 전화번호"
+      },
+      "pending": "확정 예정"
+    },
     "backToStory": "브랜드 스토리로 돌아가기"
   },
   "support": {

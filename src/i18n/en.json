@@ -192,6 +192,28 @@
         }
       ]
     },
+    "disclosure": {
+      "kicker": "Product information disclosure",
+      "note": "Required by Korea's e-commerce product information disclosure notice. Where something is not decided yet, we say so — all of it is filled in before sales begin.",
+      "columns": {
+        "item": "Item",
+        "value": "Detail"
+      },
+      "labels": {
+        "volume": "Volume or weight",
+        "features": "Key specifications",
+        "expiry": "Expiry date or period after opening",
+        "usage": "How to use",
+        "ingredients": "Full ingredient list",
+        "functionalReview": "Functional cosmetic — MFDS review status",
+        "cautions": "Precautions for use",
+        "manufacturer": "Cosmetics manufacturer",
+        "seller": "Cosmetics responsible distributor",
+        "countryOfOrigin": "Country of manufacture",
+        "customerService": "Customer service phone"
+      },
+      "pending": "To be confirmed"
+    },
     "backToStory": "Back to the story"
   },
   "support": {

@@ -39,8 +39,10 @@ test.describe('제품 상세', () => {
 
     // 확정된 값
     await expect(page.locator('.spec')).toContainText('SPF50+ / PA++++');
-    // 미확정 값 — 제형·내수성·용량 세 항목
-    await expect(page.locator('.spec__value--pending')).toHaveCount(3);
+    // 미확정 값 — 제형·내수성·용량 세 항목.
+    // `.spec` 안으로 한정합니다. 같은 페이지의 제품 정보 고시 표도 같은 표시를
+    // 쓰기 때문에, 범위를 두지 않으면 두 표의 개수를 합쳐 세게 됩니다.
+    await expect(page.locator('.spec .spec__value--pending')).toHaveCount(3);
   });
 
   test('FAQ 가 접히지 않고 초기 HTML 에 그대로 있다', async ({ request }) => {

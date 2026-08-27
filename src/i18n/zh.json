@@ -192,6 +192,28 @@
         }
       ]
     },
+    "disclosure": {
+      "kicker": "商品信息告示",
+      "note": "依据韩国《电子商务商品信息提供告示》标示。尚未确定的项目如实注明，开始销售前会全部补齐。",
+      "columns": {
+        "item": "项目",
+        "value": "内容"
+      },
+      "labels": {
+        "volume": "容量或重量",
+        "features": "产品主要规格",
+        "expiry": "使用期限或开封后使用期限",
+        "usage": "使用方法",
+        "ingredients": "依化妆品法标示的全成分",
+        "functionalReview": "功能性化妆品 食药处审查情况",
+        "cautions": "使用时的注意事项",
+        "manufacturer": "化妆品制造业者",
+        "seller": "化妆品责任销售业者",
+        "countryOfOrigin": "制造国",
+        "customerService": "消费者咨询电话"
+      },
+      "pending": "待确定"
+    },
     "backToStory": "返回品牌故事"
   },
   "support": {
