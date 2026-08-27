@@ -273,6 +273,20 @@
       "body": "아래로 문의해 주세요.",
       "email": "이메일",
       "phone": "전화"
+    },
+    "posts": {
+      "heading": "공지·읽을거리",
+      "intro": "운영 안내와 자외선차단제에 대해 알아두면 좋은 이야기입니다.",
+      "empty": "아직 올라온 글이 없습니다. 준비되는 대로 이곳에 올리겠습니다.",
+      "backToList": "목록으로",
+      "meta": {
+        "title": "공지·읽을거리 — AVORA",
+        "description": "AVORA 의 운영 안내와 자외선차단제에 대한 읽을거리입니다."
+      },
+      "categories": {
+        "notice": "공지",
+        "journal": "읽을거리"
+      }
     }
   },
   "reviews": {

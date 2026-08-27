@@ -186,6 +186,22 @@ const schemaItems = items
       ))
     }
 
+    {/*
+      공지·읽을거리로 가는 문.
+
+      글이 0건인 언어에서도 냅니다. 명세가 5개 언어 전부에 진입점을 요구하고,
+      빈 목록은 죽은 메뉴와 다릅니다 — 라운드랩의 문제는 눌러도 "사용할 수
+      없습니다" 후 홈으로 튕기는 것이었지 목록이 비어 있는 것이 아니었습니다.
+      대신 카드 문구가 내용을 약속하지 않게 쓰고, 빈 상태는 목록이 말합니다.
+    */}
+    <div class="support__card">
+      <h2>{page.posts.heading}</h2>
+      <p>{page.posts.intro}</p>
+      <p>
+        <a class="tapLink" href={localePath(locale, 'support/posts')}>{page.posts.heading}</a>
+      </p>
+    </div>
+
     <div class="support__card">
       <h2>{page.product.heading}</h2>
       <p>{page.product.body}</p>

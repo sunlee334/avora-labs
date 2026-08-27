@@ -30,7 +30,18 @@ const PAGES = LOCALES.flatMap((l) => [
   `/${l}/legal/terms`,
   `/${l}/legal/privacy`,
   `/${l}/legal/shipping`,
+  `/${l}/support/posts`,
 ]);
+
+/**
+ * 글 상세는 그 글이 있는 언어에만 존재합니다.
+ *
+ * 마크다운 본문은 손이 아니라 글쓴이가 만드는 문자열이라 무엇이 올지
+ * 모릅니다 — 긴 URL, 표, 코드가 320px 화면을 가로로 밀어낼 수 있고,
+ * 그게 `.post__body` 에 `overflow-wrap: anywhere` 를 건 이유입니다.
+ * 목록 페이지에는 그런 것이 없으므로 상세를 따로 봅니다.
+ */
+const POST_PAGES = ['/ko/support/posts/shipping-notice', '/en/support/posts/shipping-notice'];
 
 /**
  * 검사할 폭.
@@ -45,7 +56,7 @@ const WIDTHS = [320, 360, 390, 430];
 const COMMERCE_PAGES = ['/ko/cart', '/ko/checkout', '/ko/order/lookup', '/ko/account'];
 
 test.describe('모바일 레이아웃', () => {
-  for (const path of PAGES) {
+  for (const path of [...PAGES, ...POST_PAGES]) {
     test(`${path} — 320~430px 폭에서 가로 스크롤이 없다`, async ({ page }) => {
       for (const width of WIDTHS) {
         await page.setViewportSize({ width, height: 800 });
@@ -82,7 +93,7 @@ test.describe('모바일 레이아웃', () => {
     return tooSmall;
   }
 
-  for (const path of PAGES) {
+  for (const path of [...PAGES, ...POST_PAGES]) {
     test(`${path} — 탭 가능한 요소가 최소 44×44px`, async ({ page }) => {
       await page.setViewportSize({ width: 390, height: 844 });
       await page.goto(path);

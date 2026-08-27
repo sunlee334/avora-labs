@@ -1,0 +1,105 @@
+---
+/**
+ * 공지·읽을거리 목록.
+ *
+ * ── 필터가 아니라 그룹입니다 ────────────────────────────────
+ * 카테고리별로 거르는 UI 를 두지 않고 두 덩이를 나란히 놓습니다.
+ * 고객센터의 질문 그룹(`support.astro`)과 같은 방식입니다.
+ *
+ * 정적 빌드라 쿼리 라우팅이 없고, `:target` 같은 CSS 요령은 초점 이동과
+ * `aria-current` 를 직접 챙겨야 합니다. 글이 몇 편인 동안은 나란히 두는
+ * 편이 읽기도 쉽고 자바스크립트도 필요 없습니다. 한 페이지가 길어지면
+ * 그때 다시 판단합니다.
+ *
+ * ── 이 언어의 글만 ──────────────────────────────────────────
+ * 글은 `src/content/posts/{locale}/` 에 언어별로 있습니다. 다른 언어 글이
+ * 목록에 섞이면 읽을 수 없는 제목이 나열됩니다.
+ */
+import { getCollection } from 'astro:content';
+import Base from '../../../../layouts/Base.astro';
+import { LOCALES, type Locale } from '../../../../config/site';
+import { dict, localePath } from '../../../../i18n';
+import { breadcrumb } from '../../../../lib/jsonld';
+
+export function getStaticPaths() {
+  return LOCALES.map((lang) => ({ params: { lang } }));
+}
+
+const locale = Astro.params.lang as Locale;
+const t = dict(locale);
+const page = t.support.posts;
+
+const all = await getCollection('posts');
+const mine = all
+  .filter((post) => post.id.split('/')[0] === locale)
+  .sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime());
+
+/** 빈 그룹은 렌더하지 않습니다 — 제목만 있고 아래가 비면 고장으로 보입니다. */
+const groups = (['notice', 'journal'] as const)
+  .map((category) => ({
+    category,
+    label: page.categories[category],
+    posts: mine.filter((post) => post.data.category === category),
+  }))
+  .filter((group) => group.posts.length > 0);
+
+/** 주소는 언어 접두어를 뺀 형태로 넘깁니다 — Base 가 canonical 을 만듭니다. */
+const hrefOf = (id: string) => localePath(locale, `support/posts/${id.split('/')[1]}`);
+
+/**
+ * 날짜는 숫자와 하이픈으로만 씁니다.
+ *
+ * `Intl.DateTimeFormat` 을 쓰면 중국어가 `2026年8月27日` 로 나오는데,
+ * 그 세 글자는 어느 번역 파일에도 마크다운에도 없어 폰트 서브셋에
+ * 들어가지 않습니다. 화면에서 그 글자만 다른 서체로 떨어집니다.
+ */
+const isoDate = (date: Date) => date.toISOString().slice(0, 10);
+---
+
+<Base
+  locale={locale}
+  path="support/posts"
+  title={page.meta.title}
+  description={page.meta.description}
+  jsonLd={[
+    breadcrumb([
+      { name: 'AVORA', path: localePath(locale) },
+      { name: t.support.heading, path: localePath(locale, 'support') },
+      { name: page.heading, path: localePath(locale, 'support/posts') },
+    ]),
+  ]}
+>
+  <section class="section wrap">
+    <h1 class="display display--tight">{page.heading}</h1>
+    <p class="body">{page.intro}</p>
+
+    {
+      groups.length === 0 ? (
+        <p class="postList__empty">{page.empty}</p>
+      ) : (
+        groups.map((group) => (
+          <>
+            <h2 class="kicker">{group.label}</h2>
+            <ul class="postList">
+              {group.posts.map((post) => (
+                <li class="postList__item">
+                  <a href={hrefOf(post.id)}>
+                    <span class="postList__title">{post.data.title}</span>
+                    <span class="postList__summary">{post.data.summary}</span>
+                  </a>
+                  <time class="postList__date" datetime={isoDate(post.data.publishedAt)}>
+                    {isoDate(post.data.publishedAt)}
+                  </time>
+                </li>
+              ))}
+            </ul>
+          </>
+        ))
+      )
+    }
+
+    <p class="postList__back">
+      <a class="tapLink" href={localePath(locale, 'support')}>{t.support.heading}</a>
+    </p>
+  </section>
+</Base>

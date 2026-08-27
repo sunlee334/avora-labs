@@ -1941,3 +1941,131 @@ button {
   gap: 14px;
   margin-top: 22px;
 }
+
+/* ── 공지·읽을거리 ─────────────────────────────────────────── */
+
+/* 목록은 카드가 아니라 줄입니다. 글이 몇 편일 때 카드를 쓰면 빈 공간이
+   더 눈에 띄고, 제목·요약을 한 번에 훑기도 어렵습니다. */
+.postList {
+  list-style: none;
+  margin: 16px 0 40px;
+  padding: 0;
+  border-top: 1px solid var(--color-line);
+}
+.postList__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
+  padding-block: 20px;
+  border-bottom: 1px solid var(--color-line);
+}
+.postList__item > a {
+  flex: 1 1 260px;
+  /* 그리드·플렉스 자식은 기본 min-width 가 auto 라 긴 제목이 칸을 밀어냅니다. */
+  min-width: 0;
+  text-decoration: none;
+  color: inherit;
+  /* 제목과 요약을 한 덩어리로 눌러야 탭 영역이 넓어집니다. */
+  display: block;
+  min-height: var(--size-tap-min);
+}
+.postList__title {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.postList__item > a:hover .postList__title,
+.postList__item > a:focus-visible .postList__title {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.postList__summary {
+  display: block;
+  color: var(--brand-muted);
+  font-size: 14px;
+  line-height: 1.7;
+  max-width: var(--size-measure);
+}
+.postList__date {
+  color: var(--brand-muted);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  /* 숫자 폭을 맞춰 날짜가 세로로 정렬됩니다. */
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.postList__empty {
+  margin-top: 24px;
+  padding: 28px 0;
+  border-top: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-line);
+  color: var(--brand-muted);
+  font-size: 14px;
+}
+.postList__back {
+  margin-top: 8px;
+}
+
+/* 글 본문 ─ 마크다운이 만드는 태그를 여기서 받습니다. */
+.post__meta {
+  margin-top: 12px;
+  color: var(--brand-muted);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+.post__body {
+  margin-top: 32px;
+  max-width: var(--size-measure);
+  /* 손이 아니라 마크다운이 만드는 문자열이라 무엇이 올지 모릅니다.
+     긴 URL 하나가 320px 화면을 가로로 밀어내지 않게 합니다.
+     같은 이유로 .reviews__body 에도 걸려 있습니다. */
+  overflow-wrap: anywhere;
+}
+.post__body > * + * {
+  margin-top: 20px;
+}
+.post__body h2 {
+  margin-top: 40px;
+  font-size: 17px;
+  font-weight: 600;
+}
+.post__body h3 {
+  margin-top: 32px;
+  font-size: 15.5px;
+  font-weight: 600;
+}
+.post__body p,
+.post__body li {
+  color: var(--color-ink);
+  font-size: 15px;
+  line-height: 1.9;
+}
+.post__body ul,
+.post__body ol {
+  padding-inline-start: 20px;
+}
+.post__body li + li {
+  margin-top: 8px;
+}
+.post__body a {
+  color: inherit;
+  text-underline-offset: 3px;
+}
+.post__body hr {
+  border: 0;
+  border-top: 1px solid var(--color-line);
+  margin-block: 32px;
+}
+.post__body blockquote {
+  margin-inline: 0;
+  padding-inline-start: 16px;
+  border-inline-start: 2px solid var(--color-line);
+  color: var(--brand-muted);
+}
+.post__body code {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+}

@@ -1,8 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { readFileSync, writeFileSync, mkdirSync, rmSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, mkdtempSync, rmSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
+import { join, dirname } from 'node:path';
+import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { charsFor, parseFrontmatter, postStringsFor } from '../../scripts/build-fonts.mjs';
+import { charsFor, parseFrontmatter, postStringsFor, POSTS_ROOT } from '../../scripts/build-fonts.mjs';
 import { checkSlug, RESERVED_SLUG_PREFIXES } from '../../src/config/reserved-paths';
 
 /**
@@ -25,21 +27,26 @@ import { checkSlug, RESERVED_SLUG_PREFIXES } from '../../src/config/reserved-pat
  */
 
 const root = new URL('../../', import.meta.url);
-const postsDir = (locale: string) => fileURLToPath(new URL(`src/content/posts/${locale}/`, root));
 
-/** 시험용 글을 잠깐 만들었다 지웁니다. 실제 콘텐츠와 섞이면 안 됩니다. */
-function withPost(locale: string, slug: string, raw: string, run: () => void) {
-  const dir = postsDir(locale);
-  const file = `${dir}${slug}.md`;
-  const existed = existsSync(dir);
-  mkdirSync(dir, { recursive: true });
-  writeFileSync(file, raw, 'utf8');
+/**
+ * 시험용 글을 **임시 폴더**에 만듭니다.
+ *
+ * 실제 `src/content/posts/` 를 건드리면 안 됩니다 — Playwright 가
+ * 프로젝트(mobile·desktop)와 워커를 병렬로 돌리므로 한쪽이 만든 파일을
+ * 다른 쪽이 지우는 중에 읽어 터집니다. 그래서 charsFor 가 폴더를 인자로
+ * 받습니다.
+ */
+function withPosts(files: Record<string, string>, run: (postsRoot: string) => void) {
+  const base = mkdtempSync(join(tmpdir(), 'avora-posts-'));
   try {
-    run();
+    for (const [rel, raw] of Object.entries(files)) {
+      const file = join(base, rel);
+      mkdirSync(dirname(file), { recursive: true });
+      writeFileSync(file, raw, 'utf8');
+    }
+    run(base);
   } finally {
-    rmSync(file, { force: true });
-    // 우리가 만든 디렉터리면 치웁니다. 원래 있었으면 그대로 둡니다.
-    if (!existed) rmSync(dir, { recursive: true, force: true });
+    rmSync(base, { recursive: true, force: true });
   }
 }
 
@@ -81,38 +88,53 @@ test.describe('프론트매터 파서', () => {
 });
 
 test.describe('글 글자 수집', () => {
-  test('본문·제목·요약이 모두 서브셋 대상에 들어간다', () => {
-    const before = charsFor('ko').body as Set<string>;
-    // 기존 문구에 없을 법한 글자를 골랐습니다.
-    const rare = '뷁';
-    expect(before.has(rare), '시험 글자가 이미 있으면 이 검사는 의미가 없습니다').toBe(false);
+  const RARE = '뷁';
 
-    withPost('ko', 'zz-fixture', `---\ntitle: ${rare}\nsummary: 요약\n---\n\n본문\n`, () => {
-      expect((charsFor('ko').body as Set<string>).has(rare)).toBe(true);
-    });
+  test('제목·요약·본문이 모두 서브셋 대상에 들어간다', () => {
+    expect(
+      (charsFor('ko').body as Set<string>).has(RARE),
+      '시험 글자가 실제 문구에 이미 있으면 이 검사는 의미가 없습니다',
+    ).toBe(false);
 
-    // 지우면 다시 사라져야 합니다 — 캐시가 끼면 안 됩니다.
-    expect((charsFor('ko').body as Set<string>).has(rare)).toBe(false);
+    withPosts(
+      { 'ko/fixture.md': `---\ntitle: ${RARE}\nsummary: 요약\n---\n\n본문\n` },
+      (postsRoot) => {
+        expect((charsFor('ko', postsRoot).body as Set<string>).has(RARE)).toBe(true);
+      },
+    );
   });
 
-  test('본문 글자도 들어간다', () => {
-    const rare = '괆';
-    withPost('ko', 'zz-fixture', `---\ntitle: 가\n---\n\n${rare}\n`, () => {
-      expect((charsFor('ko').body as Set<string>).has(rare)).toBe(true);
-    });
+  test('본문에만 있는 글자도 들어간다', () => {
+    withPosts(
+      { 'ko/fixture.md': `---\ntitle: 가\nsummary: 나\n---\n\n${RARE}\n` },
+      (postsRoot) => {
+        expect((charsFor('ko', postsRoot).body as Set<string>).has(RARE)).toBe(true);
+      },
+    );
   });
 
   test('언어가 섞이지 않는다', () => {
     // 로케일을 디렉터리로 가르는 이유입니다. 한국어 글의 글자가 영어 서브셋에
     // 들어가면 en/body.woff2 가 20KB 에서 수백 KB 로 부풀어 오릅니다.
-    const rare = '뷁';
-    withPost('ko', 'zz-fixture', `---\ntitle: ${rare}\n---\n\n본문\n`, () => {
-      expect((charsFor('en').body as Set<string>).has(rare)).toBe(false);
-    });
+    withPosts(
+      { 'ko/fixture.md': `---\ntitle: ${RARE}\nsummary: 요약\n---\n\n본문\n` },
+      (postsRoot) => {
+        expect((charsFor('en', postsRoot).body as Set<string>).has(RARE)).toBe(false);
+      },
+    );
   });
 
   test('글이 없는 언어는 빈 배열이다', () => {
-    expect(postStringsFor('th')).toEqual([]);
+    withPosts({ 'ko/fixture.md': '---\ntitle: 가\nsummary: 나\n---\n본문\n' }, (postsRoot) => {
+      expect(postStringsFor('th', postsRoot)).toEqual([]);
+    });
+  });
+
+  test('실제 픽스처 글의 글자가 실제 서브셋 대상에 있다', () => {
+    // 위 검사들은 임시 폴더를 씁니다. 진짜 경로도 한 번은 확인해야
+    // POSTS_ROOT 가 어긋났을 때 드러납니다.
+    expect(POSTS_ROOT).toContain('src/content/posts');
+    expect((charsFor('ko').body as Set<string>).has('착')).toBe(true);
   });
 });
 
@@ -174,6 +196,14 @@ test.describe('글 주소 검사', () => {
 
 test.describe('폰트 검사가 실제로 도는가', () => {
   test('CI 에서는 도구가 없으면 통과시키지 않는다', () => {
+    /*
+     * 이 검사는 `.fontsrc/venv` 를 잠깐 옮깁니다 — 저장소 전체가 공유하는
+     * 상태입니다. 프로젝트가 둘(mobile·desktop)이라 그대로 두면 서로
+     * 옮기는 중에 부딪힙니다. 화면 크기와 무관한 검사이므로 한 곳에서만
+     * 돌립니다.
+     */
+    test.skip(test.info().project.name !== 'mobile', '뷰포트와 무관 — mobile 에서만 돕니다');
+
     /*
      * 예전에는 도구가 없으면 "생략" 하고 통과했습니다. CI 에는 fontTools 도
      * brotli 도 없었으므로, 이 검사는 **배포 경로에서 한 번도 돈 적이

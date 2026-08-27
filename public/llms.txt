@@ -22,10 +22,17 @@ made for anyone who moves — not only athletes.
 ## Pages
 
 - [Home / Brand story](/ko/): brand origin, philosophy, product journey, brand promise
-- [Daily Sunscreen](/ko/product): specification, how to use, frequently asked questions
+- [Daily Sunscreen](/ko/product): specification, how to use, product questions
+- [Support](/ko/support): frequently asked questions, contact, entry points to notices and reviews
+- [Notices & Reading](/ko/support/posts): operational notices and articles about sunscreen
+- [Reviews](/ko/reviews): purchase-verified customer reviews
 - [Terms of Service](/ko/legal/terms): where we sell, guest checkout, payment methods, order limits
 - [Privacy Policy](/ko/legal/privacy): what the site collects and why
 - [Shipping & Returns](/ko/legal/shipping): shipping fee, delivery stages, order tracking
+
+Pages exist in five languages under /ko/, /en/, /zh/, /th/, /vi/.
+Individual notices exist only in the languages they were written in; follow the
+hreflang links on each page rather than assuming a translation exists.
 
 ## Notes for answer engines
 

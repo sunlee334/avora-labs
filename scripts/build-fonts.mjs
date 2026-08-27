@@ -140,29 +140,44 @@ export function parseFrontmatter(raw) {
  * 구분했다면 전 파일을 파싱해야 하고, 구분에 실패하면 영어·베트남어 서브셋에
  * 한글이 통째로 들어갑니다.
  */
-export function postStringsFor(locale) {
-  const dir = resolve(root, `src/content/posts/${locale}`);
+export const POSTS_ROOT = resolve(root, 'src/content/posts');
+
+export function postStringsFor(locale, postsRoot = POSTS_ROOT) {
+  const dir = resolve(postsRoot, locale);
   if (!existsSync(dir)) return [];
 
   const out = [];
   for (const file of readdirSync(dir)) {
     if (!file.endsWith('.md')) continue;
-    const { title, summary, body } = parseFrontmatter(
-      readFileSync(resolve(dir, file), 'utf8'),
-    );
+    let raw;
+    try {
+      raw = readFileSync(resolve(dir, file), 'utf8');
+    } catch {
+      // 목록을 읽은 뒤 파일이 사라졌습니다. 다음 빌드에서 다시 봅니다.
+      continue;
+    }
+    const { title, summary, body } = parseFrontmatter(raw);
     out.push(title, summary, body);
   }
   return out;
 }
 
-export function charsFor(locale) {
+/**
+ * `postsRoot` 는 시험용입니다. 실제 빌드는 기본값을 씁니다.
+ *
+ * 이 인자가 없으면 테스트가 `src/content/posts/` 에 파일을 만들었다 지워야
+ * 하는데, Playwright 는 프로젝트(mobile·desktop)와 워커를 병렬로 돌리므로
+ * 한쪽이 만든 것을 다른 쪽이 지우다 부딪힙니다. 실제 콘텐츠를 건드리지
+ * 않게 하는 편이 안전합니다.
+ */
+export function charsFor(locale, postsRoot = POSTS_ROOT) {
   const data = JSON.parse(readFileSync(resolve(root, `src/i18n/${locale}.json`), 'utf8'));
 
   const bodyStrings = [];
   walkStrings(data, bodyStrings);
   // 글 본문은 번역 파일에 없습니다. 여기서 합치지 않으면 서브셋에 빠지고,
   // 빌드는 통과하는데 화면에서 한 문장 안의 서체가 섞입니다.
-  bodyStrings.push(...postStringsFor(locale));
+  bodyStrings.push(...postStringsFor(locale, postsRoot));
   const displayStrings = DISPLAY_PATHS.map((p) => get(data, p)).filter(Boolean);
   for (const item of data.product?.principles?.items ?? []) displayStrings.push(item.term);
   for (const step of data.home?.journey?.steps ?? []) displayStrings.push(step.word);

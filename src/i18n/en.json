@@ -273,6 +273,20 @@
       "body": "Get in touch.",
       "email": "Email",
       "phone": "Phone"
+    },
+    "posts": {
+      "heading": "Notices & Reading",
+      "intro": "Operational notices and things worth knowing about sunscreen.",
+      "empty": "Nothing here yet. We will post as things are ready.",
+      "backToList": "Back to list",
+      "meta": {
+        "title": "Notices & Reading — AVORA",
+        "description": "Operational notices from AVORA and reading about sunscreen."
+      },
+      "categories": {
+        "notice": "Notice",
+        "journal": "Reading"
+      }
     }
   },
   "reviews": {

@@ -73,7 +73,19 @@ test.describe('검사기 자체', () => {
 });
 
 /** 언어에 관계없이 같은 구조라, 전체 페이지는 한국어로 훑습니다. */
-const KO_PAGES = ['', 'product', 'support', 'reviews', 'legal/terms', 'legal/privacy', 'legal/shipping', '404'];
+const KO_PAGES = [
+  '',
+  'product',
+  'support',
+  'reviews',
+  'legal/terms',
+  'legal/privacy',
+  'legal/shipping',
+  '404',
+  'support/posts',
+  // 마크다운 렌더 결과가 heading-order·대비 위반이 실제로 나는 자리입니다.
+  'support/posts/shipping-notice',
+];
 
 test.describe('정적 화면', () => {
   for (const path of KO_PAGES) {
