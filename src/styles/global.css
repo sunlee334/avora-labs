@@ -2089,3 +2089,104 @@ button {
    `table { display: block }` 이 흔한 요령이지만 그러면 일부 스크린리더에서
    행·열 탐색이 사라집니다 — 표를 표가 아니게 만들어 스크롤을 얻는 셈입니다.
    그래서 CSS 가 아니라 HTML 트리 단계에서 감쌉니다. */
+
+/* ── 문의 ──────────────────────────────────────────────────── */
+
+.inquiryList {
+  list-style: none;
+  margin: 16px 0 32px;
+  padding: 0;
+}
+.inquiryList__item {
+  padding: 20px 0;
+  border-top: 1px solid var(--color-line);
+}
+.inquiryList__item:last-child {
+  border-bottom: 1px solid var(--color-line);
+}
+.inquiryList__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+.inquiryList__subject {
+  font-size: 15.5px;
+  font-weight: 600;
+  /* 플렉스 자식의 기본 min-width 는 auto 라 긴 제목이 배지를 밀어냅니다. */
+  min-width: 0;
+}
+.inquiryList__badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--color-line);
+  color: var(--brand-muted);
+  white-space: nowrap;
+}
+.inquiryList__badge[data-status='answered'] {
+  /* 답이 달린 것이 한눈에 보여야 합니다 — 기다리는 쪽이 손님입니다. */
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+}
+.inquiryList__date {
+  display: block;
+  margin-top: 6px;
+  color: var(--brand-muted);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+.inquiryList__body {
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 1.8;
+  max-width: var(--size-measure);
+  /* 손이 아니라 사람이 쓴 문자열이라 무엇이 올지 모릅니다. */
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.inquiryList__answer {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: var(--brand-surface-alt);
+}
+.inquiryList__answerLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--brand-muted);
+  margin-bottom: 6px;
+}
+.inquiryList__answer p:last-child {
+  font-size: 14px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.inquiryForm {
+  margin-top: 24px;
+  max-width: var(--size-measure);
+}
+.inquiryForm textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-ink);
+  font-family: inherit;
+  /* 16px 미만이면 iOS 가 초점을 받을 때 화면을 확대합니다. */
+  font-size: 16px;
+  line-height: 1.7;
+  resize: vertical;
+}
+.inquiryForm textarea:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+}

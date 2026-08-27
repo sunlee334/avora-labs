@@ -8,6 +8,8 @@ import Base from '../../../layouts/Base.astro';
 import { LOCALES, type Locale } from '../../../config/site';
 import { dict, localePath } from '../../../i18n';
 
+import InquirySection from '../../../components/InquirySection.astro';
+
 export function getStaticPaths() {
   return LOCALES.map((lang) => ({ params: { lang } }));
 }
@@ -50,6 +52,12 @@ const l = t.order.lookup;
         <dt>{t.order.complete.carrierAndTracking}</dt><dd data-r-tracking></dd>
       </div>
     </dl>
+
+    {/* 조회에 성공한 뒤에야 보입니다 — 주문번호를 모르면 문의를 남길
+        곳도 없습니다. */}
+    <div data-inquiry-wrap hidden>
+      <InquirySection locale={locale} mode="order" />
+    </div>
   </section>
 
   <template data-lookup-labels
@@ -68,6 +76,8 @@ const l = t.order.lookup;
 </Base>
 
 <script>
+  import { mountInquiry } from '../../../lib/inquiry';
+
   const form = document.querySelector<HTMLFormElement>('[data-lookup]');
   const labels = document.querySelector<HTMLElement>('[data-lookup-labels]');
   if (form && labels) {
@@ -75,6 +85,12 @@ const l = t.order.lookup;
     const locale = form.dataset.locale!;
     const errorBox = document.querySelector<HTMLElement>('[data-lookup-error]')!;
     const result = document.querySelector<HTMLElement>('[data-lookup-result]')!;
+
+    // 문의 섹션. 조회에 성공하기 전에는 감춰져 있습니다.
+    const inquiryWrap = document.querySelector<HTMLElement>('[data-inquiry-wrap]');
+    const inquiryRoot = document.querySelector<HTMLElement>('[data-inquiry]');
+    let inquiryMounted = false;
+    let lastCredentials: { orderId: string; phone: string } | null = null;
     const submit = form.querySelector<HTMLButtonElement>('[data-lookup-submit]')!;
 
     const statusLabel = (s: string) =>
@@ -132,6 +148,22 @@ const l = t.order.lookup;
           set('[data-r-tracking]', tracking);
 
           result.hidden = false;
+
+          /*
+           * 문의 섹션은 **조회에 성공한 뒤에야** 나타납니다. 주문번호를
+           * 모르면 문의를 남길 곳도 없고, 조회 전에 폼만 띄우면 무엇을
+           * 근거로 남기는지가 흐려집니다.
+           *
+           * 한 번만 살립니다 — 다시 조회하면 자격증명 함수가 최신 값을
+           * 돌려주므로 재장착이 필요 없습니다.
+           */
+          lastCredentials = { orderId, phone };
+          if (inquiryWrap) inquiryWrap.hidden = false;
+          if (inquiryRoot && !inquiryMounted) {
+            inquiryMounted = true;
+            const copy = JSON.parse(inquiryRoot.dataset.copy ?? '{}');
+            mountInquiry(inquiryRoot, copy, () => lastCredentials);
+          }
         } else {
           errorBox.hidden = false;
         }

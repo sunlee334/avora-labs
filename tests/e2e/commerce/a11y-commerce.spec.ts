@@ -103,6 +103,15 @@ test.describe('구매 흐름', () => {
     await page.locator('[name="phone"]').fill('010-3333-4444');
     await page.locator('[data-lookup-submit]').click();
     await expect(page.locator('[data-lookup-result]')).toBeVisible();
+    // 이 시점에 문의 폼도 함께 나타납니다.
+    await expect(page.locator('[data-inquiry-form]')).toBeVisible();
+    expect(await scan(page, testInfo)).toEqual([]);
+
+    // 문의를 남긴 뒤 — 목록과 상태 배지가 그려진 상태.
+    await page.locator('#inq-subject').fill('접근성 시험');
+    await page.locator('#inq-body').fill('문의 목록이 그려진 상태를 검사합니다.');
+    await page.locator('[data-inquiry-submit]').click();
+    await expect(page.locator('[data-inquiry-list]')).toBeVisible();
     expect(await scan(page, testInfo)).toEqual([]);
   });
 });

@@ -744,5 +744,26 @@
       "managedBy": "Your name and email are managed by the service you signed in with. Change them there and they update on your next sign-in.",
       "noEmail": "The provider did not supply an email address."
     }
+  },
+  "inquiry": {
+    "heading": "Questions",
+    "intro": "Ask us anything about your order or the product. Only you and we can see it.",
+    "empty": "You have not asked anything yet.",
+    "loading": "Loading…",
+    "subject": "Subject",
+    "body": "Your question",
+    "submit": "Send question",
+    "sending": "Sending…",
+    "sent": "We have your question. The answer will appear here.",
+    "answer": "Answer",
+    "status": {
+      "open": "Awaiting answer",
+      "answered": "Answered"
+    },
+    "error": {
+      "tooShort": "Please write a little more.",
+      "failed": "We could not send your question. Please try again."
+    },
+    "note": "Answers appear on this page. We do not send a separate notification."
   }
 }

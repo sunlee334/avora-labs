@@ -744,5 +744,26 @@
       "managedBy": "Tên và email do dịch vụ bạn dùng để đăng nhập quản lý. Đổi ở đó thì lần đăng nhập sau sẽ cập nhật.",
       "noEmail": "Đơn vị đăng nhập không cung cấp email."
     }
+  },
+  "inquiry": {
+    "heading": "Câu hỏi",
+    "intro": "Nếu có thắc mắc về đơn hàng hoặc sản phẩm, hãy để lại lời nhắn. Chỉ bạn và chúng tôi xem được.",
+    "empty": "Bạn chưa để lại câu hỏi nào.",
+    "loading": "Đang tải…",
+    "subject": "Tiêu đề",
+    "body": "Nội dung câu hỏi",
+    "submit": "Gửi câu hỏi",
+    "sending": "Đang gửi…",
+    "sent": "Chúng tôi đã nhận câu hỏi. Câu trả lời sẽ hiện ở trang này.",
+    "answer": "Trả lời",
+    "status": {
+      "open": "Đang chờ trả lời",
+      "answered": "Đã trả lời"
+    },
+    "error": {
+      "tooShort": "Vui lòng viết chi tiết hơn một chút.",
+      "failed": "Không gửi được câu hỏi. Vui lòng thử lại sau."
+    },
+    "note": "Câu trả lời sẽ hiện ở trang này. Chúng tôi không gửi thông báo riêng."
   }
 }

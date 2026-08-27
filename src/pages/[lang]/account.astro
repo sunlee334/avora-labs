@@ -14,6 +14,7 @@ import { LOCALES, type Locale } from '../../config/site';
 import { dict, localePath } from '../../i18n';
 import { ACCOUNTS_ENABLED } from '../../config/runtime';
 import carriers from '../../config/carriers.json';
+import InquirySection from '../../components/InquirySection.astro';
 
 export function getStaticPaths() {
   if (!ACCOUNTS_ENABLED) return [];
@@ -133,6 +134,10 @@ const a = t.account;
         <p class="body" data-claim-success hidden>{a.claim.success}</p>
         <button class="cta" type="submit" data-claim-submit>{a.claim.submit}</button>
       </form>
+
+      {/* 로그인한 사람만 보고 남깁니다. 주문이 없어도 됩니다 —
+          구매 전 질문을 받기 위해서입니다. */}
+      <InquirySection locale={locale} mode="account" />
     </div>
   </section>
 
@@ -169,7 +174,22 @@ const a = t.account;
 </Base>
 
 <script>
+  import { mountInquiry } from '../../lib/inquiry';
+
   const root = document.querySelector<HTMLElement>('[data-account]');
+  /*
+   * 문의 섹션.
+   *
+   * 로그인한 사람이므로 자격증명을 따로 넘기지 않습니다 — 서버가 세션
+   * 쿠키로 user_id 를 찾습니다. 로그인 전에는 이 섹션 자체가 감춰져 있어
+   * (부모가 [data-signed-in]) 여기서 다시 확인하지 않습니다.
+   */
+  const inquiryRoot = document.querySelector<HTMLElement>('[data-inquiry]');
+  if (inquiryRoot) {
+    const copy = JSON.parse(inquiryRoot.dataset.copy ?? '{}');
+    mountInquiry(inquiryRoot, copy, () => null);
+  }
+
   const labels = document.querySelector<HTMLTemplateElement>('[data-account-labels]');
 
   if (root && labels) {

@@ -1,0 +1,89 @@
+---
+/**
+ * 문의 남기기·보기.
+ *
+ * ── 왜 컴포넌트인가 ─────────────────────────────────────────
+ * 마이페이지와 주문조회 **두 화면**에 같은 것이 붙습니다. 마크업을 두 벌
+ * 두면 한쪽만 고치는 날이 오고, 그때 어느 쪽이 맞는지 아무도 모릅니다.
+ *
+ * ── 두 화면이 다른 점은 하나뿐입니다 ────────────────────────
+ * 문의를 보내고 불러올 때 무엇을 함께 넘기느냐입니다.
+ *   마이페이지  세션 쿠키만 — 서버가 user_id 로 찾습니다
+ *   주문조회    주문번호 + 연락처
+ *
+ * 그것을 `mode` 로 가르고 나머지는 전부 같습니다. 실제 요청은 각 페이지의
+ * 스크립트가 `data-inquiry` 를 찾아 붙입니다 — 주문조회는 조회에 성공한
+ * 뒤에야 주문번호를 알기 때문입니다.
+ */
+import type { Locale } from '../config/site';
+import { dict } from '../i18n';
+
+interface Props {
+  locale: Locale;
+  /** account = 세션으로, order = 주문번호+연락처로 */
+  mode: 'account' | 'order';
+}
+
+const { locale, mode } = Astro.props;
+const t = dict(locale);
+const q = t.inquiry;
+---
+
+{/*
+  문구를 요소의 data-* 로 들고 갑니다.
+
+  스크립트가 5개 언어 사전을 안지 않아도 되고, 두 페이지가 각자 라벨을
+  넘길 필요도 없습니다 — 리뷰 페이지(worker/reviews-page.ts)가 쓰는 것과
+  같은 방식입니다.
+*/}
+<section
+  class="inquiry"
+  data-inquiry
+  data-inquiry-mode={mode}
+  data-copy={JSON.stringify({
+    empty: q.empty,
+    loading: q.loading,
+    sending: q.sending,
+    submit: q.submit,
+    sent: q.sent,
+    answer: q.answer,
+    status: q.status,
+    error: q.error,
+  })}
+>
+  <h2 class="kicker" style="margin-top: 40px">{q.heading}</h2>
+  <p class="body">{q.intro}</p>
+
+  {/* 목록. 비었는지 여부는 불러온 뒤에야 알므로 자리를 미리 잡습니다. */}
+  <p class="body" data-inquiry-state>{q.loading}</p>
+  <ul class="inquiryList" data-inquiry-list hidden></ul>
+
+  <form class="inquiryForm" data-inquiry-form>
+    <div class="field">
+      <label for="inq-subject">{q.subject}</label>
+      <input
+        id="inq-subject"
+        name="subject"
+        type="text"
+        required
+        maxlength="100"
+        autocomplete="off"
+      />
+    </div>
+    <div class="field">
+      <label for="inq-body">{q.body}</label>
+      {/* 16px 미만이면 iOS 가 초점을 받을 때 화면을 확대합니다. */}
+      <textarea id="inq-body" name="body" required rows="5" maxlength="2000"></textarea>
+    </div>
+
+    <p class="field__error" data-inquiry-error hidden></p>
+
+    <div class="formActions">
+      <button class="cta" type="submit" data-inquiry-submit>{q.submit}</button>
+    </div>
+  </form>
+
+  {/* 알림을 보내지 않는다는 사실을 숨기지 않습니다. 기다리게 해 놓고
+      아무 연락이 없으면 그것이 더 나쁩니다. */}
+  <p class="cart__notice">{q.note}</p>
+</section>
