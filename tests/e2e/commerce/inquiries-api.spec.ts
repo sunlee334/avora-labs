@@ -1,5 +1,7 @@
 import { test, expect, type APIRequestContext } from '@playwright/test';
-import { execFileSync } from 'node:child_process';
+import { DatabaseSync } from 'node:sqlite';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ADMIN_DEV_TOKEN } from '../../../playwright.config';
 
@@ -279,41 +281,68 @@ test.describe('관리 화면에서 답한다', () => {
   });
 });
 
+/**
+ * 데이터베이스가 유령 행을 막는가.
+ *
+ * 애플리케이션이 실수해도 통과하지 않아야 합니다. user_id 도 order_id 도
+ * 없는 행은 **아무도 조회할 수 없고**, 손님은 답을 못 받는데 관리 목록에만
+ * 보입니다 — 예외도 안 나는 조용한 실패입니다.
+ *
+ * ── 왜 dev 서버의 D1 을 쓰지 않는가 ─────────────────────────
+ * 예전에는 `wrangler d1 execute --local` 로 같은 파일에 직접 넣어 봤습니다.
+ * 그 파일은 dev 서버가 쥐고 있어서, 잠금이 걸리면 `SQLITE_BUSY` 가 나고
+ * wrangler 4.127.0 부터는 그냥 `internal error; reference = …` 로 덮여
+ * 나옵니다. 둘 다 "제약이 막았다" 와 구분되지 않습니다 — 제약이 사라져도
+ * 테스트는 통과할 수 있었습니다.
+ *
+ * 그래서 마이그레이션 SQL 을 **아무도 쥐고 있지 않은 메모리 DB** 에 그대로
+ * 올려서 봅니다. 서버가 쓰는 스키마도 같은 파일에서 나옵니다
+ * (playwright.config 가 매번 `d1 migrations apply --local` 을 돌립니다).
+ */
 test.describe('데이터베이스가 유령 행을 막는다', () => {
-  test('user_id 도 order_id 도 없으면 거절한다', () => {
-    /*
-     * 애플리케이션이 실수해도 통과하지 않아야 합니다. 둘 다 없는 행은
-     * **아무도 조회할 수 없고**, 손님은 답을 못 받는데 관리 목록에만
-     * 보입니다 — 예외도 안 나는 조용한 실패입니다.
-     *
-     * API 로는 이 상태를 만들 수 없으므로(코드가 먼저 막습니다) D1 에
-     * 직접 넣어 봅니다.
-     */
-    const root = fileURLToPath(new URL('../../../', import.meta.url));
-    let failed = false;
-    let message = '';
-    try {
-      execFileSync(
-        'npx',
-        [
-          'wrangler',
-          'd1',
-          'execute',
-          'avora-orders',
-          '--local',
-          '--command',
-          "INSERT INTO inquiries (id,subject,body,locale,created_at,updated_at) " +
-            "VALUES ('GHOST','s','b','ko','2026-01-01','2026-01-01')",
-        ],
-        { cwd: root, encoding: 'utf8', stdio: 'pipe' },
-      );
-    } catch (error) {
-      failed = true;
-      const e = error as { stdout?: string; stderr?: string };
-      message = `${e.stdout ?? ''}${e.stderr ?? ''}`;
-    }
+  const root = fileURLToPath(new URL('../../../', import.meta.url));
 
-    expect(failed, '유령 행이 들어갔습니다').toBe(true);
-    expect(message).toContain('CHECK constraint failed');
+  function freshDb(): DatabaseSync {
+    const db = new DatabaseSync(':memory:');
+    db.exec(readFileSync(join(root, 'migrations/0006_inquiries.sql'), 'utf8'));
+    return db;
+  }
+
+  const GHOST =
+    "INSERT INTO inquiries (id,subject,body,locale,created_at,updated_at) " +
+    "VALUES ('GHOST','s','b','ko','2026-01-01','2026-01-01')";
+
+  test('user_id 도 order_id 도 없으면 거절한다', () => {
+    const db = freshDb();
+    try {
+      expect(() => db.exec(GHOST)).toThrow(/CHECK constraint failed/);
+    } finally {
+      db.close();
+    }
+  });
+
+  /**
+   * 위 테스트만 있으면 스키마가 통째로 깨져도 통과합니다 — 테이블이 없어도
+   * 예외는 나기 때문입니다. 정상 행이 들어가는 것까지 봐야 "제약이 막았다"
+   * 가 사실이 됩니다.
+   */
+  test('둘 중 하나만 있으면 들어간다 — 제약이 과하지 않다', () => {
+    const db = freshDb();
+    try {
+      expect(() =>
+        db.exec(
+          "INSERT INTO inquiries (id,user_id,subject,body,locale,created_at,updated_at) " +
+            "VALUES ('U','user-1','s','b','ko','2026-01-01','2026-01-01')",
+        ),
+      ).not.toThrow();
+      expect(() =>
+        db.exec(
+          "INSERT INTO inquiries (id,order_id,subject,body,locale,created_at,updated_at) " +
+            "VALUES ('O','AVORA-1','s','b','ko','2026-01-01','2026-01-01')",
+        ),
+      ).not.toThrow();
+    } finally {
+      db.close();
+    }
   });
 });
