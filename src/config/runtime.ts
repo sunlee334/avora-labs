@@ -43,8 +43,6 @@ export const CURRENCY = productData.currency;
 /** 자사 결제 화면(장바구니·체크아웃)을 노출할지. 가격이 없으면 열 수 없습니다. */
 export const SELLS_DIRECTLY = CHECKOUT_MODE === 'internal' && PRICE != null;
 
-/** 1차 오픈처럼 외부몰로 보내는 상태인지. */
-export const SELLS_EXTERNALLY = CHECKOUT_MODE === 'external';
 
 export const EXTERNAL_STORE_URL: string | null = country.externalStoreUrl || null;
 
@@ -68,5 +66,3 @@ export const ACCOUNTS_ENABLED =
     ? import.meta.env.PUBLIC_ACCOUNTS === 'on'
     : commerceConfig.accounts.enabled;
 
-/** 이 빌드가 기본 설정과 다른 상태인지 — 개발 중 혼동을 막기 위한 표시용. */
-export const IS_OVERRIDDEN = Boolean(modeOverride || priceOverride);

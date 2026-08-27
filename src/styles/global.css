@@ -263,10 +263,6 @@ button {
 .cta:hover {
   opacity: 0.86;
 }
-.cta--inverse {
-  background: var(--brand-surface-alt);
-  color: var(--brand-primary);
-}
 .cta--ghost {
   background: transparent;
   color: var(--color-ink);
@@ -1447,7 +1443,6 @@ button {
     transition: none;
   }
   .lang__sheet,
-  .lang__backdrop,
   .cta {
     transition: none;
   }

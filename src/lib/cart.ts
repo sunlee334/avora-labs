@@ -38,8 +38,6 @@ const CATALOG: Record<string, { name: string; price: number | null; image: strin
   },
 };
 
-export const PRODUCT_ID = product.id;
-
 function isBrowser(): boolean {
   return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
 }

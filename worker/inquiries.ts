@@ -137,25 +137,6 @@ export async function createInquiry(
   return rowToInquiry(row as Record<string, unknown>);
 }
 
-/**
- * 주문 경로의 조회.
- *
- * `findOrderForCustomer` 와 같은 모양입니다 — 문의번호와 연락처가 **둘 다**
- * 맞아야 하고, 없으면 `null` 입니다. 없는 문의와 남의 문의를 구분하지
- * 않습니다.
- */
-export async function findInquiryForCustomer(
-  db: D1Database,
-  id: string,
-  phone: string,
-): Promise<InquiryRecord | null> {
-  const row = await db
-    .prepare('SELECT * FROM inquiries WHERE id = ? AND contact_phone = ?')
-    .bind(id, normalizePhone(phone))
-    .first();
-  return row ? rowToInquiry(row as Record<string, unknown>) : null;
-}
-
 /** 한 주문에 달린 문의 전부. 연락처가 맞아야 합니다. */
 export async function inquiriesForOrder(
   db: D1Database,
