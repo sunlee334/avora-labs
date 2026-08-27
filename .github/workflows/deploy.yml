@@ -95,6 +95,24 @@ jobs:
             exit 1
           fi
 
+          # 관리 화면은 자물쇠가 둘입니다 — Cloudflare Access 정책(대시보드)과
+          # 허용 목록(여기). 정책은 저장소 밖에 있어 누가 넓혀도 diff 에 남지
+          # 않으므로, 목록 쪽이 비면 그 순간 정책 하나만 남습니다.
+          if grep -q '"ACCESS_TEAM_DOMAIN"[[:space:]]*:[[:space:]]*"[^"]' wrangler.jsonc; then
+            allowed=$(sed -n 's/.*"ADMIN_ALLOWED_EMAILS"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' wrangler.jsonc)
+            if ! printf '%s' "$allowed" | grep -q '@'; then
+              echo "::error::ADMIN_ALLOWED_EMAILS 가 비어 있습니다. 관리 화면이 아무에게도 열리지 않습니다."
+              echo "  wrangler.jsonc 의 vars 에 관리자 이메일을 쉼표로 구분해 넣으세요."
+              exit 1
+            fi
+            # "@gmail.com" 처럼 도메인만 적으면 그 도메인 전체가 관리자가 됩니다.
+            if printf '%s' "$allowed" | tr ',' '\n' | grep -qE '(^|[[:space:]])@'; then
+              echo "::error::ADMIN_ALLOWED_EMAILS 에 도메인만 적힌 항목이 있습니다: $allowed"
+              echo "  목록은 사람 단위여야 합니다. 도메인 전체를 넣으면 문이 열린 것과 같습니다."
+              exit 1
+            fi
+          fi
+
       - run: npm run build
 
       - name: 배포

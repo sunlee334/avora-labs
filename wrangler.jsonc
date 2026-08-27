@@ -78,7 +78,17 @@
     "KAKAO_REST_API_KEY": "471993744ef641f96c59d7f70db37a97",
 
     "ACCESS_TEAM_DOMAIN": "https://avoralabs.cloudflareaccess.com",
-    "ACCESS_POLICY_AUD": "ccfcc41b65327c106b50761011b64b90000cf6b5862c7674fda16ece0b353b1f"
+    "ACCESS_POLICY_AUD": "ccfcc41b65327c106b50761011b64b90000cf6b5862c7674fda16ece0b353b1f",
+
+    // 관리 화면에 들어올 수 있는 사람. 쉼표로 구분합니다.
+    //
+    // Access 정책(대시보드)이 1차 문이고 이것이 2차 문입니다. 정책은 저장소
+    // 밖에 있어 누가 넓혀도 diff 에 남지 않지만, 이 줄은 남습니다.
+    // 비우면 아무도 못 들어옵니다 — 전부 허용이 아니라 전부 차단입니다.
+    //
+    // 사람이 늘면 여기에 이메일을 추가하고 배포하세요. 대시보드 정책도
+    // 함께 넓혀야 합니다 — 둘 다 통과해야 들어옵니다.
+    "ADMIN_ALLOWED_EMAILS": "sunlee334@gmail.com,hello.avoralabs@gmail.com"
   },
 
   "observability": {
