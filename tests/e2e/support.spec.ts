@@ -2,6 +2,8 @@ import { test, expect } from '@playwright/test';
 import { BUSINESS, LOCALES } from '../../src/config/site';
 import commerce from '../../src/config/commerce.json' with { type: 'json' };
 import payment from '../../src/config/payment-config.json' with { type: 'json' };
+import ko from '../../src/i18n/ko.json' with { type: 'json' };
+import { jsonLdOf, sitemapUrls, pathKey } from '../support/sitemap';
 
 /**
  * 고객센터.
@@ -96,20 +98,53 @@ test.describe('답변엔진에 내보내는 것', () => {
     expect(questions, '잠정값인 배송비가 구조화 데이터에 들어갔습니다').not.toContain(feeQuestion);
   });
 
-  test('제품 페이지 FAQ 와 질문이 겹치지 않는다', async ({ page }) => {
-    // 같은 질문이 두 페이지에 있으면 어느 쪽을 정본으로 볼지 알 수 없습니다.
+  test('FAQPage 를 내는 페이지가 사이트 전체에서 하나다', async ({ request }) => {
+    /*
+     * ── 왜 "겹치지 않는다" 에서 "하나다" 로 바뀌었나 ──────────
+     * 예전에는 고객센터와 제품 페이지가 각자 FAQPage 를 냈고, 이 검사는
+     * 두 곳의 질문이 겹치지 않는지만 봤습니다. 이제 질문을 한 곳으로
+     * 모았으므로 **정본이 하나** 라는 것 자체를 봅니다.
+     *
+     * 같은 주제로 여러 페이지가 FAQPage 를 내면 검색에서 서로 갉아먹고,
+     * 답변엔진은 어느 쪽을 인용할지 모릅니다.
+     *
+     * 두 페이지를 표본으로 보지 않고 **사이트맵 전체**를 훑습니다 —
+     * 나중에 누가 세 번째 페이지에 faqPage() 를 붙여도 걸립니다.
+     */
+    const urls = await sitemapUrls(request);
+    expect(urls.length, '사이트맵이 비어 있습니다').toBeGreaterThan(0);
+
+    const withFaq = new Set<string>();
+    for (const url of urls) {
+      const html = await (await request.get(new URL(url).pathname)).text();
+      if (jsonLdOf(html).some((schema) => schema['@type'] === 'FAQPage')) {
+        withFaq.add(pathKey(url));
+      }
+    }
+
+    expect([...withFaq].sort(), `FAQPage 를 내는 곳: ${[...withFaq].join(' / ')}`).toEqual([
+      'support',
+    ]);
+  });
+
+  test('통합 전 두 곳의 질문이 하나도 빠지지 않았다', async ({ page }) => {
+    /*
+     * 옮기다 흘리면 그 질문에 대한 답이 사이트에서 사라집니다. 화면에서는
+     * 티가 안 나고(다른 질문들이 채우므로) 검색에서만 조용히 없어집니다.
+     */
     await page.goto('/ko/support');
-    const support = (await jsonLd(page))
+    const questions = (await jsonLd(page))
       .find((s) => s['@type'] === 'FAQPage')
       .mainEntity.map((e: any) => e.name);
 
-    await page.goto('/ko/product');
-    const product = (await jsonLd(page))
-      .find((s) => s['@type'] === 'FAQPage')
-      .mainEntity.map((e: any) => e.name);
+    // 고객센터 6문항 + 제품 5문항. 배송비는 잠정값이라 구조화 데이터에서
+    // 빠지므로(위 검사 참조) 5 + 5 = 10 이 최소입니다.
+    expect(questions.length, '통합 후 질문 수가 줄었습니다').toBeGreaterThanOrEqual(10);
 
-    const overlap = support.filter((q: string) => product.includes(q));
-    expect(overlap, `중복 질문: ${overlap.join(' / ')}`).toEqual([]);
+    // 제품 문항이 실제로 넘어왔는지 — 사전에서 직접 읽어 대조합니다.
+    for (const item of ko.product.faq.items) {
+      expect(questions, `제품 문항이 빠졌습니다: ${item.q}`).toContain(item.q);
+    }
   });
 
   test('답을 가리켜 인용할 수 있도록 질문마다 id 가 있다', async ({ page }) => {

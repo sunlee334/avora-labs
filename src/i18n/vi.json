@@ -226,6 +226,7 @@
     "groups": {
       "order": "Đặt hàng",
       "delivery": "Giao hàng",
+      "product": "Sản phẩm",
       "etc": "Khác"
     },
     "items": {
@@ -257,11 +258,6 @@
         "a": "Chúng tôi chỉ nhận thông tin cần cho việc giao hàng. Thông tin thẻ và tài khoản ngân hàng không đi vào máy chủ của chúng tôi mà chỉ nằm trong hệ thống của đơn vị thanh toán. Những gì được thu thập và lưu bao lâu đều ghi trong chính sách quyền riêng tư.",
         "link": "Chính sách quyền riêng tư"
       }
-    },
-    "product": {
-      "heading": "Câu hỏi về sản phẩm",
-      "body": "Chỉ số chống nắng, vệt trắng, mùi hương và các câu hỏi về bản thân sản phẩm nằm ở trang sản phẩm.",
-      "link": "Câu hỏi thường gặp về sản phẩm"
     },
     "pending": {
       "heading": "Những điều chúng tôi chưa thể trả lời",

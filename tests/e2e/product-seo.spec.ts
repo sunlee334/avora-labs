@@ -1,26 +1,33 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { ORIGIN } from '../../src/config/site';
+import { jsonLdOf, sitemapUrls } from '../support/sitemap';
 
 /**
  * 제품 페이지와 구조화 데이터.
  * 확정되지 않은 값이 사실처럼 새어나가지 않는지가 이 파일의 핵심 관심사입니다.
  */
 
-function jsonLdOf(html: string): any[] {
-  const blocks = [...html.matchAll(/<script type="application\/ld\+json"[^>]*>(.*?)<\/script>/gs)];
-  return blocks.map((m) => JSON.parse(m[1]));
-}
-
 test.describe('제품 상세', () => {
-  test('Product · FAQPage · BreadcrumbList JSON-LD 가 있다', async ({ request }) => {
+  test('Product · BreadcrumbList JSON-LD 가 있다', async ({ request }) => {
     const res = await request.get('/ko/product');
     const schemas = jsonLdOf(await res.text());
     const types = schemas.map((s) => s['@type']);
 
     expect(types).toContain('Product');
-    expect(types).toContain('FAQPage');
     expect(types).toContain('BreadcrumbList');
+
+    /*
+     * FAQPage 는 **일부러 없습니다.**
+     *
+     * 질문은 화면에 그대로 있습니다(아래 "FAQ 가 접히지 않고..." 검사가
+     * 지킵니다). 구조화 데이터만 고객센터 한 곳으로 모았습니다 —
+     * 같은 주제로 두 페이지가 FAQPage 를 내면 검색에서 서로 갉아먹고,
+     * 답변엔진은 어느 쪽을 인용할지 모릅니다.
+     *
+     * 사람은 사던 자리에서 읽고, 검색엔진은 한 곳만 봅니다.
+     */
+    expect(types, 'FAQPage 는 고객센터 한 곳에만 있어야 합니다').not.toContain('FAQPage');
   });
 
   test('Product 구조화 데이터의 기본 정보가 맞다', async ({ request }) => {
@@ -154,11 +161,6 @@ test.describe('사이트맵과 색인 신호가 서로 어긋나지 않는다', 
    * 공개 사이트맵에 실려 있었습니다.** 화면으로는 드러나지 않고
    * Search Console 에만 오류로 보이는 종류입니다.
    */
-  async function sitemapUrls(request: import('@playwright/test').APIRequestContext) {
-    const xml = await (await request.get('/sitemap-0.xml')).text();
-    return [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
-  }
-
   test('사이트맵의 모든 주소가 실제로 색인 가능하다', async ({ request }) => {
     const urls = await sitemapUrls(request);
     expect(urls.length, '사이트맵이 비어 있습니다').toBeGreaterThan(0);

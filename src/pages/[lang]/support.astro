@@ -81,7 +81,7 @@ const countriesAnswer = q.countries.a.replace('{countries}', sellable.join(' · 
  */
 type Item = {
   id: string;
-  group: 'order' | 'delivery' | 'etc';
+  group: 'order' | 'delivery' | 'product' | 'etc';
   q: string;
   a: string;
   note?: string | null;
@@ -131,9 +131,27 @@ const items: Item[] = [
     a: q.privacy.a,
     link: { label: q.privacy.link, href: localePath(locale, 'legal/privacy') },
   },
+
+  /*
+   * 제품 문항.
+   *
+   * 사전(`product.faq.items`)을 **그대로 가져다 씁니다.** 문구를 이 파일로
+   * 복제하면 제품 페이지와 여기가 갈라지고, 그때 어느 쪽이 맞는지 아무도
+   * 모릅니다. 제품 페이지는 계속 같은 배열로 화면을 그립니다.
+   *
+   * id 는 여기서 붙입니다 — 사전에는 없고, 답변엔진이 특정 답을 가리켜
+   * 인용하려면 필요합니다(`support.spec.ts` 가 고유성을 검사).
+   */
+  ...t.product.faq.items.map((item, index) => ({
+    id: `product-${index + 1}`,
+    group: 'product' as const,
+    q: item.q,
+    a: item.a,
+  })),
 ];
 
-const GROUPS = ['order', 'delivery', 'etc'] as const;
+// 제품 질문은 기타보다 앞입니다 — 사기 전에 궁금한 것이 먼저입니다.
+const GROUPS = ['order', 'delivery', 'product', 'etc'] as const;
 const grouped = GROUPS.map((group) => ({
   group,
   label: page.groups[group],
@@ -200,12 +218,6 @@ const schemaItems = items
       <p>
         <a class="tapLink" href={localePath(locale, 'support/posts')}>{page.posts.heading}</a>
       </p>
-    </div>
-
-    <div class="support__card">
-      <h2>{page.product.heading}</h2>
-      <p>{page.product.body}</p>
-      <p><a class="tapLink" href={localePath(locale, 'product')}>{page.product.link}</a></p>
     </div>
 
     <div class="support__card">

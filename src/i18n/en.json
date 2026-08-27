@@ -226,6 +226,7 @@
     "groups": {
       "order": "Ordering",
       "delivery": "Shipping",
+      "product": "Product",
       "etc": "Other"
     },
     "items": {
@@ -257,11 +258,6 @@
         "a": "We take only what delivery needs. Card and bank details never reach our servers — they stay inside the payment provider. What we collect and how long we keep it is set out in the privacy policy.",
         "link": "Privacy policy"
       }
-    },
-    "product": {
-      "heading": "Questions about the product",
-      "body": "SPF, white cast, fragrance and other questions about the product itself are answered on the product page.",
-      "link": "Product FAQ"
     },
     "pending": {
       "heading": "What we cannot answer yet",

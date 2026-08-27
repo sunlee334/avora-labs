@@ -12,7 +12,7 @@ import productImage from '../../assets/images/product-daily-sunscreen.jpg';
 import waterImage from '../../assets/images/water-droplets.jpg';
 import { LOCALES, BUSINESS, type Locale } from '../../config/site';
 import { dict, localePath } from '../../i18n';
-import { breadcrumb, productSchema, faqPage } from '../../lib/jsonld';
+import { breadcrumb, productSchema } from '../../lib/jsonld';
 import productData from '../../data/product.json';
 import { SELLS_DIRECTLY, EXTERNAL_STORE_URL, PRICE, CURRENCY } from '../../config/runtime';
 
@@ -92,7 +92,6 @@ const specRows = [
   ogImageAlt={p.meta.ogAlt}
   jsonLd={[
     productSchema(locale, productData.name, p.meta.description),
-    faqPage(p.faq.items),
     breadcrumb([
       { name: 'AVORA', path: localePath(locale) },
       { name: productData.name, path: localePath(locale, 'product') },
@@ -207,21 +206,49 @@ const specRows = [
   </figure>
 
   {/*
-    FAQ — GEO 의 핵심입니다.
-    답변엔진이 인용할 수 있도록 사실 기반 문장으로 쓰고, details 로 접지 않습니다.
+    FAQ.
+
+    ⚠️ 이 페이지는 **FAQPage 구조화 데이터를 내지 않습니다.** 질문은 화면에
+       그대로 두되 스키마는 고객센터 한 곳으로 모았습니다 — 같은 주제로 두
+       페이지가 FAQPage 를 내면 검색에서 서로 갉아먹고 답변엔진은 어느 쪽을
+       인용할지 모릅니다.
+
+       사람은 사던 자리에서 읽고, 검색엔진은 한 곳만 봅니다.
+       같은 배열(`product.faq.items`)을 고객센터가 import 하므로 문구가
+       갈라질 일은 없습니다.
+
+    details 로 접지 않는 것은 그대로입니다 — 접으면 답변엔진이 본문으로
+    보지 않을 수 있습니다.
   */}
   <section class="section wrap rise">
-    <p class="kicker">{p.faq.kicker}</p>
+    {/*
+      kicker 를 h2 로 올립니다.
+
+      이 페이지의 heading 은 h1 하나와 FAQ 질문의 h2 들뿐이었습니다. 그래서
+      문서 개요가 "제품 이름 아래에 질문들" 로 왜곡돼 있었습니다. 이 줄을
+      h2 로 올리면 h1 → h2(섹션) → h3(질문) 이 되어 개요가 바로 섭니다.
+
+      질문을 h3 으로 낮추는 것이 아니라 이쪽을 올리는 이유: h3 으로 낮추면
+      h1 → h3 건너뜀이 되어 axe heading-order 위반입니다.
+    */}
+    <h2 class="kicker">{p.faq.kicker}</h2>
     <div class="faq">
       {
-        p.faq.items.map((item) => (
-          <div>
-            <h2>{item.q}</h2>
+        p.faq.items.map((item, index) => (
+          <div id={`product-${index + 1}`}>
+            {/* 고객센터의 통합 FAQ 와 같은 태그를 씁니다 — 같은 질문이
+                두 곳에서 다르게 보이지 않도록. id 도 같은 규칙입니다. */}
+            <h3>{item.q}</h3>
             <p>{item.a}</p>
           </div>
         ))
       }
     </div>
+
+    <p style="margin-top: 20px">
+      {/* 나머지 질문은 고객센터에 모여 있습니다. */}
+      <a class="tapLink" href={localePath(locale, 'support')}>{t.nav.support}</a>
+    </p>
 
     <p style="margin-top: 36px; display: flex; flex-wrap: wrap; gap: 12px">
       <a class="cta cta--ghost" href={localePath(locale, 'reviews')}>{t.nav.reviews}</a>
