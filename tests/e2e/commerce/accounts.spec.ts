@@ -318,3 +318,47 @@ test.describe('마이페이지 화면', () => {
     expect(await page.evaluate(() => (window as any).__acct)).toBeUndefined();
   });
 });
+
+test.describe('마이페이지로 가는 길', () => {
+  /**
+   * 한때 마이페이지를 모바일 메뉴 시트로 옮기면서 **데스크톱에서 링크가
+   * 완전히 사라졌습니다** — 그 폭에서는 시트가 숨겨지기 때문입니다.
+   * 로그인할 방법이 없는 사이트가 되었고, 화면을 봐도 드러나지 않았습니다.
+   */
+  test('데스크톱 헤더에 마이페이지가 있다', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/ko/');
+    await expect(page.locator('[data-nav-account]')).toBeVisible();
+  });
+
+  test('모바일에서는 메뉴 시트에 있다', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/ko/');
+    // 헤더 링크는 이 폭에서 숨습니다 — 넷이 들어가지 않습니다.
+    await expect(page.locator('[data-nav-account]')).toBeHidden();
+
+    await page.locator('[data-menu-open]').click();
+    await expect(page.locator('.menu__item[href="/ko/account"]')).toBeVisible();
+  });
+
+  test('푸터에는 폭과 무관하게 있다', async ({ page }) => {
+    for (const width of [390, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto('/ko/');
+      await expect(page.locator(`footer a[href="/ko/account"]`), `${width}px`).toBeVisible();
+    }
+  });
+
+  test('어느 폭에서든 최소 한 곳에서 갈 수 있다', async ({ page }) => {
+    // 이 검사가 진짜 지키려는 것입니다 — 위 셋 중 무엇이 바뀌어도
+    // "갈 수 없는 상태" 만은 막습니다.
+    for (const width of [320, 390, 900, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto('/ko/');
+      const visible = await page
+        .locator('a[href="/ko/account"], [data-menu-open]')
+        .evaluateAll((els) => els.filter((el) => (el as HTMLElement).offsetParent !== null).length);
+      expect(visible, `${width}px 에서 마이페이지로 갈 길이 없습니다`).toBeGreaterThan(0);
+    }
+  });
+});

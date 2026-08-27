@@ -681,12 +681,27 @@
     "orders": {
       "heading": "Orders",
       "empty": "No orders yet.",
-      "loading": "Loading…"
+      "loading": "Loading…",
+      "quantity": "×{n}",
+      "trackingLink": "Track delivery",
+      "noTracking": "A tracking number appears once it ships."
     },
     "address": {
       "heading": "Saved address",
       "empty": "No saved address yet. It is remembered from your next order.",
-      "note": "Filled in automatically next time."
+      "note": "Filled in automatically next time.",
+      "edit": "Edit",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Delivery address saved.",
+      "failed": "We could not save it. Please check what you entered.",
+      "recipientName": "Recipient",
+      "recipientPhone": "Phone",
+      "postalCode": "Postcode",
+      "address1": "Address",
+      "address2": "Address line 2",
+      "address2Optional": "optional"
     },
     "claim": {
       "heading": "Add an earlier order",
@@ -705,6 +720,19 @@
       "naver": "Naver",
       "mock": "Test",
       "mock2": "Test 2"
+    },
+    "status": {
+      "pending": "Awaiting payment",
+      "paid": "Paid",
+      "failed": "Payment failed",
+      "cancelled": "Cancelled"
+    },
+    "profile": {
+      "heading": "Account",
+      "email": "Email",
+      "joined": "Joined",
+      "managedBy": "Your name and email are managed by the service you signed in with. Change them there and they update on your next sign-in.",
+      "noEmail": "The provider did not supply an email address."
     }
   }
 }

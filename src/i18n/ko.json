@@ -681,12 +681,27 @@
     "orders": {
       "heading": "주문 내역",
       "empty": "아직 주문이 없습니다.",
-      "loading": "불러오는 중…"
+      "loading": "불러오는 중…",
+      "quantity": "{n}개",
+      "trackingLink": "배송 조회",
+      "noTracking": "발송되면 송장번호가 표시됩니다."
     },
     "address": {
       "heading": "저장된 배송지",
       "empty": "저장된 배송지가 없습니다. 주문할 때 입력하면 여기에 기억됩니다.",
-      "note": "다음 주문에서 자동으로 채워집니다."
+      "note": "다음 주문에서 자동으로 채워집니다.",
+      "edit": "수정",
+      "cancel": "취소",
+      "save": "저장",
+      "saving": "저장하는 중…",
+      "saved": "배송지를 저장했습니다.",
+      "failed": "저장하지 못했습니다. 입력을 확인해 주세요.",
+      "recipientName": "받는 분",
+      "recipientPhone": "연락처",
+      "postalCode": "우편번호",
+      "address1": "주소",
+      "address2": "상세주소",
+      "address2Optional": "선택"
     },
     "claim": {
       "heading": "이전 주문 가져오기",
@@ -705,6 +720,19 @@
       "naver": "네이버",
       "mock": "테스트",
       "mock2": "테스트 2"
+    },
+    "status": {
+      "pending": "결제 대기",
+      "paid": "결제 완료",
+      "failed": "결제 실패",
+      "cancelled": "취소됨"
+    },
+    "profile": {
+      "heading": "계정 정보",
+      "email": "이메일",
+      "joined": "가입일",
+      "managedBy": "이름과 이메일은 로그인에 쓰신 서비스에서 관리됩니다. 그쪽에서 바꾸시면 다음 로그인 때 반영됩니다.",
+      "noEmail": "제공자가 이메일을 주지 않았습니다."
     }
   }
 }

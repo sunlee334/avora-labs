@@ -13,6 +13,7 @@ import Base from '../../layouts/Base.astro';
 import { LOCALES, type Locale } from '../../config/site';
 import { dict, localePath } from '../../i18n';
 import { ACCOUNTS_ENABLED } from '../../config/runtime';
+import carriers from '../../config/carriers.json';
 
 export function getStaticPaths() {
   if (!ACCOUNTS_ENABLED) return [];
@@ -58,7 +59,10 @@ const a = t.account;
       <p class="body" data-orders-state>{a.orders.loading}</p>
       <dl class="orderResult__facts" data-orders hidden></dl>
 
-      <h2 class="kicker" style="margin-top: 40px">{a.address.heading}</h2>
+      <div class="sectionHead" style="margin-top: 40px">
+        <h2 class="kicker">{a.address.heading}</h2>
+        <button class="linkButton" type="button" data-address-edit>{a.address.edit}</button>
+      </div>
       <p class="body" data-address-empty hidden>{a.address.empty}</p>
       <dl class="orderResult__facts" data-address hidden>
         <div><dt>{t.order.complete.recipient}</dt><dd data-addr-name></dd></div>
@@ -66,6 +70,46 @@ const a = t.account;
         <div><dt>{t.order.complete.address}</dt><dd data-addr-line></dd></div>
       </dl>
       <p class="cart__notice" data-address-note hidden>{a.address.note}</p>
+
+      {/* 저장 자체는 PUT /api/account/address 가 이미 하고 있었습니다 —
+          부를 화면이 없었을 뿐입니다. */}
+      <form class="addressForm" data-address-form hidden>
+        <div class="field">
+          <label for="ad-name">{a.address.recipientName}</label>
+          <input id="ad-name" name="recipientName" type="text" required autocomplete="name" />
+        </div>
+        <div class="field">
+          <label for="ad-phone">{a.address.recipientPhone}</label>
+          <input id="ad-phone" name="recipientPhone" type="tel" required inputmode="tel" autocomplete="tel" />
+        </div>
+        <div class="field">
+          <label for="ad-postal">{a.address.postalCode}</label>
+          <input id="ad-postal" name="postalCode" type="text" required inputmode="numeric" autocomplete="postal-code" />
+        </div>
+        <div class="field">
+          <label for="ad-line1">{a.address.address1}</label>
+          <input id="ad-line1" name="address1" type="text" required autocomplete="address-line1" />
+        </div>
+        <div class="field">
+          <label for="ad-line2">
+            {a.address.address2}
+            <span class="field__optional">{a.address.address2Optional}</span>
+          </label>
+          <input id="ad-line2" name="address2" type="text" autocomplete="address-line2" />
+        </div>
+        <p class="checkout__error" data-address-error hidden></p>
+        <div class="formActions">
+          <button class="cta" type="submit" data-address-save>{a.address.save}</button>
+          <button class="linkButton" type="button" data-address-cancel>{a.address.cancel}</button>
+        </div>
+      </form>
+
+      <h2 class="kicker" style="margin-top: 40px">{a.profile.heading}</h2>
+      <dl class="orderResult__facts">
+        <div><dt>{a.profile.email}</dt><dd data-profile-email></dd></div>
+        <div><dt>{a.profile.joined}</dt><dd data-profile-joined></dd></div>
+      </dl>
+      <p class="cart__notice">{a.profile.managedBy}</p>
 
       <h2 class="kicker" style="margin-top: 40px">{a.identities.heading}</h2>
       <p class="body">{a.identities.body}</p>
@@ -110,6 +154,17 @@ const a = t.account;
     data-msg-link-taken={a.identities.messages.taken}
     data-msg-unlinked={a.identities.messages.unlinked}
     data-msg-link-failed={a.identities.messages.failed}
+    data-carriers={JSON.stringify(carriers.carriers)}
+    data-status-labels={JSON.stringify(a.status)}
+    data-fulfillment-labels={JSON.stringify(t.legal.shipping.steps.labels)}
+    data-label-quantity={a.orders.quantity}
+    data-label-tracking={a.orders.trackingLink}
+    data-label-no-tracking={a.orders.noTracking}
+    data-label-no-email={a.profile.noEmail}
+    data-label-addr-saved={a.address.saved}
+    data-label-addr-failed={a.address.failed}
+    data-label-addr-saving={a.address.saving}
+    data-label-addr-save={a.address.save}
   ></template>
 </Base>
 
@@ -268,7 +323,12 @@ const a = t.account;
       void drawIdentities();
       $('[data-account-name]').textContent = user.name ?? user.email ?? '';
 
+      // 계정 정보 — 제공자가 관리하는 값이라 읽기 전용입니다.
+      $('[data-profile-email]').textContent = user.email ?? (L.labelNoEmail ?? '');
+      $('[data-profile-joined]').textContent = when(user.createdAt);
+
       // 저장된 배송지
+      savedAddress = user.address ?? null;
       if (user.address) {
         $('[data-address]').hidden = false;
         $('[data-address-note]').hidden = false;
@@ -301,14 +361,172 @@ const a = t.account;
         return;
       }
 
-      box.replaceChildren(
-        ...orders.map((o: any) =>
-          row(`${when(o.createdAt)} · ${o.id}`, `${money(o.amount, o.currency)}`),
-        ),
-      );
+      box.replaceChildren(...orders.map(orderCard));
       state.hidden = true;
       box.hidden = false;
     }
+
+    const carriers = JSON.parse(L.carriers ?? '{}') as Record<string, string>;
+    const statusLabels = JSON.parse(L.statusLabels ?? '{}') as Record<string, string>;
+    const fulfillmentLabels = JSON.parse(L.fulfillmentLabels ?? '{}') as Record<string, string>;
+
+    /**
+     * 주문 한 건.
+     *
+     * API 는 상태·배송단계·택배사·송장·상품까지 전부 돌려주는데 예전 화면은
+     * 날짜·번호·금액 셋만 쓰고 나머지를 버렸습니다. 손님이 마이페이지에서
+     * 가장 알고 싶은 것은 **지금 어디까지 왔는가** 입니다.
+     */
+    function orderCard(o: any): HTMLElement {
+      const li = document.createElement('article');
+      li.className = 'orderCard';
+      li.dataset.order = o.id;
+
+      const head = document.createElement('p');
+      head.className = 'orderCard__head';
+      head.textContent = `${when(o.createdAt)} · ${o.id}`;
+      li.append(head);
+
+      // 상품 줄 — 이름은 서버가 저장해 둔 값입니다.
+      for (const item of o.items ?? []) {
+        const line = document.createElement('p');
+        line.className = 'orderCard__item';
+        const qty = (L.labelQuantity ?? '{n}').replace('{n}', String(item.qty ?? 1));
+        line.textContent = `${item.name ?? item.id} ${qty}`;
+        li.append(line);
+      }
+
+      const amount = document.createElement('p');
+      amount.className = 'orderCard__amount';
+      amount.textContent = money(o.amount, o.currency);
+      li.append(amount);
+
+      const badges = document.createElement('p');
+      badges.className = 'orderCard__badges';
+      const status = document.createElement('span');
+      status.className = 'reviews__badge';
+      status.textContent = statusLabels[o.status] ?? o.status;
+      badges.append(status);
+
+      // 결제되지 않은 주문에 배송 단계를 붙이면 곧 보낼 것처럼 보입니다.
+      if (o.status === 'paid') {
+        const step = document.createElement('span');
+        step.className = 'reviews__badge';
+        step.textContent = fulfillmentLabels[o.fulfillment] ?? o.fulfillment;
+        badges.append(step);
+      }
+      li.append(badges);
+
+      /*
+       * 배송 조회.
+       *
+       * 송장번호만 보여주면 손님이 번호를 복사해 택배사 사이트를 직접
+       * 찾아가야 합니다. 아는 택배사면 바로 열리게 하고, 모르는 택배사면
+       * 이름과 번호만 글자로 둡니다 — 틀린 곳으로 보내는 것보다 낫습니다.
+       */
+      if (o.status === 'paid' && o.carrier && o.trackingNumber) {
+        const tracking = document.createElement('p');
+        tracking.className = 'orderCard__tracking';
+        const label = document.createElement('span');
+        label.textContent = `${o.carrier} ${o.trackingNumber}`;
+        tracking.append(label);
+
+        const template = carriers[o.carrier];
+        if (template) {
+          const link = document.createElement('a');
+          link.className = 'tapLink';
+          link.href = template.replace('{tracking}', encodeURIComponent(o.trackingNumber));
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.textContent = L.labelTracking ?? '';
+          tracking.append(link);
+        }
+        li.append(tracking);
+      } else if (o.status === 'paid' && o.fulfillment !== 'delivered') {
+        const note = document.createElement('p');
+        note.className = 'orderCard__note';
+        note.textContent = L.labelNoTracking ?? '';
+        li.append(note);
+      }
+
+      return li;
+    }
+
+    /*
+     * 배송지 수정.
+     *
+     * 저장은 PUT /api/account/address 가 이미 하고 있었습니다 — 부를 화면이
+     * 없었을 뿐입니다. 이름과 이메일은 여기서 바꾸지 않습니다: 로그인할
+     * 때마다 제공자가 준 값으로 덮어써서, 고쳐도 다음 로그인에 되돌아갑니다.
+     */
+    const addressForm = $<HTMLFormElement>('[data-address-form]');
+    const addressList = $('[data-address]');
+    const addressEmpty = $('[data-address-empty]');
+    const addressNote = $('[data-address-note]');
+    const addressError = $('[data-address-error]');
+    const editButton = $<HTMLButtonElement>('[data-address-edit]');
+
+    /** 저장된 값을 폼에 채워 둡니다 — 빈 칸부터 다시 쓰게 하지 않습니다. */
+    let savedAddress: Record<string, string | null> | null = null;
+
+    function showForm(show: boolean) {
+      addressForm.hidden = !show;
+      editButton.hidden = show;
+      addressList.hidden = show || !savedAddress;
+      addressEmpty.hidden = show || Boolean(savedAddress);
+      addressNote.hidden = show || !savedAddress;
+      addressError.hidden = true;
+    }
+
+    editButton.addEventListener('click', () => {
+      const fields = addressForm.elements as unknown as Record<string, HTMLInputElement>;
+      if (savedAddress) {
+        fields.recipientName.value = savedAddress.recipientName ?? '';
+        fields.recipientPhone.value = savedAddress.recipientPhone ?? '';
+        fields.postalCode.value = savedAddress.postalCode ?? '';
+        fields.address1.value = savedAddress.address1 ?? '';
+        fields.address2.value = savedAddress.address2 ?? '';
+      }
+      showForm(true);
+      fields.recipientName.focus();
+    });
+
+    $('[data-address-cancel]').addEventListener('click', () => showForm(false));
+
+    addressForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      addressError.hidden = true;
+
+      const data = new FormData(addressForm);
+      const payload = {
+        recipientName: String(data.get('recipientName') ?? '').trim(),
+        recipientPhone: String(data.get('recipientPhone') ?? '').trim(),
+        postalCode: String(data.get('postalCode') ?? '').trim(),
+        address1: String(data.get('address1') ?? '').trim(),
+        address2: String(data.get('address2') ?? '').trim() || undefined,
+      };
+
+      const save = $<HTMLButtonElement>('[data-address-save]');
+      save.disabled = true;
+      save.textContent = L.labelAddrSaving ?? '';
+
+      try {
+        const res = await fetch('/api/account/address', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error('failed');
+        showForm(false);
+        await load();
+      } catch {
+        addressError.textContent = L.labelAddrFailed ?? '';
+        addressError.hidden = false;
+      } finally {
+        save.disabled = false;
+        save.textContent = L.labelAddrSave ?? '';
+      }
+    });
 
     $('[data-logout]').addEventListener('click', async () => {
       await fetch('/api/auth/logout', { method: 'POST' });

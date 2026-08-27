@@ -158,6 +158,30 @@ test.describe('관리 화면', () => {
   });
 });
 
+test.describe('마이페이지 — 배송지 수정 폼을 연 상태', () => {
+  test('폼이 열린 상태에 위반이 없다', async ({ page }, testInfo) => {
+    // 폼은 자바스크립트가 열어 넣습니다. 처음 그려진 HTML 만 보는 검사로는
+    // 존재하지 않는 것으로 보입니다.
+    //
+    // 로그인은 page.request 로 합니다 — request 픽스처는 브라우저와 쿠키를
+    // 공유하지 않아, 시작과 콜백이 다른 세션이 됩니다.
+    const start = await page.request.get(
+      '/api/auth/login?provider=mock&returnTo=%2Fko%2Faccount',
+      { maxRedirects: 0 },
+    );
+    const cb = new URL(start.headers()['location']);
+    cb.searchParams.set('code', `a11y-addr-${Date.now()}`);
+    await page.request.get(cb.href, { maxRedirects: 0 });
+
+    await page.goto('/ko/account');
+    await expect(page.locator('[data-account-signed]')).toBeVisible();
+    await page.locator('[data-address-edit]').click();
+    await expect(page.locator('[data-address-form]')).toBeVisible();
+
+    expect(await scan(page, testInfo)).toEqual([]);
+  });
+});
+
 test.describe('후기가 실제로 있는 리뷰 페이지', () => {
   /**
    * 후기 목록은 Worker 가 그립니다. 후기가 0건이면 그 자리에 빈 상태만

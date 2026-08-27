@@ -2,7 +2,7 @@
 import LanguageSwitcher from './LanguageSwitcher.astro';
 import MenuSheet from './MenuSheet.astro';
 import { dict, localePath } from '../i18n';
-import { SELLS_DIRECTLY } from '../config/runtime';
+import { SELLS_DIRECTLY, ACCOUNTS_ENABLED } from '../config/runtime';
 import type { Locale } from '../config/site';
 
 interface Props {
@@ -39,10 +39,23 @@ const t = dict(locale);
         </a>
       )
     }
-    {/* 마이페이지는 헤더가 아니라 메뉴 시트 안에 있습니다.
-        커머스를 켜면 헤더 우측이 장바구니·마이페이지·언어·메뉴 넷이 되는데,
-        360px 에서 워드마크와 여백을 빼면 200px 밖에 남지 않아 들어가지 않습니다.
-        장바구니는 배지가 붙는 거래 단축키라 남기고, 마이페이지가 한 단계 들어갑니다. */}
+    {/*
+      마이페이지는 **데스크톱에서만** 헤더에 나옵니다(`.nav__account`).
+      360px 에서는 워드마크와 여백을 빼면 200px 밖에 남지 않아 장바구니·언어·
+      메뉴와 함께 넷이 들어가지 않기 때문입니다. 좁은 화면에서는 메뉴 시트가
+      같은 링크를 담습니다.
+
+      한때 이 링크를 시트로 옮기면서 **데스크톱에서 완전히 사라졌습니다** —
+      그 폭에서는 시트 자체가 숨겨지기 때문입니다. 로그인할 방법이 없는
+      사이트가 되었고, 그래서 이 자리를 다시 만들었습니다.
+    */}
+    {
+      ACCOUNTS_ENABLED && (
+        <a class="nav__account" href={localePath(locale, 'account')} data-nav-account>
+          {t.nav.account}
+        </a>
+      )
+    }
     <LanguageSwitcher locale={locale} path={path} />
     <MenuSheet locale={locale} path={path} />
   </div>

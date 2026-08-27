@@ -1258,7 +1258,14 @@ button {
 .linkButton {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   min-height: var(--size-tap-min);
+  /*
+   * 폭도 지켜야 합니다. 높이만 두면 "수정"·"해제" 처럼 짧은 글자에서
+   * 43.66px 이 나옵니다 — 눈으로는 멀쩡해 보이고 반올림하면 44 라서,
+   * 모바일 검사가 소수점까지 재지 않았다면 그냥 지나갔을 값입니다.
+   */
+  min-width: var(--size-tap-min);
   padding-inline: 8px;
   margin-inline-start: 4px;
   background: none;
@@ -1840,4 +1847,97 @@ button {
   /* 공백이 없는 이메일 주소는 좁은 화면에서 끊을 곳이 없습니다. */
   min-width: 0;
   overflow-wrap: anywhere;
+}
+
+/*
+ * 헤더의 마이페이지 링크.
+ *
+ * 좁은 화면에서는 숨깁니다 — 360px 에서 워드마크와 여백을 빼면 200px 밖에
+ * 남지 않아 장바구니·언어·메뉴와 함께 넷이 들어가지 않습니다. 그 폭에서는
+ * 메뉴 시트가 같은 링크를 담습니다.
+ */
+.nav__account {
+  display: none;
+}
+@media (min-width: 900px) {
+  .nav__account {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--size-tap-min);
+    padding-inline: 10px;
+    font-size: 13px;
+    letter-spacing: 0.03em;
+    text-decoration: none;
+  }
+  .nav__account:hover {
+    text-decoration: underline;
+  }
+}
+
+/* ── 마이페이지 ────────────────────────────────────────────── */
+
+/* 제목과 그 옆 버튼. */
+.sectionHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.orderCard {
+  /* 그리드 칸은 기본이 min-width:auto 라, 긴 주문번호가 칸을 밀어냅니다. */
+  min-width: 0;
+  padding-block: 20px;
+  border-bottom: 1px solid var(--color-line);
+}
+.orderCard__head {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--brand-muted);
+  /* 주문번호는 공백이 없어 좁은 화면에서 끊을 곳이 없습니다. */
+  overflow-wrap: anywhere;
+}
+.orderCard__item {
+  margin-top: 8px;
+  font-size: 15px;
+}
+.orderCard__amount {
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 15px;
+}
+.orderCard__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+.orderCard__tracking {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  font-size: 13.5px;
+  color: var(--brand-muted);
+  overflow-wrap: anywhere;
+}
+.orderCard__note {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--brand-muted);
+}
+
+.addressForm {
+  max-width: 520px;
+  margin-top: 20px;
+}
+.formActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin-top: 22px;
 }

@@ -681,12 +681,27 @@
     "orders": {
       "heading": "订单记录",
       "empty": "还没有订单。",
-      "loading": "加载中…"
+      "loading": "加载中…",
+      "quantity": "{n} 件",
+      "trackingLink": "查询配送",
+      "noTracking": "发货后将显示运单号。"
     },
     "address": {
       "heading": "已保存的配送地址",
       "empty": "尚未保存配送地址。下单时填写后会记录在这里。",
-      "note": "下次下单时自动填入。"
+      "note": "下次下单时自动填入。",
+      "edit": "修改",
+      "cancel": "取消",
+      "save": "保存",
+      "saving": "保存中…",
+      "saved": "收货地址已保存。",
+      "failed": "保存失败，请检查填写内容。",
+      "recipientName": "收件人",
+      "recipientPhone": "联系电话",
+      "postalCode": "邮政编码",
+      "address1": "地址",
+      "address2": "详细地址",
+      "address2Optional": "可选"
     },
     "claim": {
       "heading": "添加此前的订单",
@@ -705,6 +720,19 @@
       "naver": "Naver",
       "mock": "测试",
       "mock2": "测试 2"
+    },
+    "status": {
+      "pending": "待付款",
+      "paid": "已付款",
+      "failed": "付款失败",
+      "cancelled": "已取消"
+    },
+    "profile": {
+      "heading": "账户信息",
+      "email": "电子邮件",
+      "joined": "注册日期",
+      "managedBy": "姓名与电子邮件由您用于登录的服务管理。在该服务中修改后，下次登录时会同步。",
+      "noEmail": "服务商未提供电子邮件。"
     }
   }
 }

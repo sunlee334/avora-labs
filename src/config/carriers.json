@@ -1,0 +1,13 @@
+{
+  "$comment": "택배사 배송조회 주소. 송장번호만 보여주면 손님이 번호를 복사해 택배사 사이트를 직접 찾아가야 합니다. {tracking} 자리에 송장번호가 들어갑니다.",
+  "$howToAdd": "관리 화면에서 새 택배사 이름을 쓰기 시작하면 여기에도 같은 이름으로 추가하세요. 없는 택배사는 링크 없이 이름과 번호만 나갑니다 — 틀린 곳으로 보내는 것보다 낫습니다.",
+  "carriers": {
+    "CJ대한통운": "https://trace.cjlogistics.com/next/tracking.html?wblNo={tracking}",
+    "우체국택배": "https://service.epost.go.kr/trace.RetrieveDomRigiTraceList.comm?sid1={tracking}",
+    "한진택배": "https://www.hanjin.com/kor/CMS/DeliveryMgr/WaybillResult.do?mCode=MN038&schLang=KR&wblnumText2={tracking}",
+    "롯데택배": "https://www.lotteglogis.com/home/reservation/tracking/linkView?InvNo={tracking}",
+    "로젠택배": "https://www.ilogen.com/web/personal/trace/{tracking}",
+    "CU편의점택배": "https://www.cupost.co.kr/postbox/delivery/localResult.cupost?invoice_no={tracking}",
+    "GS편의점택배": "https://www.cvsnet.co.kr/invoice/tracking.do?invoice_no={tracking}"
+  }
+}

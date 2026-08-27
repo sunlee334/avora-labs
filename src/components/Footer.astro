@@ -1,5 +1,6 @@
 ---
 import { dict, localePath } from '../i18n';
+import { ACCOUNTS_ENABLED } from '../config/runtime';
 import { BUSINESS, LOCALES, LOCALE_LABELS, LOCALE_TAGS, type Locale } from '../config/site';
 
 interface Props {
@@ -40,6 +41,11 @@ const businessRows = [
           <li><a href={localePath(locale, 'product')}>{t.nav.product}</a></li>
           <li><a href={localePath(locale, 'reviews')}>{t.nav.reviews}</a></li>
           <li><a href={localePath(locale, 'support')}>{t.nav.support}</a></li>
+          {
+            ACCOUNTS_ENABLED && (
+              <li><a href={localePath(locale, 'account')}>{t.nav.account}</a></li>
+            )
+          }
         </ul>
       </div>
 

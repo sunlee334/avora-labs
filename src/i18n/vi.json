@@ -681,12 +681,27 @@
     "orders": {
       "heading": "Lịch sử đơn hàng",
       "empty": "Chưa có đơn hàng nào.",
-      "loading": "Đang tải…"
+      "loading": "Đang tải…",
+      "quantity": "{n} cái",
+      "trackingLink": "Theo dõi giao hàng",
+      "noTracking": "Mã vận đơn hiện ra sau khi gửi hàng."
     },
     "address": {
       "heading": "Địa chỉ đã lưu",
       "empty": "Chưa có địa chỉ nào được lưu. Địa chỉ sẽ được ghi nhớ từ đơn hàng tiếp theo.",
-      "note": "Sẽ được điền sẵn ở lần sau."
+      "note": "Sẽ được điền sẵn ở lần sau.",
+      "edit": "Sửa",
+      "cancel": "Huỷ",
+      "save": "Lưu",
+      "saving": "Đang lưu…",
+      "saved": "Đã lưu địa chỉ giao hàng.",
+      "failed": "Không lưu được. Vui lòng kiểm tra lại thông tin.",
+      "recipientName": "Người nhận",
+      "recipientPhone": "Số điện thoại",
+      "postalCode": "Mã bưu chính",
+      "address1": "Địa chỉ",
+      "address2": "Địa chỉ chi tiết",
+      "address2Optional": "tuỳ chọn"
     },
     "claim": {
       "heading": "Thêm đơn hàng trước đó",
@@ -705,6 +720,19 @@
       "naver": "Naver",
       "mock": "Thử nghiệm",
       "mock2": "Thử nghiệm 2"
+    },
+    "status": {
+      "pending": "Chờ thanh toán",
+      "paid": "Đã thanh toán",
+      "failed": "Thanh toán thất bại",
+      "cancelled": "Đã huỷ"
+    },
+    "profile": {
+      "heading": "Thông tin tài khoản",
+      "email": "Email",
+      "joined": "Ngày tham gia",
+      "managedBy": "Tên và email do dịch vụ bạn dùng để đăng nhập quản lý. Đổi ở đó thì lần đăng nhập sau sẽ cập nhật.",
+      "noEmail": "Đơn vị đăng nhập không cung cấp email."
     }
   }
 }
