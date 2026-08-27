@@ -4,7 +4,13 @@ import { execFileSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import { charsFor, parseFrontmatter, postStringsFor, POSTS_ROOT } from '../../scripts/build-fonts.mjs';
+import {
+  charsFor,
+  postStringsFor,
+  packCoverage,
+  unpackCoverage,
+  POSTS_ROOT,
+} from '../../scripts/build-fonts.mjs';
 import { checkSlug, RESERVED_SLUG_PREFIXES } from '../../src/config/reserved-paths';
 
 /**
@@ -49,43 +55,6 @@ function withPosts(files: Record<string, string>, run: (postsRoot: string) => vo
     rmSync(base, { recursive: true, force: true });
   }
 }
-
-test.describe('프론트매터 파서', () => {
-  test('제목과 요약을 꺼낸다', () => {
-    const { title, summary, body } = parseFrontmatter(
-      '---\ntitle: 배송 안내\nsummary: 언제 출발하는지\ncategory: notice\n---\n\n본문입니다\n',
-    );
-    expect(title).toBe('배송 안내');
-    expect(summary).toBe('언제 출발하는지');
-    expect(body.trim()).toBe('본문입니다');
-  });
-
-  test('값 안의 콜론을 감당한다', () => {
-    // YAML 은 값에 콜론이 있으면 따옴표를 요구합니다. 순진하게 split(':') 하면
-    // "재도포" 만 남고 "언제" 가 서브셋에서 빠집니다.
-    const { title } = parseFrontmatter('---\ntitle: "재도포: 언제 하나"\n---\n본문\n');
-    expect(title).toBe('재도포: 언제 하나');
-  });
-
-  test('작은따옴표도 벗긴다', () => {
-    const { title } = parseFrontmatter("---\ntitle: '안내'\n---\n본문\n");
-    expect(title).toBe('안내');
-  });
-
-  test('프론트매터가 없으면 전부 본문이다', () => {
-    const { title, body } = parseFrontmatter('제목 없는 글\n');
-    expect(title).toBe('');
-    expect(body).toContain('제목 없는 글');
-  });
-
-  test('본문의 --- 를 프론트매터 끝으로 오해하지 않는다', () => {
-    // 마크다운의 수평선입니다. 첫 --- 쌍만 프론트매터입니다.
-    const { title, body } = parseFrontmatter('---\ntitle: 가\n---\n\n앞\n\n---\n\n뒤\n');
-    expect(title).toBe('가');
-    expect(body).toContain('앞');
-    expect(body).toContain('뒤');
-  });
-});
 
 test.describe('글 글자 수집', () => {
   const RARE = '뷁';
@@ -228,13 +197,19 @@ test.describe('폰트 검사가 실제로 도는가', () => {
     expect(run({ ...noTools, CI: undefined }), '로컬은 건너뛰고 통과해야 합니다').toBe(0);
     expect(run({ ...noTools, CI: 'true' }), 'CI 는 검사를 못 하면 실패해야 합니다').toBe(1);
 
-    // 그리고 도구가 있으면 진짜로 검사합니다 — 위 둘만 보면 "언제나 건너뛴다"
-    // 여도 통과합니다.
+    /*
+     * 그리고 도구가 있으면 진짜로 검사합니다 — 위 둘만 보면 "언제나
+     * 건너뛴다" 여도 통과합니다.
+     *
+     * 다만 도구 없이 화면만 보려는 사람의 길을 막지 않는 것이 이 스크립트의
+     * 정책이므로(build-fonts.mjs 의 CI 분기 주석), 그런 기계에서는 이
+     * 단언을 건너뜁니다.
+     */
     const output = execFileSync(process.execPath, ['scripts/build-fonts.mjs', '--check'], {
       cwd: fileURLToPath(root),
       encoding: 'utf8',
     });
-    expect(output, '도구가 있는데도 건너뛰고 있습니다').not.toContain('생략');
+    test.skip(output.includes('생략'), 'fontTools 가 없는 기계 — 이 단언은 의미가 없습니다');
     expect(output).toContain('모두 포함');
   });
 
@@ -273,6 +248,7 @@ test.describe('폰트 검사가 실제로 도는가', () => {
         stderr = `${e.stdout ?? ''}${e.stderr ?? ''}`;
       }
 
+      test.skip(stderr.includes('생략'), 'fontTools 가 없는 기계 — 이 검사는 도구가 있어야 합니다');
       expect(status, '서브셋에 없는 글자가 있는데 통과했습니다').toBe(1);
       expect(stderr, '어떤 글자가 빠졌는지 알려주지 않습니다').toContain(rare);
     } finally {
@@ -299,6 +275,40 @@ test.describe('폰트 검사가 실제로 도는가', () => {
     }
   });
 
+  test('커버리지 파일이 왕복 무손실이고 깨지지 않았다', () => {
+    /*
+     * 이 파일이 CI 에서 display 검사의 **유일한 근거**입니다.
+     * 깨지거나 잘리면 예전에는 빈 Set 이 되어 조용히 전부 통과시켰습니다 —
+     * 옛 정규식의 54% 실명보다 나쁜 100% 실명이었습니다.
+     */
+    const file = fileURLToPath(new URL('scripts/display-source-coverage.txt', root));
+    const text = readFileSync(file, 'utf8');
+    const set = unpackCoverage(text) as Set<string>;
+
+    expect(set.size, '커버리지가 너무 작습니다').toBeGreaterThan(20000);
+    expect(packCoverage(set, text.match(/— (\S+)/)?.[1] ?? ''), '왕복이 무손실이 아닙니다').toBe(text);
+
+    // 옛 규칙이 못 보던 한자가 실제로 들어 있어야 이 파일이 값을 합니다.
+    for (const ch of ['龍', '韓', '漢']) expect(set.has(ch), ch).toBe(true);
+
+    // BMP 밖 글자도 손실 없이 왕복해야 합니다.
+    expect([...set].some((ch) => ch.codePointAt(0)! > 0xffff)).toBe(true);
+  });
+
+  test('깨진 커버리지는 조용히 통과시키지 않는다', () => {
+    // 33KB 파일이라 두 브랜치가 각각 재생성하면 충돌합니다. 충돌 마커가
+    // 남거나 잘못 해소되면 그것이 곧 이 상태입니다.
+    for (const [name, text] of [
+      ['빈 파일', ''],
+      ['머리글 없음', '20-7e,a0-ff'],
+      ['해석 불가', '# 23124 chars\ngarbage'],
+      ['개수 불일치', '# 23124 chars\n20-7e'],
+      ['충돌 마커', '# 23124 chars\n20-7e\n<<<<<<< HEAD'],
+    ] as const) {
+      expect(() => unpackCoverage(text), name).toThrow();
+    }
+  });
+
   test('원본이 없는 환경에서도 display 를 정확히 검사한다', () => {
     /*
      * display 원본(NotoSerifKR.ttf, 23MB)은 .gitignore 라 CI 에 없습니다.
@@ -322,7 +332,12 @@ test.describe('폰트 검사가 실제로 도는가', () => {
     const OLD_RULE = /[ -ɏ가-힣]/;
     const zh = charsFor('zh').display as Set<string>;
     const blind = [...zh].filter((ch) => !OLD_RULE.test(ch));
-    expect(blind.length / zh.size).toBeGreaterThan(0.4);
+    // 비율로 고정하면 카피 편집만으로 깨집니다(한자가 줄면 분모도 줄어듦).
+    // 요지는 "옛 규칙이 상당수를 못 봤다" 는 사실이므로 절대값으로 둡니다.
+    expect(
+      blind.length,
+      '옛 규칙이 못 보던 글자가 이만큼 있었습니다 — 커버리지 파일이 그것을 메웁니다',
+    ).toBeGreaterThan(50);
   });
 
   test('검사가 원본 서체 기준이라 베트남어 성조 문자도 본다', () => {

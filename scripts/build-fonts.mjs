@@ -18,6 +18,10 @@
  * 준비물 (생성할 때만):
  *   mkdir -p .fontsrc && curl -L -o .fontsrc/NotoSerifKR.ttf \
  *     "https://raw.githubusercontent.com/google/fonts/main/ofl/notoserifkr/NotoSerifKR%5Bwght%5D.ttf"
+ *
+ *   ⚠️ main 브랜치라 시점에 따라 파일이 다를 수 있습니다. 커버리지 파일의
+ *      머리글에 원본의 SHA-256 을 적어 두므로, 다른 파일을 받으면
+ *      `npm run fonts` 후 그 줄이 바뀌어 diff 에 드러납니다.
  *   python3 -m venv .fontsrc/venv && .fontsrc/venv/bin/pip install fonttools brotli
  */
 import {
@@ -31,7 +35,8 @@ import {
   realpathSync,
 } from 'node:fs';
 import { execFileSync } from 'node:child_process';
-import { resolve, dirname, join } from 'node:path';
+import { createHash } from 'node:crypto';
+import { resolve, dirname, join, basename } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -114,45 +119,6 @@ function walkStrings(node, out) {
 }
 
 /**
- * 프론트매터에서 제목과 요약을 꺼냅니다.
- *
- * ⚠️ **폰트 수집은 이 함수를 쓰지 않습니다.** 한 줄짜리 값만 보기 때문에
- *    YAML 의 접힌 스칼라(`title: >`)나 리터럴 블록(`summary: |`)에서 값을
- *    놓칩니다. 글자를 놓치면 서브셋에서 빠지고 화면에서 서체가 섞이는데,
- *    생성과 검사가 같은 함수를 쓰면 그것을 아무도 못 잡습니다.
- *    `postStringsFor` 는 원문을 통째로 넘깁니다.
- *
- * 그래서 이 함수는 **테스트와 도구용**입니다. 정확한 값이 필요하면
- * Astro 의 콘텐츠 컬렉션(`src/content.config.ts`)이 zod 로 검증한 것을
- * 쓰세요 — 그쪽이 진짜 YAML 파서를 지납니다.
- */
-export function parseFrontmatter(raw) {
-  const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-  if (!match) return { title: '', summary: '', body: raw };
-
-  const fields = { title: '', summary: '' };
-  for (const line of match[1].split(/\r?\n/)) {
-    // 키는 줄 맨 앞에서 시작합니다. 들여쓴 줄은 중첩 값이라 건너뜁니다.
-    const kv = line.match(/^(title|summary)\s*:\s*(.*)$/);
-    if (!kv) continue;
-    let value = kv[2].trim();
-    // 따옴표로 감쌌으면 벗깁니다. 값 안의 콜론은 이 경로로 들어옵니다.
-    const quoted = value.match(/^(['"])([\s\S]*)\1$/);
-    if (quoted) value = quoted[2];
-    fields[kv[1]] = value;
-  }
-
-  return { ...fields, body: raw.slice(match[0].length) };
-}
-
-/**
- * 이 언어의 글에 쓰인 글자.
- *
- * 로케일을 디렉터리로 가르기 때문에 그 폴더만 읽으면 됩니다. 프론트매터로만
- * 구분했다면 전 파일을 파싱해야 하고, 구분에 실패하면 영어·베트남어 서브셋에
- * 한글이 통째로 들어갑니다.
- */
-/**
  * 글 폴더. `AVORA_POSTS_ROOT` 로 덮어쓸 수 있습니다.
  *
  * 테스트가 "서브셋에 없는 글자가 생기면 정말 실패하는가" 를 확인할 때
@@ -163,6 +129,13 @@ export const POSTS_ROOT = process.env.AVORA_POSTS_ROOT
   ? resolve(process.env.AVORA_POSTS_ROOT)
   : resolve(root, 'src/content/posts');
 
+/**
+ * 이 언어의 글에 쓰인 글자.
+ *
+ * 로케일을 디렉터리로 가르기 때문에 그 폴더만 읽으면 됩니다. 프론트매터로만
+ * 구분했다면 전 파일을 파싱해야 하고, 구분에 실패하면 영어·베트남어 서브셋에
+ * 한글이 통째로 들어갑니다.
+ */
 export function postStringsFor(locale, postsRoot = POSTS_ROOT) {
   const dir = resolve(postsRoot, locale);
   if (!existsSync(dir)) return [];
@@ -313,7 +286,9 @@ const css = (locale) => `/* 자동 생성 — scripts/build-fonts.mjs (${locale}
  * 글자가 절반쯤 빠져도 CI 가 통과한다는 뜻입니다.
  *
  * 23MB 를 커밋하는 대신 **cmap 만 33KB 로 압축해** 커밋합니다.
- * `npm run fonts` 가 원본을 읽을 때마다 갱신하므로 낡을 일이 없습니다.
+ * `npm run fonts` 가 갱신하고, `--check` 는 읽기만 하되 원본이 있는 곳에서는
+ * 어긋났는지 대조합니다 — 검사가 자기 근거를 고치면 "낡았다" 를 잡을 수
+ * 없어집니다.
  *
  * body 원본은 npm 의존성이라 어디에나 있어 이 장치가 필요 없습니다.
  */
@@ -322,7 +297,8 @@ const COVERAGE_FILES = {
 };
 
 /** 연속 구간으로 접습니다. 23,124자가 4,676구간이 됩니다. */
-function packCoverage(chars) {
+export function packCoverage(chars, sourceTag = '') {
+  if (!chars.size) throw new Error('빈 커버리지는 만들지 않습니다 — 원본을 잘못 읽었습니다.');
   const codes = [...chars].map((c) => c.codePointAt(0)).sort((a, b) => a - b);
   const out = [];
   let start = codes[0];
@@ -336,16 +312,83 @@ function packCoverage(chars) {
     start = prev = code;
   }
   out.push(start === prev ? start.toString(16) : `${start.toString(16)}-${prev.toString(16)}`);
-  return out.join(',');
+
+  /*
+   * 줄을 나눕니다. 33KB 한 줄이면 어떤 변경이든 전체 파일 충돌이고, 두
+   * 브랜치가 각각 재생성하면 반드시 부딪힙니다. 충돌 마커가 남거나 잘못
+   * 해소되면 그것이 곧 "깨진 커버리지" — 검사가 통째로 눈머는 상태입니다.
+   */
+  const lines = [];
+  for (let i = 0; i < out.length; i += 40) lines.push(out.slice(i, i + 40).join(','));
+
+  /*
+   * 첫 줄에 기대 개수를 적습니다.
+   *
+   * 크기 하한만으로는 **잘린 파일**을 못 잡습니다. 앞부분만 남아도 글자
+   * 수가 하한을 넘을 수 있고, 그러면 빠진 글자들이 "원본에 없는 글자" 로
+   * 분류되어 조용히 통과합니다. 개수를 대조하면 한 글자만 어긋나도 걸립니다.
+   */
+  return [`# ${codes.length} chars, ${out.length} ranges${sourceTag ? ` — ${sourceTag}` : ''}`, ...lines].join(
+    '\n',
+  ) + '\n';
 }
 
-function unpackCoverage(text) {
+export function unpackCoverage(text) {
+  /*
+   * ⚠️ 실패하면 **소리 내어** 실패해야 합니다.
+   *
+   * 예전에는 파싱 실패가 빈 Set 으로 돌아왔습니다. 그런데 빈 Set 은
+   * truthy 라 "근거 없음" 가드를 지나가고, 판정식의 `source.has(ch)` 가
+   * 언제나 false 가 되어 **모든 글자가 "원본에 없으니 폴백이 정상"** 으로
+   * 분류됩니다. 5개 언어 display 가 무조건 통과합니다 — 옛 정규식의
+   * 54% 실명보다 나쁜 100% 실명입니다.
+   *
+   * 도달 경로가 가설이 아닙니다. 이 파일은 한 줄짜리 33KB 라 두 브랜치가
+   * 각각 재생성하면 반드시 충돌하고, 충돌 마커가 남거나 잘못 해소되면
+   * 그대로 이 상태가 됩니다.
+   */
+  const expected = text.match(/^#\s*(\d+)\s*chars/m);
+
+  // 주석은 **줄 단위**로 걸러야 합니다. 토큰으로 쪼갠 뒤 '#' 로 시작하는
+  // 조각만 버리면 머리글의 나머지 낱말(chars, ranges)이 구간으로 섞입니다.
+  const parts = text
+    .split(/\r?\n/)
+    .filter((line) => !line.trimStart().startsWith('#'))
+    .join(',')
+    .split(/[\s,]+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+
   const chars = new Set();
-  for (const part of text.trim().split(',')) {
+  for (const part of parts) {
     const [a, b] = part.split('-');
     const from = parseInt(a, 16);
-    const to = b ? parseInt(b, 16) : from;
+    const to = b === undefined ? from : parseInt(b, 16);
+    if (!Number.isInteger(from) || !Number.isInteger(to) || to < from || to > 0x10ffff) {
+      throw new Error(
+        `커버리지 파일이 깨졌습니다 — 해석할 수 없는 구간 ${JSON.stringify(part)}.\n` +
+          '  npm run fonts 로 다시 만든 뒤 커밋하세요.',
+      );
+    }
     for (let code = from; code <= to; code++) chars.add(String.fromCodePoint(code));
+  }
+
+  /*
+   * 첫 줄의 개수와 맞는지 봅니다. 크기 하한만으로는 잘린 파일을 못 잡습니다 —
+   * 앞부분만 남아도 하한을 넘을 수 있고, 그러면 빠진 글자가 "원본에 없는
+   * 글자" 로 분류되어 조용히 통과합니다.
+   */
+  if (!expected) {
+    throw new Error(
+      '커버리지 파일에 개수 머리글이 없습니다 — 오래되었거나 잘렸습니다.\n' +
+        '  npm run fonts 로 다시 만든 뒤 커밋하세요.',
+    );
+  }
+  if (chars.size !== Number(expected[1])) {
+    throw new Error(
+      `커버리지가 ${chars.size}자인데 머리글은 ${expected[1]}자라고 적혀 있습니다 — 잘렸거나 잘못 합쳐졌습니다.\n` +
+        '  npm run fonts 로 다시 만든 뒤 커밋하세요.',
+    );
   }
   return chars;
 }
@@ -354,26 +397,66 @@ function unpackCoverage(text) {
  * 원본 서체가 가진 글자. kind 마다 한 번만 읽고 재사용합니다.
  *
  * body 원본은 npm 의존성이라 어디에나 있지만, display 원본은 23MB 라
- * 저장소에 두지 않습니다(.gitignore). 없으면 null 을 돌려주고 호출한 쪽이
- * 예전 방식으로 넘어갑니다 — 검사를 못 한다고 빌드를 세우지는 않습니다.
+ * 저장소에 두지 않습니다(.gitignore). 그래서 커버리지 파일이 CI 에서
+ * 유일한 근거입니다.
+ *
+ * ⚠️ **검사(`--check`)는 이 파일을 쓰지 않습니다.** 검사가 자기 근거를
+ *    갱신하면 "낡았다" 는 상태가 존재할 수 없어져 검증이 무의미해집니다.
+ *    생성(`npm run fonts`)에서만 쓰고, 검사는 어긋났는지 **비교만** 합니다.
  */
 const sourceGlyphCache = new Map();
-function sourceGlyphs(kind) {
+function sourceGlyphs(kind, { write = false } = {}) {
   if (sourceGlyphCache.has(kind)) return sourceGlyphCache.get(kind);
 
   const src = SOURCES[kind];
+  const coverageFile = Object.hasOwn(COVERAGE_FILES, kind) ? COVERAGE_FILES[kind] : null;
   let result = null;
+
   if (existsSync(src)) {
-    result = glyphsIn(src);
-    // 원본이 있을 때 커버리지를 갱신해 둡니다. 원본이 없는 곳(CI)에서는
-    // 이 파일이 유일한 근거이므로 낡으면 판정이 어긋납니다.
-    if (kind in COVERAGE_FILES) writeFileSync(COVERAGE_FILES[kind], packCoverage(result), 'utf8');
-  } else if (kind in COVERAGE_FILES && existsSync(COVERAGE_FILES[kind])) {
-    result = unpackCoverage(readFileSync(COVERAGE_FILES[kind], 'utf8'));
+    try {
+      result = glyphsIn(src);
+    } catch (cause) {
+      // 원인을 보존합니다. 위쪽 도구 부재 판정이 이것을 보고
+      // "손상된 폰트" 와 "fontTools 없음" 을 가릅니다.
+      throw new Error(
+        `원본 서체를 읽지 못했습니다: ${src}\n` +
+          '  파일이 손상되었거나 fontTools 가 없습니다.\n' +
+          `  (${cause?.message ?? cause})`,
+        { cause },
+      );
+    }
+    if (coverageFile && write) {
+      // 원본의 해시를 함께 적습니다. 다른 파일을 받으면 이 줄이 바뀌어
+      // diff 에 드러납니다 — main 브랜치라 시점에 따라 달라질 수 있습니다.
+      const digest = createHash('sha256').update(readFileSync(src)).digest('hex').slice(0, 16);
+      writeFileSync(coverageFile, packCoverage(result, `sha256:${digest}`), 'utf8');
+    }
+  } else if (coverageFile && existsSync(coverageFile)) {
+    result = unpackCoverage(readFileSync(coverageFile, 'utf8'));
   }
 
   sourceGlyphCache.set(kind, result);
   return result;
+}
+
+/**
+ * 커버리지 파일이 원본과 어긋나지 않는지.
+ *
+ * 원본이 있는 곳(개발자 기계)에서만 볼 수 있습니다. 여기서 잡지 않으면
+ * 낡은 파일이 그대로 커밋되어 CI 가 틀린 근거로 판정합니다.
+ */
+function checkCoverageFresh() {
+  for (const [kind, file] of Object.entries(COVERAGE_FILES)) {
+    if (!existsSync(SOURCES[kind]) || !existsSync(file)) continue;
+    const digest = createHash('sha256').update(readFileSync(SOURCES[kind])).digest('hex').slice(0, 16);
+    const current = packCoverage(sourceGlyphs(kind), `sha256:${digest}`);
+    if (current.trim() !== readFileSync(file, 'utf8').trim()) {
+      console.error(`\n${file} 이 원본과 다릅니다.`);
+      console.error('  npm run fonts 로 다시 만든 뒤 커밋하세요.\n');
+      return false;
+    }
+  }
+  return true;
 }
 
 /*
@@ -403,7 +486,7 @@ if (process.argv[1]) {
   }
 }
 
-if (!isEntrypoint && process.argv.includes('--check')) {
+if (!isEntrypoint && basename(process.argv[1] ?? '') === 'build-fonts.mjs') {
   console.error('build-fonts.mjs 가 엔트리포인트로 인식되지 않아 검사가 돌지 않았습니다.');
   console.error(`  import.meta.url = ${import.meta.url}`);
   console.error(`  process.argv[1]  = ${process.argv[1] ?? '(없음)'}`);
@@ -412,7 +495,15 @@ if (!isEntrypoint && process.argv.includes('--check')) {
 
 if (isEntrypoint) {
 
-  const checkOnly = process.argv.includes('--check');
+  /*
+ * CI 인가.
+ *
+ * `CI=false` 나 `CI=0` 은 "CI 동작을 끄겠다" 는 관례로 쓰입니다. 빈 문자열이
+ * 아니라는 이유로 참이 되면 그 의도를 정반대로 읽습니다.
+ */
+const inCI = !!process.env.CI && process.env.CI !== 'false' && process.env.CI !== '0';
+
+const checkOnly = process.argv.includes('--check');
   let failed = false;
 
   /*
@@ -448,11 +539,26 @@ if (isEntrypoint) {
       sourceGlyphs('body');
     } catch (cause) {
       toolsOk = false;
-      const reason = String(cause?.message ?? cause).includes('Brotli')
+      /*
+       * 도구 부재만 여기서 다룹니다. 손상된 폰트·권한 오류·버퍼 초과까지
+       * "pip install 하세요" 로 안내하면 이미 설치된 환경에 엉뚱한 처방이
+       * 나가고 원인을 찾는 시간이 그대로 날아갑니다.
+       */
+      // sourceGlyphs 가 감싼 오류일 수 있으므로 원인까지 봅니다.
+      const root_ = cause?.cause ?? cause;
+      const detail = `${cause?.message ?? cause} ${root_?.message ?? ''}`;
+      const missingBrotli = detail.includes('Brotli');
+      const missingTools =
+        root_?.code === 'ENOENT' ||
+        cause?.code === 'ENOENT' ||
+        /ModuleNotFoundError|No module named|ENOENT/.test(detail);
+      if (!missingBrotli && !missingTools) throw cause;
+
+      const reason = missingBrotli
         ? 'brotli 확장이 없어 woff2 를 열지 못합니다'
         : 'fontTools 를 찾지 못했습니다';
 
-      if (process.env.CI) {
+      if (inCI) {
         console.error(`\n글자 검사를 할 수 없습니다 — ${reason}.`);
         console.error('CI 에서는 검사를 건너뛰지 않습니다. 워크플로에 아래를 추가하세요:\n');
         console.error('  - uses: actions/setup-python@v5');
@@ -494,7 +600,7 @@ if (isEntrypoint) {
          */
         const source = sourceGlyphs(kind);
 
-        if (!source && process.env.CI) {
+        if (!source && inCI) {
           /*
            * 근거 없이 통과시키지 않습니다.
            *
@@ -518,7 +624,13 @@ if (isEntrypoint) {
           ok = false;
         }
       }
-      if (ok) console.log(`✓ ${locale} — body ${need.body.size}자 / display ${need.display.size}자 모두 포함`);
+      if (ok && !toolsOk) {
+        // 검사하지 않았는데 "모두 포함" 이라고 쓰면 다섯 줄의 초록이
+        // 위의 "생략" 한 줄을 덮습니다.
+        console.log(`- ${locale} — 파일 존재만 확인 (글자 검사 생략)`);
+      } else if (ok) {
+        console.log(`✓ ${locale} — body ${need.body.size}자 / display ${need.display.size}자 모두 포함`);
+      }
 
       /*
        * 서브셋은 글이 늘수록 커집니다. 그리고 이 파일은 그 언어의 **모든**
@@ -549,6 +661,10 @@ if (isEntrypoint) {
     }
 
     mkdirSync(outDir, { recursive: true });
+    // 커버리지 파일은 여기서만 씁니다. 검사(--check)가 자기 근거를 갱신하면
+    // "낡았다" 는 상태가 존재할 수 없어져 검증이 무의미해집니다.
+    sourceGlyphs('display', { write: true });
+
     const bodySize = subset(SOURCES.body, resolve(outDir, 'body.woff2'), need.body);
     const displaySize = subset(SOURCES.display, resolve(outDir, 'display.woff2'), need.display);
     writeFileSync(resolve(outDir, 'fonts.css'), css(locale), 'utf8');
@@ -558,6 +674,10 @@ if (isEntrypoint) {
         `  display ${String(Math.round(displaySize / 1024)).padStart(3)}KB (${need.display.size}자)`,
     );
   }
+
+  // 원본이 있는 곳(개발자 기계)에서만 볼 수 있습니다. 여기서 안 잡으면
+  // 낡은 커버리지가 그대로 커밋되어 CI 가 틀린 근거로 판정합니다.
+  if (checkOnly && toolsOk && !checkCoverageFresh()) failed = true;
 
   if (failed) {
     console.error('\n폰트 서브셋이 현재 문구를 담지 못합니다. npm run fonts 로 다시 만드세요.');

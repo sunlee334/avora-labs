@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=22.18"
+    "node": ">=22.18 <23 || >=23.6"
   },
   "description": "AVORA 브랜드 웹사이트 — Astro + Cloudflare Workers",
   "scripts": {

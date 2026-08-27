@@ -1,0 +1,6 @@
+# 자동 생성된 커버리지 목록입니다. 사람이 읽을 diff 가 아닙니다.
+#
+# 충돌하면 자동 해소하지 않습니다 — 두 쪽 다 원본에서 만든 값이라
+# 어느 쪽이 옳은지는 `npm run fonts` 를 다시 돌려야 압니다.
+# 잘못 합쳐진 파일은 check:fonts 가 머리글 개수 대조로 잡습니다.
+scripts/display-source-coverage.txt -diff
