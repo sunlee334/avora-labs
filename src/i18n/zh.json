@@ -384,7 +384,32 @@
           "item": "项目",
           "purpose": "目的",
           "when": "收集时点"
-        }
+        },
+        "accountRows": [
+          {
+            "item": "登录服务商提供的唯一识别码",
+            "purpose": "识别会员",
+            "when": "登录时（必需）"
+          },
+          {
+            "item": "电子邮件与姓名（服务商提供时）",
+            "purpose": "识别会员与联络",
+            "when": "登录时（可选）"
+          },
+          {
+            "item": "最近一次收货地址",
+            "purpose": "下次下单时自动填写",
+            "when": "下单时（自动）"
+          }
+        ],
+        "reviewRows": [
+          {
+            "item": "评价内容、评分与下单姓名",
+            "purpose": "发布购买评价",
+            "when": "撰写评价时（必需）"
+          }
+        ],
+        "reviewMask": "评价上显示的姓名会部分隐去（例如 金*秀）。"
       }
     },
     "terms": {
@@ -635,9 +660,23 @@
     },
     "heading": "我的页面",
     "loginHeading": "登录",
-    "loginBody": "使用 Kakao 账号登录后，订单记录与配送地址会被保存。",
-    "loginButton": "使用 Kakao 登录",
+    "loginBody": "登录后，订单记录与收货地址将被保存。",
     "logout": "退出登录",
+    "identities": {
+      "heading": "登录方式",
+      "body": "关联多种方式后，无论用哪一种登录都是同一个账户。",
+      "connect": "关联",
+      "disconnect": "解除关联",
+      "lastNote": "最后一种无法解除 — 解除后将无法再登录此账户。",
+      "loading": "加载中…",
+      "messages": {
+        "ok": "已关联。",
+        "already_linked": "该方式已关联。",
+        "taken": "该账户已被其他会员关联。",
+        "unlinked": "已解除关联。",
+        "failed": "处理失败，请稍后再试。"
+      }
+    },
     "guestNote": "不登录也可以下单。登录只是为了让下次下单更方便。",
     "orders": {
       "heading": "订单记录",
@@ -658,6 +697,14 @@
       "success": "已添加订单。",
       "notFound": "未找到匹配的订单。请再次确认订单编号与联系电话。"
     },
-    "error": "处理失败，请稍后重试。"
+    "error": "处理失败，请稍后重试。",
+    "loginWith": "使用 {provider} 登录",
+    "providers": {
+      "google": "Google",
+      "kakao": "Kakao",
+      "naver": "Naver",
+      "mock": "测试",
+      "mock2": "测试 2"
+    }
   }
 }

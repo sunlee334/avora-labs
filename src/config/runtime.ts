@@ -15,6 +15,7 @@
  * 그래야 무엇이 켜져 있는지가 저장소에 남습니다.
  */
 import paymentConfig from './payment-config.json';
+import commerceConfig from './commerce.json';
 import productData from './../data/product.json';
 
 type CheckoutMode = 'internal' | 'external' | 'none';
@@ -56,8 +57,16 @@ export const EXTERNAL_STORE_URL: string | null = country.externalStoreUrl || nul
  * 바뀌므로 켜지 않으면 계속 사실입니다.
  *
  *   PUBLIC_ACCOUNTS=on npm run build   회원 기능을 켠 채로 빌드합니다
+ *   PUBLIC_ACCOUNTS=off npm run build  끈 채로 빌드합니다
+ *
+ * 환경변수를 주지 않으면 commerce.json 의 accounts.enabled 를 따릅니다.
+ * 켜고 끄는 판단은 그 파일에 남습니다 — 환경변수로만 켜면 무엇이 켜져 있는지가
+ * 저장소에 남지 않고, 다음 사람이 배포 명령을 봐야만 알 수 있습니다.
  */
-export const ACCOUNTS_ENABLED = import.meta.env.PUBLIC_ACCOUNTS === 'on';
+export const ACCOUNTS_ENABLED =
+  import.meta.env.PUBLIC_ACCOUNTS != null
+    ? import.meta.env.PUBLIC_ACCOUNTS === 'on'
+    : commerceConfig.accounts.enabled;
 
 /** 이 빌드가 기본 설정과 다른 상태인지 — 개발 중 혼동을 막기 위한 표시용. */
 export const IS_OVERRIDDEN = Boolean(modeOverride || priceOverride);

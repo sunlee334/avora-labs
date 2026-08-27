@@ -38,9 +38,12 @@ const a = t.account;
     <div data-account-anon hidden>
       <h2 class="kicker" style="margin-top: 36px">{a.loginHeading}</h2>
       <p class="body">{a.loginBody}</p>
-      <a class="cta" style="margin-top: 20px; display: inline-flex" data-login-link href="#">
-        {a.loginButton}
-      </a>
+      {/*
+        버튼은 서버가 켜 둔 제공자만큼만 그립니다(/api/auth/providers).
+        키가 없는 제공자의 버튼을 미리 그려 두면, 눌러도 아무 일이 없는
+        로그인 버튼이 됩니다 — 없는 것만 못합니다.
+      */}
+      <div class="providerButtons" data-login-buttons></div>
       <p class="cart__notice">{a.guestNote}</p>
     </div>
 
@@ -63,6 +66,13 @@ const a = t.account;
         <div><dt>{t.order.complete.address}</dt><dd data-addr-line></dd></div>
       </dl>
       <p class="cart__notice" data-address-note hidden>{a.address.note}</p>
+
+      <h2 class="kicker" style="margin-top: 40px">{a.identities.heading}</h2>
+      <p class="body">{a.identities.body}</p>
+      <p class="body" data-identities-state>{a.identities.loading}</p>
+      <ul class="identityList" data-identities hidden></ul>
+      <div class="providerButtons" data-link-buttons></div>
+      <p class="cart__notice" data-identities-note hidden>{a.identities.lastNote}</p>
 
       <h2 class="kicker" style="margin-top: 40px">{a.claim.heading}</h2>
       <p class="body">{a.claim.body}</p>
@@ -91,6 +101,15 @@ const a = t.account;
     data-label-success={a.claim.success}
     data-label-submit={a.claim.submit}
     data-path-lookup={localePath(locale, 'order/lookup')}
+    data-label-login-with={a.loginWith}
+    data-label-connect={a.identities.connect}
+    data-label-disconnect={a.identities.disconnect}
+    data-provider-names={JSON.stringify(a.providers)}
+    data-msg-link-ok={a.identities.messages.ok}
+    data-msg-link-already={a.identities.messages.already_linked}
+    data-msg-link-taken={a.identities.messages.taken}
+    data-msg-unlinked={a.identities.messages.unlinked}
+    data-msg-link-failed={a.identities.messages.failed}
   ></template>
 </Base>
 
@@ -106,9 +125,113 @@ const a = t.account;
     const anon = $('[data-account-anon]');
     const signed = $('[data-account-signed]');
 
-    // 로그인 후 이 페이지로 돌아옵니다.
-    $<HTMLAnchorElement>('[data-login-link]').href =
-      `/api/auth/login?returnTo=${encodeURIComponent(location.pathname)}`;
+    const providerNames = JSON.parse(L.providerNames ?? '{}') as Record<string, string>;
+    const label = (provider: string) => providerNames[provider] ?? provider;
+    const returnTo = encodeURIComponent(location.pathname);
+
+    /**
+     * 제공자 버튼 하나.
+     *
+     * 링크에 담기는 것은 제공자 이름뿐이고, 인가는 전부 서버가 합니다.
+     * 여기서 만든 주소를 손대도 켜지지 않은 제공자로는 시작되지 않습니다.
+     */
+    function providerLink(kind: 'login' | 'link', provider: string, text: string): HTMLAnchorElement {
+      const a = document.createElement('a');
+      a.className = kind === 'login' ? 'cta' : 'cta cta--ghost';
+      a.href = `/api/auth/${kind === 'login' ? 'login' : 'link'}?provider=${encodeURIComponent(provider)}&returnTo=${returnTo}`;
+      a.textContent = text;
+      return a;
+    }
+
+    /** 로그인 전 — 켜져 있는 제공자만큼 버튼을 그립니다. */
+    async function drawLoginButtons() {
+      const box = $('[data-login-buttons]');
+      box.replaceChildren();
+      try {
+        const { providers } = await (await fetch('/api/auth/providers')).json();
+        for (const provider of providers as string[]) {
+          box.append(
+            providerLink('login', provider, (L.labelLoginWith ?? '{provider}').replace('{provider}', label(provider))),
+          );
+        }
+      } catch {
+        /* 목록을 못 받아도 화면은 계속 보여줍니다 — 로그인만 불가합니다. */
+      }
+    }
+
+    /** 연결 결과는 주소에 실려 돌아옵니다(?link=ok 등). */
+    function linkMessage(): string | null {
+      const value = new URLSearchParams(location.search).get('link');
+      if (!value) return null;
+      const map: Record<string, string | undefined> = {
+        ok: L.msgLinkOk,
+        already_linked: L.msgLinkAlready,
+        taken: L.msgLinkTaken,
+      };
+      return map[value] ?? L.msgLinkFailed ?? null;
+    }
+
+    /** 로그인 후 — 붙어 있는 수단과 아직 붙일 수 있는 수단. */
+    async function drawIdentities() {
+      const state = $('[data-identities-state]');
+      const list = $<HTMLUListElement>('[data-identities]');
+      const linkBox = $('[data-link-buttons]');
+      const note = $('[data-identities-note]');
+
+      let body: { linked: Array<{ provider: string; email: string | null }>; available: string[]; canUnlink: boolean };
+      try {
+        const res = await fetch('/api/account/identities');
+        if (!res.ok) throw new Error('failed');
+        body = await res.json();
+      } catch {
+        state.textContent = L.msgLinkFailed ?? '';
+        return;
+      }
+
+      const message = linkMessage();
+      state.textContent = message ?? '';
+      state.hidden = !message;
+
+      list.replaceChildren();
+      for (const identity of body.linked) {
+        const li = document.createElement('li');
+        const name = document.createElement('span');
+        // 제공자가 준 이메일은 사람이 만든 값이라 textContent 로만 넣습니다.
+        name.textContent = identity.email ? `${label(identity.provider)} · ${identity.email}` : label(identity.provider);
+        li.append(name);
+
+        if (body.canUnlink) {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'linkButton';
+          button.textContent = L.labelDisconnect ?? '';
+          button.addEventListener('click', async () => {
+            button.disabled = true;
+            const res = await fetch('/api/account/identities/unlink', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ provider: identity.provider }),
+            });
+            state.hidden = false;
+            state.textContent = res.ok ? (L.msgUnlinked ?? '') : (L.msgLinkFailed ?? '');
+            await drawIdentities();
+          });
+          li.append(button);
+        }
+        list.append(li);
+      }
+      list.hidden = body.linked.length === 0;
+
+      linkBox.replaceChildren();
+      for (const provider of body.available) {
+        linkBox.append(
+          providerLink('link', provider, `${label(provider)} ${L.labelConnect ?? ''}`.trim()),
+        );
+      }
+
+      // 마지막 하나뿐이면 왜 뗄 수 없는지 알려 줍니다.
+      note.hidden = body.canUnlink;
+    }
 
     const money = (v: number, currency: string) => {
       try {
@@ -134,17 +257,15 @@ const a = t.account;
 
     async function load() {
       const meRes = await fetch('/api/account/me');
-      if (meRes.status === 401) {
+      if (meRes.status === 401 || !meRes.ok) {
         anon.hidden = false;
-        return;
-      }
-      if (!meRes.ok) {
-        anon.hidden = false;
+        void drawLoginButtons();
         return;
       }
 
       const { user } = await meRes.json();
       signed.hidden = false;
+      void drawIdentities();
       $('[data-account-name]').textContent = user.name ?? user.email ?? '';
 
       // 저장된 배송지

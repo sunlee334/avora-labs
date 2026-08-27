@@ -384,7 +384,32 @@
           "item": "Mục",
           "purpose": "Mục đích",
           "when": "Thời điểm"
-        }
+        },
+        "accountRows": [
+          {
+            "item": "Mã định danh do đơn vị đăng nhập cung cấp",
+            "purpose": "Nhận diện thành viên",
+            "when": "Khi đăng nhập (bắt buộc)"
+          },
+          {
+            "item": "Email và tên, nếu đơn vị cung cấp",
+            "purpose": "Nhận diện và liên hệ",
+            "when": "Khi đăng nhập (tuỳ chọn)"
+          },
+          {
+            "item": "Địa chỉ giao hàng gần nhất",
+            "purpose": "Điền sẵn cho đơn hàng sau",
+            "when": "Khi đặt hàng (tự động)"
+          }
+        ],
+        "reviewRows": [
+          {
+            "item": "Nội dung đánh giá, điểm và tên trên đơn hàng",
+            "purpose": "Đăng đánh giá mua hàng",
+            "when": "Khi viết đánh giá (bắt buộc)"
+          }
+        ],
+        "reviewMask": "Tên hiển thị trên đánh giá được che một phần (ví dụ Kim*su)."
       }
     },
     "terms": {
@@ -635,9 +660,23 @@
     },
     "heading": "Trang của tôi",
     "loginHeading": "Đăng nhập",
-    "loginBody": "Đăng nhập bằng tài khoản Kakao để lưu lịch sử đơn hàng và địa chỉ giao hàng.",
-    "loginButton": "Đăng nhập bằng Kakao",
+    "loginBody": "Đăng nhập để lưu lịch sử đơn hàng và địa chỉ giao hàng.",
     "logout": "Đăng xuất",
+    "identities": {
+      "heading": "Phương thức đăng nhập",
+      "body": "Liên kết nhiều phương thức thì dùng cách nào cũng vào cùng một tài khoản.",
+      "connect": "Liên kết",
+      "disconnect": "Huỷ liên kết",
+      "lastNote": "Không thể huỷ phương thức cuối cùng — huỷ rồi sẽ không còn cách nào vào lại tài khoản này.",
+      "loading": "Đang tải…",
+      "messages": {
+        "ok": "Đã liên kết.",
+        "already_linked": "Phương thức này đã được liên kết.",
+        "taken": "Tài khoản đó đã được liên kết với thành viên khác.",
+        "unlinked": "Đã huỷ liên kết.",
+        "failed": "Không thực hiện được. Vui lòng thử lại sau."
+      }
+    },
     "guestNote": "Bạn vẫn đặt hàng được mà không cần đăng nhập. Đăng nhập chỉ giúp lần đặt sau nhanh hơn.",
     "orders": {
       "heading": "Lịch sử đơn hàng",
@@ -658,6 +697,14 @@
       "success": "Đã thêm đơn hàng.",
       "notFound": "Không tìm thấy đơn hàng khớp. Vui lòng kiểm tra lại mã đơn hàng và số điện thoại."
     },
-    "error": "Không xử lý được yêu cầu. Vui lòng thử lại sau."
+    "error": "Không xử lý được yêu cầu. Vui lòng thử lại sau.",
+    "loginWith": "Đăng nhập bằng {provider}",
+    "providers": {
+      "google": "Google",
+      "kakao": "Kakao",
+      "naver": "Naver",
+      "mock": "Thử nghiệm",
+      "mock2": "Thử nghiệm 2"
+    }
   }
 }

@@ -26,7 +26,7 @@ const WIDTHS = [320, 360, 390, 430];
 
 /** 로그인한 상태의 마이페이지도 봐야 합니다 — 내용이 그때 채워집니다. */
 async function loginAs(page: Page, providerUserId: string): Promise<void> {
-  const start = await page.request.get('/api/auth/login?returnTo=%2Fko%2Faccount', {
+  const start = await page.request.get('/api/auth/login?provider=mock&returnTo=%2Fko%2Faccount', {
     maxRedirects: 0,
   });
   const callback = new URL(start.headers()['location']);

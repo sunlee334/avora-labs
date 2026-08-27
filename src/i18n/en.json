@@ -384,7 +384,32 @@
           "item": "Item",
           "purpose": "Purpose",
           "when": "Collected"
-        }
+        },
+        "accountRows": [
+          {
+            "item": "Unique identifier from the sign-in provider",
+            "purpose": "Identifying your account",
+            "when": "On sign-in (required)"
+          },
+          {
+            "item": "Email and name, where the provider supplies them",
+            "purpose": "Identifying and contacting you",
+            "when": "On sign-in (optional)"
+          },
+          {
+            "item": "Most recent delivery address",
+            "purpose": "Filling in your next order",
+            "when": "On ordering (automatic)"
+          }
+        ],
+        "reviewRows": [
+          {
+            "item": "Review text, rating and the name on the order",
+            "purpose": "Publishing your review",
+            "when": "When writing a review (required)"
+          }
+        ],
+        "reviewMask": "Names shown on reviews are partly masked (for example Kim*su)."
       }
     },
     "terms": {
@@ -635,9 +660,23 @@
     },
     "heading": "My Page",
     "loginHeading": "Sign in",
-    "loginBody": "Sign in with Kakao to keep your orders and address.",
-    "loginButton": "Sign in with Kakao",
+    "loginBody": "Sign in and your orders and delivery address are kept for next time.",
     "logout": "Sign out",
+    "identities": {
+      "heading": "Sign-in methods",
+      "body": "Link more than one and you reach the same account whichever you use.",
+      "connect": "Link",
+      "disconnect": "Unlink",
+      "lastNote": "The last one cannot be removed — without it there is no way back into this account.",
+      "loading": "Loading…",
+      "messages": {
+        "ok": "Linked.",
+        "already_linked": "That one is already linked.",
+        "taken": "That account is already linked to another member.",
+        "unlinked": "Unlinked.",
+        "failed": "We could not do that. Please try again shortly."
+      }
+    },
     "guestNote": "You can order without signing in. Signing in only makes the next order quicker.",
     "orders": {
       "heading": "Orders",
@@ -658,6 +697,14 @@
       "success": "Order added.",
       "notFound": "No matching order. Check the order number and phone."
     },
-    "error": "Something went wrong. Please try again."
+    "error": "Something went wrong. Please try again.",
+    "loginWith": "Continue with {provider}",
+    "providers": {
+      "google": "Google",
+      "kakao": "Kakao",
+      "naver": "Naver",
+      "mock": "Test",
+      "mock2": "Test 2"
+    }
   }
 }

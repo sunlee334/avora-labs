@@ -44,7 +44,17 @@ import {
   type ReviewStatus,
 } from './reviews';
 import { notifyNewOrder, toNotification } from './notify';
-import { handleLogin, handleCallback, handleLogout, currentUser, providerFor, type AuthEnv } from './auth';
+import {
+  handleLogin,
+  handleCallback,
+  handleLogout,
+  handleLinkStart,
+  handleIdentities,
+  handleProviders,
+  handleUnlink,
+  currentUser,
+  type AuthEnv,
+} from './auth';
 import { publicUser, ordersForUser, saveAddress, claimOrder } from './accounts';
 
 const LOCALES = ['ko', 'en', 'zh', 'th', 'vi'] as const;
@@ -874,8 +884,17 @@ export default {
     if (pathname === '/api/auth/login' && request.method === 'GET') {
       return handleLogin(request, env);
     }
-    if (pathname === '/api/auth/callback' && request.method === 'GET') {
-      return handleCallback(request, env);
+    // 제공자 이름이 경로에 있습니다 — 제공자마다 Redirect URI 를 따로
+    // 등록해야 하고, 등록된 주소와 한 글자라도 다르면 코드가 오지 않습니다.
+    const callback = pathname.match(/^\/api\/auth\/callback(?:\/([a-z0-9-]+))?$/);
+    if (callback && request.method === 'GET') {
+      return handleCallback(request, env, callback[1] ?? null);
+    }
+    if (pathname === '/api/auth/link' && request.method === 'GET') {
+      return handleLinkStart(request, env);
+    }
+    if (pathname === '/api/auth/providers' && request.method === 'GET') {
+      return handleProviders(request, env);
     }
     if (pathname === '/api/auth/logout' && request.method === 'POST') {
       return handleLogout(request, env);
@@ -893,6 +912,12 @@ export default {
     }
     if (pathname === '/api/account/claim' && request.method === 'POST') {
       return handleAccountClaim(request, env);
+    }
+    if (pathname === '/api/account/identities' && request.method === 'GET') {
+      return handleIdentities(request, env);
+    }
+    if (pathname === '/api/account/identities/unlink' && request.method === 'POST') {
+      return handleUnlink(request, env);
     }
 
     // 관리 API — 무엇을 하려는지 보기 전에 먼저 신원을 확인합니다.

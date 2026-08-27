@@ -1807,3 +1807,37 @@ button {
   outline: 2px solid var(--color-ink);
   outline-offset: 2px;
 }
+
+/* ── 로그인 수단 ───────────────────────────────────────────── */
+
+.providerButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.identityList {
+  display: grid;
+  gap: 2px;
+  margin-top: 16px;
+  list-style: none;
+}
+.identityList li {
+  /* 그리드 칸은 기본이 min-width:auto 라, 긴 이메일이 칸을 밀어냅니다. */
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: var(--size-tap-min);
+  padding-block: 12px;
+  border-bottom: 1px solid var(--color-line);
+  font-size: 15px;
+}
+.identityList li > span {
+  /* 공백이 없는 이메일 주소는 좁은 화면에서 끊을 곳이 없습니다. */
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

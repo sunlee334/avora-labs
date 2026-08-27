@@ -16,8 +16,6 @@ export const SESSION_COOKIE = 'avora_session';
 
 export interface User {
   id: string;
-  provider: string;
-  providerUserId: string;
   email: string | null;
   name: string | null;
   recipientName: string | null;
@@ -51,8 +49,6 @@ export async function hashToken(token: string): Promise<string> {
 function rowToUser(row: Record<string, unknown>): User {
   return {
     id: row.id as string,
-    provider: row.provider as string,
-    providerUserId: row.provider_user_id as string,
     email: (row.email as string) ?? null,
     name: (row.name as string) ?? null,
     recipientName: (row.recipient_name as string) ?? null,
@@ -71,26 +67,52 @@ function rowToUser(row: Record<string, unknown>): User {
  * 식별자는 (provider, providerUserId) 입니다. 이메일이 아닙니다 —
  * 카카오는 이메일을 주지 않을 수 있고, 이메일은 바뀌기도 합니다.
  */
+export interface Identity {
+  provider: string;
+  providerUserId: string;
+  email: string | null;
+  createdAt: string;
+}
+
+function rowToIdentity(row: Record<string, unknown>): Identity {
+  return {
+    provider: row.provider as string,
+    providerUserId: row.provider_user_id as string,
+    email: (row.email as string) ?? null,
+    createdAt: row.created_at as string,
+  };
+}
+
+/**
+ * 이 로그인 수단으로 처음이면 사람을 만들고, 있으면 그 사람을 가져옵니다.
+ *
+ * 식별자는 (provider, providerUserId) 입니다. 이메일이 아닙니다 — 이메일은
+ * 없을 수도 있고 바뀔 수도 있으며, 제공자가 소유를 검증했다는 보장도 없습니다.
+ */
 export async function findOrCreateUser(
   db: D1Database,
   provider: string,
   profile: { providerUserId: string; email?: string; name?: string },
   now: string,
 ): Promise<User> {
-  const existing = await db
-    .prepare('SELECT * FROM users WHERE provider = ? AND provider_user_id = ?')
+  const identity = await db
+    .prepare('SELECT user_id FROM identities WHERE provider = ? AND provider_user_id = ?')
     .bind(provider, profile.providerUserId)
-    .first();
+    .first<{ user_id: string }>();
 
-  if (existing) {
+  if (identity) {
     // 제공자 쪽에서 이름·이메일이 바뀌었을 수 있으니 갱신합니다.
     await db
       .prepare('UPDATE users SET email = ?, name = ?, updated_at = ? WHERE id = ?')
-      .bind(profile.email ?? null, profile.name ?? null, now, (existing as { id: string }).id)
+      .bind(profile.email ?? null, profile.name ?? null, now, identity.user_id)
+      .run();
+    await db
+      .prepare('UPDATE identities SET email = ? WHERE provider = ? AND provider_user_id = ?')
+      .bind(profile.email ?? null, provider, profile.providerUserId)
       .run();
     const refreshed = await db
       .prepare('SELECT * FROM users WHERE id = ?')
-      .bind((existing as { id: string }).id)
+      .bind(identity.user_id)
       .first();
     return rowToUser(refreshed as Record<string, unknown>);
   }
@@ -98,14 +120,98 @@ export async function findOrCreateUser(
   const id = crypto.randomUUID();
   await db
     .prepare(
-      `INSERT INTO users (id, provider, provider_user_id, email, name, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO users (id, email, name, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?)`,
     )
-    .bind(id, provider, profile.providerUserId, profile.email ?? null, profile.name ?? null, now, now)
+    .bind(id, profile.email ?? null, profile.name ?? null, now, now)
+    .run();
+  await db
+    .prepare(
+      `INSERT INTO identities (provider, provider_user_id, user_id, email, created_at)
+       VALUES (?, ?, ?, ?, ?)`,
+    )
+    .bind(provider, profile.providerUserId, id, profile.email ?? null, now)
     .run();
 
   const created = await db.prepare('SELECT * FROM users WHERE id = ?').bind(id).first();
   return rowToUser(created as Record<string, unknown>);
+}
+
+/** 이 사람에게 붙어 있는 로그인 수단들. */
+export async function identitiesForUser(db: D1Database, userId: string): Promise<Identity[]> {
+  const { results } = await db
+    .prepare('SELECT * FROM identities WHERE user_id = ? ORDER BY created_at ASC')
+    .bind(userId)
+    .all<Record<string, unknown>>();
+  return (results ?? []).map(rowToIdentity);
+}
+
+export type LinkResult =
+  | { ok: true }
+  | { ok: false; reason: 'ALREADY_LINKED' }
+  | { ok: false; reason: 'TAKEN' };
+
+/**
+ * 로그인한 사람에게 다른 로그인 수단을 붙입니다.
+ *
+ * 이미 **다른 사람**에게 붙어 있으면 거절합니다. 조용히 옮기면 원래 계정의
+ * 주문 내역이 사라지고, 그 계정으로는 다시 들어갈 수 없게 됩니다.
+ */
+export async function linkIdentity(
+  db: D1Database,
+  userId: string,
+  provider: string,
+  profile: { providerUserId: string; email?: string },
+  now: string,
+): Promise<LinkResult> {
+  const existing = await db
+    .prepare('SELECT user_id FROM identities WHERE provider = ? AND provider_user_id = ?')
+    .bind(provider, profile.providerUserId)
+    .first<{ user_id: string }>();
+
+  if (existing) {
+    return existing.user_id === userId
+      ? { ok: false, reason: 'ALREADY_LINKED' }
+      : { ok: false, reason: 'TAKEN' };
+  }
+
+  await db
+    .prepare(
+      `INSERT INTO identities (provider, provider_user_id, user_id, email, created_at)
+       VALUES (?, ?, ?, ?, ?)`,
+    )
+    .bind(provider, profile.providerUserId, userId, profile.email ?? null, now)
+    .run();
+  return { ok: true };
+}
+
+export type UnlinkResult =
+  | { ok: true }
+  | { ok: false; reason: 'NOT_FOUND' }
+  | { ok: false; reason: 'LAST_IDENTITY' };
+
+/**
+ * 로그인 수단을 뗍니다.
+ *
+ * **마지막 하나는 뗄 수 없습니다.** 떼는 순간 그 계정에 들어갈 방법이
+ * 사라지고, 주문 내역과 배송지가 아무도 닿을 수 없는 곳에 남습니다.
+ */
+export async function unlinkIdentity(
+  db: D1Database,
+  userId: string,
+  provider: string,
+): Promise<UnlinkResult> {
+  const mine = await identitiesForUser(db, userId);
+  if (!mine.some((identity) => identity.provider === provider)) {
+    return { ok: false, reason: 'NOT_FOUND' };
+  }
+  if (mine.length <= 1) return { ok: false, reason: 'LAST_IDENTITY' };
+
+  await db
+    .prepare('DELETE FROM identities WHERE user_id = ? AND provider = ?')
+    .bind(userId, provider)
+    .run();
+  return { ok: true };
 }
 
 export async function createSession(
@@ -219,7 +325,6 @@ export function publicUser(user: User) {
   return {
     name: user.name,
     email: user.email,
-    provider: user.provider,
     address:
       user.address1 && user.recipientName
         ? {

@@ -14,6 +14,10 @@
     "minOrderAmount": 0,
     "orderIdPrefix": "AVORA"
   },
+  "accounts": {
+    "enabled": true,
+    "$comment": "소셜 로그인·마이페이지를 노출할지. 켜면 로그인 수단이 실제로 준비돼 있어야 합니다 — 키가 없는 제공자는 버튼이 나오지 않지만, 하나도 없으면 로그인할 수 없는 로그인 화면이 됩니다."
+  },
   "cart": {
     "storageKey": "avora.cart.v1",
     "$storageKey": "구조가 바뀌면 v2 로 올리세요. 예전 형식이 남아 있어도 무시됩니다."

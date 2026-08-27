@@ -11,6 +11,7 @@ import Base from '../../../layouts/Base.astro';
 import { LOCALES, type Locale } from '../../../config/site';
 import { dict, localePath } from '../../../i18n';
 import { breadcrumb } from '../../../lib/jsonld';
+import { ACCOUNTS_ENABLED, SELLS_DIRECTLY } from '../../../config/runtime';
 
 export function getStaticPaths() {
   return LOCALES.map((lang) => ({ params: { lang } }));
@@ -20,6 +21,19 @@ const locale = Astro.params.lang as Locale;
 const t = dict(locale);
 const page = t.legal.privacy;
 const c = page.collect;
+
+/*
+ * 수집 항목은 **켜져 있는 기능만** 적습니다.
+ *
+ * 아직 하지 않는 수집을 적어 두면 그것도 틀린 고지입니다. 회원 기능이나
+ * 자사 결제를 켜는 순간 이 표가 함께 늘어나므로, 따로 고치는 것을 잊을
+ * 일이 없습니다.
+ */
+const rows = [
+  ...c.rows,
+  ...(ACCOUNTS_ENABLED ? c.accountRows : []),
+  ...(SELLS_DIRECTLY ? c.reviewRows : []),
+];
 ---
 
 <Base
@@ -53,7 +67,7 @@ const c = page.collect;
         </thead>
         <tbody>
           {
-            c.rows.map((row) => (
+            rows.map((row) => (
               <tr>
                 <td>{row.item}</td>
                 <td>{row.purpose}</td>
@@ -66,6 +80,8 @@ const c = page.collect;
     </div>
 
     <p class="body" style="margin-top: 24px">{c.notCollected}</p>
+    {/* 후기에 이름이 어떻게 나가는지는 후기를 받을 때만 말이 됩니다. */}
+    {SELLS_DIRECTLY && <p class="body" style="margin-top: 12px">{c.reviewMask}</p>}
     <p class="body" style="margin-top: 14px">{c.retention}</p>
 
     <p class="cart__notice" style="margin-top: 36px">{c.pending}</p>

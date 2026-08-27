@@ -115,7 +115,7 @@ test.describe('마이페이지', () => {
   });
 
   test('로그인 후 — 주문내역과 가져오기 폼이 그려진 상태', async ({ page }, testInfo) => {
-    const start = await page.request.get('/api/auth/login?returnTo=%2Fko%2Faccount', {
+    const start = await page.request.get('/api/auth/login?provider=mock&returnTo=%2Fko%2Faccount', {
       maxRedirects: 0,
     });
     const callback = new URL(start.headers()['location']);

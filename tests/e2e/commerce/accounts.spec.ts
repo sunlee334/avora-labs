@@ -33,7 +33,7 @@ function nextOrderId(): string {
  * 브라우저 컨텍스트와 쿠키를 공유하므로 state·세션 쿠키가 그대로 적용됩니다.
  */
 async function loginAs(page: Page, providerUserId: string): Promise<void> {
-  const start = await page.request.get('/api/auth/login?returnTo=%2Fko%2Faccount', {
+  const start = await page.request.get('/api/auth/login?provider=mock&returnTo=%2Fko%2Faccount', {
     maxRedirects: 0,
   });
   expect(start.status()).toBe(302);
@@ -107,7 +107,11 @@ test.describe('로그인', () => {
 
     const me = await page.request.get('/api/account/me');
     expect(me.status()).toBe(200);
-    expect((await me.json()).user.provider).toBe('mock');
+
+    // 로그인 수단은 사람과 분리돼 있습니다 — 한 사람이 여럿을 가질 수 있어
+    // 계정 응답 하나로 "어느 제공자냐" 에 답할 수 없습니다.
+    const { linked } = await (await page.request.get('/api/account/identities')).json();
+    expect(linked.map((i: { provider: string }) => i.provider)).toContain('mock');
   });
 
   test('계정 응답에 내부 식별자는 나가지 않는다', async ({ page }) => {
@@ -117,10 +121,16 @@ test.describe('로그인', () => {
     const { user } = await (await page.request.get('/api/account/me')).json();
 
     expect(Object.keys(user).sort()).toEqual(
-      ['address', 'createdAt', 'email', 'name', 'provider'].sort(),
+      ['address', 'createdAt', 'email', 'name'].sort(),
     );
     expect(user).not.toHaveProperty('id');
     expect(user).not.toHaveProperty('providerUserId');
+
+    // 로그인 수단 목록에도 제공자 쪽 id 는 나가지 않습니다.
+    const { linked } = await (await page.request.get('/api/account/identities')).json();
+    for (const identity of linked) {
+      expect(Object.keys(identity).sort()).toEqual(['createdAt', 'email', 'provider'].sort());
+    }
   });
 
   test('이메일을 주지 않는 계정도 로그인된다', async ({ page }) => {
@@ -129,7 +139,9 @@ test.describe('로그인', () => {
     await loginAs(page, 'noemail-user');
     const { user } = await (await page.request.get('/api/account/me')).json();
     expect(user.email).toBeNull();
-    expect(user.provider).toBe('mock');
+
+    const { linked } = await (await page.request.get('/api/account/identities')).json();
+    expect(linked.map((i: { provider: string }) => i.provider)).toContain('mock');
   });
 
   test('로그아웃하면 세션이 무효가 된다', async ({ page }) => {
@@ -151,7 +163,7 @@ test.describe('로그인', () => {
   test('우리가 시작하지 않은 콜백은 거절한다', async ({ request }) => {
     // state 를 대조하지 않으면 공격자가 자기 계정의 인가 코드로 콜백을 불러
     // 피해자를 공격자 계정에 로그인시킬 수 있습니다.
-    const noStart = await request.get('/api/auth/callback?code=user-evil&state=made-up', {
+    const noStart = await request.get('/api/auth/callback/mock?code=user-evil&state=made-up', {
       maxRedirects: 0,
     });
     expect(noStart.status()).toBe(400);
@@ -160,8 +172,8 @@ test.describe('로그인', () => {
 
   test('시작은 했지만 state 가 다르면 거절한다', async ({ page }) => {
     // 로그인을 시작해 state 쿠키는 있지만, 콜백의 state 가 다른 경우입니다.
-    await page.request.get('/api/auth/login?returnTo=%2Fko%2Faccount', { maxRedirects: 0 });
-    const res = await page.request.get('/api/auth/callback?code=user-evil&state=다른값', {
+    await page.request.get('/api/auth/login?provider=mock&returnTo=%2Fko%2Faccount', { maxRedirects: 0 });
+    const res = await page.request.get('/api/auth/callback/mock?code=user-evil&state=다른값', {
       maxRedirects: 0,
     });
     expect(res.status()).toBe(400);
@@ -171,7 +183,7 @@ test.describe('로그인', () => {
   test('로그인 후 외부 주소로 보내지 않는다', async ({ page }) => {
     // returnTo 를 그대로 믿으면 로그인 직후 남의 사이트로 보낼 수 있습니다.
     const start = await page.request.get(
-      '/api/auth/login?returnTo=https%3A%2F%2Fevil.example%2Fx',
+      '/api/auth/login?provider=mock&returnTo=https%3A%2F%2Fevil.example%2Fx',
       { maxRedirects: 0 },
     );
     const done = await page.request.get(new URL(start.headers()['location']).href, {

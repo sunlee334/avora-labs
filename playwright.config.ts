@@ -56,6 +56,15 @@ export const CAPTURE_URL = `http://127.0.0.1:${CAPTURE_PORT}`;
  */
 const accessOff = '--var ACCESS_TEAM_DOMAIN: --var ACCESS_POLICY_AUD:';
 
+/**
+ * 로컬 `.dev.vars` 에 들어 있는 실제 로그인 키를 테스트에서 비웁니다.
+ *
+ * `wrangler dev` 는 .dev.vars 를 읽습니다. 그대로 두면 개발자 기계에 구글
+ * 키가 있느냐에 따라 켜지는 제공자 수가 달라지고, **같은 코드가 사람마다
+ * 다르게 동작합니다.** 테스트는 mock 하나만 켜진 상태를 봅니다.
+ */
+const realProvidersOff = '--var GOOGLE_CLIENT_ID: --var GOOGLE_CLIENT_SECRET: --var KAKAO_REST_API_KEY:';
+
 const workerVars =
   MODE === 'commerce'
     // Worker 도 가격을 알아야 합니다 — 이제 서버가 금액을 직접 계산하므로,
@@ -64,10 +73,10 @@ const workerVars =
     // 붙이는 것이라 wrangler dev 로는 재현할 수 없습니다. 관리 API 를 테스트하려면
     // 다른 문이 필요합니다. 운영에서는 절대 설정하지 않으며, 배포 전 점검이
     // wrangler.jsonc 에서 이 이름을 발견하면 배포를 멈춥니다.
-    ? `${accessOff} --var PAYMENT_PROVIDER:mock --var PRODUCT_PRICE:32000` +
+    ? `${accessOff} ${realProvidersOff} --var PAYMENT_PROVIDER:mock --var PRODUCT_PRICE:32000` +
       ` --var ADMIN_DEV_TOKEN:${ADMIN_DEV_TOKEN}` +
-      ` --var NOTIFY_WEBHOOK_URL:${CAPTURE_URL}/hook --var AUTH_PROVIDER:mock`
-    : accessOff;
+      ` --var NOTIFY_WEBHOOK_URL:${CAPTURE_URL}/hook --var AUTH_PROVIDER:mock,mock2`
+    : `${accessOff} ${realProvidersOff}`;
 
 /** 해당 모드에서만 의미 있는 테스트는 폴더로 갈라 두었습니다. */
 const testIgnore =
