@@ -196,25 +196,22 @@ test.describe('글 주소 검사', () => {
 
 test.describe('폰트 검사가 실제로 도는가', () => {
   test('CI 에서는 도구가 없으면 통과시키지 않는다', () => {
-    /*
-     * 이 검사는 `.fontsrc/venv` 를 잠깐 옮깁니다 — 저장소 전체가 공유하는
-     * 상태입니다. 프로젝트가 둘(mobile·desktop)이라 그대로 두면 서로
-     * 옮기는 중에 부딪힙니다. 화면 크기와 무관한 검사이므로 한 곳에서만
-     * 돌립니다.
-     */
-    test.skip(test.info().project.name !== 'mobile', '뷰포트와 무관 — mobile 에서만 돕니다');
 
     /*
      * 예전에는 도구가 없으면 "생략" 하고 통과했습니다. CI 에는 fontTools 도
      * brotli 도 없었으므로, 이 검사는 **배포 경로에서 한 번도 돈 적이
      * 없습니다.** 열린 채로 잠긴 척하는 문이었습니다.
      *
-     * PATH 에서 파이썬을 지워 도구 부재를 재현합니다. venv 가 있으면
-     * 스크립트가 그것을 먼저 쓰므로 함께 가립니다.
+     * `AVORA_FONT_PY` 로 없는 파이썬을 가리켜 도구 부재를 재현합니다.
+     *
+     * 예전에는 `.fontsrc/venv` 를 잠깐 옮겼는데, 테스트가 두 번의 이동
+     * 사이에서 죽으면 저장소에 `venv-hidden-by-test` 만 남습니다. 그 뒤로는
+     * `npm run fonts` 가 실패하고 `check:fonts` 는 조용히 건너뜁니다 —
+     * 검사를 지키려던 테스트가 검사를 끄는 셈입니다.
      */
-    // node 는 절대 경로로 부릅니다 — PATH 를 비우면 node 자신도 못 찾습니다.
     const run = (env: NodeJS.ProcessEnv) => {
       try {
+        // node 는 절대 경로로 부릅니다 — PATH 를 비우면 node 자신도 못 찾습니다.
         execFileSync(process.execPath, ['scripts/build-fonts.mjs', '--check'], {
           cwd: fileURLToPath(root),
           env,
@@ -227,18 +224,105 @@ test.describe('폰트 검사가 실제로 도는가', () => {
       }
     };
 
-    const venv = fileURLToPath(new URL('.fontsrc/venv', root));
-    const hidden = `${venv}-hidden-by-test`;
-    const hasVenv = existsSync(venv);
-    if (hasVenv) execFileSync('mv', [venv, hidden]);
+    const noTools = { ...process.env, AVORA_FONT_PY: '/nonexistent/python' };
+    expect(run({ ...noTools, CI: undefined }), '로컬은 건너뛰고 통과해야 합니다').toBe(0);
+    expect(run({ ...noTools, CI: 'true' }), 'CI 는 검사를 못 하면 실패해야 합니다').toBe(1);
 
+    // 그리고 도구가 있으면 진짜로 검사합니다 — 위 둘만 보면 "언제나 건너뛴다"
+    // 여도 통과합니다.
+    const output = execFileSync(process.execPath, ['scripts/build-fonts.mjs', '--check'], {
+      cwd: fileURLToPath(root),
+      encoding: 'utf8',
+    });
+    expect(output, '도구가 있는데도 건너뛰고 있습니다').not.toContain('생략');
+    expect(output).toContain('모두 포함');
+  });
+
+  test('서브셋에 없는 글자가 생기면 실제로 실패한다', () => {
+    /*
+     * 이 파일의 나머지 검사는 전부 **주변**을 봅니다 — 도구가 없을 때,
+     * 수집 함수가 무엇을 모으는지, 규칙이 어느 범위를 보는지.
+     *
+     * 정작 이 게이트의 존재 이유인 **"글자가 빠지면 빌드가 선다"** 는
+     * 아무도 돌려 보지 않았습니다. 그래서 검사가 통째로 죽어 있어도
+     * 나머지가 전부 초록일 수 있습니다.
+     */
+    const dir = mkdtempSync(join(tmpdir(), 'avora-probe-'));
     try {
-      const broken = { ...process.env, PATH: '/nonexistent' };
-      expect(run({ ...broken, CI: undefined }), '로컬은 건너뛰고 통과해야 합니다').toBe(0);
-      expect(run({ ...broken, CI: 'true' }), 'CI 는 검사를 못 하면 실패해야 합니다').toBe(1);
+      mkdirSync(join(dir, 'ko'), { recursive: true });
+      // 지금 서브셋에 없는 글자들. 있으면 이 검사가 무의미해집니다.
+      const rare = '뷁쐟괆흄퀩';
+      writeFileSync(
+        join(dir, 'ko', 'probe.md'),
+        `---\ntitle: ${rare}\nsummary: 요약\n---\n\n본문\n`,
+        'utf8',
+      );
+
+      let status = 0;
+      let stderr = '';
+      try {
+        execFileSync(process.execPath, ['scripts/build-fonts.mjs', '--check'], {
+          cwd: fileURLToPath(root),
+          env: { ...process.env, AVORA_POSTS_ROOT: dir },
+          encoding: 'utf8',
+          stdio: 'pipe',
+        });
+      } catch (error) {
+        const e = error as { status?: number; stdout?: string; stderr?: string };
+        status = e.status ?? -1;
+        stderr = `${e.stdout ?? ''}${e.stderr ?? ''}`;
+      }
+
+      expect(status, '서브셋에 없는 글자가 있는데 통과했습니다').toBe(1);
+      expect(stderr, '어떤 글자가 빠졌는지 알려주지 않습니다').toContain(rare);
     } finally {
-      if (hasVenv) execFileSync('mv', [hidden, venv]);
+      rmSync(dir, { recursive: true, force: true });
     }
+  });
+
+  test('여러 줄 프론트매터의 글자도 수집한다', () => {
+    /*
+     * YAML 의 접힌 스칼라(`title: >`)와 리터럴 블록(`summary: |`)은 값이
+     * 다음 줄로 갑니다. 한 줄만 보는 파서로 뽑으면 제목 글자가 통째로
+     * 빠지고, 생성과 검사가 같은 함수를 쓰면 아무도 못 잡습니다.
+     * 그래서 수집은 원문을 통째로 넘깁니다.
+     */
+    const rare = '뷁';
+    for (const [name, frontmatter] of [
+      ['접힌 스칼라', `title: >\n  ${rare} 로 시작하는 긴 제목\nsummary: 요약`],
+      ['리터럴 블록', `title: 가\nsummary: |\n  ${rare} 가 들어간 요약`],
+      ['다음 줄 값', `title:\n  ${rare}\nsummary: 요약`],
+    ] as const) {
+      withPosts({ 'ko/fixture.md': `---\n${frontmatter}\n---\n\n본문\n` }, (postsRoot) => {
+        expect((charsFor('ko', postsRoot).body as Set<string>).has(rare), name).toBe(true);
+      });
+    }
+  });
+
+  test('원본이 없는 환경에서도 display 를 정확히 검사한다', () => {
+    /*
+     * display 원본(NotoSerifKR.ttf, 23MB)은 .gitignore 라 CI 에 없습니다.
+     * 그러면 판정이 옛 정규식 `/[ -ɏ가-힣]/` 으로 되돌아가는데, 그 규칙은
+     * **중국어 display 209자 중 113자(54%)** 를 아예 보지 않습니다.
+     * 헤드라인 서브셋에서 글자가 절반쯤 빠져도 통과한다는 뜻입니다.
+     *
+     * 그래서 cmap 을 33KB 로 접어 커밋합니다. 이 파일이 사라지거나
+     * .gitignore 에 들어가면 그 구멍이 조용히 되돌아옵니다.
+     */
+    const coverage = fileURLToPath(new URL('scripts/display-source-coverage.txt', root));
+    expect(existsSync(coverage), 'display 커버리지 파일이 없습니다').toBe(true);
+
+    const tracked = execFileSync('git', ['ls-files', 'scripts/display-source-coverage.txt'], {
+      cwd: fileURLToPath(root),
+      encoding: 'utf8',
+    }).trim();
+    expect(tracked, '커버리지 파일이 저장소에 추적되지 않습니다 — CI 에서 사라집니다').not.toBe('');
+
+    // 옛 규칙이 못 보는 글자가 실제로 많다는 것을 숫자로 고정합니다.
+    const OLD_RULE = /[ -ɏ가-힣]/;
+    const zh = charsFor('zh').display as Set<string>;
+    const blind = [...zh].filter((ch) => !OLD_RULE.test(ch));
+    expect(blind.length / zh.size).toBeGreaterThan(0.4);
   });
 
   test('검사가 원본 서체 기준이라 베트남어 성조 문자도 본다', () => {

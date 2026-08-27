@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
   "description": "AVORA 브랜드 웹사이트 — Astro + Cloudflare Workers",
   "scripts": {
     "tokens": "node scripts/build-tokens.mjs",

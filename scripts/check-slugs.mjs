@@ -28,12 +28,10 @@ import { readdirSync, existsSync, statSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkSlug } from '../src/config/reserved-paths.ts';
+import { LOCALES } from '../src/config/site.ts';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const POSTS = resolve(root, 'src/content/posts');
-
-/** 이 저장소가 지원하는 언어. `src/config/site.ts` 와 같아야 합니다. */
-const LOCALES = ['ko', 'en', 'zh', 'th', 'vi'];
 
 const problems = [];
 
@@ -45,7 +43,14 @@ if (!existsSync(POSTS)) {
 
 for (const entry of readdirSync(POSTS)) {
   const localeDir = resolve(POSTS, entry);
-  if (!statSync(localeDir).isDirectory()) continue;
+  if (!statSync(localeDir).isDirectory()) {
+    // 언어 폴더 밖의 .md 는 라우트가 안 생깁니다. 그냥 두면 나중에
+    // [slug].astro 가 "알 수 없는 언어 폴더" 라는 엉뚱한 말로 터집니다.
+    if (entry.endsWith('.md')) {
+      problems.push(`src/content/posts/${entry} — 글은 언어 폴더 안에 두세요 (예: ko/${entry}).`);
+    }
+    continue;
+  }
 
   // 로케일 디렉터리 이름이 오타면 여기서 잡습니다.
   // 그냥 두면 /kr/support/posts/... 가 조용히 생성되어 사이트맵에 실립니다
@@ -64,6 +69,9 @@ for (const entry of readdirSync(POSTS)) {
       problems.push(`src/content/posts/${entry}/${file}/ — 글은 평면 구조여야 합니다. 하위 폴더를 두지 마세요.`);
       continue;
     }
+    // Astro 의 glob 로더가 _ 로 시작하는 파일을 무시해 페이지가 안 생깁니다.
+    // 초안을 두는 흔한 방법이라 막지 않습니다.
+    if (file.startsWith('_')) continue;
     if (!file.endsWith('.md')) continue;
 
     const slug = file.slice(0, -3);

@@ -53,14 +53,22 @@ const t = dict(locale);
 const canonical = new URL(localePath(locale, path), ORIGIN).href;
 const ogImageUrl = new URL(ogImage, ORIGIN).href;
 
-// 넘어온 언어만, 없으면 5개 전부. 순서는 alternates() 가 정한 대로 둡니다.
-const langs = locales
-  ? alternates(path).filter((entry) => locales.includes(entry.locale))
+/*
+ * 넘어온 언어만, 없으면 5개 전부. 순서는 alternates() 가 정한 대로 둡니다.
+ *
+ * 지금 보고 있는 언어는 무조건 넣습니다. 호출부가 빠뜨리면 canonical 은
+ * 이 언어를 가리키는데 hreflang 목록에는 없는 상태가 되고, 검색엔진에는
+ * "이 페이지는 어느 언어판도 아니다" 로 읽힙니다. 조용한 오류라 여기서
+ * 막습니다.
+ */
+const wanted = locales ? [...new Set([locale, ...locales])] : null;
+const langs = wanted
+  ? alternates(path).filter((entry) => wanted.includes(entry.locale))
   : alternates(path);
 
 // 기본 언어판이 없으면 x-default 를 아예 내보내지 않습니다.
 // 없는 주소를 "여기가 기본입니다" 라고 알리는 것보다 침묵이 낫습니다.
-const xDefault = !locales || locales.includes(DEFAULT_LOCALE)
+const xDefault = !wanted || wanted.includes(DEFAULT_LOCALE)
   ? new URL(localePath(DEFAULT_LOCALE, path), ORIGIN).href
   : null;
 ---

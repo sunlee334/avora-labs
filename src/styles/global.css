@@ -2069,3 +2069,16 @@ button {
   font-family: var(--font-mono);
   font-size: 0.92em;
 }
+
+/* 마크다운이 만드는 박스는 낱말이 아니라 overflow-wrap 이 듣지 않습니다.
+   body 에 overflow-x:hidden 이 걸려 있어(위 참조) 넘치면 스크롤바 없이
+   잘려 보입니다 — 태국어 제품 페이지에서 겪은 그 실패 모드입니다.
+   .tableScroll 이 하는 일을 마크다운 태그에 직접 겁니다. */
+.post__body pre {
+  overflow-x: auto;
+}
+.post__body table {
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
+}

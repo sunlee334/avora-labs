@@ -28,6 +28,7 @@ import {
   statSync,
   readdirSync,
   rmSync,
+  realpathSync,
 } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { resolve, dirname, join } from 'node:path';
@@ -46,8 +47,19 @@ const SOURCES = {
   display: resolve(root, '.fontsrc/NotoSerifKR.ttf'),
 };
 
+/**
+ * 서브셋을 만들고 읽을 파이썬.
+ *
+ * `.fontsrc/venv` 가 있으면 그것을 씁니다 — 준비물 명령이 거기에 fontTools 와
+ * brotli 를 넣습니다. 없으면 시스템 python3 를 시도합니다(대개 실패하고,
+ * 그 실패를 `--check` 가 처리합니다).
+ *
+ * `AVORA_FONT_PY` 로 덮어쓸 수 있습니다. 테스트가 "도구가 없는 상태" 를
+ * 재현할 때 씁니다 — 그게 없으면 테스트가 `.fontsrc/venv` 를 잠깐 옮겨야
+ * 하는데, 그 사이에 죽으면 저장소가 깨진 채 남습니다.
+ */
 const VENV_PY = resolve(root, '.fontsrc/venv/bin/python');
-const PY = existsSync(VENV_PY) ? VENV_PY : 'python3';
+const PY = process.env.AVORA_FONT_PY || (existsSync(VENV_PY) ? VENV_PY : 'python3');
 
 /**
  * 헤드라인(--font-display)이 적용되는 자리.
@@ -102,17 +114,17 @@ function walkStrings(node, out) {
 }
 
 /**
- * 프론트매터에서 화면에 나오는 두 값만 꺼냅니다.
+ * 프론트매터에서 제목과 요약을 꺼냅니다.
  *
- * `title` 과 `summary` 는 목록·상세에 그대로 표시되므로 서브셋에 있어야 합니다.
- * `---` 블록을 통째로 버리면 그 글자들이 빠져 제목만 다른 서체로 나옵니다.
+ * ⚠️ **폰트 수집은 이 함수를 쓰지 않습니다.** 한 줄짜리 값만 보기 때문에
+ *    YAML 의 접힌 스칼라(`title: >`)나 리터럴 블록(`summary: |`)에서 값을
+ *    놓칩니다. 글자를 놓치면 서브셋에서 빠지고 화면에서 서체가 섞이는데,
+ *    생성과 검사가 같은 함수를 쓰면 그것을 아무도 못 잡습니다.
+ *    `postStringsFor` 는 원문을 통째로 넘깁니다.
  *
- * 나머지 키(category·날짜)는 원문이 화면에 안 나갑니다 — 카테고리는 번역된
- * 라벨로, 날짜는 숫자와 하이픈으로만 렌더합니다.
- *
- * YAML 파서를 쓰지 않는 이유: 이 스크립트는 `prebuild` 의 네 번째로 도는
- * 순수 노드 스크립트이고, 의존성을 하나 더 들이기에는 읽는 것이 두 줄뿐입니다.
- * 대신 인용부호와 값 안의 콜론(`title: "재도포: 언제"`)은 다뤄야 합니다.
+ * 그래서 이 함수는 **테스트와 도구용**입니다. 정확한 값이 필요하면
+ * Astro 의 콘텐츠 컬렉션(`src/content.config.ts`)이 zod 로 검증한 것을
+ * 쓰세요 — 그쪽이 진짜 YAML 파서를 지납니다.
  */
 export function parseFrontmatter(raw) {
   const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---/);
@@ -140,7 +152,16 @@ export function parseFrontmatter(raw) {
  * 구분했다면 전 파일을 파싱해야 하고, 구분에 실패하면 영어·베트남어 서브셋에
  * 한글이 통째로 들어갑니다.
  */
-export const POSTS_ROOT = resolve(root, 'src/content/posts');
+/**
+ * 글 폴더. `AVORA_POSTS_ROOT` 로 덮어쓸 수 있습니다.
+ *
+ * 테스트가 "서브셋에 없는 글자가 생기면 정말 실패하는가" 를 확인할 때
+ * 씁니다 — 그 성질을 실제로 돌려 보지 않으면, 검사가 통째로 죽어 있어도
+ * "도구 없을 때 건너뛴다" 같은 주변 검사만 통과합니다.
+ */
+export const POSTS_ROOT = process.env.AVORA_POSTS_ROOT
+  ? resolve(process.env.AVORA_POSTS_ROOT)
+  : resolve(root, 'src/content/posts');
 
 export function postStringsFor(locale, postsRoot = POSTS_ROOT) {
   const dir = resolve(postsRoot, locale);
@@ -152,12 +173,27 @@ export function postStringsFor(locale, postsRoot = POSTS_ROOT) {
     let raw;
     try {
       raw = readFileSync(resolve(dir, file), 'utf8');
-    } catch {
-      // 목록을 읽은 뒤 파일이 사라졌습니다. 다음 빌드에서 다시 봅니다.
-      continue;
+    } catch (error) {
+      // 목록을 읽은 뒤 파일이 사라진 경우만 넘어갑니다. 권한·입출력 오류를
+      // 함께 삼키면 그 글의 글자가 통째로 빠지는데 검사도 같은 코드를
+      // 지나므로 아무도 모릅니다.
+      if (error.code === 'ENOENT') continue;
+      throw error;
     }
-    const { title, summary, body } = parseFrontmatter(raw);
-    out.push(title, summary, body);
+
+    /*
+     * 프론트매터를 파싱하지 않고 **원문을 통째로** 넣습니다.
+     *
+     * `parseFrontmatter` 는 한 줄짜리 값만 봅니다. YAML 의 접힌 스칼라
+     * (`title: >`)나 리터럴 블록(`summary: |`)을 쓰면 값이 다음 줄로 가고,
+     * 그러면 제목 글자가 통째로 빠집니다 — 그리고 생성과 검사가 같은
+     * 함수를 쓰므로 `--check` 도 못 잡습니다.
+     *
+     * 폰트 수집에서 위험한 것은 **과소 집계뿐**입니다. 남는 글자는 서브셋을
+     * 몇 바이트 키울 뿐이고, 프론트매터의 키 이름·카테고리·날짜는 전부
+     * ASCII 라 그마저 0 에 가깝습니다.
+     */
+    out.push(raw);
   }
   return out;
 }
@@ -191,6 +227,8 @@ export function charsFor(locale, postsRoot = POSTS_ROOT) {
   return { body: toSet(bodyStrings), display: toSet(displayStrings) };
 }
 
+let subsetSeq = 0;
+
 function subset(sourceFile, outFile, chars, extraArgs = []) {
   /*
    * 글자 목록을 인자가 아니라 파일로 넘깁니다.
@@ -200,7 +238,12 @@ function subset(sourceFile, outFile, chars, extraArgs = []) {
    * 약 43,000자에서 E2BIG 가 납니다. 지금은 수백 자지만 글이 쌓이면
    * 다가가므로 미리 옮깁니다.
    */
-  const listFile = join(tmpdir(), `avora-subset-${process.pid}-${chars.size}.txt`);
+  /*
+   * 이름에 순번을 씁니다. 글자 수로 구분하려 했더니 en 이 body 106 자,
+   * display 105 자로 한 자 차이였습니다 — 지금은 순차 호출이라 부딪히지
+   * 않지만, 이름이 "겹치지 않는다" 를 말해 주지 못합니다.
+   */
+  const listFile = join(tmpdir(), `avora-subset-${process.pid}-${subsetSeq++}.txt`);
   writeFileSync(listFile, [...chars].sort().join(''), 'utf8');
 
   try {
@@ -260,6 +303,54 @@ const css = (locale) => `/* 자동 생성 — scripts/build-fonts.mjs (${locale}
 `;
 
 /**
+ * 원본 서체가 가진 글자의 목록.
+ *
+ * ── 왜 파일로 두는가 ────────────────────────────────────────
+ * display 원본(NotoSerifKR.ttf, 23MB)은 `.gitignore` 라 CI 에 없습니다.
+ * 그러면 `sourceGlyphs('display')` 가 null 이 되고 판정이 옛 정규식
+ * `/[ -ɏ가-힣]/` 으로 되돌아갑니다. 그 규칙은 중국어 display 글자
+ * **209자 중 113자(54%)** 를 아예 보지 않습니다 — 헤드라인 서브셋에서
+ * 글자가 절반쯤 빠져도 CI 가 통과한다는 뜻입니다.
+ *
+ * 23MB 를 커밋하는 대신 **cmap 만 33KB 로 압축해** 커밋합니다.
+ * `npm run fonts` 가 원본을 읽을 때마다 갱신하므로 낡을 일이 없습니다.
+ *
+ * body 원본은 npm 의존성이라 어디에나 있어 이 장치가 필요 없습니다.
+ */
+const COVERAGE_FILES = {
+  display: resolve(root, 'scripts/display-source-coverage.txt'),
+};
+
+/** 연속 구간으로 접습니다. 23,124자가 4,676구간이 됩니다. */
+function packCoverage(chars) {
+  const codes = [...chars].map((c) => c.codePointAt(0)).sort((a, b) => a - b);
+  const out = [];
+  let start = codes[0];
+  let prev = codes[0];
+  for (const code of codes.slice(1)) {
+    if (code === prev + 1) {
+      prev = code;
+      continue;
+    }
+    out.push(start === prev ? start.toString(16) : `${start.toString(16)}-${prev.toString(16)}`);
+    start = prev = code;
+  }
+  out.push(start === prev ? start.toString(16) : `${start.toString(16)}-${prev.toString(16)}`);
+  return out.join(',');
+}
+
+function unpackCoverage(text) {
+  const chars = new Set();
+  for (const part of text.trim().split(',')) {
+    const [a, b] = part.split('-');
+    const from = parseInt(a, 16);
+    const to = b ? parseInt(b, 16) : from;
+    for (let code = from; code <= to; code++) chars.add(String.fromCodePoint(code));
+  }
+  return chars;
+}
+
+/**
  * 원본 서체가 가진 글자. kind 마다 한 번만 읽고 재사용합니다.
  *
  * body 원본은 npm 의존성이라 어디에나 있지만, display 원본은 23MB 라
@@ -269,8 +360,18 @@ const css = (locale) => `/* 자동 생성 — scripts/build-fonts.mjs (${locale}
 const sourceGlyphCache = new Map();
 function sourceGlyphs(kind) {
   if (sourceGlyphCache.has(kind)) return sourceGlyphCache.get(kind);
+
   const src = SOURCES[kind];
-  const result = existsSync(src) ? glyphsIn(src) : null;
+  let result = null;
+  if (existsSync(src)) {
+    result = glyphsIn(src);
+    // 원본이 있을 때 커버리지를 갱신해 둡니다. 원본이 없는 곳(CI)에서는
+    // 이 파일이 유일한 근거이므로 낡으면 판정이 어긋납니다.
+    if (kind in COVERAGE_FILES) writeFileSync(COVERAGE_FILES[kind], packCoverage(result), 'utf8');
+  } else if (kind in COVERAGE_FILES && existsSync(COVERAGE_FILES[kind])) {
+    result = unpackCoverage(readFileSync(COVERAGE_FILES[kind], 'utf8'));
+  }
+
   sourceGlyphCache.set(kind, result);
   return result;
 }
@@ -286,8 +387,28 @@ function sourceGlyphs(kind) {
  * 불러 씁니다 — worker/canonical-host.ts 와 worker/admin.ts 를 스펙이
  * import 하는 것과 같은 방식입니다.
  */
-const isEntrypoint =
-  process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+/*
+ * Node 는 ESM 을 realpath 로 해석하므로 `import.meta.url` 은 실제 경로,
+ * `process.argv[1]` 은 호출된 경로입니다. symlink 로 부르면 두 값이 달라
+ * 실행부가 통째로 건너뛰어지고 **exit 0** 이 나옵니다 — 검사 스크립트가
+ * "아무것도 안 하고 성공" 하는 것이 최악의 실패 모드라, realpath 로
+ * 맞춰 보고 그래도 아니면 소리 내어 멈춥니다.
+ */
+let isEntrypoint = false;
+if (process.argv[1]) {
+  try {
+    isEntrypoint = import.meta.url === pathToFileURL(realpathSync(process.argv[1])).href;
+  } catch {
+    isEntrypoint = false;
+  }
+}
+
+if (!isEntrypoint && process.argv.includes('--check')) {
+  console.error('build-fonts.mjs 가 엔트리포인트로 인식되지 않아 검사가 돌지 않았습니다.');
+  console.error(`  import.meta.url = ${import.meta.url}`);
+  console.error(`  process.argv[1]  = ${process.argv[1] ?? '(없음)'}`);
+  process.exit(1);
+}
 
 if (isEntrypoint) {
 
@@ -315,8 +436,16 @@ if (isEntrypoint) {
    */
   let toolsOk = true;
   if (checkOnly) {
+    // 원본이 없는 것과 도구가 없는 것은 다른 문제입니다. 섞으면
+    // "pip install 하세요" 라는 처방이 이미 설치된 환경에 나가 시간을 버립니다.
+    if (!existsSync(SOURCES.body)) {
+      console.error(`원본 폰트가 없습니다: ${SOURCES.body}`);
+      console.error('  npm ci 로 의존성을 다시 설치하세요.');
+      process.exit(1);
+    }
     try {
-      glyphsIn(SOURCES.body);
+      // sourceGlyphs 를 거쳐 캐시를 채웁니다 — 아래 검사에서 다시 파싱하지 않게.
+      sourceGlyphs('body');
     } catch (cause) {
       toolsOk = false;
       const reason = String(cause?.message ?? cause).includes('Brotli')
@@ -364,6 +493,22 @@ if (isEntrypoint) {
          * 이제 원본 서체가 실제로 가진 글자와 비교합니다. 근사가 아니라 사실입니다.
          */
         const source = sourceGlyphs(kind);
+
+        if (!source && process.env.CI) {
+          /*
+           * 근거 없이 통과시키지 않습니다.
+           *
+           * 옛 규칙으로 물러서면 중국어 display 는 209자 중 113자를 아예
+           * 안 봅니다. "검사했다" 고 말하면서 절반을 지나치느니 멈춥니다.
+           */
+          console.error(`\n${locale}/${kind}: 원본 서체 정보가 없어 정확히 검사할 수 없습니다.`);
+          console.error(`  ${COVERAGE_FILES[kind] ?? SOURCES[kind]} 가 필요합니다.`);
+          console.error('  로컬에서 npm run fonts 를 돌린 뒤 그 파일을 커밋하세요.\n');
+          failed = true;
+          ok = false;
+          continue;
+        }
+
         const missing = source
           ? [...need[kind]].filter((ch) => source.has(ch) && !have.has(ch))
           : [...need[kind]].filter((ch) => !have.has(ch) && /[ -ɏ가-힣]/.test(ch));

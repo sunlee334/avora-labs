@@ -142,6 +142,22 @@ test.describe('hreflang 이 없는 주소를 가리키지 않는다', () => {
     expect(x?.href).toContain('/en/support/posts/');
   });
 
+  test('현재 언어는 언제나 목록에 있다', async ({ request }) => {
+    /*
+     * canonical 은 이 언어를 가리키는데 hreflang 목록에 없으면, 검색엔진에는
+     * "이 페이지는 어느 언어판도 아니다" 로 읽힙니다. 호출부가 locales 를
+     * 잘못 넘겨도 Base.astro 가 막아야 합니다.
+     */
+    for (const lang of HAS_POST) {
+      const html = await (await request.get(`/${lang}/support/posts/${SLUG}`)).text();
+      const canonical = html.match(/<link rel="canonical" href="([^"]+)"/)?.[1];
+      const hrefs = alternatesOf(html)
+        .filter((a) => a.hreflang !== 'x-default')
+        .map((a) => a.href);
+      expect(hrefs, `${lang}: canonical 이 hreflang 목록에 없습니다`).toContain(canonical);
+    }
+  });
+
   test('글이 아닌 기존 페이지는 여전히 6개다', async ({ request }) => {
     // Base.astro 를 고쳤으므로 회귀를 봅니다. i18n.spec.ts 의 hreflang 검사는
     // 홈 5개만 돌아서 나머지 페이지를 아무도 보지 않습니다.

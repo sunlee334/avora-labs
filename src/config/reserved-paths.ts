@@ -43,9 +43,26 @@ export const SITEMAP_EXCLUDED = [
  * `checkSlug()` 가 **접두 일치**로 봅니다 — 완전 일치로 하면 `checkout-tips` 가
  * 통과해 버리고, 그게 정확히 위에서 말한 조용한 사고입니다.
  */
-export const RESERVED_SLUG_PREFIXES = SITEMAP_EXCLUDED.map((path) =>
-  path.replace(/^\/+/, '').replace(/\/+$/, ''),
-);
+export const RESERVED_SLUG_PREFIXES = SITEMAP_EXCLUDED.map((path) => {
+  /*
+   * 접두 일치가 사이트맵의 부분 문자열 일치와 대응하는 **근거**는 모든
+   * 항목이 `/` 로 시작한다는 것입니다. 주소가 `/ko/support/posts/{slug}/`
+   * 이므로 `/cart` 는 slug 선두에서만 매치합니다.
+   *
+   * 누가 슬래시 없이 `'cart'` 를 넣으면 사이트맵은 `my-cart-guide` 를
+   * 중간에서 삼키는데 여기 접두 검사는 통과시킵니다 — 그 순간 이 파일이
+   * 존재하는 이유가 사라집니다. 주석이 아니라 코드로 막습니다.
+   */
+  if (!path.startsWith('/')) {
+    throw new Error(`SITEMAP_EXCLUDED 항목은 '/' 로 시작해야 합니다: ${JSON.stringify(path)}`);
+  }
+  const word = path.replace(/^\/+/, '').replace(/\/+$/, '');
+  // 빈 조각이 들어오면 ''.startsWith 가 언제나 참이라 모든 글이 막힙니다.
+  if (!word) {
+    throw new Error(`SITEMAP_EXCLUDED 에 빈 조각이 있습니다: ${JSON.stringify(path)}`);
+  }
+  return word;
+});
 
 /**
  * 이 slug 를 써도 되는가.

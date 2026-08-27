@@ -53,7 +53,8 @@ export async function getStaticPaths() {
 
     return {
       params: { lang, slug: rest[0] },
-      props: { post, locales: bySlug.get(rest[0]) ?? [lang] },
+      // 위 두 검사(로케일·평면 구조)를 통과했으므로 키가 반드시 있습니다.
+      props: { post, locales: bySlug.get(rest[0])! },
     };
   });
 }
@@ -64,7 +65,10 @@ const t = dict(locale);
 const page = t.support.posts;
 const { Content } = await render(post);
 
-const path = `support/posts/${Astro.params.slug}`;
+// Astro.params 대신 props 에서 유도합니다 — params 는 string | undefined 라
+// 값이 없으면 `support/posts/undefined` 가 canonical·JSON-LD 에 조용히 실립니다.
+const slug = post.id.split('/')[1];
+const path = `support/posts/${slug}`;
 const isoDate = (date: Date) => date.toISOString().slice(0, 10);
 ---
 
