@@ -419,7 +419,19 @@
             "when": "When writing a review (required)"
           }
         ],
-        "reviewMask": "Names shown on reviews are partly masked (for example Kim*su)."
+        "reviewMask": "Names shown on reviews are partly masked (for example Kim*su).",
+        "inquiryRows": [
+          {
+            "item": "Question subject and body",
+            "purpose": "Answering your question",
+            "when": "When you ask (required)"
+          },
+          {
+            "item": "Phone number",
+            "purpose": "Verifying it is your question",
+            "when": "When asking with an order number (required)"
+          }
+        ]
       }
     },
     "terms": {

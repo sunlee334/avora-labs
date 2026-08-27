@@ -419,7 +419,19 @@
             "when": "Khi viết đánh giá (bắt buộc)"
           }
         ],
-        "reviewMask": "Tên hiển thị trên đánh giá được che một phần (ví dụ Kim*su)."
+        "reviewMask": "Tên hiển thị trên đánh giá được che một phần (ví dụ Kim*su).",
+        "inquiryRows": [
+          {
+            "item": "Tiêu đề và nội dung câu hỏi",
+            "purpose": "Trả lời câu hỏi",
+            "when": "Khi gửi câu hỏi (bắt buộc)"
+          },
+          {
+            "item": "Số điện thoại",
+            "purpose": "Xác minh người hỏi",
+            "when": "Khi hỏi bằng mã đơn hàng (bắt buộc)"
+          }
+        ]
       }
     },
     "terms": {

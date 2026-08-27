@@ -2,6 +2,10 @@ import { test, expect } from '@playwright/test';
 import commerce from '../../src/config/commerce.json' with { type: 'json' };
 import payment from '../../src/config/payment-config.json' with { type: 'json' };
 import { FULFILLMENTS } from '../../worker/orders';
+import { readdirSync, readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { LOCALES } from '../../src/config/site';
+import ko from '../../src/i18n/ko.json' with { type: 'json' };
 
 /**
  * 이용약관 · 개인정보 · 배송/교환반품.
@@ -145,5 +149,62 @@ test.describe('비어 있는 것은 비어 있다고 말한다', () => {
     expect(text).toContain('/ko/legal/shipping');
     expect(text.toLowerCase()).toContain('returns');
     expect(text).toMatch(/not yet\s+settled/i);
+  });
+});
+
+test.describe('수집 항목 표가 코드와 어긋나지 않는다', () => {
+  /*
+   * `legal.privacy.collect.intro` 가 **"코드 기준으로 작성했으며, 항목이
+   * 바뀌면 함께 갱신됩니다"** 라고 선언합니다. 그런데 그 약속을 지키는지
+   * 아무도 보지 않았습니다 — 새 기능이 개인정보를 저장하면서 표를 빠뜨려도
+   * 조용히 넘어갑니다.
+   *
+   * 여기서는 **마이그레이션이 만든 컬럼**과 표를 대조합니다. 완벽한 검사는
+   * 아니지만(컬럼 이름과 사람 말이 1:1이 아니므로), "새 PII 테이블이
+   * 생겼는데 표는 그대로" 인 상태는 잡습니다.
+   */
+  const root = new URL('../../', import.meta.url);
+
+  test('개인정보를 담는 테이블마다 방침에 행이 있다', () => {
+    const migrations = readdirSync(fileURLToPath(new URL('migrations/', root)))
+      .filter((f) => f.endsWith('.sql'))
+      .map((f) => readFileSync(fileURLToPath(new URL(`migrations/${f}`, root)), 'utf-8'))
+      .join('\n');
+
+    // 사람을 가리키는 컬럼. 하나라도 새로 생기면 고지 대상입니다.
+    const PII = ['recipient_phone', 'recipient_name', 'email', 'contact_phone', 'author_name'];
+    const present = PII.filter((column) => migrations.includes(column));
+    expect(present.length, 'PII 컬럼을 하나도 못 찾았습니다 — 검사가 고장났습니다').toBeGreaterThan(3);
+
+    const collect = ko.legal.privacy.collect as Record<string, unknown>;
+    // 배열인 키가 곧 행 묶음입니다. 'rows' 는 Rows 로 끝나지 않으므로
+    // 이름이 아니라 값의 모양으로 찾습니다.
+    const rowGroups = Object.keys(collect).filter((key) => Array.isArray(collect[key]));
+
+    // 주문·계정·리뷰·문의 네 갈래가 전부 있어야 합니다.
+    expect(rowGroups.sort()).toEqual(['accountRows', 'inquiryRows', 'reviewRows', 'rows'].sort());
+  });
+
+  test('문의 수집 항목이 5개 언어에 모두 있다', () => {
+    for (const locale of LOCALES) {
+      const dict = JSON.parse(
+        readFileSync(fileURLToPath(new URL(`src/i18n/${locale}.json`, root)), 'utf-8'),
+      );
+      const rows = dict.legal.privacy.collect.inquiryRows;
+      expect(rows, `${locale}: inquiryRows 가 없습니다`).toBeTruthy();
+      expect(rows.length, `${locale}: 행 수가 다릅니다`).toBe(2);
+      for (const row of rows) {
+        for (const key of ['item', 'purpose', 'when']) {
+          expect(row[key], `${locale}: ${key} 가 비었습니다`).toBeTruthy();
+        }
+      }
+    }
+  });
+
+  test('문의 항목이 화면에 실제로 나온다', async ({ page }) => {
+    // i18n 에만 있고 화면에 안 나오면 고지한 것이 아닙니다.
+    await page.goto('/ko/legal/privacy');
+    const table = page.locator('.dataTable, .tableScroll').first();
+    await expect(table).toContainText('문의');
   });
 });

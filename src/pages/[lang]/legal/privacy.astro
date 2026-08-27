@@ -33,6 +33,19 @@ const rows = [
   ...c.rows,
   ...(ACCOUNTS_ENABLED ? c.accountRows : []),
   ...(SELLS_DIRECTLY ? c.reviewRows : []),
+
+  /*
+   * 문의는 **조건 없이** 적습니다.
+   *
+   * 다른 항목과 달리 문의를 끄는 플래그가 없습니다. 주문조회 화면
+   * (`order/lookup.astro`)에는 ACCOUNTS_ENABLED 같은 게이트가 없어 어떤
+   * 빌드에서도 존재하고, 거기에 문의 폼이 붙습니다. 조건을 달면 플래그가
+   * 꺼진 빌드에서 **수집은 일어나는데 고지에는 없는** 상태가 됩니다 —
+   * 이 파일이 위에서 금지한 바로 그것입니다.
+   *
+   * 나중에 INQUIRIES_ENABLED 같은 것이 생기면 여기도 함께 고쳐야 합니다.
+   */
+  ...c.inquiryRows,
 ];
 ---
 

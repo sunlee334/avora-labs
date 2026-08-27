@@ -27,6 +27,11 @@ function nextOrderId(): string {
   return `AVORA-${stamp}-${suffix}`;
 }
 
+/** 실행마다 다른 제목. 로컬 D1 은 실행 간에 남아 같은 제목이 쌓입니다. */
+function freshSubject(prefix: string): string {
+  return `${prefix} ${Date.now().toString(36)}${Math.floor(Math.random() * 1000)}`;
+}
+
 function freshPhone(): string {
   return `010${String(Math.floor(Math.random() * 100000000)).padStart(8, '0')}`;
 }
@@ -197,5 +202,121 @@ test.describe('남이 쓴 글이 실행되지 않는다', () => {
     expect(await page.evaluate(() => (window as any).__pwned), '스크립트가 실행됐습니다').toBeUndefined();
     // 그리고 글자 그대로 보여야 합니다 — 지워 버리면 무엇을 썼는지 모릅니다.
     await expect(page.locator('[data-inquiry-list]')).toContainText('onerror');
+  });
+});
+
+test.describe('관리 화면 문의 탭', () => {
+  test.use({ extraHTTPHeaders: AUTH });
+
+  test('탭을 눌러야 문의가 보인다', async ({ page }) => {
+    await page.goto('/admin');
+    // 처음에는 주문 탭입니다.
+    await expect(page.locator('[data-panel="orders"]')).toBeVisible();
+    await expect(page.locator('[data-panel="inquiries"]')).toBeHidden();
+
+    await page.click('[data-tab="inquiries"]');
+    await expect(page.locator('[data-panel="inquiries"]')).toBeVisible();
+    await expect(page.locator('[data-panel="orders"]')).toBeHidden();
+  });
+
+  test('두 탭이 표를 공유하지 않는다', async ({ page, request }) => {
+    /*
+     * 같은 [data-rows] 를 쓰면 탭을 오갈 때 한쪽 데이터가 다른 쪽 표에
+     * 남습니다. 화면만 봐서는 알아채기 어려운 상태입니다.
+     */
+    const subject = freshSubject('탭 분리 시험');
+    const phone = freshPhone();
+    const orderId = await seedOrder(request, phone);
+    await request.post('/api/inquiries', {
+      data: { orderId, phone, subject, body: '표가 섞이지 않는지 봅니다.' },
+    });
+
+    await page.goto('/admin');
+    await expect(page.locator('[data-rows] tr').first()).toBeVisible();
+
+    await page.click('[data-tab="inquiries"]');
+    await expect(page.locator('[data-inq-rows]')).toContainText(subject);
+    // 주문 표는 그대로 남아 있되 감춰져 있어야 합니다.
+    await expect(page.locator('[data-inq-rows]')).not.toContainText('AVORA-');
+  });
+
+  test('답하면 목록에서 사라진다 — 미답변 필터', async ({ page, request }) => {
+    const subject = freshSubject('관리 답변 시험');
+    const phone = freshPhone();
+    const orderId = await seedOrder(request, phone);
+    const created = await (
+      await request.post('/api/inquiries', {
+        data: { orderId, phone, subject, body: '여기서 답을 달아 봅니다.' },
+      })
+    ).json();
+
+    await page.goto('/admin');
+    await page.click('[data-tab="inquiries"]');
+    await expect(page.locator('[data-inq-rows]')).toContainText(subject);
+
+    // 행을 눌러 상세를 엽니다.
+    await page.locator('[data-inq-rows] tr', { hasText: subject }).click();
+    await expect(page.locator('[data-inq-detail]')).toBeVisible();
+    await expect(page.locator('[data-inq-d-body]')).toContainText('여기서 답을 달아 봅니다');
+
+    await page.fill('#inq-answer', '확인했습니다. 오늘 중으로 발송하겠습니다.');
+    await page.click('[data-inq-save]');
+
+    // 미답변 필터이므로 목록에서 빠집니다.
+    await expect(page.locator('[data-inq-rows]')).not.toContainText(subject);
+
+    // 그리고 손님 쪽에 실제로 전달됐는지.
+    const { inquiries } = await (
+      await request.post('/api/inquiries/lookup', { data: { orderId, phone } })
+    ).json();
+    expect(inquiries[0].answer.body).toContain('오늘 중으로 발송하겠습니다');
+    expect(created.inquiry.id).toBe(inquiries[0].id);
+  });
+
+  test('이미 답한 문의는 답변 폼이 닫혀 있다', async ({ page, request }) => {
+    // 쓸 수 있게 두었다가 409 로 거절하는 것은 답을 두 번 쓰게 만드는 일입니다.
+    const subject = freshSubject('이미 답한 문의');
+    const phone = freshPhone();
+    const orderId = await seedOrder(request, phone);
+    const created = await (
+      await request.post('/api/inquiries', {
+        data: { orderId, phone, subject, body: '답이 달린 상태를 봅니다.' },
+      })
+    ).json();
+    await request.patch(`/api/admin/inquiries/${created.inquiry.id}`, {
+      data: { answer: '먼저 단 답변입니다.' },
+    });
+
+    await page.goto('/admin');
+    await page.click('[data-tab="inquiries"]');
+    await page.selectOption('#inq-status', 'answered');
+    await page.click('[data-inq-filters] button[type="submit"]');
+    await expect(page.locator('[data-inq-rows]')).toContainText(subject);
+
+    await page.locator('[data-inq-rows] tr', { hasText: subject }).click();
+    await expect(page.locator('[data-inq-answered]')).toBeVisible();
+    await expect(page.locator('[data-inq-d-answer]')).toContainText('먼저 단 답변입니다');
+    await expect(page.locator('[data-inq-form]')).toBeHidden();
+  });
+
+  test('손님이 쓴 글이 관리 화면에서도 실행되지 않는다', async ({ page, request }) => {
+    const phone = freshPhone();
+    const orderId = await seedOrder(request, phone);
+    await request.post('/api/inquiries', {
+      data: {
+        orderId,
+        phone,
+        subject: '<img src=x onerror="window.__admin_pwned=true">',
+        body: '<script>window.__admin_pwned = true</script> 열 자가 넘는 본문입니다.',
+      },
+    });
+
+    await page.goto('/admin');
+    await page.click('[data-tab="inquiries"]');
+    await expect(page.locator('[data-inq-rows] tr').first()).toBeVisible();
+    await page.locator('[data-inq-rows] tr').first().click();
+    await expect(page.locator('[data-inq-detail]')).toBeVisible();
+
+    expect(await page.evaluate(() => (window as any).__admin_pwned)).toBeUndefined();
   });
 });

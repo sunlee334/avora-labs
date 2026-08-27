@@ -41,7 +41,18 @@ const FULFILLMENT_LABEL: Record<string, string> = {
 
   <body class="admin">
     <header class="bar">
-      <h1>주문 관리</h1>
+      <h1>관리</h1>
+      <nav class="tabs" aria-label="관리 영역">
+        {/*
+          탭이지만 role="tablist" 를 쓰지 않습니다. ARIA 탭 패턴은 화살표
+          이동·roving tabindex 를 함께 구현해야 하고, 그러지 않으면 오히려
+          기대를 어깁니다. 여기서는 버튼 두 개와 aria-current 로 충분합니다.
+        */}
+        <button type="button" data-tab="orders" aria-current="true">주문</button>
+        <button type="button" data-tab="inquiries">
+          문의<span class="tabs__count" data-inq-badge hidden></span>
+        </button>
+      </nav>
       <div class="bar__right">
         <span class="who" data-who></span>
         <button type="button" data-refresh>새로고침</button>
@@ -49,6 +60,7 @@ const FULFILLMENT_LABEL: Record<string, string> = {
     </header>
 
     <main>
+      <div data-panel="orders">
       {/* dt·dd 는 dl 안에 있어야 합니다. div 로 감싸는 것까지는 허용되지만
           dl 자체가 없으면 스크린리더가 짝을 읽지 못합니다. */}
       <dl class="summary" data-summary aria-label="상태 요약"></dl>
@@ -114,7 +126,84 @@ const FULFILLMENT_LABEL: Record<string, string> = {
         <span data-page-info></span>
         <button type="button" data-next>다음</button>
       </nav>
+      </div>
+
+      {/*
+        문의 패널.
+
+        주문 패널과 DOM 을 공유하지 않습니다 — 같은 [data-rows] 를 쓰면
+        탭을 오갈 때 한쪽 데이터가 다른 쪽 표에 남습니다. 클래스는 그대로
+        재사용하되 선택자만 갈랐습니다.
+      */}
+      <div data-panel="inquiries" hidden>
+        <dl class="summary" data-inq-summary aria-label="문의 요약"></dl>
+
+        <form class="filters" data-inq-filters>
+          <label class="sr-only" for="inq-status">답변 여부</label>
+          <select id="inq-status" name="status">
+            <option value="">전체</option>
+            <option value="open" selected>미답변</option>
+            <option value="answered">답변 완료</option>
+          </select>
+          <button type="submit">보기</button>
+        </form>
+
+        <p class="state" data-inq-state>불러오는 중…</p>
+
+        <div class="tableWrap" data-inq-table-wrap hidden>
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">문의번호</th>
+                <th scope="col">제목</th>
+                <th scope="col">연락처</th>
+                <th scope="col">받은 때</th>
+                <th scope="col">상태</th>
+              </tr>
+            </thead>
+            <tbody data-inq-rows></tbody>
+          </table>
+        </div>
+
+        <nav class="pager" data-inq-pager hidden aria-label="문의 페이지">
+          <button type="button" data-inq-prev>이전</button>
+          <span data-inq-page-info></span>
+          <button type="button" data-inq-next>다음</button>
+        </nav>
+      </div>
     </main>
+
+    {/* 문의 상세 — 행을 누르면 열립니다 */}
+    <dialog class="detail" data-inq-detail aria-label="문의 상세">
+      <div class="detail__head">
+        <h2 data-inq-d-id></h2>
+        <button type="button" data-inq-detail-close aria-label="닫기">✕</button>
+      </div>
+
+      <dl class="detail__facts">
+        <div><dt>제목</dt><dd data-inq-d-subject></dd></div>
+        <div><dt>내용</dt><dd data-inq-d-body></dd></div>
+        <div><dt>연락처</dt><dd data-inq-d-phone></dd></div>
+        <div><dt>주문번호</dt><dd data-inq-d-order></dd></div>
+        <div><dt>받은 때</dt><dd data-inq-d-when></dd></div>
+      </dl>
+
+      {/* 이미 답한 문의는 답을 보여주기만 합니다 — 덮어쓰면 손님이 읽던
+          내용이 사라집니다(서버도 409 로 막습니다). */}
+      <div class="detail__notice" data-inq-answered hidden>
+        <p data-inq-d-answer></p>
+      </div>
+
+      <form class="detail__form" data-inq-form>
+        <h3>답변</h3>
+        <div class="row">
+          <label for="inq-answer">답변 내용</label>
+          <textarea id="inq-answer" name="answer" rows="6" required maxlength="2000"></textarea>
+        </div>
+        <p class="detail__error" data-inq-error hidden></p>
+        <button type="submit" data-inq-save>답변 보내기</button>
+      </form>
+    </dialog>
 
     {/* 주문 상세 — 행을 누르면 열립니다 */}
     <dialog class="detail" data-detail aria-label="주문 상세">
@@ -200,6 +289,61 @@ const FULFILLMENT_LABEL: Record<string, string> = {
       }
       .admin .bar h1 { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
       .admin .bar__right { display: flex; align-items: center; gap: 12px; }
+      /* 탭. 모든 규칙이 .admin 접두여야 합니다 — 이 <style is:global> 은
+         사이트 전체 CSS 로 묶여 공개 페이지에도 링크됩니다. */
+      .admin .tabs {
+        display: flex;
+        gap: 4px;
+        margin-inline-start: 20px;
+      }
+      .admin .tabs button {
+        padding: 8px 14px;
+        border: 0;
+        border-radius: 8px;
+        background: transparent;
+        color: var(--brand-muted);
+        font: inherit;
+        font-size: 13.5px;
+        cursor: pointer;
+        /* 탭도 손가락으로 눌립니다. */
+        min-height: 40px;
+      }
+      .admin .tabs button:hover {
+        color: var(--brand-primary);
+      }
+      .admin .tabs button[aria-current='true'] {
+        background: var(--brand-surface-alt);
+        color: var(--brand-primary);
+        font-weight: 600;
+      }
+      .admin .tabs__count {
+        display: inline-block;
+        margin-inline-start: 6px;
+        padding: 1px 7px;
+        border-radius: 999px;
+        background: var(--brand-primary);
+        color: var(--brand-surface);
+        font-family: var(--font-mono);
+        font-size: 11px;
+      }
+      .admin .detail__form textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid var(--color-line);
+        border-radius: 8px;
+        background: transparent;
+        color: var(--color-ink);
+        font: inherit;
+        font-size: 14px;
+        line-height: 1.7;
+        resize: vertical;
+      }
+      /* 문의 본문은 줄바꿈을 그대로 살려야 읽힙니다. */
+      .admin [data-inq-d-body] {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+
       .admin .who { font-family: var(--font-mono); font-size: 12px; color: var(--brand-muted-on-dark); }
       .admin .bar button {
         min-height: 40px; padding-inline: 14px; border-radius: 999px;
@@ -295,6 +439,10 @@ const FULFILLMENT_LABEL: Record<string, string> = {
       .admin .detail__facts dt { font-size: 13px; color: var(--brand-muted); }
       .admin .detail__facts dd { font-size: 14px; }
       .admin .detail__form { padding: 20px; display: grid; gap: 14px; }
+      /* display 를 지정한 요소는 hidden 속성(display:none)을 이깁니다.
+         감췄다고 생각한 것이 그대로 보이는, 눈으로만 봐서는 원인을
+         짐작하기 어려운 종류의 버그입니다. */
+      .admin [hidden] { display: none !important; }
       .admin .detail__form h3 { font-size: 14px; font-weight: 600; }
       .admin .detail__form .row { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
       .admin .detail__form label { display: grid; gap: 6px; font-size: 13px; color: var(--brand-muted); }
@@ -579,12 +727,226 @@ const FULFILLMENT_LABEL: Record<string, string> = {
       });
 
       $('[data-detail-close]').addEventListener('click', () => detail.close());
-      $('[data-refresh]').addEventListener('click', () => load());
+      $('[data-refresh]').addEventListener('click', () => {
+        // 지금 보고 있는 탭을 다시 부릅니다. 늘 주문만 부르면 문의 탭에서
+        // 새로고침이 아무 일도 안 하는 것처럼 보입니다.
+        if (activeTab === 'inquiries') loadInquiries();
+        else load();
+      });
       filters.addEventListener('submit', (event) => { event.preventDefault(); page = 0; load(); });
       $('[data-prev]').addEventListener('click', () => { if (page > 0) { page -= 1; load(); } });
       $('[data-next]').addEventListener('click', () => { page += 1; load(); });
 
+      /* ── 문의 ───────────────────────────────────────────────
+       *
+       * 주문 패널과 DOM 을 공유하지 않습니다. 같은 [data-rows] 를 쓰면 탭을
+       * 오갈 때 한쪽 데이터가 다른 쪽 표에 남고, 그 상태는 화면만 봐서는
+       * 알아채기 어렵습니다. 상태 변수도 따로 둡니다.
+       *
+       * 클래스는 그대로 재사용합니다 — .filters·.tableWrap·.pill·.pager 가
+       * 이미 이 화면의 언어입니다.
+       */
+      const inqState = $('[data-inq-state]');
+      const inqTableWrap = $('[data-inq-table-wrap]');
+      const inqRows = $('[data-inq-rows]');
+      const inqPager = $('[data-inq-pager]');
+      const inqSummary = $('[data-inq-summary]');
+      const inqFilters = $<HTMLFormElement>('[data-inq-filters]');
+      const inqDetail = $<HTMLDialogElement>('[data-inq-detail]');
+      const inqForm = $<HTMLFormElement>('[data-inq-form]');
+      const inqBadge = $('[data-inq-badge]');
+
+      let inqPage = 0;
+      let inqTotal = 0;
+      let openInquiry: any = null;
+
+      const INQ_STATUS = {
+        open: { label: '미답변', tone: 'warn' },
+        answered: { label: '답변 완료', tone: 'ok' },
+      } as const;
+
+      async function loadInquiries() {
+        const status = new FormData(inqFilters).get('status') as string;
+        const params = new URLSearchParams({
+          limit: String(PAGE_SIZE),
+          offset: String(inqPage * PAGE_SIZE),
+        });
+        if (status) params.set('status', status);
+
+        inqState.textContent = '불러오는 중…';
+        inqState.hidden = false;
+        inqTableWrap.hidden = true;
+
+        try {
+          const data = await api(`/api/admin/inquiries?${params}`);
+          inqTotal = data.total ?? 0;
+
+          // 미답변 건수는 탭 배지로도 보여줍니다 — 다른 탭에 있어도
+          // 기다리는 사람이 있다는 것을 알아야 합니다.
+          const open = data.open ?? 0;
+          inqBadge.textContent = open > 0 ? String(open) : '';
+          inqBadge.hidden = open === 0;
+
+          const summaryEntries: Array<[string, string]> = [
+            ['전체', String(inqTotal)],
+            ['미답변', String(open)],
+          ];
+          inqSummary.replaceChildren(
+            ...summaryEntries.map(([label, value], index) => {
+              const box = document.createElement('div');
+              if (label === '미답변' && open > 0) box.dataset.attention = 'true';
+              const dt = document.createElement('dt');
+              dt.textContent = label;
+              const dd = document.createElement('dd');
+              dd.textContent = value;
+              box.appendChild(dt);
+              box.appendChild(dd);
+              return box;
+            }),
+          );
+
+          const list = data.inquiries ?? [];
+          if (list.length === 0) {
+            inqState.textContent = inqPage > 0 ? '이 페이지에는 문의가 없습니다.' : '문의가 없습니다.';
+            inqPager.hidden = inqPage === 0;
+            return;
+          }
+
+          inqRows.replaceChildren(
+            ...list.map((inq: any) => {
+              const tr = document.createElement('tr');
+              tr.appendChild(cell(inq.id, 'oid'));
+              tr.appendChild(cell(inq.subject));
+              tr.appendChild(cell(inq.contactPhone ? phone(inq.contactPhone) : '—'));
+              tr.appendChild(cell(when(inq.createdAt), 'when'));
+              tr.appendChild(cell('', undefined, pill(INQ_STATUS, inq.status)));
+
+              tr.tabIndex = 0;
+              const open = () => showInquiry(inq);
+              tr.addEventListener('click', open);
+              tr.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  open();
+                }
+              });
+              return tr;
+            }),
+          );
+
+          inqState.hidden = true;
+          inqTableWrap.hidden = false;
+          inqPager.hidden = false;
+          $('[data-inq-page-info]').textContent =
+            `${inqPage * PAGE_SIZE + 1}–${inqPage * PAGE_SIZE + list.length} / ${inqTotal}`;
+        } catch (error) {
+          inqState.textContent = (error as Error).message;
+          inqState.hidden = false;
+        }
+      }
+
+      function showInquiry(inq: any) {
+        openInquiry = inq;
+        const set = (sel: string, value: string) => {
+          // 문의 본문은 손님이 쓴 문자열입니다. innerHTML 로 넣으면 그대로
+          // 실행됩니다 — 이 화면에서 이미 한 번 겪은 실수입니다.
+          $(sel).textContent = value;
+        };
+
+        set('[data-inq-d-id]', inq.id);
+        set('[data-inq-d-subject]', inq.subject);
+        set('[data-inq-d-body]', inq.body);
+        set('[data-inq-d-phone]', inq.contactPhone ? phone(inq.contactPhone) : '—');
+        set('[data-inq-d-order]', inq.orderId ?? '구매 전 질문');
+        set('[data-inq-d-when]', when(inq.createdAt));
+
+        const answered = inq.status === 'answered';
+        const answeredBox = $('[data-inq-answered]');
+        answeredBox.hidden = !answered;
+        if (answered) set('[data-inq-d-answer]', inq.answerBody ?? '');
+
+        // 이미 답한 문의는 폼을 닫습니다. 서버도 409 로 막지만, 쓸 수 있게
+        // 두었다가 거절하는 것은 답을 두 번 쓰게 만드는 일입니다.
+        inqForm.hidden = answered;
+
+        inqForm.reset();
+        $('[data-inq-error]').hidden = true;
+        inqDetail.showModal();
+      }
+
+      inqForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (!openInquiry) return;
+
+        const save = $<HTMLButtonElement>('[data-inq-save]');
+        const errorBox = $('[data-inq-error]');
+        errorBox.hidden = true;
+        save.disabled = true;
+        const label = save.textContent;
+        save.textContent = '보내는 중…';
+
+        try {
+          const answer = String(new FormData(inqForm).get('answer') ?? '').trim();
+          await api(`/api/admin/inquiries/${encodeURIComponent(openInquiry.id)}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ answer }),
+          });
+          inqDetail.close();
+          await loadInquiries();
+        } catch (error) {
+          errorBox.textContent = (error as Error).message;
+          errorBox.hidden = false;
+        } finally {
+          save.disabled = false;
+          save.textContent = label;
+        }
+      });
+
+      $('[data-inq-detail-close]').addEventListener('click', () => inqDetail.close());
+      inqFilters.addEventListener('submit', (event) => {
+        event.preventDefault();
+        inqPage = 0;
+        loadInquiries();
+      });
+      $('[data-inq-prev]').addEventListener('click', () => {
+        if (inqPage > 0) { inqPage -= 1; loadInquiries(); }
+      });
+      $('[data-inq-next]').addEventListener('click', () => { inqPage += 1; loadInquiries(); });
+
+      /* ── 탭 ─────────────────────────────────────────────────
+       * 새로고침 버튼이 지금 보고 있는 탭을 다시 불러야 합니다.
+       */
+      let activeTab: 'orders' | 'inquiries' = 'orders';
+
+      function showTab(name: 'orders' | 'inquiries') {
+        activeTab = name;
+        document.querySelectorAll<HTMLElement>('[data-panel]').forEach((panel) => {
+          panel.hidden = panel.dataset.panel !== name;
+        });
+        document.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach((tab) => {
+          if (tab.dataset.tab === name) tab.setAttribute('aria-current', 'true');
+          else tab.removeAttribute('aria-current');
+        });
+        if (name === 'inquiries') loadInquiries();
+      }
+
+      document.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach((tab) => {
+        tab.addEventListener('click', () => showTab(tab.dataset.tab as 'orders' | 'inquiries'));
+      });
+
+      // 미답변 건수는 어느 탭에 있든 알아야 하므로 처음에 한 번 물어봅니다.
+      api('/api/admin/inquiries?status=open&limit=1')
+        .then((data) => {
+          const open = data.open ?? 0;
+          inqBadge.textContent = open > 0 ? String(open) : '';
+          inqBadge.hidden = open === 0;
+        })
+        .catch(() => {
+          /* 문의 기능이 꺼져 있거나 인증이 막힌 경우입니다. 배지만 안 뜹니다. */
+        });
+
       load();
+
     </script>
   </body>
 </html>
