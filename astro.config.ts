@@ -1,5 +1,7 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import { satteri } from '@astrojs/markdown-satteri';
+import { hastTableScroll } from './src/hast/table-scroll';
 import { ORIGIN, LOCALES, DEFAULT_LOCALE, LOCALE_TAGS } from './src/config/site';
 import { SITEMAP_EXCLUDED } from './src/config/reserved-paths';
 
@@ -16,6 +18,18 @@ export default defineConfig({
   trailingSlash: 'ignore',
   build: {
     format: 'directory',
+  },
+
+  /*
+   * 마크다운은 Astro 7 의 기본 프로세서(Sätteri)가 그립니다. 여기서 바꾸는
+   * 것은 표를 가로 스크롤 상자로 감싸는 것 하나뿐입니다 — body 에
+   * overflow-x:hidden 이 걸려 있어 넓은 표가 스크롤바 없이 잘려 보입니다.
+   * CSS 로 하려면 표 시맨틱을 깨야 해서 트리 단계에서 감쌉니다.
+   */
+  markdown: {
+    processor: satteri({
+      hastPlugins: [hastTableScroll],
+    }),
   },
   i18n: {
     locales: [...LOCALES],

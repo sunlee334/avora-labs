@@ -117,6 +117,55 @@ test.describe('상세', () => {
   });
 });
 
+test.describe('넓은 내용이 화면 밖으로 잘리지 않는다', () => {
+  /*
+   * body 에 overflow-x: hidden 이 걸려 있습니다. 그래서 넓은 표가 넘치면
+   * **가로 스크롤바조차 없이 글자만 잘려 보입니다** — 태국어 제품
+   * 페이지에서 겪은 실패 모드이고, 그때는 아무도 몰랐습니다.
+   */
+  test('표가 스크롤 상자에 담긴다', async ({ page }) => {
+    await page.goto(`/ko/support/posts/${SLUG}`);
+    const box = page.locator('.post__body .tableScroll');
+    await expect(box).toHaveCount(1);
+    await expect(box).toHaveCSS('overflow-x', 'auto');
+  });
+
+  test('감싸도 표는 표로 남는다', async ({ page }) => {
+    /*
+     * `table { display: block; overflow-x: auto }` 가 흔한 요령이지만
+     * 그러면 일부 스크린리더에서 행·열 탐색이 사라집니다 — 표를 표가
+     * 아니게 만들어 스크롤을 얻는 셈입니다. 그래서 CSS 가 아니라
+     * HTML 트리 단계에서 감쌉니다(src/hast/table-scroll.ts).
+     */
+    await page.goto(`/ko/support/posts/${SLUG}`);
+    const table = page.locator('.tableScroll > table');
+    await expect(table).toHaveCount(1);
+    await expect(table).toHaveCSS('display', 'table');
+    await expect(page.locator('.tableScroll th').first()).toBeVisible();
+  });
+
+  test('키보드로도 스크롤할 수 있다', async ({ page }) => {
+    // tabindex 가 없으면 마우스·터치로만 움직일 수 있습니다 (WCAG 2.1.1).
+    await page.goto(`/ko/support/posts/${SLUG}`);
+    await expect(page.locator('.post__body .tableScroll')).toHaveAttribute('tabindex', '0');
+  });
+
+  test('320px 에서 표가 페이지를 밀어내지 않는다', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 720 });
+    await page.goto(`/ko/support/posts/${SLUG}`);
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow, '가로로 넘칩니다').toBeLessThanOrEqual(0);
+  });
+
+  test('영어판에도 같이 적용된다', async ({ page }) => {
+    // 플러그인은 언어와 무관하게 모든 마크다운에 걸립니다.
+    await page.goto(`/en/support/posts/${SLUG}`);
+    await expect(page.locator('.post__body .tableScroll > table')).toHaveCount(1);
+  });
+});
+
 test.describe('hreflang 이 없는 주소를 가리키지 않는다', () => {
   test('글 상세는 실재하는 번역본만 가리킨다', async ({ request }) => {
     const html = await (await request.get(`/ko/support/posts/${SLUG}`)).text();

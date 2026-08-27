@@ -1218,21 +1218,28 @@ button {
   outline: 2px solid var(--brand-primary);
   outline-offset: 2px;
 }
-.dataTable {
+/* 마크다운이 만드는 표에는 클래스가 없습니다(src/hast/table-scroll.ts 가
+   바깥만 감쌉니다). 규칙을 복제하는 대신 셀렉터를 함께 잡습니다 — 두 벌이
+   되면 한쪽만 고치는 날이 옵니다. */
+.dataTable,
+.tableScroll > table {
   border-collapse: collapse;
   width: 100%;
   min-width: 520px;
   font-size: 14px;
 }
 .dataTable th,
-.dataTable td {
+.dataTable td,
+.tableScroll > table th,
+.tableScroll > table td {
   text-align: left;
   padding: 14px 16px;
   border-bottom: 1px solid var(--color-line);
   vertical-align: top;
   line-height: 1.7;
 }
-.dataTable th {
+.dataTable th,
+.tableScroll > table th {
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.12em;
@@ -1241,7 +1248,8 @@ button {
   font-weight: 500;
   white-space: nowrap;
 }
-.dataTable tr:last-child td {
+.dataTable tr:last-child td,
+.tableScroll > table tr:last-child td {
   border-bottom: 0;
 }
 
@@ -2077,9 +2085,7 @@ button {
   overflow-x: auto;
 }
 
-/* ⚠️ 표는 아직 다루지 않았습니다.
-   `table { display: block }` 로 스크롤을 만들 수 있지만 그러면 일부
-   스크린리더에서 표 시맨틱(행·열 탐색)이 사라집니다. 올바른 방법은
-   `.tableScroll` 로 감싸는 것인데, 마크다운이 만드는 태그에는 클래스를
-   붙일 수 없어 Sätteri HAST 플러그인이 필요합니다(의존성 추가 사항).
-   지금 글에 표가 없어 미뤘습니다 — 첫 표가 들어오기 전에 정하세요. */
+/* 표는 `src/hast/table-scroll.ts` 가 .tableScroll 로 감쌉니다.
+   `table { display: block }` 이 흔한 요령이지만 그러면 일부 스크린리더에서
+   행·열 탐색이 사라집니다 — 표를 표가 아니게 만들어 스크롤을 얻는 셈입니다.
+   그래서 CSS 가 아니라 HTML 트리 단계에서 감쌉니다. */

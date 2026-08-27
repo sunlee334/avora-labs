@@ -13,6 +13,16 @@ We are asked often about when an order leaves us, so here is what we know today.
 - You can track an order with the order number and the phone number used at checkout
 - Once a tracking number exists, the carrier's page is one tap away
 
+## Delivery stages
+
+The order lookup page shows one of these.
+
+| Stage | Meaning |
+| --- | --- |
+| Preparing | Payment confirmed, not yet handed over |
+| Shipped | With the carrier. Trackable by tracking number |
+| Delivered | Recorded as received |
+
 ## What is not settled yet
 
 Shipping fees and delivery times are not confirmed. We will publish them together
