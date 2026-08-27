@@ -31,6 +31,15 @@ import {
 } from './orders';
 import { priceOrder, currencyOf, isAllowedCurrency } from './catalog';
 import { verifyAdmin, type AdminEnv } from './admin';
+import {
+  createInquiry,
+  inquiriesForOrder,
+  inquiriesForUser,
+  answerInquiry,
+  listInquiries,
+  openInquiryCount,
+  publicInquiry,
+} from './inquiries';
 import { canonicalHostRedirect } from './canonical-host';
 import { renderReviewsPage } from './reviews-page';
 import { handleKakaoWebhook } from './auth/kakao-webhook';
@@ -578,6 +587,166 @@ async function handleAdminReviewPatch(
   return json({ ok: true, review });
 }
 
+// ── 문의 ─────────────────────────────────────────────────────
+// 공개 게시판이 아닙니다. 본인과 관리자만 봅니다.
+//
+// 들어오는 길이 둘입니다 — 로그인, 그리고 주문번호+연락처. 요청에 주문번호와
+// 연락처가 함께 오면 **세션 여부와 무관하게** 주문 경로로 저장하고, 알 수
+// 있으면 user_id 도 함께 채웁니다. 그래야 로그인한 사람이 주문조회에서
+// 남긴 문의를 마이페이지에서도 볼 수 있습니다.
+
+/** 문의 길이. 리뷰와 같은 기준을 씁니다. */
+const INQUIRY_SUBJECT_MAX = 100;
+const INQUIRY_BODY_MIN = 10;
+const INQUIRY_BODY_MAX = 2000;
+
+async function handleInquiryCreate(request: Request, env: Env): Promise<Response> {
+  if (!env.DB) return json({ error: 'INQUIRIES_NOT_CONFIGURED' }, 503);
+
+  let body: { orderId?: string; phone?: string; subject?: string; body?: string; locale?: string };
+  try {
+    body = (await request.json()) as typeof body;
+  } catch {
+    return json({ error: 'INVALID_JSON' }, 400);
+  }
+
+  const subject = text(body.subject, INQUIRY_SUBJECT_MAX);
+  const message = text(body.body, INQUIRY_BODY_MAX);
+  if (!subject || !message) return json({ error: 'MISSING_FIELDS' }, 400);
+
+  if (message.length < INQUIRY_BODY_MIN) {
+    return json(
+      {
+        error: 'BODY_TOO_SHORT',
+        message: `문의 내용을 ${INQUIRY_BODY_MIN}자 이상 적어 주세요.`,
+      },
+      400,
+    );
+  }
+
+  const requested = text(body.locale, 8) ?? '';
+  const locale = (LOCALES as readonly string[]).includes(requested) ? requested : 'ko';
+
+  // 로그인 여부는 알아만 둡니다. 아래에서 경로를 정할 때 씁니다.
+  const user = await currentUser(request, env);
+
+  const orderId = text(body.orderId, 40);
+  const phone = text(body.phone, 40);
+
+  if (orderId && phone) {
+    // 주문 경로. 주문번호와 연락처가 둘 다 맞아야 합니다.
+    // 없는 주문과 연락처 불일치를 같은 응답으로 돌려줍니다 —
+    // 다르게 답하면 주문번호가 존재하는지를 알려주는 셈이 됩니다.
+    const order = await findOrderForCustomer(env.DB, orderId, phone);
+    if (!order) return json({ error: 'ORDER_NOT_FOUND' }, 404);
+
+    const inquiry = await createInquiry(
+      env.DB,
+      {
+        userId: user?.id ?? null,
+        orderId: order.id,
+        contactPhone: phone,
+        subject,
+        body: message,
+        locale,
+      },
+      new Date(),
+    );
+    return json({ ok: true, inquiry: publicInquiry(inquiry) }, 201);
+  }
+
+  // 로그인 경로. 주문이 없어도 됩니다 — 구매 전 질문을 받기 위해서입니다.
+  if (!user) return json({ error: 'NOT_LOGGED_IN' }, 401);
+
+  const inquiry = await createInquiry(
+    env.DB,
+    { userId: user.id, subject, body: message, locale },
+    new Date(),
+  );
+  return json({ ok: true, inquiry: publicInquiry(inquiry) }, 201);
+}
+
+async function handleInquiryList(request: Request, env: Env): Promise<Response> {
+  const user = await currentUser(request, env);
+  if (!user) return json({ error: 'NOT_LOGGED_IN' }, 401);
+  if (!env.DB) return json({ error: 'INQUIRIES_NOT_CONFIGURED' }, 503);
+
+  const inquiries = await inquiriesForUser(env.DB, user.id);
+  return json({ ok: true, inquiries: inquiries.map(publicInquiry) });
+}
+
+async function handleInquiryLookup(request: Request, env: Env): Promise<Response> {
+  if (!env.DB) return json({ error: 'INQUIRIES_NOT_CONFIGURED' }, 503);
+
+  let body: { orderId?: string; phone?: string };
+  try {
+    body = (await request.json()) as typeof body;
+  } catch {
+    return json({ error: 'INVALID_JSON' }, 400);
+  }
+
+  const orderId = text(body.orderId, 40);
+  const phone = text(body.phone, 40);
+  if (!orderId || !phone) return json({ error: 'MISSING_FIELDS' }, 400);
+
+  const inquiries = await inquiriesForOrder(env.DB, orderId, phone);
+  return json({ ok: true, inquiries: inquiries.map(publicInquiry) });
+}
+
+async function handleAdminInquiryList(env: Env, url: URL, who: string): Promise<Response> {
+  if (!env.DB) return json({ error: 'INQUIRIES_NOT_CONFIGURED' }, 503);
+
+  const status = url.searchParams.get('status');
+  const limit = clampInt(url.searchParams.get('limit'), 20, 1, ADMIN_MAX_LIMIT);
+  const offset = clampInt(url.searchParams.get('offset'), 0, 0, 100000);
+
+  const { inquiries, total } = await listInquiries(env.DB, {
+    status: status === 'open' || status === 'answered' ? status : undefined,
+    limit,
+    offset,
+  });
+
+  return json({
+    ok: true,
+    who,
+    total,
+    open: await openInquiryCount(env.DB),
+    // 관리 화면은 연락처를 봐야 합니다 — 답을 전할 길이 화면뿐이라
+    // 누구의 문의인지 확인할 수 있어야 합니다.
+    inquiries,
+  });
+}
+
+async function handleAdminInquiryAnswer(
+  request: Request,
+  env: Env,
+  id: string,
+  who: string,
+): Promise<Response> {
+  if (!env.DB) return json({ error: 'INQUIRIES_NOT_CONFIGURED' }, 503);
+
+  let body: { answer?: string };
+  try {
+    body = (await request.json()) as typeof body;
+  } catch {
+    return json({ error: 'INVALID_JSON' }, 400);
+  }
+
+  const answer = text(body.answer, INQUIRY_BODY_MAX);
+  if (!answer) return json({ error: 'MISSING_FIELDS' }, 400);
+
+  const result = await answerInquiry(env.DB, id, answer, who, new Date());
+  if (!result.ok) {
+    if (result.reason === 'NOT_FOUND') return json({ error: 'INQUIRY_NOT_FOUND' }, 404);
+    return json(
+      { error: 'ALREADY_ANSWERED', message: '이미 답변한 문의입니다.' },
+      409,
+    );
+  }
+
+  return json({ ok: true, inquiry: result.inquiry });
+}
+
 // ── 회원 계정 ────────────────────────────────────────────────
 // 로그인은 선택입니다. 비회원 주문은 앞으로도 계속 받습니다 —
 // 결제 직전에 로그인을 요구하면 거기서 이탈합니다.
@@ -881,6 +1050,17 @@ export default {
       return handleReviewCreate(request, env);
     }
 
+    // 문의 — 공개 게시판이 아닙니다. 조회는 본인 확인을 지납니다.
+    if (pathname === '/api/inquiries' && request.method === 'POST') {
+      return handleInquiryCreate(request, env);
+    }
+    if (pathname === '/api/inquiries' && request.method === 'GET') {
+      return handleInquiryList(request, env);
+    }
+    if (pathname === '/api/inquiries/lookup' && request.method === 'POST') {
+      return handleInquiryLookup(request, env);
+    }
+
     // 로그인
     if (pathname === '/api/auth/login' && request.method === 'GET') {
       return handleLogin(request, env);
@@ -953,6 +1133,19 @@ export default {
       const reviewDetail = pathname.match(/^\/api\/admin\/reviews\/([^/]+)$/);
       if (reviewDetail && request.method === 'PATCH') {
         return handleAdminReviewPatch(request, env, decodeURIComponent(reviewDetail[1]));
+      }
+
+      if (pathname === '/api/admin/inquiries' && request.method === 'GET') {
+        return handleAdminInquiryList(env, url, auth.who);
+      }
+      const inquiryDetail = pathname.match(/^\/api\/admin\/inquiries\/([^/]+)$/);
+      if (inquiryDetail && request.method === 'PATCH') {
+        return handleAdminInquiryAnswer(
+          request,
+          env,
+          decodeURIComponent(inquiryDetail[1]),
+          auth.who,
+        );
       }
 
       return json({ error: 'NOT_FOUND' }, 404);
