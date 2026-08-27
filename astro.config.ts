@@ -1,6 +1,7 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import { ORIGIN, LOCALES, DEFAULT_LOCALE, LOCALE_TAGS } from './src/config/site';
+import { SITEMAP_EXCLUDED } from './src/config/reserved-paths';
 
 /**
  * 언어별 라우팅은 `src/pages/[lang]/` 동적 라우트가 담당합니다.
@@ -41,19 +42,15 @@ export default defineConfig({
        * 실제로 46개 주소 중 26개가 그런 상태였고, **관리 화면 경로까지
        * 공개 사이트맵에 실려 있었습니다.**
        *
-       * 새 페이지에 noindex 를 달면 여기에도 넣으세요.
+       * 새 페이지에 noindex 를 달면 `src/config/reserved-paths.ts` 에 넣으세요.
        * `tests/e2e/product-seo.spec.ts` 가 사이트맵의 모든 주소를 실제로
        * 열어 보고 noindex 가 섞여 있으면 실패합니다.
+       *
+       * ⚠️ 이 검사는 **부분 문자열**입니다. 그래서 글 slug 도 삼킬 수 있어
+       *    (`posts/checkout-tips` → `/checkout`), 같은 배열을
+       *    `scripts/check-slugs.mjs` 가 접두 일치로 미리 막습니다.
        */
-      filter: (page) =>
-        ![
-          '/404',
-          '/admin',
-          '/cart',
-          '/checkout',
-          '/account',
-          '/order/',
-        ].some((excluded) => page.includes(excluded)),
+      filter: (page) => !SITEMAP_EXCLUDED.some((excluded) => page.includes(excluded)),
     }),
   ],
   vite: {

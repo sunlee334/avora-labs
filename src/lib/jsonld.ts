@@ -98,6 +98,42 @@ export function productSchema(locale: Locale, name: string, description: string)
   return schema;
 }
 
+/**
+ * 공지·읽을거리 글 하나.
+ *
+ * 답변엔진이 "언제 쓴 글인가" 를 묻습니다. 오래된 안내를 최신 사실로 인용하면
+ * 손님이 틀린 정보를 받으므로 `datePublished` 를 반드시 넣습니다.
+ *
+ * `dateModified` 는 실제로 고친 날이 있을 때만 넣습니다. 발행일을 그대로
+ * 복사해 넣으면 "고친 적 없음" 과 "발행일에 고침" 을 구분할 수 없게 됩니다 —
+ * 이 파일의 원칙(확정되지 않은 값은 넣지 않는다)이 그대로 적용됩니다.
+ */
+export function article(input: {
+  headline: string;
+  description: string;
+  path: string;
+  locale: Locale;
+  publishedAt: string;
+  updatedAt?: string;
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: input.headline,
+    description: input.description,
+    url: absoluteUrl(input.path),
+    mainEntityOfPage: absoluteUrl(input.path),
+    // website() 와 같은 형태를 씁니다 — BCP 47 태그가 아니라 언어 코드입니다.
+    inLanguage: input.locale,
+    datePublished: input.publishedAt,
+    ...(input.updatedAt ? { dateModified: input.updatedAt } : {}),
+    // 글쓴이는 개인이 아니라 브랜드입니다. 1인 운영이라도 개인 이름을
+    // 구조화 데이터로 내보낼 이유가 없습니다.
+    author: { '@type': 'Organization', name: BUSINESS.brandName },
+    publisher: { '@type': 'Organization', name: BUSINESS.brandName },
+  };
+}
+
 export function faqPage(items: Array<{ q: string; a: string }>) {
   return {
     '@context': 'https://schema.org',

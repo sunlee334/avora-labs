@@ -19,6 +19,22 @@ interface Props {
   noindex?: boolean;
   /** JSON-LD 객체 배열 — 페이지마다 필요한 스키마를 넘깁니다 */
   jsonLd?: unknown[];
+  /**
+   * 이 경로가 **실제로 존재하는** 언어. 생략하면 5개 언어 전부로 봅니다.
+   *
+   * ── 왜 필요한가 ────────────────────────────────────────────
+   * 지금까지 모든 페이지는 5개 언어에 다 있었습니다(`[lang]` 라우트가 언어마다
+   * 하나씩 만드니까요). 그래서 alternates 를 무조건 5개 내는 것이 맞았습니다.
+   *
+   * 글은 다릅니다. 한국어로만 쓴 글에 5개 언어 hreflang 을 붙이면
+   * `/en/support/posts/...` 를 가리키게 되고, 검색엔진이 크롤링해서 404 를
+   * 받습니다. 사이트 전체 신뢰도가 떨어집니다.
+   *
+   * ⚠️ **x-default 도 함께 다뤄야 합니다.** 그것은 아래 langs 배열 바깥에
+   *    따로 있고 DEFAULT_LOCALE('en') 을 무조건 가리킵니다. 배열만 줄이면
+   *    한국어 전용 글의 x-default 가 여전히 /en/ 404 를 가리킵니다.
+   */
+  locales?: readonly Locale[];
 }
 
 const {
@@ -30,12 +46,23 @@ const {
   ogImageAlt = '',
   noindex = false,
   jsonLd = [],
+  locales,
 } = Astro.props;
 
 const t = dict(locale);
 const canonical = new URL(localePath(locale, path), ORIGIN).href;
 const ogImageUrl = new URL(ogImage, ORIGIN).href;
-const langs = alternates(path);
+
+// 넘어온 언어만, 없으면 5개 전부. 순서는 alternates() 가 정한 대로 둡니다.
+const langs = locales
+  ? alternates(path).filter((entry) => locales.includes(entry.locale))
+  : alternates(path);
+
+// 기본 언어판이 없으면 x-default 를 아예 내보내지 않습니다.
+// 없는 주소를 "여기가 기본입니다" 라고 알리는 것보다 침묵이 낫습니다.
+const xDefault = !locales || locales.includes(DEFAULT_LOCALE)
+  ? new URL(localePath(DEFAULT_LOCALE, path), ORIGIN).href
+  : null;
 ---
 
 <!doctype html>
@@ -49,17 +76,13 @@ const langs = alternates(path);
     <link rel="canonical" href={canonical} />
     {noindex && <meta name="robots" content="noindex, follow" />}
 
-    {/* 언어별 대안 URL — 5개 언어 전부 + x-default */}
+    {/* 언어별 대안 URL. locales 를 넘기지 않으면 5개 언어 전부 + x-default */}
     {
       langs.map(({ locale: l, path: p }) => (
         <link rel="alternate" hreflang={LOCALE_TAGS[l]} href={new URL(p, ORIGIN).href} />
       ))
     }
-    <link
-      rel="alternate"
-      hreflang="x-default"
-      href={new URL(localePath(DEFAULT_LOCALE, path), ORIGIN).href}
-    />
+    {xDefault && <link rel="alternate" hreflang="x-default" href={xDefault} />}
 
     {/* SNS 공유 */}
     <meta property="og:type" content="website" />

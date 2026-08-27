@@ -23,6 +23,14 @@ jobs:
           node-version: 24
           cache: npm
 
+      # 폰트 서브셋 검사가 woff2 를 열려면 fontTools 와 brotli 가 둘 다 필요합니다.
+      # 없으면 `check:fonts` 가 CI 에서 실패합니다 — 예전에는 조용히 건너뛰었고,
+      # 그래서 이 검사는 배포 경로에서 한 번도 돈 적이 없었습니다.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install fonttools brotli
+
       - run: npm ci
 
       # 빌드가 토큰 생성·번역 키 검사·폰트 서브셋 검사를 함께 수행합니다.
@@ -59,6 +67,14 @@ jobs:
         with:
           node-version: 24
           cache: npm
+
+      # 폰트 서브셋 검사가 woff2 를 열려면 fontTools 와 brotli 가 둘 다 필요합니다.
+      # 없으면 `check:fonts` 가 CI 에서 실패합니다 — 예전에는 조용히 건너뛰었고,
+      # 그래서 이 검사는 배포 경로에서 한 번도 돈 적이 없었습니다.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install fonttools brotli
 
       - run: npm ci
 
