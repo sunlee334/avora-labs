@@ -22,8 +22,7 @@
       "ogAlt": "Silhouette of a runner against a low sun"
     },
     "hero": {
-      "imageAlt": "Silhouette of a runner on a rocky trail against a low sun",
-      "scrollHint": "Scroll"
+      "imageAlt": "Silhouette of a runner on a rocky trail against a low sun"
     },
     "origin": {
       "kicker": "Origin",
@@ -361,7 +360,6 @@
         "description": "The privacy policy for the AVORA website."
       },
       "heading": "Privacy Policy",
-      "placeholder": "This document is in preparation and will be published once the data we collect and our business details are confirmed.",
       "collect": {
         "heading": "What we collect",
         "intro": "These are the items this site actually collects and stores, written from the code itself and updated when the code changes.",
@@ -498,7 +496,6 @@
         "flat": "{fee}, regardless of order value.",
         "threshold": "Free over {threshold}; otherwise {fee}.",
         "remote": "Remote and island areas add {surcharge}.",
-        "source": "This value comes from src/config/commerce.json. The cart, the checkout, and the server all read that one file, so changing the policy changes all three together.",
         "provisional": "The current value is a starting point, not a settled policy. It will be updated once the real policy is decided."
       },
       "steps": {
@@ -555,8 +552,7 @@
     "skipToContent": "Skip to content",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
-    "selectLanguage": "Select language",
-    "cartCount": "Cart"
+    "selectLanguage": "Select language"
   },
   "cart": {
     "meta": {
@@ -571,7 +567,6 @@
     "decrease": "Decrease quantity",
     "increase": "Increase quantity",
     "remove": "Remove",
-    "removed": "Removed from your cart.",
     "subtotal": "Subtotal",
     "shipping": "Shipping",
     "shippingFree": "Free",

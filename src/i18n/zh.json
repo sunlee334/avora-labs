@@ -22,8 +22,7 @@
       "ogAlt": "低角度阳光下奔跑者的剪影"
     },
     "hero": {
-      "imageAlt": "低角度阳光下在岩石小径上奔跑的人的剪影",
-      "scrollHint": "向下滚动"
+      "imageAlt": "低角度阳光下在岩石小径上奔跑的人的剪影"
     },
     "origin": {
       "kicker": "Origin",
@@ -361,7 +360,6 @@
         "description": "AVORA 网站的隐私政策。"
       },
       "heading": "隐私政策",
-      "placeholder": "本文件正在准备中，待实际收集项目与企业信息确定后发布。",
       "collect": {
         "heading": "收集的项目",
         "intro": "以下是本网站实际收集与保存的项目，依据代码撰写，项目变更时会一并更新。",
@@ -498,7 +496,6 @@
         "flat": "不论订单金额，运费为 {fee}。",
         "threshold": "满 {threshold} 免运费，未满则为 {fee}。",
         "remote": "偏远及岛屿地区加收 {surcharge}。",
-        "source": "该值由 src/config/commerce.json 决定。购物车、结算页面与服务器读取同一个文件，因此修改政策时三处会一并变更。",
         "provisional": "当前值只是最简单的起点，并非已确定的政策，待实际政策确定后更新。"
       },
       "steps": {
@@ -555,8 +552,7 @@
     "skipToContent": "跳到正文",
     "openMenu": "打开菜单",
     "closeMenu": "关闭菜单",
-    "selectLanguage": "选择语言",
-    "cartCount": "购物车"
+    "selectLanguage": "选择语言"
   },
   "cart": {
     "meta": {
@@ -571,7 +567,6 @@
     "decrease": "减少数量",
     "increase": "增加数量",
     "remove": "删除",
-    "removed": "已从购物车中删除。",
     "subtotal": "商品金额",
     "shipping": "运费",
     "shippingFree": "免费",

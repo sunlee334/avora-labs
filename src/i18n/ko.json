@@ -22,8 +22,7 @@
       "ogAlt": "낮은 태양을 배경으로 달리는 사람의 실루엣"
     },
     "hero": {
-      "imageAlt": "낮은 태양을 배경으로 바위길을 달리는 사람의 실루엣",
-      "scrollHint": "스크롤"
+      "imageAlt": "낮은 태양을 배경으로 바위길을 달리는 사람의 실루엣"
     },
     "origin": {
       "kicker": "Origin",
@@ -361,7 +360,6 @@
         "description": "AVORA 웹사이트의 개인정보처리방침입니다."
       },
       "heading": "개인정보처리방침",
-      "placeholder": "본 문서는 준비 중입니다. 실제 수집 항목과 사업자 정보가 확정되면 게시됩니다.",
       "collect": {
         "heading": "수집하는 항목",
         "intro": "아래는 이 사이트가 실제로 수집·저장하는 항목입니다. 코드 기준으로 작성했으며, 항목이 바뀌면 함께 갱신됩니다.",
@@ -498,7 +496,6 @@
         "flat": "주문 금액과 관계없이 {fee} 입니다.",
         "threshold": "{threshold} 이상 주문 시 무료, 미만이면 {fee} 입니다.",
         "remote": "제주·도서산간 지역은 {surcharge} 이 추가됩니다.",
-        "source": "이 값은 src/config/commerce.json 이 정합니다. 장바구니·체크아웃 화면과 서버 계산이 모두 같은 파일을 읽으므로, 정책을 바꾸면 세 곳이 함께 바뀝니다.",
         "provisional": "현재 값은 확정된 정책이 아니라 가장 단순한 출발점입니다. 실제 정책이 정해지면 갱신됩니다."
       },
       "steps": {
@@ -555,8 +552,7 @@
     "skipToContent": "본문으로 건너뛰기",
     "openMenu": "메뉴 열기",
     "closeMenu": "메뉴 닫기",
-    "selectLanguage": "언어 선택",
-    "cartCount": "장바구니"
+    "selectLanguage": "언어 선택"
   },
   "cart": {
     "meta": {
@@ -571,7 +567,6 @@
     "decrease": "수량 줄이기",
     "increase": "수량 늘리기",
     "remove": "삭제",
-    "removed": "장바구니에서 삭제했습니다.",
     "subtotal": "상품 금액",
     "shipping": "배송비",
     "shippingFree": "무료",

@@ -22,8 +22,7 @@
       "ogAlt": "Bóng người chạy in trên nền mặt trời thấp"
     },
     "hero": {
-      "imageAlt": "Bóng một người đang chạy trên đường mòn đá dưới ánh mặt trời thấp",
-      "scrollHint": "Cuộn xuống"
+      "imageAlt": "Bóng một người đang chạy trên đường mòn đá dưới ánh mặt trời thấp"
     },
     "origin": {
       "kicker": "Origin",
@@ -361,7 +360,6 @@
         "description": "Chính sách bảo mật của website AVORA."
       },
       "heading": "Chính sách bảo mật",
-      "placeholder": "Tài liệu này đang được chuẩn bị và sẽ được công bố khi các mục dữ liệu thu thập và thông tin doanh nghiệp được xác nhận.",
       "collect": {
         "heading": "Thông tin chúng tôi thu thập",
         "intro": "Dưới đây là những mục mà trang này thực sự thu thập và lưu trữ, được viết dựa trên chính mã nguồn và cập nhật khi mã thay đổi.",
@@ -498,7 +496,6 @@
         "flat": "{fee}, bất kể giá trị đơn hàng.",
         "threshold": "Miễn phí với đơn từ {threshold}; dưới mức đó là {fee}.",
         "remote": "Khu vực xa và hải đảo cộng thêm {surcharge}.",
-        "source": "Giá trị này do src/config/commerce.json quyết định. Giỏ hàng, trang thanh toán và máy chủ đều đọc cùng một tệp, nên đổi chính sách là cả ba đổi theo.",
         "provisional": "Giá trị hiện tại chỉ là điểm khởi đầu đơn giản nhất, chưa phải chính sách đã chốt, và sẽ được cập nhật khi có chính sách thực tế."
       },
       "steps": {
@@ -555,8 +552,7 @@
     "skipToContent": "Chuyển đến nội dung",
     "openMenu": "Mở menu",
     "closeMenu": "Đóng menu",
-    "selectLanguage": "Chọn ngôn ngữ",
-    "cartCount": "Giỏ hàng"
+    "selectLanguage": "Chọn ngôn ngữ"
   },
   "cart": {
     "meta": {
@@ -571,7 +567,6 @@
     "decrease": "Giảm số lượng",
     "increase": "Tăng số lượng",
     "remove": "Xoá",
-    "removed": "Đã xoá khỏi giỏ hàng.",
     "subtotal": "Tạm tính",
     "shipping": "Phí vận chuyển",
     "shippingFree": "Miễn phí",
