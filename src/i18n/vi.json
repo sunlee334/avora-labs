@@ -12,7 +12,8 @@
     "menu": "Menu",
     "close": "Đóng",
     "account": "Trang của tôi",
-    "support": "Hỗ trợ"
+    "support": "Hỗ trợ",
+    "reviews": "Đánh giá"
   },
   "home": {
     "meta": {
@@ -250,6 +251,55 @@
       "body": "Hãy liên hệ với chúng tôi.",
       "email": "Email",
       "phone": "Điện thoại"
+    }
+  },
+  "reviews": {
+    "meta": {
+      "title": "Đánh giá — AVORA",
+      "description": "Đánh giá từ những người đã mua AVORA Daily Sunscreen."
+    },
+    "heading": "Đánh giá",
+    "intro": "Chỉ từ những người đã được xác nhận mua hàng.",
+    "empty": {
+      "heading": "Chưa có đánh giá",
+      "body": "Đánh giá sẽ xuất hiện ở đây sau khi những đơn hàng đầu tiên được giao. Chúng tôi không tạo ra đánh giá không có thật."
+    },
+    "outOf": "trên thang 5",
+    "countLabel": "đánh giá",
+    "verified": "Đã xác nhận mua",
+    "sponsored": "Viết khi có nhận thù lao",
+    "policy": {
+      "heading": "Cách chúng tôi quản lý đánh giá",
+      "items": [
+        "Chỉ người mua mới viết được. Chúng tôi đối chiếu mã đơn hàng với số điện thoại đã nhập khi đặt.",
+        "Mỗi đơn hàng một đánh giá.",
+        "Đánh giá viết khi có nhận thù lao sẽ được ghi rõ.",
+        "Chúng tôi ẩn thay vì xoá, và ghi lại lý do.",
+        "Tiêu chí ẩn: lộ thông tin cá nhân, quảng cáo, lời lẽ xúc phạm, nội dung không liên quan đến sản phẩm.",
+        "Chúng tôi không ẩn một đánh giá chỉ vì điểm thấp."
+      ]
+    },
+    "write": {
+      "heading": "Viết đánh giá",
+      "body": "Bạn cần mã đơn hàng và số điện thoại đã nhập khi đặt hàng.",
+      "disabled": "Bạn sẽ viết được đánh giá khi hệ thống thanh toán của chúng tôi mở.",
+      "orderId": "Mã đơn hàng",
+      "phone": "Số điện thoại",
+      "rating": "Điểm",
+      "content": "Đánh giá của bạn",
+      "contentHint": "Ít nhất 10 ký tự",
+      "submit": "Gửi",
+      "sending": "Đang gửi…",
+      "success": "Cảm ơn bạn — đánh giá đã được đăng.",
+      "errors": {
+        "missing": "Còn thiếu thông tin.",
+        "rating": "Vui lòng chọn điểm.",
+        "short": "Vui lòng viết ít nhất 10 ký tự.",
+        "notFound": "Mã đơn hàng và số điện thoại không khớp.",
+        "notPaid": "Chỉ đơn hàng đã thanh toán mới viết được đánh giá.",
+        "already": "Bạn đã đánh giá đơn hàng này rồi.",
+        "failed": "Không gửi được. Vui lòng thử lại sau."
+      }
     }
   },
   "footer": {

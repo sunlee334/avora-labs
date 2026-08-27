@@ -26,6 +26,7 @@ const PAGES = LOCALES.flatMap((l) => [
   `/${l}/`,
   `/${l}/product`,
   `/${l}/support`,
+  `/${l}/reviews`,
   `/${l}/legal/terms`,
   `/${l}/legal/privacy`,
   `/${l}/legal/shipping`,

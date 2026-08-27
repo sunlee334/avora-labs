@@ -12,7 +12,8 @@
     "menu": "Menu",
     "close": "Close",
     "account": "My Page",
-    "support": "Support"
+    "support": "Support",
+    "reviews": "Reviews"
   },
   "home": {
     "meta": {
@@ -250,6 +251,55 @@
       "body": "Get in touch.",
       "email": "Email",
       "phone": "Phone"
+    }
+  },
+  "reviews": {
+    "meta": {
+      "title": "Reviews — AVORA",
+      "description": "Reviews from people who bought AVORA Daily Sunscreen."
+    },
+    "heading": "Reviews",
+    "intro": "Only from people whose purchase we could verify.",
+    "empty": {
+      "heading": "No reviews yet",
+      "body": "They will appear here once the first orders arrive. We do not invent reviews that do not exist."
+    },
+    "outOf": "out of 5",
+    "countLabel": "reviews",
+    "verified": "Verified purchase",
+    "sponsored": "Written for compensation",
+    "policy": {
+      "heading": "How we handle reviews",
+      "items": [
+        "Only buyers can write one. We check the order number against the phone number used to order.",
+        "One review per order.",
+        "Reviews written for compensation are labelled as such.",
+        "We hide rather than delete, and we record why.",
+        "We hide personal information, advertising, abuse, and anything unrelated to the product.",
+        "We do not hide a review for being low-rated."
+      ]
+    },
+    "write": {
+      "heading": "Write a review",
+      "body": "You will need your order number and the phone number you entered when ordering.",
+      "disabled": "You will be able to write a review once our own checkout opens.",
+      "orderId": "Order number",
+      "phone": "Phone",
+      "rating": "Rating",
+      "content": "Your review",
+      "contentHint": "At least 10 characters",
+      "submit": "Post",
+      "sending": "Posting…",
+      "success": "Thank you — your review is posted.",
+      "errors": {
+        "missing": "Something is missing.",
+        "rating": "Please choose a rating.",
+        "short": "Please write at least 10 characters.",
+        "notFound": "That order number and phone number do not match.",
+        "notPaid": "Reviews can only be written for completed payments.",
+        "already": "You have already reviewed this order.",
+        "failed": "We could not post it. Please try again shortly."
+      }
     }
   },
   "footer": {

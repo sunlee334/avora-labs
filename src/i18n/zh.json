@@ -12,7 +12,8 @@
     "menu": "菜单",
     "close": "关闭",
     "account": "我的页面",
-    "support": "客户服务"
+    "support": "客户服务",
+    "reviews": "评价"
   },
   "home": {
     "meta": {
@@ -250,6 +251,55 @@
       "body": "请通过以下方式联系我们。",
       "email": "电子邮件",
       "phone": "电话"
+    }
+  },
+  "reviews": {
+    "meta": {
+      "title": "评价 — AVORA",
+      "description": "购买 AVORA Daily Sunscreen 的顾客留下的评价。"
+    },
+    "heading": "评价",
+    "intro": "仅限已确认购买的顾客撰写。",
+    "empty": {
+      "heading": "暂无评价",
+      "body": "首批订单送达后，评价会显示在这里。我们不会编造不存在的评价。"
+    },
+    "outOf": "满分 5 分",
+    "countLabel": "条评价",
+    "verified": "已确认购买",
+    "sponsored": "受赠或获酬后撰写",
+    "policy": {
+      "heading": "评价管理方针",
+      "items": [
+        "仅购买者可撰写。以订单号与下单时填写的联系电话核对。",
+        "每笔订单限一条评价。",
+        "受赠或获酬后撰写的评价会明确标注。",
+        "我们隐藏而非删除，并记录隐藏原因。",
+        "隐藏标准为：泄露个人信息、广告、辱骂、与产品无关的内容。",
+        "不会因评分低而隐藏。"
+      ]
+    },
+    "write": {
+      "heading": "撰写评价",
+      "body": "需要订单号与下单时填写的联系电话。",
+      "disabled": "自营结算开通后即可撰写评价。",
+      "orderId": "订单号",
+      "phone": "联系电话",
+      "rating": "评分",
+      "content": "评价内容",
+      "contentHint": "10 字以上",
+      "submit": "提交",
+      "sending": "提交中…",
+      "success": "评价已提交，谢谢。",
+      "errors": {
+        "missing": "有未填写的项目。",
+        "rating": "请选择评分。",
+        "short": "评价请填写 10 字以上。",
+        "notFound": "订单号或联系电话不匹配。",
+        "notPaid": "仅已完成付款的订单可撰写评价。",
+        "already": "该订单已提交过评价。",
+        "failed": "提交失败，请稍后再试。"
+      }
     }
   },
   "footer": {

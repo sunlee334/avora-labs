@@ -1620,3 +1620,190 @@ button {
     display: none;
   }
 }
+
+/* ── 구매 후기 ─────────────────────────────────────────────── */
+
+.reviews {
+  margin-top: 32px;
+}
+.reviews__empty {
+  display: grid;
+  gap: 10px;
+  padding: 32px 22px;
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  text-align: center;
+}
+.reviews__empty h2 {
+  font-size: 16px;
+  font-weight: 600;
+}
+.reviews__empty p {
+  max-width: var(--size-measure);
+  margin-inline: auto;
+  color: var(--brand-muted);
+  font-size: 14px;
+  line-height: 1.85;
+}
+
+.reviews__summary {
+  display: grid;
+  gap: 6px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--color-line);
+}
+.reviews__average {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.reviews__average strong {
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;
+}
+.reviews__average span,
+.reviews__count {
+  color: var(--brand-muted);
+  font-size: 13px;
+}
+.reviews__bars {
+  display: grid;
+  gap: 5px;
+  margin-top: 14px;
+  max-width: 320px;
+}
+.reviews__bar {
+  display: grid;
+  grid-template-columns: 12px 1fr 28px;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--brand-muted);
+  font-variant-numeric: tabular-nums;
+}
+.reviews__bar-track {
+  height: 5px;
+  border-radius: 999px;
+  background: var(--color-line);
+  overflow: hidden;
+}
+.reviews__bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--color-ink);
+}
+.reviews__bar-n {
+  text-align: right;
+}
+
+.reviews__list {
+  display: grid;
+  list-style: none;
+}
+.reviews__item {
+  /* 그리드 칸은 기본이 min-width:auto 라, 공백 없는 긴 글이 칸을 밀어냅니다. */
+  min-width: 0;
+  padding-block: 24px;
+  border-bottom: 1px solid var(--color-line);
+}
+.reviews__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.stars {
+  color: var(--color-ink);
+  font-size: 14px;
+  letter-spacing: 0.1em;
+}
+.reviews__badge {
+  padding: 3px 9px;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  color: var(--brand-muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+/* 대가성 표시는 눈에 띄어야 합니다 — 가려 두면 표시한 의미가 없습니다. */
+.reviews__badge--sponsored {
+  border-color: var(--color-ink);
+  color: var(--color-ink);
+  font-weight: 600;
+}
+.reviews__body {
+  max-width: var(--size-measure);
+  font-size: 15px;
+  line-height: 1.85;
+  /* 후기에는 붙여 쓴 긴 글이 들어올 수 있습니다. */
+  overflow-wrap: anywhere;
+}
+.reviews__meta {
+  margin-top: 10px;
+  color: var(--brand-muted);
+  font-size: 12.5px;
+}
+
+/* ── 후기 작성 ─────────────────────────────────────────────── */
+
+.reviewForm {
+  max-width: 620px;
+  margin-top: 22px;
+}
+.reviewForm textarea {
+  font: inherit;
+  font-size: 16px; /* iOS 는 16px 미만 입력칸을 누르면 화면을 확대합니다 */
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+  background: var(--brand-surface);
+  color: var(--color-ink);
+  line-height: 1.8;
+  resize: vertical;
+}
+.rating {
+  margin: 0 0 20px;
+  padding: 0;
+  border: 0;
+}
+.rating legend {
+  padding: 0;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.rating__stars {
+  display: flex;
+  gap: 2px;
+}
+/* 라벨 전체가 탭 영역입니다 — 별 글자만 누르게 하면 44px 을 못 채웁니다. */
+.rating__star {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--size-tap-min);
+  min-height: var(--size-tap-min);
+  border-radius: 8px;
+  color: var(--color-line);
+  font-size: 26px;
+  cursor: pointer;
+}
+.rating__star input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.rating__star:has(input:checked),
+/* 고른 별의 왼쪽도 함께 채웁니다 — 별점은 누적으로 읽히기 때문입니다. */
+.rating__star:has(~ .rating__star input:checked) {
+  color: var(--color-ink);
+}
+.rating__star:has(input:focus-visible) {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}

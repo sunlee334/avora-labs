@@ -1,0 +1,210 @@
+---
+/**
+ * 구매 후기.
+ *
+ * ── 이 페이지가 지키는 것 ───────────────────────────────────
+ * **없는 후기를 지어내지 않습니다.** 지금 후기는 0건이고, 그 사실을 그대로
+ * 적습니다. 대신 빈 화면으로 두지 않고 리뷰 운영 방침을 함께 둡니다 —
+ * 그것은 지금 사실이고, 구매를 검토하는 사람과 답변엔진에게 실제로 쓸모가
+ * 있습니다. 고객센터에서 쓴 것과 같은 원칙입니다.
+ *
+ * ── 목록은 왜 서버가 그리는가 ───────────────────────────────
+ * 후기를 자바스크립트로만 채우면 **답변엔진과 크롤러가 보지 못합니다.**
+ * 그래서 아래 `[data-reviews-slot]` 안을 Worker 가 HTMLRewriter 로 채웁니다
+ * (worker/reviews-page.ts). 이 파일이 그리는 것은 후기가 0건일 때의 화면이고,
+ * 1건이라도 있으면 Worker 가 그 자리를 목록으로 바꿉니다.
+ *
+ * 목록에 필요한 낱말은 slot 의 data-* 로 넘깁니다. Worker 가 5개 언어 사전을
+ * 다시 안고 있을 이유가 없기 때문입니다.
+ */
+import Base from '../../layouts/Base.astro';
+import { LOCALES, type Locale } from '../../config/site';
+import { dict, localePath } from '../../i18n';
+import { breadcrumb } from '../../lib/jsonld';
+import { SELLS_DIRECTLY } from '../../config/runtime';
+
+export function getStaticPaths() {
+  return LOCALES.map((lang) => ({ params: { lang } }));
+}
+
+const locale = Astro.params.lang as Locale;
+const t = dict(locale);
+const page = t.reviews;
+---
+
+<Base
+  locale={locale}
+  path="reviews"
+  title={page.meta.title}
+  description={page.meta.description}
+  jsonLd={[
+    breadcrumb([
+      { name: 'AVORA', path: localePath(locale) },
+      { name: page.heading, path: localePath(locale, 'reviews') },
+    ]),
+  ]}
+>
+  <section class="section wrap">
+    <h1 class="display display--tight">{page.heading}</h1>
+    <p class="body" style="margin-top: 20px">{page.intro}</p>
+
+    {/*
+      Worker 가 이 안을 목록으로 바꿉니다. 바꾸지 못하는 경우(후기 0건,
+      또는 Worker 를 거치지 않는 경우)에는 아래 빈 상태가 그대로 나갑니다 —
+      어느 쪽이든 화면이 비지 않습니다.
+    */}
+    <div
+      class="reviews"
+      data-reviews-slot
+      data-locale={locale}
+      data-label-verified={page.verified}
+      data-label-sponsored={page.sponsored}
+      data-label-out-of={page.outOf}
+      data-label-count={page.countLabel}
+    >
+      <div class="reviews__empty">
+        <h2>{page.empty.heading}</h2>
+        <p>{page.empty.body}</p>
+      </div>
+    </div>
+
+    <div class="support__card">
+      <h2>{page.policy.heading}</h2>
+      <ul class="factList">
+        {page.policy.items.map((item) => <li>{item}</li>)}
+      </ul>
+    </div>
+
+    <h2 class="kicker" style="margin-top: 48px">{page.write.heading}</h2>
+    {
+      SELLS_DIRECTLY ? (
+        <>
+          <p class="body">{page.write.body}</p>
+          <form
+            class="reviewForm"
+            data-review-form
+            data-msg-sending={page.write.sending}
+            data-msg-missing={page.write.errors.missing}
+            data-msg-rating={page.write.errors.rating}
+            data-msg-short={page.write.errors.short}
+            data-msg-not-found={page.write.errors.notFound}
+            data-msg-not-paid={page.write.errors.notPaid}
+            data-msg-already={page.write.errors.already}
+            data-msg-failed={page.write.errors.failed}
+            novalidate
+          >
+            <div class="field">
+              <label for="rv-order">{page.write.orderId}</label>
+              <input id="rv-order" name="orderId" type="text" autocomplete="off" required />
+            </div>
+            <div class="field">
+              <label for="rv-phone">{page.write.phone}</label>
+              <input id="rv-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required />
+            </div>
+
+            {/*
+              별점은 라디오입니다. 별 모양 버튼으로 만들면 키보드와 스크린리더에서
+              무엇을 고른 상태인지 알 수 없게 됩니다. 라디오는 브라우저가
+              그 일을 이미 해 줍니다.
+            */}
+            <fieldset class="rating">
+              <legend>{page.write.rating}</legend>
+              <div class="rating__stars">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <label class="rating__star">
+                    <input type="radio" name="rating" value={n} required />
+                    <span aria-hidden="true">★</span>
+                    <span class="sr-only">{n}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+
+            <div class="field">
+              <label for="rv-body">{page.write.content}</label>
+              <textarea id="rv-body" name="body" rows="5" minlength="10" maxlength="2000" required />
+              <p class="field__optional">{page.write.contentHint}</p>
+            </div>
+
+            <p class="checkout__error" data-review-error hidden></p>
+            <p class="cart__notice" data-review-success hidden>{page.write.success}</p>
+
+            <button class="cta" type="submit" data-review-submit>{page.write.submit}</button>
+          </form>
+        </>
+      ) : (
+        <p class="body">{page.write.disabled}</p>
+      )
+    }
+  </section>
+</Base>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-review-form]');
+  if (form) {
+    const errorBox = document.querySelector<HTMLElement>('[data-review-error]')!;
+    const successBox = document.querySelector<HTMLElement>('[data-review-success]')!;
+    const submit = document.querySelector<HTMLButtonElement>('[data-review-submit]')!;
+
+    /**
+     * 문구는 서버가 이미 이 언어로 그려 보냈습니다. 사전을 클라이언트에서 다시
+     * 불러오면 5개 언어 문구가 전부 번들에 따라 들어갑니다.
+     */
+    const msg = (name: string) => form.dataset[name] ?? '';
+
+    /** 서버가 무엇이 틀렸는지 알려주므로, 그 코드를 사람 말로 옮깁니다. */
+    const MESSAGES: Record<string, string> = {
+      MISSING_FIELDS: msg('msgMissing'),
+      INVALID_RATING: msg('msgRating'),
+      BODY_TOO_SHORT: msg('msgShort'),
+      ORDER_NOT_FOUND: msg('msgNotFound'),
+      ORDER_NOT_PAID: msg('msgNotPaid'),
+      ALREADY_REVIEWED: msg('msgAlready'),
+    };
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      errorBox.hidden = true;
+      successBox.hidden = true;
+
+      const data = new FormData(form);
+      const payload = {
+        orderId: String(data.get('orderId') ?? '').trim(),
+        phone: String(data.get('phone') ?? '').trim(),
+        rating: Number(data.get('rating') ?? 0),
+        body: String(data.get('body') ?? '').trim(),
+        locale: document.documentElement.lang.split('-')[0],
+      };
+
+      submit.disabled = true;
+      const original = submit.textContent;
+      submit.textContent = msg('msgSending');
+
+      try {
+        const res = await fetch('/api/reviews', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const body = (await res.json().catch(() => ({}))) as { error?: string };
+
+        if (res.ok) {
+          form.reset();
+          successBox.hidden = false;
+          // 방금 쓴 후기가 목록에 보이도록 다시 받아옵니다.
+          // 목록은 서버가 그리므로 새로 그리는 편이 가장 정확합니다.
+          setTimeout(() => location.reload(), 1200);
+          return;
+        }
+        errorBox.textContent = (body.error && MESSAGES[body.error]) || msg('msgFailed');
+        errorBox.hidden = false;
+      } catch {
+        errorBox.textContent = msg('msgFailed');
+        errorBox.hidden = false;
+      } finally {
+        submit.disabled = false;
+        submit.textContent = original;
+      }
+    });
+  }
+</script>

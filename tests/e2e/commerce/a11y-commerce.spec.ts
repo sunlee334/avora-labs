@@ -157,3 +157,65 @@ test.describe('관리 화면', () => {
     expect(await scan(page, testInfo)).toEqual([]);
   });
 });
+
+test.describe('후기가 실제로 있는 리뷰 페이지', () => {
+  /**
+   * 후기 목록은 Worker 가 그립니다. 후기가 0건이면 그 자리에 빈 상태만
+   * 나오므로, **목록을 검사하려면 먼저 후기가 있어야 합니다.**
+   * 그러지 않으면 이 페이지의 가장 복잡한 부분이 검사에서 통째로 빠집니다.
+   */
+  const UNIT = 32000;
+  const PHONE = '010-3333-2222';
+  const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+  async function seedReview(request: any, rating: number, body: string) {
+    let suffix = '';
+    for (let i = 0; i < 6; i++) suffix += LETTERS[Math.floor(Math.random() * LETTERS.length)];
+    const orderId = `AVORA-2026082614${String(rating).padStart(4, '0')}-${suffix}`;
+    await request.post('/api/orders', {
+      data: {
+        orderId, amount: UNIT, currency: 'KRW', locale: 'ko',
+        items: [{ id: 'daily-sunscreen', qty: 1 }],
+        recipientName: '한접근', recipientPhone: PHONE,
+        postalCode: '04524', address1: '서울특별시 중구 세종대로 110',
+      },
+    });
+    await request.post('/api/payments/confirm', {
+      data: { orderId, paymentKey: `mock-${orderId}`, amount: UNIT },
+    });
+    await request.post('/api/reviews', { data: { orderId, phone: PHONE, rating, body } });
+  }
+
+  test('후기 목록과 별점 요약에 위반이 없다', async ({ page, request }, testInfo) => {
+    await seedReview(request, 5, '접근성 검사용 후기입니다. 가볍고 편안하게 발립니다.');
+    await seedReview(request, 2, '접근성 검사용 두 번째 후기입니다. 향이 조금 있습니다.');
+
+    await page.goto('/ko/reviews');
+    await expect(page.locator('.reviews__list')).toBeVisible();
+    expect(await scan(page, testInfo)).toEqual([]);
+  });
+
+  test('별점이 색만으로 전달되지 않는다', async ({ page, request }) => {
+    // 별 모양만으로 점수를 전하면 화면을 못 보는 사람에게는 아무것도 남지 않습니다.
+    await seedReview(request, 4, '별점 접근성 검사용 후기입니다. 무난히 좋습니다.');
+    await page.goto('/ko/reviews');
+    const first = page.locator('.reviews__item').first();
+    await expect(first).toBeVisible();
+    // 별 글자는 화면 낭독에서 제외되고, 숫자가 대신 읽혀야 합니다.
+    await expect(first.locator('.stars')).toHaveAttribute('aria-hidden', 'true');
+    await expect(first.locator('.sr-only').first()).not.toBeEmpty();
+  });
+
+  test('후기가 있어도 320px 에서 넘치지 않는다', async ({ page, request }) => {
+    // 띄어쓰기 없는 긴 후기가 들어오면 칸을 밀어낼 수 있습니다.
+    await seedReview(request, 5, '아'.repeat(300));
+    await page.setViewportSize({ width: 320, height: 800 });
+    await page.goto('/ko/reviews');
+    await expect(page.locator('.reviews__list')).toBeVisible();
+
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow, '후기가 찬 상태에서 가로 넘침').toBeLessThanOrEqual(0);
+  });
+});

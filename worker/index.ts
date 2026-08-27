@@ -32,6 +32,17 @@ import {
 import { priceOrder, currencyOf, isAllowedCurrency } from './catalog';
 import { verifyAdmin, type AdminEnv } from './admin';
 import { canonicalHostRedirect } from './canonical-host';
+import { renderReviewsPage } from './reviews-page';
+import {
+  createReview,
+  getReview,
+  listAllReviews,
+  listVisibleReviews,
+  publicReview,
+  reviewSummary,
+  setReviewStatus,
+  type ReviewStatus,
+} from './reviews';
 import { notifyNewOrder, toNotification } from './notify';
 import { handleLogin, handleCallback, handleLogout, currentUser, providerFor, type AuthEnv } from './auth';
 import { publicUser, ordersForUser, saveAddress, claimOrder } from './accounts';
@@ -407,6 +418,155 @@ async function handleOrderLookup(request: Request, env: Env): Promise<Response> 
   return json({ ok: true, order: publicView(order) });
 }
 
+
+// ── 구매 후기 ────────────────────────────────────────────────
+// 자격은 주문이 정합니다. 결제가 끝난 주문의 주문번호와 연락처를 아는 사람만
+// 쓸 수 있고, 주문 하나에 리뷰 하나입니다. 그래서 "구매 확인" 이 사실입니다.
+
+/** 리뷰 본문 길이. 너무 짧으면 후기가 아니고, 너무 길면 화면과 저장이 무너집니다. */
+const REVIEW_BODY_MIN = 10;
+const REVIEW_BODY_MAX = 2000;
+
+async function handleReviewList(request: Request, env: Env): Promise<Response> {
+  if (!env.DB) return json({ error: 'REVIEWS_NOT_CONFIGURED' }, 503);
+
+  const url = new URL(request.url);
+  const limit = clampInt(url.searchParams.get('limit'), 20, 1, 50);
+  const offset = clampInt(url.searchParams.get('offset'), 0, 0, 100000);
+
+  const [reviews, summary] = await Promise.all([
+    listVisibleReviews(env.DB, limit, offset),
+    reviewSummary(env.DB),
+  ]);
+
+  return json({
+    ok: true,
+    summary,
+    reviews: reviews.map(publicReview),
+  });
+}
+
+async function handleReviewCreate(request: Request, env: Env): Promise<Response> {
+  if (!env.DB) return json({ error: 'REVIEWS_NOT_CONFIGURED' }, 503);
+
+  let body: {
+    orderId?: string;
+    phone?: string;
+    rating?: unknown;
+    body?: string;
+    locale?: string;
+  };
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: 'INVALID_JSON' }, 400);
+  }
+
+  const orderId = text(body.orderId, 40);
+  const phone = text(body.phone, 30);
+  const reviewBody = text(body.body, REVIEW_BODY_MAX);
+  const rating = Number(body.rating);
+
+  if (!orderId || !phone || !reviewBody) return json({ error: 'MISSING_FIELDS' }, 400);
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+    return json({ error: 'INVALID_RATING', message: '별점은 1점부터 5점까지입니다.' }, 400);
+  }
+  if (reviewBody.length < REVIEW_BODY_MIN) {
+    return json(
+      { error: 'BODY_TOO_SHORT', message: `후기는 ${REVIEW_BODY_MIN}자 이상 적어주세요.` },
+      400,
+    );
+  }
+
+  // 주문번호와 연락처가 함께 맞아야 합니다. 주문 조회와 같은 열쇠입니다.
+  const order = await findOrderForCustomer(env.DB, orderId, phone);
+  // 없는 주문과 연락처 불일치를 같은 응답으로 돌려줍니다 —
+  // 다르게 답하면 주문번호가 존재하는지를 알려주는 셈이 됩니다.
+  if (!order) return json({ error: 'ORDER_NOT_FOUND' }, 404);
+
+  if (order.status !== 'paid') {
+    return json(
+      {
+        error: 'ORDER_NOT_PAID',
+        message: '결제가 완료된 주문에만 후기를 남길 수 있습니다.',
+      },
+      409,
+    );
+  }
+
+  const requested = String(body.locale ?? '');
+  const locale = (LOCALES as readonly string[]).includes(requested) ? requested : order.locale;
+
+  const created = await createReview(
+    env.DB,
+    {
+      orderId: order.id,
+      rating,
+      body: reviewBody,
+      authorName: order.recipientName,
+      locale,
+    },
+    new Date(),
+  );
+
+  if (!created.ok) {
+    return json(
+      { error: 'ALREADY_REVIEWED', message: '이 주문에는 이미 후기를 남기셨습니다.' },
+      409,
+    );
+  }
+
+  return json({ ok: true, review: publicReview(created.review) }, 201);
+}
+
+async function handleAdminReviewList(env: Env, url: URL, who: string): Promise<Response> {
+  if (!env.DB) return json({ error: 'REVIEWS_NOT_CONFIGURED' }, 503);
+  const limit = clampInt(url.searchParams.get('limit'), 20, 1, 100);
+  const offset = clampInt(url.searchParams.get('offset'), 0, 0, 100000);
+  const { reviews, total } = await listAllReviews(env.DB, limit, offset);
+  return json({ ok: true, who, total, reviews });
+}
+
+async function handleAdminReviewPatch(
+  request: Request,
+  env: Env,
+  id: string,
+): Promise<Response> {
+  if (!env.DB) return json({ error: 'REVIEWS_NOT_CONFIGURED' }, 503);
+
+  let body: { status?: string; reason?: string };
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: 'INVALID_JSON' }, 400);
+  }
+
+  const status = body.status === 'visible' || body.status === 'hidden' ? body.status : null;
+  if (!status) return json({ error: 'INVALID_STATUS' }, 400);
+
+  const reason = text(body.reason, 200);
+  // 숨길 때는 이유가 반드시 있어야 합니다. 기준 없이 지운 기록이 없으면,
+  // 부정적 리뷰만 골라 숨겼는지 아닌지를 나중에 아무도 증명할 수 없습니다.
+  if (status === 'hidden' && !reason) {
+    return json(
+      { error: 'REASON_REQUIRED', message: '숨기는 이유를 남겨야 합니다.' },
+      400,
+    );
+  }
+
+  const changed = await setReviewStatus(
+    env.DB,
+    id,
+    status as ReviewStatus,
+    reason,
+    new Date().toISOString(),
+  );
+  if (!changed) return json({ error: 'REVIEW_NOT_FOUND' }, 404);
+
+  const review = await getReview(env.DB, id);
+  return json({ ok: true, review });
+}
+
 // ── 회원 계정 ────────────────────────────────────────────────
 // 로그인은 선택입니다. 비회원 주문은 앞으로도 계속 받습니다 —
 // 결제 직전에 로그인을 요구하면 거기서 이탈합니다.
@@ -702,6 +862,14 @@ export default {
       return handlePaymentConfirm(request, env, ctx);
     }
 
+    // 후기
+    if (pathname === '/api/reviews' && request.method === 'GET') {
+      return handleReviewList(request, env);
+    }
+    if (pathname === '/api/reviews' && request.method === 'POST') {
+      return handleReviewCreate(request, env);
+    }
+
     // 로그인
     if (pathname === '/api/auth/login' && request.method === 'GET') {
       return handleLogin(request, env);
@@ -741,6 +909,15 @@ export default {
       if (detail && request.method === 'PATCH') {
         return handleAdminPatch(request, env, decodeURIComponent(detail[1]));
       }
+
+      if (pathname === '/api/admin/reviews' && request.method === 'GET') {
+        return handleAdminReviewList(env, url, auth.who);
+      }
+      const reviewDetail = pathname.match(/^\/api\/admin\/reviews\/([^/]+)$/);
+      if (reviewDetail && request.method === 'PATCH') {
+        return handleAdminReviewPatch(request, env, decodeURIComponent(reviewDetail[1]));
+      }
+
       return json({ error: 'NOT_FOUND' }, 404);
     }
 
@@ -753,7 +930,28 @@ export default {
       return handleAdminPage(request, env);
     }
 
-    // 4 — 그 외에는 정적 에셋에 넘깁니다.
+    /*
+     * 4 — 리뷰 페이지는 정적 껍데기에 실제 후기를 채워 내보냅니다.
+     *
+     * 자바스크립트로만 채우면 답변엔진과 크롤러가 후기를 보지 못합니다.
+     * 리뷰 페이지의 값어치는 대부분 거기서 나오므로 초기 HTML 에 넣습니다.
+     * 후기가 0건이면 정적 페이지를 그대로 내보냅니다 — 그 화면이 이미
+     * "아직 리뷰가 없습니다" 라고 말하고 있고, 그게 사실입니다.
+     */
+    const reviewsPage = pathname.match(/^\/([a-z]{2})\/reviews\/?$/);
+    if (reviewsPage && env.DB && (LOCALES as readonly string[]).includes(reviewsPage[1])) {
+      const page = await env.ASSETS.fetch(request);
+      if (page.ok) {
+        return renderReviewsPage(
+          page,
+          env.DB,
+          new URL(`/${reviewsPage[1]}/product`, url).href,
+        );
+      }
+      return page;
+    }
+
+    // 5 — 그 외에는 정적 에셋에 넘깁니다.
     const assetResponse = await env.ASSETS.fetch(request);
 
     // 에셋에도 없으면 언어에 맞는 404 페이지를 상태 코드 404 로 돌려줍니다.
