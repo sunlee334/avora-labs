@@ -70,6 +70,13 @@
     // 으로만 넣습니다. 둘 중 하나라도 없으면 구글 버튼이 나오지 않습니다.
     "GOOGLE_CLIENT_ID": "1074249602401-u9s1hgmhknqa2ireu8u682t7mpkgvah0.apps.googleusercontent.com",
 
+    // 카카오 로그인. REST API 키도 공개값입니다 — 인가 요청의 client_id 로
+    // 브라우저 주소창에 그대로 나타납니다.
+    // Client Secret 을 콘솔에서 "사용함" 으로 켜면 KAKAO_CLIENT_SECRET 을
+    // `wrangler secret put` 으로 반드시 함께 넣어야 합니다. 콘솔에서만 켜고
+    // 값을 넣지 않으면 토큰 발급이 전부 실패합니다.
+    "KAKAO_REST_API_KEY": "471993744ef641f96c59d7f70db37a97",
+
     "ACCESS_TEAM_DOMAIN": "https://avoralabs.cloudflareaccess.com",
     "ACCESS_POLICY_AUD": "ccfcc41b65327c106b50761011b64b90000cf6b5862c7674fda16ece0b353b1f"
   },
