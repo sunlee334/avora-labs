@@ -229,3 +229,54 @@ test.describe('지울 것과 남길 것을 가른다', () => {
     expect(body.linked.map((i: { provider: string }) => i.provider)).toEqual(['mock2']);
   });
 });
+
+test.describe('검증에 실패해도 무엇이 왔는지 알 수 있다', () => {
+  /**
+   * 검증 실패를 "실패했다" 로만 남기면, 고쳐야 할 것이 무엇인지 알 수 없습니다.
+   * 카카오 로그인이 KOE010 으로 막혔을 때 상태 코드만 남겨 두어 서버 밖에서
+   * 따로 요청을 만들어 봐야 원인을 찾을 수 있었습니다. 같은 실수를 반복하지
+   * 않으려고, 실패해도 받은 값(iss·aud·kid·이벤트 종류)을 로그에 남깁니다.
+   *
+   * 다만 그 값은 **서명을 확인하기 전의 것**이라 믿을 수 없습니다.
+   * 진단에만 쓰고, 응답에는 절대 담지 않습니다.
+   */
+  function fakeJwt(payload: Record<string, unknown>): string {
+    const b64 = (o: unknown) =>
+      Buffer.from(JSON.stringify(o)).toString('base64url');
+    return `${b64({ alg: 'RS256', typ: 'secevent+jwt', kid: 'fake-kid' })}.${b64(payload)}.c2ln`;
+  }
+
+  test('위조 토큰은 거절하고, 내용은 응답에 담지 않는다', async ({ request }) => {
+    const forged = fakeJwt({
+      iss: 'https://evil.example',
+      aud: 'someone-elses-app-key',
+      sub: '999',
+      events: { [UNLINKED]: { subject: { sub: '999' } } },
+    });
+
+    const res = await post(request, forged);
+    expect(res.status()).toBe(400);
+
+    const body = await res.text();
+    expect(body, '받은 값이 응답에 새면 안 됩니다').not.toContain('someone-elses-app-key');
+    expect(body).not.toContain('evil.example');
+    expect(body).not.toContain('999');
+  });
+
+  test('위조 토큰으로는 아무것도 지워지지 않는다', async ({ page, request }) => {
+    const id = freshId('forge-victim');
+    await loginWith(page, 'mock', id);
+    expect((await page.request.get('/api/account/me')).status()).toBe(200);
+
+    await post(request, fakeJwt({
+      iss: 'https://kauth.kakao.com',
+      aud: '471993744ef641f96c59d7f70db37a97',
+      events: { [UNLINKED]: { subject: { sub: id } } },
+    }));
+
+    expect(
+      (await page.request.get('/api/account/me')).status(),
+      '서명이 없으면 iss·aud 가 맞아도 지워지면 안 됩니다',
+    ).toBe(200);
+  });
+});

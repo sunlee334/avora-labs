@@ -26,7 +26,7 @@
  * ── 3초 안에 답해야 합니다 ──────────────────────────────────
  * 공식 문서 기준입니다. 성공은 202, 실패는 400 입니다.
  */
-import { createRemoteJWKSet, jwtVerify, type JWTPayload } from 'jose';
+import { createRemoteJWKSet, decodeJwt, decodeProtectedHeader, jwtVerify, type JWTPayload } from 'jose';
 import { removeIdentity } from '../accounts';
 
 const ISSUER = 'https://kauth.kakao.com';
@@ -144,10 +144,45 @@ export async function handleKakaoWebhook(
       audience: env.KAKAO_REST_API_KEY,
     });
     payload = verified.payload as SetPayload;
-  } catch {
-    // 서명 불일치·만료·다른 앱의 토큰이 모두 여기로 옵니다.
-    // 무엇이 틀렸는지는 알려주지 않습니다.
-    console.error('카카오 웹훅 검증 실패');
+  } catch (cause) {
+    /*
+     * 서명 불일치·만료·다른 앱의 토큰이 모두 여기로 옵니다.
+     *
+     * **무엇이 왔는지 로그에 남깁니다.** 남기지 않으면 검증이 실패했을 때
+     * "실패했다" 는 사실만 알 뿐, 무엇을 고쳐야 하는지 알 수 없습니다.
+     * 실제로 카카오 로그인이 KOE010 으로 막혔을 때 상태 코드만 남겨 두어
+     * 서버 밖에서 따로 요청을 만들어 봐야 원인을 찾을 수 있었습니다.
+     *
+     * 특히 `aud` 는 확신하지 못하는 값입니다 — 공식 문서 예시가 앱 키 모양
+     * (32자 16진수)이라 REST API 키로 두었는데, 다른 키일 수 있습니다.
+     * 실제 이벤트가 한 번 오면 이 로그로 바로 확정됩니다.
+     *
+     * 서명을 확인하기 **전의** 값이므로 믿을 수 없습니다. 진단에만 쓰고,
+     * 어떤 판단에도 쓰지 않습니다.
+     */
+    let claimed: Record<string, unknown> = {};
+    try {
+      const header = decodeProtectedHeader(token);
+      const body = decodeJwt(token);
+      claimed = {
+        alg: header.alg,
+        kid: header.kid,
+        typ: header.typ,
+        iss: body.iss,
+        aud: body.aud,
+        eventTypes: Object.keys((body as SetPayload).events ?? {}),
+      };
+    } catch {
+      claimed = { note: 'JWT 형식이 아닙니다' };
+    }
+
+    console.error('카카오 웹훅 검증 실패', {
+      reason: cause instanceof Error ? cause.message : String(cause),
+      expectedIss: ISSUER,
+      expectedAud: env.KAKAO_REST_API_KEY,
+      claimed,
+    });
+    // 사용자(카카오)에게는 무엇이 틀렸는지 알려주지 않습니다.
     return json({ err: 'invalid_token', description: '검증에 실패했습니다.' }, 400);
   }
 
@@ -186,6 +221,9 @@ async function applyEvents(
       ordersDetached: result.ordersDetached,
     });
   }
+
+  // 성공도 남깁니다. 202 만으로는 무엇을 받아 무엇을 했는지 알 수 없습니다.
+  console.log('웹훅 검증 통과', { provider, eventTypes: Object.keys(events) });
 
   // 처리할 것이 없어도 202 입니다. 같은 이벤트가 다시 와도(카카오는 재전송할
   // 수 있습니다) 결과가 같아야 합니다.
