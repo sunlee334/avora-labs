@@ -174,7 +174,7 @@ const a = t.account;
 </Base>
 
 <script>
-  import { mountInquiry } from '../../lib/inquiry';
+  import { mountInquiry, drain } from '../../lib/inquiry';
 
   const root = document.querySelector<HTMLElement>('[data-account]');
   /*
@@ -287,6 +287,7 @@ const a = t.account;
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ provider: identity.provider }),
             });
+            await drain(res);
             state.hidden = false;
             state.textContent = res.ok ? (L.msgUnlinked ?? '') : (L.msgLinkFailed ?? '');
             await drawIdentities();
@@ -335,7 +336,7 @@ const a = t.account;
       if (meRes.status === 401 || !meRes.ok) {
         // 로그인하지 않은 사람은 항상 이 길로 옵니다. 본문을 읽지 않으면
         // 응답 스트림이 열린 채 남아 네트워크가 조용해지지 않습니다.
-        await meRes.arrayBuffer().catch(() => {});
+        await drain(meRes);
         anon.hidden = false;
         void drawLoginButtons();
         return;
@@ -539,6 +540,7 @@ const a = t.account;
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
+        await drain(res);
         if (!res.ok) throw new Error('failed');
         showForm(false);
         await load();
@@ -576,6 +578,8 @@ const a = t.account;
             phone: String(data.get('phone') ?? '').trim(),
           }),
         });
+
+        await drain(res);
 
         if (res.ok) {
           success.hidden = false;
