@@ -336,6 +336,23 @@ identities  로그인 수단 (provider, provider_user_id) → user_id
 함수를 직접 부르는 검사로 지킵니다. 배포 전 점검도 `"mock,mock2"` 같은
 목록까지 잡습니다.
 
+### 검증되지 않은 이메일은 받지 않습니다
+
+두 제공자가 다른 기준을 쓰면 그 자체가 구멍이라, **같은 기준**으로 봅니다.
+
+| 제공자 | 보는 값 |
+|---|---|
+| 구글 | `email_verified` |
+| 카카오 | `is_email_valid` · `is_email_verified` |
+
+이메일이 없어도 **로그인은 됩니다.** 식별자는 제공자가 주는 id 이지 이메일이
+아니기 때문입니다 — 이메일을 필수로 삼았다면 카카오계정에 이메일을 등록하지
+않은 사람은 로그인 자체가 막힙니다.
+
+`tests/e2e/commerce/auth-providers.spec.ts` 가 제공자 응답을 흉내 내어
+**동작**을 확인합니다. 코드에 특정 단어가 있는지 보는 검사는 이름만 바꿔도
+통과하므로 쓰지 않습니다.
+
 ### 구글 앱 설정
 
 ```
@@ -349,6 +366,32 @@ Google Cloud → Google Auth Platform
 
 `GOOGLE_CLIENT_ID` 는 공개값이라 `wrangler.jsonc` 에, `GOOGLE_CLIENT_SECRET`
 은 `wrangler secret put` 으로만 넣습니다.
+
+### 카카오 앱 설정
+
+```
+developers.kakao.com → 내 애플리케이션 → 애플리케이션 추가
+  앱 이름 AVORA · 회사명 아보라랩스
+
+  앱 설정 > 플랫폼 > Web
+    사이트 도메인   https://avoralabs.co
+
+  제품 설정 > 카카오 로그인    활성화 ON
+    Redirect URI  https://avoralabs.co/api/auth/callback/kakao
+
+  제품 설정 > 카카오 로그인 > 동의항목
+    닉네임(profile_nickname)     선택 동의
+    카카오계정(이메일)            필수 동의  ← 비즈 앱이어야 합니다
+
+  앱 설정 > 앱 키 > REST API 키   ← KAKAO_REST_API_KEY
+  제품 설정 > 카카오 로그인 > 보안 > Client Secret  (선택, 권장)
+```
+
+동의항목(scope)은 코드에서 보내지 않고 **콘솔 설정을 따릅니다.** 콘솔에서
+켜지 않은 항목을 scope 로 보내면 오류가 나므로, 한 곳에서만 정하는 편이
+어긋날 여지가 적습니다.
+
+비즈 앱 전환에는 사업자등록번호가 필요하고, 그건 이미 있습니다(392-32-01888).
 
 구글은 `email_verified` 를 함께 줍니다. **검증되지 않은 이메일은 받지
 않습니다** — 우리는 이메일을 식별자로 쓰지 않지만(식별자는 `sub`),
@@ -800,7 +843,7 @@ npx wrangler secret put KAKAO_CLIENT_SECRET    # 활성화한 경우만
 | 탭 영역 | ≥ 44×44px | 테스트로 강제 |
 | 320~430px 가로 스크롤 | 없음 | 테스트로 강제 (5개 언어 전부) |
 | 접근성 자동 검사 (axe, WCAG 2.1 AA) | 위반 0 | **위반 0** (44개 화면·상태) |
-| 브라우저 테스트 | 전부 통과 | **1,410개 통과** (commerce 950 + launch 460) |
+| 브라우저 테스트 | 전부 통과 | **1,428개 통과** (commerce 968 + launch 460) |
 
 > 장바구니·체크아웃·주문조회는 Lighthouse SEO 가 69 로 나옵니다.
 > `noindex` 페이지를 감점하는 항목 때문이며, 이 세 페이지는 색인되면 안 되는 페이지라 정상입니다.

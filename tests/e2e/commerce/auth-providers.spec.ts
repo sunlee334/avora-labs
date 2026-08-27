@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { mockAuth, mockAuth2 } from '../../../worker/auth/mock';
 import { googleAuth } from '../../../worker/auth/google';
+import { kakaoAuth } from '../../../worker/auth/kakao';
 
 /**
  * 여러 로그인 수단.
@@ -128,6 +129,143 @@ test.describe('구글 어댑터', () => {
       GOOGLE_CLIENT_SECRET: 'super-secret',
     });
     expect(authorizeUrl).not.toContain('super-secret');
+  });
+});
+
+test.describe('카카오 어댑터', () => {
+  /* 실제 카카오를 부를 수는 없으므로, 순수한 부분만 봅니다. */
+  test('REST API 키가 있어야 켜진다', () => {
+    expect(kakaoAuth.isConfigured({})).toBe(false);
+    expect(kakaoAuth.isConfigured({ KAKAO_REST_API_KEY: '' })).toBe(false);
+    expect(kakaoAuth.isConfigured({ KAKAO_REST_API_KEY: 'rest-key' })).toBe(true);
+  });
+
+  test('보내는 주소가 카카오 인가 주소이고 state 를 싣는다', () => {
+    const { authorizeUrl } = kakaoAuth.start(
+      'https://avoralabs.co/api/auth/callback/kakao',
+      'state-value',
+      { KAKAO_REST_API_KEY: 'rest-key' },
+    );
+    const url = new URL(authorizeUrl);
+    expect(url.origin + url.pathname).toBe('https://kauth.kakao.com/oauth/authorize');
+    expect(url.searchParams.get('client_id')).toBe('rest-key');
+    expect(url.searchParams.get('state')).toBe('state-value');
+    expect(url.searchParams.get('redirect_uri')).toBe(
+      'https://avoralabs.co/api/auth/callback/kakao',
+    );
+    // 동의항목은 콘솔에서 정합니다 — 두 곳에서 정하면 어긋납니다.
+    expect(url.searchParams.get('scope')).toBeNull();
+  });
+
+  test('시크릿이 로그인 주소에 실리지 않는다', () => {
+    const { authorizeUrl } = kakaoAuth.start('https://avoralabs.co/api/auth/callback/kakao', 's', {
+      KAKAO_REST_API_KEY: 'rest-key',
+      KAKAO_CLIENT_SECRET: 'super-secret',
+    });
+    expect(authorizeUrl).not.toContain('super-secret');
+  });
+
+});
+
+test.describe('검증되지 않은 이메일은 받지 않는다', () => {
+  /**
+   * 두 제공자가 다른 기준을 쓰면 그 자체가 구멍입니다. 실제 제공자를 부를
+   * 수는 없으므로, 응답만 흉내 내어 **동작**을 봅니다 — 코드에 특정 단어가
+   * 있는지 보는 검사는 이름만 바꿔도 통과해 버립니다.
+   *
+   * 이메일을 식별자로 쓰지는 않지만(식별자는 제공자가 주는 id), 저장하고
+   * 화면에 보여주므로 남의 주소를 주장하는 값을 받아서는 안 됩니다.
+   */
+  const realFetch = globalThis.fetch;
+
+  function stub(...responses: unknown[]) {
+    let call = 0;
+    globalThis.fetch = (async () => {
+      const body = responses[Math.min(call, responses.length - 1)];
+      call += 1;
+      return new Response(JSON.stringify(body), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }) as typeof fetch;
+  }
+
+  test.afterEach(() => {
+    globalThis.fetch = realFetch;
+  });
+
+  const googleEnv = { GOOGLE_CLIENT_ID: 'id', GOOGLE_CLIENT_SECRET: 'secret' };
+  const kakaoEnv = { KAKAO_REST_API_KEY: 'key' };
+
+  test('구글 — 검증된 이메일은 받는다', async () => {
+    stub({ access_token: 't' }, { sub: '123', email: 'ok@example.test', email_verified: true, name: '홍길동' });
+    const result = await googleAuth.exchange('code', 'https://x/cb', googleEnv);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.profile.providerUserId).toBe('123');
+      expect(result.profile.email).toBe('ok@example.test');
+    }
+  });
+
+  test('구글 — 검증되지 않은 이메일은 버린다', async () => {
+    stub({ access_token: 't' }, { sub: '123', email: 'spoof@example.test', email_verified: false });
+    const result = await googleAuth.exchange('code', 'https://x/cb', googleEnv);
+    expect(result.ok).toBe(true);
+    // 로그인 자체는 됩니다 — 식별자는 sub 이지 이메일이 아니기 때문입니다.
+    if (result.ok) expect(result.profile.email).toBeUndefined();
+  });
+
+  test('카카오 — 검증된 이메일은 받는다', async () => {
+    stub(
+      { access_token: 't' },
+      {
+        id: 987,
+        kakao_account: {
+          email: 'ok@example.test',
+          is_email_valid: true,
+          is_email_verified: true,
+          profile: { nickname: '길동' },
+        },
+      },
+    );
+    const result = await kakaoAuth.exchange('code', 'https://x/cb', kakaoEnv);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.profile.providerUserId).toBe('987');
+      expect(result.profile.email).toBe('ok@example.test');
+      expect(result.profile.name).toBe('길동');
+    }
+  });
+
+  test('카카오 — 검증되지 않은 이메일은 버린다', async () => {
+    stub(
+      { access_token: 't' },
+      { id: 987, kakao_account: { email: 'spoof@example.test', is_email_verified: false } },
+    );
+    const result = await kakaoAuth.exchange('code', 'https://x/cb', kakaoEnv);
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.profile.email).toBeUndefined();
+  });
+
+  test('카카오 — 유효하지 않은 주소도 버린다', async () => {
+    stub(
+      { access_token: 't' },
+      { id: 987, kakao_account: { email: 'bad@example.test', is_email_valid: false, is_email_verified: true } },
+    );
+    const result = await kakaoAuth.exchange('code', 'https://x/cb', kakaoEnv);
+    if (result.ok) expect(result.profile.email).toBeUndefined();
+  });
+
+  test('카카오 — 이메일이 아예 없어도 로그인은 된다', async () => {
+    // 카카오계정에 이메일을 등록하지 않은 사람이 실제로 있습니다.
+    // 이메일을 필수로 삼았다면 그 사람은 로그인 자체가 막힙니다.
+    stub({ access_token: 't' }, { id: 987, kakao_account: { profile: { nickname: '길동' } } });
+    const result = await kakaoAuth.exchange('code', 'https://x/cb', kakaoEnv);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.profile.providerUserId).toBe('987');
+      expect(result.profile.email).toBeUndefined();
+    }
   });
 });
 
