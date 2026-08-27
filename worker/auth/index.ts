@@ -207,7 +207,13 @@ export async function handleCallback(
   const redirectUri = new URL(`/api/auth/callback/${provider.name}`, url).href;
   const result = await provider.exchange(code, redirectUri, env as unknown as Record<string, unknown>);
   if (!result.ok) {
-    console.error('로그인 실패', { provider: provider.name, error: result.error });
+    // 제공자가 준 실패 이유까지 남깁니다. error 코드만 남기면 무엇이
+    // 틀렸는지 알 수 없어, 서버 밖에서 따로 토큰 요청을 만들어 봐야 합니다.
+    console.error('로그인 실패', {
+      provider: provider.name,
+      error: result.error,
+      detail: result.message,
+    });
     return json({ error: result.error, message: '로그인에 실패했습니다. 다시 시도해 주세요.' }, 502);
   }
 

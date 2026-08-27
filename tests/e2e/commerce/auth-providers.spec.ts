@@ -557,3 +557,63 @@ test.describe('개인정보처리방침이 실제 수집과 맞는다', () => {
     expect(new Set(counts).size, `언어별 항목 수가 다릅니다: ${counts.join(', ')}`).toBe(1);
   });
 });
+
+test.describe('실패 이유는 로그에만 남고 사용자에게는 가지 않는다', () => {
+  /**
+   * 제공자가 준 실패 이유(KOE010 같은 것)를 버리면, 설정이 어긋났을 때
+   * 서버 밖에서 따로 토큰 요청을 만들어 봐야 원인을 알 수 있습니다.
+   * 실제로 카카오 Client Secret 문제를 그렇게 진단해야 했습니다.
+   *
+   * 그렇다고 그 값을 사용자에게 보내면 안 됩니다 — 무엇이 틀렸는지
+   * 알려주는 것은 공격자에게도 알려주는 것입니다.
+   */
+  const realFetch = globalThis.fetch;
+  test.afterEach(() => {
+    globalThis.fetch = realFetch;
+  });
+
+  function failToken(body: unknown, status = 400) {
+    globalThis.fetch = (async () =>
+      new Response(JSON.stringify(body), {
+        status,
+        headers: { 'Content-Type': 'application/json' },
+      })) as typeof fetch;
+  }
+
+  test('카카오 — 오류 코드가 어댑터 메시지에 담긴다', async () => {
+    failToken({ error: 'invalid_client', error_code: 'KOE010', error_description: 'Bad client credentials' });
+    const result = await kakaoAuth.exchange('code', 'https://x/cb', { KAKAO_REST_API_KEY: 'k' });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error).toBe('TOKEN_FAILED');
+      expect(result.message, '실패 이유가 없으면 로그만 보고는 알 수 없습니다').toContain('KOE010');
+    }
+  });
+
+  test('구글 — 오류 코드가 어댑터 메시지에 담긴다', async () => {
+    failToken({ error: 'invalid_grant', error_description: 'Bad Request' });
+    const result = await googleAuth.exchange('code', 'https://x/cb', {
+      GOOGLE_CLIENT_ID: 'id',
+      GOOGLE_CLIENT_SECRET: 'secret',
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.message).toContain('invalid_grant');
+  });
+
+  test('사용자에게는 일반적인 문구만 나간다', async ({ request }) => {
+    // 콜백이 실패했을 때 응답 본문에 제공자의 오류가 섞여서는 안 됩니다.
+    const start = await request.get('/api/auth/login?provider=mock&returnTo=%2Fko%2Faccount', {
+      maxRedirects: 0,
+    });
+    const callback = new URL(start.headers()['location']);
+    // mock 어댑터는 fail 로 시작하는 code 에 실패를 돌려줍니다.
+    callback.searchParams.set('code', 'fail-on-purpose');
+    const done = await request.get(callback.href, { maxRedirects: 0 });
+
+    expect(done.status()).toBe(502);
+    const body = await done.json();
+    expect(body.message).toBe('로그인에 실패했습니다. 다시 시도해 주세요.');
+    // 어댑터가 남긴 상세 내용이 사용자에게 가면 안 됩니다.
+    expect(JSON.stringify(body)).not.toContain('테스트용 실패');
+  });
+});

@@ -367,6 +367,21 @@ Google Cloud → Google Auth Platform
 `GOOGLE_CLIENT_ID` 는 공개값이라 `wrangler.jsonc` 에, `GOOGLE_CLIENT_SECRET`
 은 `wrangler secret put` 으로만 넣습니다.
 
+### 실패 이유는 로그에만 남깁니다
+
+제공자가 준 오류 코드를 버리면, 설정이 어긋났을 때 **서버 밖에서 따로 토큰
+요청을 만들어 봐야** 원인을 알 수 있습니다. 실제로 카카오 `KOE010`
+(Client Secret 을 콘솔에서 켰는데 서버에 값이 없음)을 그렇게 진단했습니다.
+
+그래서 어댑터는 제공자의 오류 코드를 `message` 에 담고, 호출하는 쪽이
+`console.error` 로 남긴 뒤 **사용자에게는 일반적인 문구만** 내보냅니다.
+무엇이 틀렸는지 알려주는 것은 공격자에게도 알려주는 것입니다.
+
+```
+로그    로그인 실패 { provider: 'kakao', error: 'TOKEN_FAILED', detail: '… KOE010 …' }
+응답    { error: 'TOKEN_FAILED', message: '로그인에 실패했습니다. 다시 시도해 주세요.' }
+```
+
 ### 카카오 앱 설정
 
 ```
@@ -379,9 +394,18 @@ developers.kakao.com → 내 애플리케이션 → 애플리케이션 추가
   제품 설정 > 카카오 로그인    활성화 ON
     Redirect URI  https://avoralabs.co/api/auth/callback/kakao
 
+  제품 설정 > 카카오 로그인 > 일반
+    Redirect URI  https://avoralabs.co/api/auth/callback/kakao
+    ⚠️ '고급' 의 **로그아웃 리다이렉트 URI** 와 다른 칸입니다. 그쪽에 넣으면
+       로그인 화면까지는 가지만 인가 코드가 오지 않습니다.
+
   제품 설정 > 카카오 로그인 > 동의항목
     닉네임(profile_nickname)     선택 동의
     카카오계정(이메일)            필수 동의  ← 비즈 앱이어야 합니다
+
+  제품 설정 > 카카오 로그인 > 고급 > Client Secret
+    ⚠️ 여기서 '사용함' 으로 켜면 KAKAO_CLIENT_SECRET 을 반드시 함께 넣어야
+       합니다. 켜고 값을 안 넣으면 토큰 발급이 KOE010 으로 전부 실패합니다.
 
   앱 설정 > 앱 키 > REST API 키   ← KAKAO_REST_API_KEY
   제품 설정 > 카카오 로그인 > 보안 > Client Secret  (선택, 권장)
@@ -899,7 +923,7 @@ npx wrangler secret put KAKAO_CLIENT_SECRET    # 활성화한 경우만
 | 탭 영역 | ≥ 44×44px | 테스트로 강제 |
 | 320~430px 가로 스크롤 | 없음 | 테스트로 강제 (5개 언어 전부) |
 | 접근성 자동 검사 (axe, WCAG 2.1 AA) | 위반 0 | **위반 0** (44개 화면·상태) |
-| 브라우저 테스트 | 전부 통과 | **1,456개 통과** (commerce 996 + launch 460) |
+| 브라우저 테스트 | 전부 통과 | **1,462개 통과** (commerce 1002 + launch 460) |
 
 > 장바구니·체크아웃·주문조회는 Lighthouse SEO 가 69 로 나옵니다.
 > `noindex` 페이지를 감점하는 항목 때문이며, 이 세 페이지는 색인되면 안 되는 페이지라 정상입니다.

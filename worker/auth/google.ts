@@ -72,12 +72,24 @@ export const googleAuth: AuthProvider = {
     }
 
     if (!tokenRes.ok) {
-      // 무엇이 틀렸는지는 알려주지 않습니다 — 인가 코드 재사용, 만료,
-      // redirect_uri 불일치가 모두 여기로 옵니다.
+      /*
+       * 사용자에게는 무엇이 틀렸는지 알려주지 않습니다 — 인가 코드 재사용,
+       * 만료, redirect_uri 불일치가 모두 여기로 옵니다.
+       *
+       * 다만 **로그에는 남깁니다.** 남기지 않으면 설정이 어긋났을 때
+       * 서버 밖에서 따로 토큰 요청을 만들어 봐야 원인을 알 수 있습니다.
+       * 이 message 는 호출하는 쪽이 일반적인 문구로 바꿔 내보냅니다.
+       */
+      const failure = (await tokenRes.json().catch(() => null)) as {
+        error?: string;
+        error_description?: string;
+      } | null;
       return {
         ok: false,
         error: 'TOKEN_EXCHANGE_FAILED',
-        message: '로그인에 실패했습니다. 다시 시도해 주세요.',
+        message:
+          `구글 토큰 발급 실패 (${tokenRes.status})` +
+          ` ${failure?.error ?? ''} ${failure?.error_description ?? ''}`.trimEnd(),
       };
     }
 

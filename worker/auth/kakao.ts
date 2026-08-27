@@ -66,9 +66,31 @@ export const kakaoAuth: AuthProvider = {
       };
     }
 
-    const token = (await tokenRes.json().catch(() => null)) as { access_token?: string } | null;
+    const token = (await tokenRes.json().catch(() => null)) as {
+      access_token?: string;
+      error?: string;
+      error_code?: string;
+      error_description?: string;
+    } | null;
+
     if (!tokenRes.ok || !token?.access_token) {
-      return { ok: false, error: 'TOKEN_FAILED', message: `카카오 토큰 발급 실패 (${tokenRes.status})` };
+      /*
+       * 카카오가 준 실패 이유를 그대로 남깁니다.
+       *
+       * 예전에는 상태 코드만 남겼는데, 그것만으로는 무엇이 틀렸는지 알 수
+       * 없었습니다. 실제로 KOE010(Client Secret 을 콘솔에서 켰는데 보내지
+       * 않음)을 진단하려고 서버 밖에서 따로 토큰 요청을 만들어 봐야 했습니다.
+       *
+       * 사용자에게는 이 값이 가지 않습니다 — 호출하는 쪽이 일반적인 문구로
+       * 바꿔 내보냅니다(worker/auth/index.ts).
+       */
+      return {
+        ok: false,
+        error: 'TOKEN_FAILED',
+        message:
+          `카카오 토큰 발급 실패 (${tokenRes.status})` +
+          ` ${token?.error_code ?? ''} ${token?.error ?? ''} ${token?.error_description ?? ''}`.trimEnd(),
+      };
     }
 
     let userRes: Response;
@@ -98,7 +120,14 @@ export const kakaoAuth: AuthProvider = {
     } | null;
 
     if (!userRes.ok || user?.id == null) {
-      return { ok: false, error: 'PROFILE_FAILED', message: `카카오 사용자 조회 실패 (${userRes.status})` };
+      const failure = user as unknown as { msg?: string; code?: number } | null;
+      return {
+        ok: false,
+        error: 'PROFILE_FAILED',
+        message:
+          `카카오 사용자 조회 실패 (${userRes.status})` +
+          ` ${failure?.code ?? ''} ${failure?.msg ?? ''}`.trimEnd(),
+      };
     }
 
     /*
