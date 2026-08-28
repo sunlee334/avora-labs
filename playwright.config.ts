@@ -89,22 +89,13 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
 
-  /*
-   * CI 러너는 2 코어인데(private 저장소의 `ubuntu-latest`), Playwright 의
-   * 기본 worker 수는 **코어수의 절반** 이라 정확히 1 이 됩니다. 샤드를 5 개로
-   * 나눠 러너를 늘려도 러너마다 코어 하나는 계속 놀았습니다.
-   *
-   * 병렬로 돌려도 되는지는 이미 압니다 — 로컬이 8 worker 로 같은 D1 하나를
-   * 두들기며 2,105 개를 통과시킵니다.
-   */
-  workers: process.env.CI ? '100%' : undefined,
-
   // CI 는 테스트를 샤드로 쪼개 여러 러너에 나눠 돌립니다. 각 샤드는 blob 을
   // 남기고, 실패했을 때만 `merge-reports` 가 하나의 HTML 로 합칩니다.
   //
-  // fileName 을 직접 짓는 이유: 기본 이름은 샤드 번호에서만 나오므로
-  // commerce 1/3 과 launch 1/2 가 똑같이 `report-1.zip` 이 됩니다. 합칠 때
-  // 한 쪽이 다른 쪽을 덮어써 절반이 조용히 사라집니다.
+  // fileName 을 직접 짓는 이유: 기본 이름은 샤드 번호에서만 나오므로 여러
+  // 모드·프로젝트의 1 번 샤드가 똑같이 `report-1.zip` 이 됩니다. 합칠 때 한
+  // 쪽이 다른 쪽을 덮어써 절반이 조용히 사라집니다. E2E_SHARD 에는 워크플로가
+  // `mobile-1` 처럼 프로젝트까지 넣어 넘깁니다.
   reporter: process.env.CI
     ? [['github'], ['blob', { fileName: `${MODE}-${process.env.E2E_SHARD ?? '1'}.zip` }]]
     : 'list',

@@ -54,7 +54,7 @@ jobs:
         run: npm run build
 
   e2e:
-    name: E2E ${{ matrix.mode }} ${{ matrix.shard }}/${{ matrix.total }}
+    name: E2E ${{ matrix.mode }} ${{ matrix.project }} ${{ matrix.shard }}/${{ matrix.total }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -62,15 +62,30 @@ jobs:
       # 다음 게 깨지는 왕복을 없앱니다.
       fail-fast: false
       matrix:
-        # 사이트는 두 모드로 동작합니다. 한 쪽만 돌리면 나머지는 아무도
-        # 확인하지 않은 채 나갑니다. 샤드 수는 각 모드의 실측 시간에
-        # 비례합니다 — commerce 679 초, launch 338 초.
+        # ── 왜 프로젝트까지 갈라 놓았는가 ────────────────────────────
+        #
+        # `fullyParallel` 이라 샤딩은 테스트 **단위** 로 이뤄지지만, 균형은
+        # **개수** 로만 맞춥니다. Playwright 가 프로젝트 순으로 정렬한 뒤
+        # 반으로 자르니, launch 2 샤드가 경계에 딱 맞아떨어졌습니다:
+        #
+        #   샤드 1/2  mobile  347 개 → 288 초
+        #   샤드 2/2  desktop 347 개 → 140 초
+        #
+        # 개수는 같은데 시간은 2 배입니다. 리눅스에서 WebKit 이 Chromium 보다
+        # 그만큼 느립니다. 느린 쪽이 통째로 한 샤드에 몰려 벽시계를 잡았습니다.
+        #
+        # 그래서 프로젝트를 먼저 가르고, 느린 mobile 에 샤드를 더 줍니다.
+        # 덤으로 잡마다 브라우저를 하나만 깔면 됩니다 — 예전에는 webkit 과
+        # chromium 의 apt 의존성 182 개를 샤드마다 함께 깔았습니다.
         include:
-          - { mode: commerce, shard: 1, total: 3 }
-          - { mode: commerce, shard: 2, total: 3 }
-          - { mode: commerce, shard: 3, total: 3 }
-          - { mode: launch, shard: 1, total: 2 }
-          - { mode: launch, shard: 2, total: 2 }
+          - { mode: commerce, project: mobile, browser: webkit, shard: 1, total: 3 }
+          - { mode: commerce, project: mobile, browser: webkit, shard: 2, total: 3 }
+          - { mode: commerce, project: mobile, browser: webkit, shard: 3, total: 3 }
+          - { mode: commerce, project: desktop, browser: chromium, shard: 1, total: 2 }
+          - { mode: commerce, project: desktop, browser: chromium, shard: 2, total: 2 }
+          - { mode: launch, project: mobile, browser: webkit, shard: 1, total: 2 }
+          - { mode: launch, project: mobile, browser: webkit, shard: 2, total: 2 }
+          - { mode: launch, project: desktop, browser: chromium, shard: 1, total: 1 }
     steps:
       - uses: actions/checkout@v5
 
@@ -89,36 +104,39 @@ jobs:
 
       - run: npm ci
 
-      # 브라우저는 잡마다 새로 받으면 5 번 받습니다. 캐시는 잡들이 같은
-      # 열쇠로 공유하므로 한 번만 내려받습니다.
+      # 잡마다 자기 프로젝트가 쓰는 브라우저 하나만 받습니다. 캐시는 같은
+      # 브라우저를 쓰는 잡들끼리 공유합니다.
       - name: 브라우저 캐시
         id: pw-cache
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          key: playwright-${{ runner.os }}-${{ matrix.browser }}-${{ hashFiles('package-lock.json') }}
 
       - name: Playwright 브라우저 설치
         if: steps.pw-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps webkit chromium
+        run: npx playwright install --with-deps ${{ matrix.browser }}
 
       # 캐시에는 브라우저만 담깁니다. OS 패키지는 apt 로 들어가므로
-      # 캐시가 맞았어도 이건 따로 깔아야 webkit 이 뜹니다.
+      # 캐시가 맞았어도 이건 따로 깔아야 브라우저가 뜹니다.
       - name: 브라우저 OS 의존성
         if: steps.pw-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps webkit chromium
+        run: npx playwright install-deps ${{ matrix.browser }}
 
       - name: E2E 테스트
         env:
           E2E_MODE: ${{ matrix.mode }}
-          E2E_SHARD: ${{ matrix.shard }}
-        run: npx playwright test --shard=${{ matrix.shard }}/${{ matrix.total }}
+          E2E_SHARD: ${{ matrix.project }}-${{ matrix.shard }}
+        run: >-
+          npx playwright test
+          --project=${{ matrix.project }}
+          --shard=${{ matrix.shard }}/${{ matrix.total }}
 
       - name: blob 리포트 보관
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: blob-${{ matrix.mode }}-${{ matrix.shard }}
+          name: blob-${{ matrix.mode }}-${{ matrix.project }}-${{ matrix.shard }}
           path: blob-report/
           retention-days: 1
 
