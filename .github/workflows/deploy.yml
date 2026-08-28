@@ -129,6 +129,39 @@ jobs:
             fi
           fi
 
+      # ── 운영 D1 이 마이그레이션보다 뒤처져 있으면 배포를 멈춥니다 ──
+      #
+      # 이 저장소에는 운영 마이그레이션을 자동으로 거는 단계가 없습니다.
+      # `npm run db:migrate` 를 사람이 손으로 돌립니다. 그 자체는 의도된
+      # 것입니다 — 마이그레이션은 되돌리기 어렵고, 배포마다 자동으로 걸면
+      # 잘못된 스키마 변경이 아무도 안 볼 때 운영에 들어갑니다.
+      #
+      # 문제는 **잊었을 때 아무도 말해 주지 않는다** 는 것이었습니다.
+      # 새 표를 쓰는 코드가 먼저 배포되면 그 기능은 운영에서만 500 을 냅니다.
+      # 테스트는 로컬 D1 을 쓰므로 전부 초록입니다.
+      #
+      # 그래서 여기서는 **적용하지 않고 확인만** 합니다. 뒤처져 있으면
+      # 배포를 멈추고, 사람이 `npm run db:migrate` 를 돌린 뒤 다시 돌립니다.
+      - name: 운영 D1 마이그레이션 확인
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          out=$(npx wrangler d1 migrations list avora-orders --remote 2>&1) || {
+            echo "$out"
+            echo "::error::운영 D1 상태를 읽지 못했습니다. 위 출력을 확인하세요."
+            exit 1
+          }
+          echo "$out"
+          if printf '%s' "$out" | grep -q 'No migrations to apply'; then
+            echo "운영 D1 이 migrations/ 와 같습니다."
+            exit 0
+          fi
+          echo "::error::운영 D1 에 적용되지 않은 마이그레이션이 있습니다."
+          echo "  npm run db:migrate 를 돌린 뒤 이 워크플로를 다시 실행하세요."
+          echo "  (자동으로 걸지 않는 이유: 마이그레이션은 되돌리기 어렵습니다)"
+          exit 1
+
       - run: npm run build
 
       - name: 배포
