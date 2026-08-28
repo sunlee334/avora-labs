@@ -65,7 +65,7 @@ function summaryHtml(summary: ReviewSummary, labels: SlotLabels): string {
       const percent = summary.count === 0 ? 0 : Math.round((n / summary.count) * 100);
       return (
         `<div class="reviews__bar">` +
-        `<span class="reviews__bar-star">${star}</span>` +
+        `<span>${star}</span>` +
         `<span class="reviews__bar-track"><span class="reviews__bar-fill" style="width:${percent}%"></span></span>` +
         `<span class="reviews__bar-n">${n}</span>` +
         `</div>`

@@ -42,14 +42,14 @@ const purchasable = SELLS_DIRECTLY;
       data-product-href={localePath(locale, 'product')}
     >
       {/* 비어 있는 상태 — 기본값입니다. JS 가 장바구니를 읽고 내용이 있으면 감춥니다. */}
-      <div class="cart__empty" data-cart-empty>
+      <div data-cart-empty>
         <p class="body">{c.empty}</p>
         <p style="margin-top: 22px">
           <a class="cta" href={localePath(locale, 'product')}>{c.emptyCta}</a>
         </p>
       </div>
 
-      <div class="cart__filled" data-cart-filled hidden>
+      <div data-cart-filled hidden>
         <ul class="cart__lines" data-cart-lines></ul>
 
         <dl class="cart__totals">
@@ -129,7 +129,7 @@ const purchasable = SELLS_DIRECTLY;
           li.className = 'cart__line';
           li.innerHTML = `
             <img class="cart__thumb" src="${line.image}" alt="" width="88" height="118" loading="lazy">
-            <div class="cart__line-body">
+            <div>
               <p class="cart__line-name">${line.name}</p>
               <p class="cart__line-price">${line.price != null ? money(line.price) : ''}</p>
               <div class="cart__qty" role="group" aria-label="${labels!.dataset.labelQuantity}">

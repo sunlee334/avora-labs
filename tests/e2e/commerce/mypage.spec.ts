@@ -254,3 +254,26 @@ test.describe('계정 정보', () => {
     await expect(page.locator('[data-account-signed]')).toBeHidden();
   });
 });
+
+test.describe('주문 연결 폼', () => {
+  /**
+   * 이 폼만 한때 `<label class="field"><span class="field__label">` 구조였습니다.
+   * `.field label` 규칙이 `.field` **안의** label 을 겨냥하므로, 라벨 자신이
+   * `.field` 이면 규칙이 걸리지 않습니다. 그래서 이 폼의 라벨만 16px/400 으로,
+   * 나머지 폼은 14px/600 으로 그려졌습니다. 눈에는 띄지만 아무도 안 세는 차이라
+   * 자로 재서 붙잡아 둡니다.
+   */
+  test('라벨과 입력칸이 다른 폼과 같은 모양이다', async ({ page }) => {
+    await loginAs(page, freshId('claim'));
+    await page.goto('/ko/account');
+
+    const shape = (sel: string) =>
+      page.locator(sel).evaluate((el) => {
+        const s = getComputedStyle(el);
+        return { size: s.fontSize, weight: s.fontWeight };
+      });
+
+    expect(await shape('label[for="claim-orderId"]')).toEqual(await shape('label[for="ad-name"]'));
+    expect(await shape('#claim-orderId')).toEqual(await shape('#ad-name'));
+  });
+});

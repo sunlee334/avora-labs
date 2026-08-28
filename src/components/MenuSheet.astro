@@ -125,7 +125,7 @@ const utility = UTILITY_VISIBLE.filter((item) => item.badge !== 'cart');
           {utility.map((item) => (
             <li>
               <a
-                class="menu__item menu__item--utility"
+                class="menu__item"
                 href={localePath(locale, item.path)}
                 aria-current={isCurrent(item) ? 'page' : undefined}
               >

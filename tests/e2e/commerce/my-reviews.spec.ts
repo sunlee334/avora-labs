@@ -491,10 +491,11 @@ test.describe('관리 화면 후기 탭', () => {
   });
 
   test('행을 누르면 상세가 열리고 전체 본문이 보인다', async ({ page }) => {
-    await someReview(page);
+    const id = await someReview(page);
     await page.goto('/admin');
     await page.locator('[data-tab="reviews"]').click();
-    await page.locator('[data-rv-rows] tr').first().click();
+    // 목록은 최신순이라 `.first()` 는 나란히 도는 다른 테스트의 후기일 수 있습니다.
+    await page.locator(`[data-rv-row="${id}"]`).click();
     await expect(page.locator('[data-rv-detail]')).toBeVisible();
     await expect(page.locator('[data-rv-d-body]')).toContainText('관리 화면에서 볼');
   });
@@ -502,10 +503,10 @@ test.describe('관리 화면 후기 탭', () => {
   test('이유 없이 숨길 수 없다', async ({ page }) => {
     // 기준 없이 숨긴 기록이 없으면, 부정적 후기만 골라 숨겼는지 나중에
     // 아무도 증명할 수 없습니다.
-    await someReview(page);
+    const id = await someReview(page);
     await page.goto('/admin');
     await page.locator('[data-tab="reviews"]').click();
-    await page.locator('[data-rv-rows] tr').first().click();
+    await page.locator(`[data-rv-row="${id}"]`).click();
     await page.locator('[data-rv-hide]').click();
     await expect(page.locator('[data-rv-error]')).toBeVisible();
     await expect(page.locator('[data-rv-error]')).toContainText('이유');

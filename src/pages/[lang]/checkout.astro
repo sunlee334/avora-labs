@@ -53,7 +53,7 @@ const methods = country.methods.filter((m) => m.enabled);
           data-cart-href={localePath(locale, 'cart')}
         >
           {/* 장바구니가 비었을 때 */}
-          <div class="checkout__empty" data-checkout-empty hidden>
+          <div data-checkout-empty hidden>
             <p class="body">{c.emptyCart}</p>
             <p style="margin-top: 20px">
               <a class="cta" href={localePath(locale, 'product')}>{t.cart.emptyCta}</a>
