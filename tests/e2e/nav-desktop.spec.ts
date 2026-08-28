@@ -201,6 +201,19 @@ test.describe('드롭다운', () => {
     await expect(page.locator('.nav__dropdown')).toBeVisible();
   });
 
+  test('눌렀다가 마우스를 치우면 닫힌다', async ({ page }) => {
+    // 클릭도 버튼에 포커스를 줍니다. mouseleave 가 activeElement 를 보면
+    // 클릭 뒤에는 영영 안 닫힙니다 — :focus-visible 로 키보드 포커스만
+    // 걸러야 합니다. 운영에서 실제로 났던 결함입니다.
+    await page.goto('/ko/');
+    test.skip(!(await finePointer(page)), '마우스가 없는 기기입니다');
+    await page.locator('.nav__group').hover();
+    await page.locator('[data-nav-drop]').click();
+    await expect(page.locator('.nav__dropdown')).toBeVisible();
+    await page.locator('.nav__wordmark').hover();
+    await expect(page.locator('.nav__dropdown')).toBeHidden();
+  });
+
   test('열린 상태로 5개 언어 × 두 폭에서 넘치지 않는다', async ({ page }) => {
     // AC-3 은 **닫힌** 상태만 봅니다. left:0 이면 여기서 최대 133.7px 넘칩니다.
     for (const width of [900, 1280]) {

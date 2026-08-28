@@ -195,9 +195,15 @@ const utility = UTILITY_VISIBLE.filter((item) => item.badge !== 'cart');
 
     group.addEventListener('mouseleave', () => {
       if (!finePointer.matches) return;
-      // 키보드로 연 것을 마우스가 스쳐 지나가며 닫지 않게, 포커스가 이 묶음
-      // 안에 있으면 그대로 둡니다.
-      if (group.contains(document.activeElement)) return;
+      /*
+       * 키보드로 연 것을 마우스가 스쳐 지나가며 닫지 않게 둡니다.
+       *
+       * activeElement 를 보면 안 됩니다 — **클릭도 버튼에 포커스를 줍니다.**
+       * 그래서 올려서 열고 누른 뒤 마우스를 치우면 메뉴가 열린 채 남습니다.
+       * :focus-visible 은 키보드로 옮긴 포커스에만 붙고 마우스 클릭에는
+       * 붙지 않아, 원래 막으려던 경우만 정확히 걸러냅니다.
+       */
+      if (group.querySelector(':focus-visible')) return;
       setOpen(false);
     });
   }
