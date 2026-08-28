@@ -2,20 +2,21 @@
  * 이 파일은 자동 생성됩니다. 직접 수정하지 마세요.
  * 값을 바꾸려면 tokens/design-tokens.json 을 고치고 npm run tokens 실행.
  *
- * 팔레트: A — Deep Forest / Warm Cream (AVORA_디자인_가이드.pdf 기준)
+ * 팔레트: Mist Blue / Off White / Charcoal (AVORA 브랜딩(수정안)ver5 6장 기준)
  * ───────────────────────────────────────────────────────────── */
 :root {
-  --brand-primary: #23291F; /* Deep Forest — 로고·핵심 브랜드 요소·역상 블록 배경 */
-  --brand-surface: #F5F3EC; /* Soft Paper — 기본 배경 */
-  --brand-surface-alt: #E9E4D6; /* Warm Cream — 교차 배경 · 역상 잉크 */
-  --brand-muted: #67655A; /* Stone Accent — 보조 텍스트 · 구분선 */
-  --brand-muted-on-dark: #A6A38F; /* Stone Light — 어두운 면 위 보조 텍스트 */
-  --brand-accent-campaign: #E9E4D6; /* Warm Cream (대체) — 캠페인 포인트. 팔레트 A에는 전용 캠페인 컬러가 없어 역상 대비로 대체. 나중에 캠페인 컬러를 도입하면 이 값만 교체 */
+  --brand-primary: #252B31; /* Charcoal — 로고·핵심 브랜드 요소·역상 블록 배경 */
+  --brand-surface: #F6F7F8; /* Off White — 기본 배경 */
+  --brand-surface-alt: #AFC8D8; /* Mist Blue — 교차 배경 · 역상 잉크 */
+  --brand-surface-tint: #D2E0E8; /* Mist Blue Tint — 교차 섹션 배경 (넓은 면적) */
+  --brand-muted: #485058; /* Slate — 보조 텍스트 · 구분선 */
+  --brand-muted-on-dark: #A8BAC6; /* Slate Light — 어두운 면 위 보조 텍스트 */
+  --brand-accent-campaign: #E2673B; /* Sunset — 캠페인 포인트 · 강조 밑줄 */
 
-  --color-ink: #23291F;
-  --color-ink-inverse: #E9E4D6;
-  --color-line: rgba(35, 41, 31, 0.14);
-  --color-line-inverse: rgba(233, 228, 214, 0.20);
+  --color-ink: #252B31;
+  --color-ink-inverse: #AFC8D8;
+  --color-line: rgba(37, 43, 49, 0.14);
+  --color-line-inverse: rgba(175, 200, 216, 0.20);
 
   --font-display: 'AVORA Display', 'Noto Serif KR', 'Apple SD Gothic Neo', serif;
   --font-body: 'AVORA Body', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;

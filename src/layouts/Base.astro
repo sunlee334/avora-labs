@@ -7,6 +7,9 @@ import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import { ORIGIN, LOCALE_TAGS, DEFAULT_LOCALE, type Locale } from '../config/site';
 import { dict, alternates, localePath } from '../i18n';
+// 모바일 브라우저의 주소창 색입니다. 브랜드 색이므로 토큰에서 읽습니다 —
+// 여기 값을 베껴 적으면 팔레트가 바뀔 때 이 한 줄만 옛 색으로 남습니다.
+import tokens from '../../tokens/design-tokens.json';
 
 interface Props {
   locale: Locale;
@@ -108,7 +111,7 @@ const xDefault = !wanted || wanted.includes(DEFAULT_LOCALE)
 
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png" />
-    <meta name="theme-color" content="#23291F" />
+    <meta name="theme-color" content={tokens.color.brand.primary.value} />
 
     {/*
       폰트는 언어별 서브셋입니다. 이 페이지 언어에 실제로 쓰이는 글자만 담겨 있어

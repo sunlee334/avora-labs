@@ -36,8 +36,13 @@ const USED: Array<{ fg: string; bg: string; where: string; min: number }> = [
   { fg: 'primary', bg: 'surfaceAlt', where: '본문 잉크 / 대체 배경', min: 4.5 },
   { fg: 'muted', bg: 'surface', where: '보조 텍스트 / 기본 배경', min: 4.5 },
   { fg: 'muted', bg: 'surfaceAlt', where: '보조 텍스트 / 대체 배경', min: 4.5 },
+  // 교차 섹션(.section--alt)이 실제로 깔리는 색은 진한 Mist Blue 가 아니라
+  // 옅게 섞은 tint 입니다. 위 두 줄만 지키면 화면에 없는 조합을 검사하고
+  // 화면에 있는 조합은 놓칩니다.
+  { fg: 'primary', bg: 'surfaceTint', where: '본문 잉크 / 교차 섹션', min: 4.5 },
+  { fg: 'muted', bg: 'surfaceTint', where: '보조 텍스트 / 교차 섹션', min: 4.5 },
   { fg: 'surface', bg: 'primary', where: '역상 본문 / 어두운 면', min: 4.5 },
-  { fg: 'surfaceAlt', bg: 'primary', where: '역상 본문(크림) / 어두운 면', min: 4.5 },
+  { fg: 'surfaceAlt', bg: 'primary', where: '역상 본문(Mist Blue) / 어두운 면', min: 4.5 },
   { fg: 'mutedOnDark', bg: 'primary', where: '어두운 면 위 보조 텍스트', min: 4.5 },
 ];
 

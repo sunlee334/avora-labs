@@ -510,7 +510,7 @@ const FULFILLMENT_LABEL: Record<string, string> = {
         border: 0; border-radius: 14px; padding: 0; width: min(680px, 94vw);
         max-height: 88svh; background: var(--brand-surface); color: var(--color-ink);
       }
-      .admin .detail::backdrop { background: rgba(35, 41, 31, 0.4); }
+      .admin .detail::backdrop { background: color-mix(in srgb, var(--color-ink) 40%, transparent); }
       .admin .detail__head {
         display: flex; align-items: center; justify-content: space-between; gap: 12px;
         padding: 16px 20px; border-bottom: 1px solid var(--color-line);

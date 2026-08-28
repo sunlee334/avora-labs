@@ -133,12 +133,17 @@ button {
   padding-block: var(--space-section-mobile);
 }
 
+/*
+ * 교차 섹션은 진한 Mist Blue 가 아니라 옅게 섞은 tint 를 씁니다.
+ * 예전 Warm Cream 은 기본 배경과 1.14:1 밖에 차이가 없는 옅은 결이었는데,
+ * Mist Blue 를 그대로 큰 면적에 쓰면 1.62:1 이 되어 색조가 아니라 **무게** 가
+ * 달라집니다. 긴 페이지에서는 화면 절반이 통째로 파래집니다.
+ * 진한 Mist Blue 는 어두운 면 위 글자색과 포인트에 그대로 남아 있습니다.
+ */
 .section--alt {
-  background: var(--brand-surface-alt);
+  background: var(--brand-surface-tint);
 }
 
-/* 팔레트 A 에는 캠페인 컬러가 없습니다.
-   ver3 문서가 라임에 맡기려던 "브랜드의 에너지 버튼" 역할을 이 역상 블록이 대신합니다. */
 .section--dark {
   background: var(--brand-primary);
   color: var(--brand-surface-alt);
@@ -224,8 +229,15 @@ button {
 .rise.is-in .mark::after {
   transform: scaleX(1);
 }
-/* 밝은 지반 위에서는 Warm Cream 밑줄이 보이지 않으므로 잉크색으로 대체합니다. */
-.section:not(.section--dark) .mark::after {
+/*
+ * 캠페인 컬러(Sunset)는 기본 배경에서 3.14:1, 어두운 면에서 4.25:1 로 양쪽 다
+ * 보입니다. 예외는 교차 섹션의 Mist Blue tint 입니다 — 둘 다 중간 밝기라 2.50:1 로 묻힙니다.
+ * 그래서 그 한 자리에서만 잉크로 바꿉니다(잉크 대 tint 는 10.60:1).
+ *
+ * 예전에는 캠페인 자리에 Warm Cream 이 들어가 있어 밝은 면 전체에서 보이지
+ * 않았고, 그래서 이 규칙이 `:not(.section--dark)` 로 훨씬 넓었습니다.
+ */
+.section--alt .mark::after {
   background: var(--color-ink);
 }
 
@@ -373,7 +385,7 @@ button {
   background: var(--brand-surface);
   border: 1px solid var(--color-line);
   border-radius: 10px;
-  box-shadow: 0 18px 40px -18px rgba(35, 41, 31, 0.3);
+  box-shadow: 0 18px 40px -18px color-mix(in srgb, var(--color-ink) 30%, transparent);
 }
 .nav__dropdown[hidden] {
   display: none;
@@ -499,7 +511,7 @@ button {
   overflow-y: auto;
 }
 .lang__sheet::backdrop {
-  background: rgba(35, 41, 31, 0.38);
+  background: color-mix(in srgb, var(--color-ink) 38%, transparent);
 }
 
 .lang__head {
@@ -563,10 +575,10 @@ button {
     border: 1px solid var(--color-line);
     border-radius: 12px;
     padding: 4px 16px 12px;
-    box-shadow: 0 20px 50px -20px rgba(35, 41, 31, 0.35);
+    box-shadow: 0 20px 50px -20px color-mix(in srgb, var(--color-ink) 35%, transparent);
   }
   .lang__sheet::backdrop {
-    background: rgba(35, 41, 31, 0.12);
+    background: color-mix(in srgb, var(--color-ink) 12%, transparent);
   }
 }
 
@@ -694,8 +706,9 @@ button {
   background: var(--brand-surface);
   padding: 26px 22px;
 }
+/* 카드는 놓인 지반과 같아집니다 — 칸을 가르는 것은 1px 선이지 색이 아닙니다. */
 .section--alt .promise > div {
-  background: var(--brand-surface-alt);
+  background: var(--brand-surface-tint);
 }
 .promise h3 {
   font-family: var(--font-mono);
@@ -854,7 +867,7 @@ button {
   background: var(--brand-surface);
 }
 .section--alt .steps li {
-  background: var(--brand-surface-alt);
+  background: var(--brand-surface-tint);
 }
 .steps li::before {
   content: counter(step, decimal-leading-zero);
@@ -1067,7 +1080,7 @@ button {
   background: var(--brand-primary);
   color: var(--brand-surface-alt);
   font-size: 14px;
-  box-shadow: 0 16px 40px -16px rgba(35, 41, 31, 0.5);
+  box-shadow: 0 16px 40px -16px color-mix(in srgb, var(--color-ink) 50%, transparent);
   transition: transform 0.3s var(--motion-rise-easing);
   max-width: calc(100vw - 32px);
 }
@@ -1708,7 +1721,7 @@ button {
   overflow-y: auto;
 }
 .menu__sheet::backdrop {
-  background: rgba(35, 41, 31, 0.38);
+  background: color-mix(in srgb, var(--color-ink) 38%, transparent);
 }
 .menu__head {
   display: flex;

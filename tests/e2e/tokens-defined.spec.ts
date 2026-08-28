@@ -23,6 +23,20 @@ import { readFileSync, readdirSync } from 'node:fs';
 
 const STYLE_DIR = new URL('../../src/styles/', import.meta.url);
 
+/**
+ * 브랜드 잉크를 `rgb(r, g, b)` 로. 값을 여기 베껴 적으면 팔레트를 바꿀 때마다
+ * 이 검사가 **팔레트가 바뀌었다는 이유로** 깨집니다 — 잡아야 할 것(검정으로
+ * 떨어지는 것)과 구분이 안 됩니다. 그래서 토큰 원본에서 읽습니다.
+ */
+function brandInkRgb(): string {
+  const json = JSON.parse(
+    readFileSync(new URL('../../tokens/design-tokens.json', import.meta.url), 'utf-8'),
+  );
+  const hex: string = json.color.brand.primary.value.replace('#', '');
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
 /** 브랜드 토큰. tokens.css 는 build-tokens.mjs 가 tokens/design-tokens.json 에서 만듭니다. */
 function tokenNames(): Set<string> {
   const css = readFileSync(new URL('tokens.css', STYLE_DIR), 'utf-8');
@@ -107,7 +121,7 @@ test.describe('토큰이 화면까지 닿는다', () => {
     // 검정은 대비가 오히려 높아 axe 도 통과시킵니다 — 그래서 여기서 잽니다.
     await page.goto('/ko/');
     const color = await page.evaluate(() => getComputedStyle(document.body).color);
-    expect(color, '본문 글자색').toBe('rgb(35, 41, 31)');
+    expect(color, '본문 글자색').toBe(brandInkRgb());
   });
 
   test('브랜드 강조 밑줄이 실제로 그려진다', async ({ page }) => {
