@@ -55,6 +55,9 @@ import {
   reviewsForUser,
   ordersAwaitingReview,
   myReview,
+  updateOwnReview,
+  removeOwnReview,
+  reviveRemovedReview,
 } from './reviews';
 import { notifyNewOrder, toNotification } from './notify';
 import { notifyNewInquiry } from './notify/inquiry';
@@ -568,10 +571,29 @@ async function handleReviewCreate(request: Request, env: Env): Promise<Response>
   );
 
   if (!created.ok) {
-    return json(
-      { error: 'ALREADY_REVIEWED', message: '이 주문에는 이미 후기를 남기셨습니다.' },
-      409,
+    /*
+     * 내렸던 후기를 다시 쓰는 길입니다.
+     *
+     * `idx_reviews_order` 가 주문 하나에 후기 하나를 강제하므로, 내린
+     * 뒤에 새로 INSERT 하면 UNIQUE 에 걸립니다. 같은 행을 되살립니다 —
+     * 그래야 "내렸다가 다시 썼다" 는 사실이 `updated_at` 에 남습니다.
+     *
+     * 되살아나지 않으면(= `removed` 가 아니라 살아 있는 후기가 있으면)
+     * 지금까지와 같은 409 입니다.
+     */
+    const revived = await reviveRemovedReview(
+      env.DB,
+      order.id,
+      { rating, body: reviewBody },
+      new Date(),
     );
+    if (!revived) {
+      return json(
+        { error: 'ALREADY_REVIEWED', message: '이 주문에는 이미 후기를 남기셨습니다.' },
+        409,
+      );
+    }
+    return json({ ok: true }, 201);
   }
 
   return json({ ok: true, review: publicReview(created.review) }, 201);
@@ -840,6 +862,80 @@ async function handleAccountReviews(request: Request, env: Env): Promise<Respons
   ]);
 
   return json({ ok: true, reviews: reviews.map(myReview), pending });
+}
+
+/**
+ * 내 후기 고치기·내리기.
+ *
+ * 소유는 세션으로 확인합니다 — `reviews` 에는 `user_id` 가 없으므로
+ * `orders.user_id` 를 타고 들어가는 조건을 UPDATE 문 자체에 담습니다.
+ * 먼저 조회하고 나중에 쓰면 그 사이에 관리자가 상태를 바꿀 수 있습니다.
+ *
+ * 관리자가 내린 후기(`hidden`)는 본인도 손댈 수 없습니다. 그것을 고쳐 다시
+ * 보이게 하거나 지워 없앨 수 있으면, 조정의 근거가 사라집니다.
+ */
+async function handleAccountReviewPatch(
+  request: Request,
+  env: Env,
+  id: string,
+): Promise<Response> {
+  const user = await currentUser(request, env);
+  if (!user) return json({ error: 'NOT_LOGGED_IN' }, 401);
+  if (!env.DB) return json({ error: 'REVIEWS_NOT_CONFIGURED' }, 503);
+
+  const now = new Date();
+
+  if (request.method === 'DELETE') {
+    const result = await removeOwnReview(env.DB, id, user.id, now);
+    if (result === 'locked') {
+      return json(
+        {
+          error: 'MODERATED',
+          message: '관리자가 내린 후기는 지울 수 없습니다. 고객센터로 문의해 주세요.',
+        },
+        409,
+      );
+    }
+    // 없는 후기와 남의 후기를 같은 응답으로 — 다르게 답하면 후기 번호가
+    // 존재하는지를 알려주는 셈이 됩니다.
+    if (result === 'not-found') return json({ error: 'REVIEW_NOT_FOUND' }, 404);
+    return json({ ok: true });
+  }
+
+  let body: { rating?: unknown; body?: string };
+  try {
+    body = (await request.json()) as typeof body;
+  } catch {
+    return json({ error: 'INVALID_JSON' }, 400);
+  }
+
+  const reviewBody = text(body.body, REVIEW_BODY_MAX);
+  const rating = Number(body.rating);
+
+  // 검사는 작성과 같은 것을 씁니다. 고칠 때만 느슨하면 그 길로 들어옵니다.
+  if (!reviewBody) return json({ error: 'MISSING_FIELDS' }, 400);
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+    return json({ error: 'INVALID_RATING', message: '별점은 1점부터 5점까지입니다.' }, 400);
+  }
+  if (reviewBody.length < REVIEW_BODY_MIN) {
+    return json(
+      { error: 'BODY_TOO_SHORT', message: `후기는 ${REVIEW_BODY_MIN}자 이상 적어주세요.` },
+      400,
+    );
+  }
+
+  const result = await updateOwnReview(env.DB, id, user.id, { rating, body: reviewBody }, now);
+  if (result === 'locked') {
+    return json(
+      {
+        error: 'MODERATED',
+        message: '관리자가 내린 후기는 고칠 수 없습니다. 고객센터로 문의해 주세요.',
+      },
+      409,
+    );
+  }
+  if (result === 'not-found') return json({ error: 'REVIEW_NOT_FOUND' }, 404);
+  return json({ ok: true });
 }
 
 async function handleAccountOrders(request: Request, env: Env): Promise<Response> {
@@ -1186,6 +1282,12 @@ export default {
     }
     if (pathname === '/api/account/reviews' && request.method === 'GET') {
       return handleAccountReviews(request, env);
+    }
+    {
+      const mine = pathname.match(/^\/api\/account\/reviews\/([\w-]+)$/);
+      if (mine && (request.method === 'PATCH' || request.method === 'DELETE')) {
+        return handleAccountReviewPatch(request, env, mine[1]);
+      }
     }
     if (pathname === '/api/account/address' && request.method === 'PUT') {
       return handleAccountAddress(request, env);

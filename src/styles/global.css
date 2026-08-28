@@ -2351,6 +2351,49 @@ button {
   color: var(--brand-muted);
   margin: 28px 0 0;
 }
+.myReviews__acts {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.myReviews__danger {
+  color: var(--brand-muted);
+}
+/* 관리자가 내린 후기의 설명. 버튼 대신 이것이 놓입니다. */
+.myReviews__locked {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: var(--brand-muted);
+}
+.myReviews__form {
+  margin-top: 14px;
+  display: grid;
+  gap: 14px;
+}
+/* 별점은 라디오입니다 — 별 다섯을 버튼으로 만들면 키보드 순회가 다섯
+   정거장이 되고 현재 값이 무엇인지 읽히지 않습니다. */
+.myReviews__ratings {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+.myReviews__ratings legend {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--brand-muted);
+  padding: 0;
+}
+.myReviews__ratings label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: var(--size-tap-min);
+  cursor: pointer;
+}
+
 .myReviews__write {
   flex: none;
   /* 이 저장소의 탭 영역 기준 */

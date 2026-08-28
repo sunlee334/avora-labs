@@ -13,7 +13,7 @@ export interface MyReview {
   rating: number;
   body: string;
   sponsored: boolean;
-  status: 'visible' | 'hidden';
+  status: 'visible' | 'hidden' | 'removed';
   createdAt: string;
 }
 
@@ -31,6 +31,15 @@ export interface MyReviewsCopy {
   status: { visible: string; hidden: string };
   error: string;
   outOf: string;
+  edit: string;
+  remove: string;
+  save: string;
+  cancel: string;
+  saving: string;
+  confirmRemove: string;
+  moderated: string;
+  ratingLabel: string;
+  bodyLabel: string;
 }
 
 /**
@@ -110,7 +119,117 @@ function reviewItem(review: MyReview, copy: MyReviewsCopy): HTMLLIElement {
   li.appendChild(head);
   li.appendChild(order);
   li.appendChild(body);
+
+  /*
+   * 관리자가 내린 후기에는 고치기·삭제를 **아예 그리지 않습니다.**
+   *
+   * 눌러 봐야 409 로 거절당할 버튼을 보여주는 것은 없는 것만 못합니다.
+   * 서버도 같은 판정을 하지만(`updateOwnReview` 의 status='visible' 조건),
+   * 화면이 먼저 말해 주는 편이 낫습니다.
+   */
+  if (review.status === 'hidden') {
+    const why = document.createElement('p');
+    why.className = 'myReviews__locked';
+    why.textContent = copy.moderated;
+    li.appendChild(why);
+    return li;
+  }
+
+  const acts = document.createElement('div');
+  acts.className = 'myReviews__acts';
+
+  const edit = document.createElement('button');
+  edit.type = 'button';
+  edit.className = 'linkButton';
+  edit.dataset.edit = review.id;
+  edit.textContent = copy.edit;
+
+  const remove = document.createElement('button');
+  remove.type = 'button';
+  remove.className = 'linkButton myReviews__danger';
+  remove.dataset.remove = review.id;
+  remove.textContent = copy.remove;
+
+  acts.appendChild(edit);
+  acts.appendChild(remove);
+  li.appendChild(acts);
   return li;
+}
+
+/**
+ * 편집 폼.
+ *
+ * 별점도 바꿉니다 — 마음이 바뀐 것을 본문으로만 적게 하고 별점은 못 고치게
+ * 하면, 목록의 평균이 그 사람의 지금 생각과 어긋난 채로 남습니다.
+ *
+ * 라디오를 씁니다. 별 다섯 개를 버튼으로 만들면 키보드 순회가 다섯 정거장이
+ * 되고 현재 값이 무엇인지 읽히지 않습니다.
+ */
+function editForm(review: MyReview, copy: MyReviewsCopy): HTMLFormElement {
+  const form = document.createElement('form');
+  form.className = 'myReviews__form';
+  form.dataset.editForm = review.id;
+
+  const ratingSet = document.createElement('fieldset');
+  ratingSet.className = 'myReviews__ratings';
+  const legend = document.createElement('legend');
+  legend.textContent = copy.ratingLabel;
+  ratingSet.appendChild(legend);
+
+  for (let n = 1; n <= 5; n++) {
+    const label = document.createElement('label');
+    const input = document.createElement('input');
+    input.type = 'radio';
+    input.name = `rating-${review.id}`;
+    input.value = String(n);
+    input.checked = n === review.rating;
+    const text = document.createElement('span');
+    text.textContent = String(n);
+    label.appendChild(input);
+    label.appendChild(text);
+    ratingSet.appendChild(label);
+  }
+
+  const field = document.createElement('div');
+  field.className = 'field';
+  const bodyLabel = document.createElement('label');
+  bodyLabel.setAttribute('for', `body-${review.id}`);
+  bodyLabel.textContent = copy.bodyLabel;
+  const textarea = document.createElement('textarea');
+  textarea.id = `body-${review.id}`;
+  textarea.name = 'body';
+  textarea.rows = 4;
+  textarea.required = true;
+  textarea.minLength = 10;
+  textarea.maxLength = 2000;
+  textarea.value = review.body;
+  field.appendChild(bodyLabel);
+  field.appendChild(textarea);
+
+  const error = document.createElement('p');
+  error.className = 'field__error';
+  error.dataset.editError = '';
+  error.hidden = true;
+
+  const actions = document.createElement('div');
+  actions.className = 'formActions';
+  const save = document.createElement('button');
+  save.className = 'cta';
+  save.type = 'submit';
+  save.textContent = copy.save;
+  const cancel = document.createElement('button');
+  cancel.className = 'linkButton';
+  cancel.type = 'button';
+  cancel.dataset.cancelEdit = '';
+  cancel.textContent = copy.cancel;
+  actions.appendChild(save);
+  actions.appendChild(cancel);
+
+  form.appendChild(ratingSet);
+  form.appendChild(field);
+  form.appendChild(error);
+  form.appendChild(actions);
+  return form;
 }
 
 function pendingItem(order: PendingOrder, copy: MyReviewsCopy, writeHref: string): HTMLLIElement {
@@ -182,24 +301,144 @@ function render(
 /** 내 후기 섹션을 살립니다. */
 export function mountMyReviews(root: HTMLElement, copy: MyReviewsCopy, writeHref: string): void {
   const state = el(root, '[data-my-reviews-state]');
+  // 편집 폼을 그리려면 원본이 필요합니다. 화면에서 다시 읽으면 사람이 쓴
+  // 문자열을 파싱하는 셈이 됩니다.
+  let current: MyReview[] = [];
 
-  void (async () => {
+  async function load(): Promise<void> {
     try {
       const res = await fetch('/api/account/reviews');
       if (!res.ok) {
         // 로그인이 풀렸거나 기능이 꺼진 경우입니다. 오류 문구로 화면을
         // 채우지 않고 빈 상태로 둡니다 — 이 섹션은 부가적인 자리입니다.
         await drain(res);
+        current = [];
         render(root, { reviews: [], pending: [] }, copy, writeHref);
         return;
       }
       const data = (await res.json()) as { reviews?: MyReview[]; pending?: PendingOrder[] };
-      render(root, { reviews: data.reviews ?? [], pending: data.pending ?? [] }, copy, writeHref);
+      current = data.reviews ?? [];
+      render(root, { reviews: current, pending: data.pending ?? [] }, copy, writeHref);
     } catch {
       if (state) {
         state.textContent = copy.error;
         state.hidden = false;
       }
     }
-  })();
+  }
+
+  /** 서버가 준 오류를 사람이 읽을 문장으로. 없으면 일반 문구입니다. */
+  function messageFor(payload: { error?: string; message?: string }): string {
+    if (payload.error === 'MODERATED') return copy.moderated;
+    return payload.message ?? copy.error;
+  }
+
+  // 목록은 매번 다시 그려지므로 개별 요소에 붙이지 않고 위임합니다.
+  root.addEventListener('click', (event) => {
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
+
+    const editId = target.dataset?.edit;
+    if (editId) {
+      const review = current.find((r) => r.id === editId);
+      const item = target.closest('li');
+      if (!review || !item) return;
+      // 이미 열려 있으면 두 번 그리지 않습니다.
+      if (item.querySelector('[data-edit-form]')) return;
+      item.appendChild(editForm(review, copy));
+      item.querySelector<HTMLTextAreaElement>('textarea')?.focus();
+      return;
+    }
+
+    if (target.dataset?.cancelEdit !== undefined) {
+      target.closest('form')?.remove();
+      return;
+    }
+
+    const removeId = target.dataset?.remove;
+    if (removeId) {
+      // 되돌릴 수 없는 것처럼 보이는 동작이라 한 번 묻습니다. 실제로는
+      // 그 주문이 "다시 쓸 수 있는 목록" 으로 돌아갑니다.
+      if (!window.confirm(copy.confirmRemove)) return;
+      void (async () => {
+        const button = target as HTMLButtonElement;
+        button.disabled = true;
+        try {
+          const res = await fetch(`/api/account/reviews/${encodeURIComponent(removeId)}`, {
+            method: 'DELETE',
+          });
+          if (!res.ok) {
+            const payload = (await res.json().catch(() => ({}))) as { error?: string };
+            window.alert(messageFor(payload));
+            return;
+          }
+          await drain(res);
+          await load();
+        } catch {
+          window.alert(copy.error);
+        } finally {
+          button.disabled = false;
+        }
+      })();
+    }
+  });
+
+  root.addEventListener('submit', (event) => {
+    const form = event.target as HTMLFormElement | null;
+    const id = form?.dataset.editForm;
+    if (!form || !id) return;
+    event.preventDefault();
+
+    const error = form.querySelector<HTMLElement>('[data-edit-error]');
+    const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+    const data = new FormData(form);
+    const body = String(data.get('body') ?? '').trim();
+    const rating = Number(data.get(`rating-${id}`) ?? 0);
+
+    const show = (message: string | null) => {
+      if (!error) return;
+      error.textContent = message ?? '';
+      error.hidden = !message;
+    };
+
+    show(null);
+    if (body.length < 10 || !Number.isInteger(rating) || rating < 1 || rating > 5) {
+      show(copy.error);
+      return;
+    }
+
+    void (async () => {
+      const label = submit?.textContent ?? '';
+      if (submit) {
+        submit.disabled = true;
+        submit.textContent = copy.saving;
+      }
+      try {
+        const res = await fetch(`/api/account/reviews/${encodeURIComponent(id)}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ rating, body }),
+        });
+        if (!res.ok) {
+          const payload = (await res.json().catch(() => ({}))) as {
+            error?: string;
+            message?: string;
+          };
+          show(messageFor(payload));
+          return;
+        }
+        await drain(res);
+        await load();
+      } catch {
+        show(copy.error);
+      } finally {
+        if (submit) {
+          submit.disabled = false;
+          submit.textContent = label;
+        }
+      }
+    })();
+  });
+
+  void load();
 }

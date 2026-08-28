@@ -717,7 +717,17 @@
         "hidden": "Đã ẩn"
       },
       "error": "Không tải được đánh giá.",
-      "note": "Đánh giá viết khi chưa đăng nhập sẽ không hiện ở đây. Liên kết đơn hàng với tài khoản ở mục “Thêm đơn hàng trước đây” bên dưới thì đánh giá sẽ xuất hiện."
+      "note": "Đánh giá viết khi chưa đăng nhập sẽ không hiện ở đây. Liên kết đơn hàng với tài khoản ở mục “Thêm đơn hàng trước đây” bên dưới thì đánh giá sẽ xuất hiện.",
+      "edit": "Sửa",
+      "remove": "Xóa",
+      "save": "Lưu",
+      "cancel": "Hủy",
+      "saving": "Đang lưu",
+      "confirmRemove": "Xóa đánh giá này? Nó sẽ biến mất khỏi trang công khai ngay lập tức.",
+      "moderated": "Đánh giá do chúng tôi ẩn không thể sửa hoặc xóa. Vui lòng liên hệ hỗ trợ.",
+      "ratingLabel": "Điểm",
+      "bodyLabel": "Nội dung đánh giá",
+      "removedNote": "Sau khi xóa, đơn hàng đó quay lại danh sách có thể viết đánh giá."
     },
     "address": {
       "heading": "Địa chỉ đã lưu",

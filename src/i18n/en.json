@@ -717,7 +717,17 @@
         "hidden": "Hidden"
       },
       "error": "Could not load your reviews.",
-      "note": "Reviews written without signing in do not appear here. Link the order to your account under “Add a past order” below and it will show up."
+      "note": "Reviews written without signing in do not appear here. Link the order to your account under “Add a past order” below and it will show up.",
+      "edit": "Edit",
+      "remove": "Delete",
+      "save": "Save",
+      "cancel": "Cancel",
+      "saving": "Saving",
+      "confirmRemove": "Delete this review? It disappears from the public page right away.",
+      "moderated": "Reviews hidden by us cannot be edited or deleted. Please contact support.",
+      "ratingLabel": "Rating",
+      "bodyLabel": "Review",
+      "removedNote": "Deleting puts that order back on the list of orders you can review."
     },
     "address": {
       "heading": "Saved address",

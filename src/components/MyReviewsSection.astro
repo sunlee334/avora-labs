@@ -41,6 +41,15 @@ const r = t.account.reviews;
     status: r.status,
     error: r.error,
     outOf: t.reviews.outOf,
+    edit: r.edit,
+    remove: r.remove,
+    save: r.save,
+    cancel: r.cancel,
+    saving: r.saving,
+    confirmRemove: r.confirmRemove,
+    moderated: r.moderated,
+    ratingLabel: r.ratingLabel,
+    bodyLabel: r.bodyLabel,
   })}
 >
   <h2 class="kicker" style="margin-top: 40px">{r.heading}</h2>
@@ -59,5 +68,6 @@ const r = t.account.reviews;
     로그인 없이 남긴 후기가 안 보이는 이유를 밝힙니다. 숨기면 "썼는데
     없어졌다" 가 되고, 그건 화면이 거짓말한 것과 같습니다.
   */}
-  <p class="cart__notice">{r.note}</p>
+  <p class="cart__notice" data-my-reviews-note>{r.note}</p>
+  <p class="cart__notice" data-my-reviews-removed-note>{r.removedNote}</p>
 </section>

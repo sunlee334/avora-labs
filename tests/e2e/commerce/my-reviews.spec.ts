@@ -272,6 +272,198 @@ test.describe('마이페이지 화면', () => {
     // 이 문장이 없으면 "후기를 썼는데 없어졌다" 는 문의가 옵니다.
     await loginAs(page, freshCode());
     await page.goto('/ko/account');
-    await expect(page.locator('[data-my-reviews] .cart__notice')).toContainText('로그인');
+    await expect(page.locator('[data-my-reviews-note]')).toContainText('로그인');
+  });
+});
+
+test.describe('내 후기 고치기·삭제', () => {
+  /** 후기 하나를 만들고 그 id 를 돌려줍니다. */
+  async function ownReview(page: Page): Promise<{ id: string; orderId: string; phone: string }> {
+    const phone = freshPhone();
+    const orderIdValue = await paidOrder(page.request, phone);
+    await page.request.post('/api/account/claim', { data: { orderId: orderIdValue, phone } });
+    const created = await page.request.post('/api/reviews', {
+      data: { orderId: orderIdValue, phone, rating: 3, body: '처음 쓴 후기 본문입니다.' },
+    });
+    expect(created.status()).toBe(201);
+    const list = await (await page.request.get('/api/account/reviews')).json();
+    const mine = list.reviews.find((r: { orderId: string }) => r.orderId === orderIdValue);
+    return { id: mine.id, orderId: orderIdValue, phone };
+  }
+
+  test('본문과 별점을 고칠 수 있다', async ({ page }) => {
+    await loginAs(page, freshCode());
+    const { id } = await ownReview(page);
+
+    const res = await page.request.patch(`/api/account/reviews/${id}`, {
+      data: { rating: 5, body: '마음이 바뀌어 고친 후기 본문입니다.' },
+    });
+    expect(res.status(), await res.text()).toBe(200);
+
+    const after = await (await page.request.get('/api/account/reviews')).json();
+    const mine = after.reviews.find((r: { id: string }) => r.id === id);
+    expect(mine.rating).toBe(5);
+    expect(mine.body).toContain('마음이 바뀌어');
+  });
+
+  test('고칠 때도 작성과 같은 검사를 받는다', async ({ page }) => {
+    // 고칠 때만 느슨하면 그 길로 들어옵니다.
+    await loginAs(page, freshCode());
+    const { id } = await ownReview(page);
+
+    const short = await page.request.patch(`/api/account/reviews/${id}`, {
+      data: { rating: 5, body: '짧음' },
+    });
+    expect(short.status()).toBe(400);
+    expect((await short.json()).error).toBe('BODY_TOO_SHORT');
+
+    const bad = await page.request.patch(`/api/account/reviews/${id}`, {
+      data: { rating: 9, body: '별점 범위를 벗어난 값으로 고치려는 시도입니다.' },
+    });
+    expect(bad.status()).toBe(400);
+    expect((await bad.json()).error).toBe('INVALID_RATING');
+  });
+
+  test('삭제하면 공개 목록에서 사라진다', async ({ page, request }) => {
+    await loginAs(page, freshCode());
+    const { id } = await ownReview(page);
+
+    const before = await (await request.get('/api/reviews?limit=50')).json();
+    expect(before.reviews.some((r: { id: string }) => r.id === id)).toBe(true);
+
+    const res = await page.request.delete(`/api/account/reviews/${id}`);
+    expect(res.status()).toBe(200);
+
+    const after = await (await request.get('/api/reviews?limit=50')).json();
+    expect(after.reviews.some((r: { id: string }) => r.id === id), '공개 목록에 남아 있습니다').toBe(
+      false,
+    );
+  });
+
+  test('삭제한 주문은 다시 쓸 수 있는 목록으로 돌아온다', async ({ page }) => {
+    // 한 번 지운 사람이 영영 후기를 못 쓰면 그것은 삭제가 아니라 박탈입니다.
+    await loginAs(page, freshCode());
+    const { id, orderId: order } = await ownReview(page);
+    await page.request.delete(`/api/account/reviews/${id}`);
+
+    const after = await (await page.request.get('/api/account/reviews')).json();
+    expect(after.reviews.some((r: { id: string }) => r.id === id)).toBe(false);
+    expect(
+      after.pending.some((o: { orderId: string }) => o.orderId === order),
+      '삭제한 주문이 다시 쓸 수 있는 목록에 없습니다',
+    ).toBe(true);
+  });
+
+  test('삭제한 주문에 다시 쓰면 UNIQUE 에 걸리지 않는다', async ({ page }) => {
+    // idx_reviews_order 가 주문 하나에 후기 하나를 강제하므로, 지운 뒤
+    // 새로 INSERT 하면 걸립니다. 같은 행을 되살려야 합니다.
+    await loginAs(page, freshCode());
+    const { id, orderId: order, phone } = await ownReview(page);
+    await page.request.delete(`/api/account/reviews/${id}`);
+
+    const again = await page.request.post('/api/reviews', {
+      data: { orderId: order, phone, rating: 4, body: '지웠다가 다시 쓴 후기 본문입니다.' },
+    });
+    expect(again.status(), await again.text()).toBe(201);
+
+    const after = await (await page.request.get('/api/account/reviews')).json();
+    const mine = after.reviews.find((r: { orderId: string }) => r.orderId === order);
+    expect(mine.body).toContain('다시 쓴');
+  });
+
+  test('관리자가 내린 후기는 본인도 되살릴 수 없다', async ({ page }) => {
+    // 이 파일에서 가장 중요한 단언입니다. 본인이 고쳐 다시 보이게 하거나
+    // 지워 없앨 수 있으면, 조정의 근거가 사라집니다.
+    await loginAs(page, freshCode());
+    const { id } = await ownReview(page);
+    await page.request.patch(`/api/admin/reviews/${id}`, {
+      headers: AUTH,
+      data: { status: 'hidden', reason: '광고성 내용' },
+    });
+
+    const edit = await page.request.patch(`/api/account/reviews/${id}`, {
+      data: { rating: 5, body: '조정을 지우려는 시도입니다. 막혀야 합니다.' },
+    });
+    expect(edit.status(), '관리자 조정을 본인이 되돌렸습니다').toBe(409);
+    expect((await edit.json()).error).toBe('MODERATED');
+
+    const del = await page.request.delete(`/api/account/reviews/${id}`);
+    expect(del.status(), '관리자가 내린 후기를 본인이 지웠습니다').toBe(409);
+
+    // 그리고 실제로 그대로여야 합니다.
+    const after = await (await page.request.get('/api/account/reviews')).json();
+    const mine = after.reviews.find((r: { id: string }) => r.id === id);
+    expect(mine.status).toBe('hidden');
+    expect(mine.body).toContain('처음 쓴');
+  });
+
+  test('남의 후기는 고칠 수도 지울 수도 없다', async ({ page, browser }) => {
+    const other = await browser.newContext();
+    const otherPage = await other.newPage();
+    await loginAs(otherPage, freshCode());
+    const { id } = await ownReview(otherPage);
+    await other.close();
+
+    await loginAs(page, freshCode());
+    const edit = await page.request.patch(`/api/account/reviews/${id}`, {
+      data: { rating: 1, body: '남의 후기를 고치려는 시도입니다.' },
+    });
+    // 없는 것과 남의 것을 같은 응답으로 — 후기 번호 존재 여부를 알려주지 않습니다.
+    expect(edit.status()).toBe(404);
+    expect((await page.request.delete(`/api/account/reviews/${id}`)).status()).toBe(404);
+  });
+
+  test('로그인하지 않으면 아예 못 부른다', async ({ request }) => {
+    const res = await request.patch('/api/account/reviews/REVIEW-20260101000000-AAAAAA', {
+      data: { rating: 5, body: '로그인 없이 고치려는 시도입니다.' },
+    });
+    expect(res.status()).toBe(401);
+  });
+});
+
+test.describe('화면에서 고치고 지운다', () => {
+  test('고치기를 누르면 폼이 열리고 저장하면 반영된다', async ({ page }) => {
+    await loginAs(page, freshCode());
+    const phone = freshPhone();
+    const order = await paidOrder(page.request, phone);
+    await page.request.post('/api/account/claim', { data: { orderId: order, phone } });
+    await page.request.post('/api/reviews', {
+      data: { orderId: order, phone, rating: 2, body: '화면에서 고칠 후기 본문입니다.' },
+    });
+
+    await page.goto('/ko/account');
+    await page.locator('[data-my-reviews] [data-edit]').first().click();
+    const form = page.locator('[data-edit-form]');
+    await expect(form).toBeVisible();
+
+    await form.locator('textarea').fill('화면에서 고친 뒤의 후기 본문입니다.');
+    await form.locator('input[type="radio"][value="5"]').check();
+    await form.locator('button[type="submit"]').click();
+
+    await expect(page.locator('[data-my-reviews] .myReviews__body').first()).toContainText(
+      '고친 뒤의',
+    );
+  });
+
+  test('관리자가 내린 후기에는 버튼이 아예 없다', async ({ page }) => {
+    // 눌러 봐야 거절당할 버튼을 보여주는 것은 없는 것만 못합니다.
+    await loginAs(page, freshCode());
+    const phone = freshPhone();
+    const order = await paidOrder(page.request, phone);
+    await page.request.post('/api/account/claim', { data: { orderId: order, phone } });
+    const created = await page.request.post('/api/reviews', {
+      data: { orderId: order, phone, rating: 1, body: '관리자가 내릴 후기 본문입니다.' },
+    });
+    const { review } = await created.json();
+    await page.request.patch(`/api/admin/reviews/${review.id}`, {
+      headers: AUTH,
+      data: { status: 'hidden', reason: '검사용' },
+    });
+
+    await page.goto('/ko/account');
+    const item = page.locator('[data-my-reviews] .myReviews__item').first();
+    await expect(item.locator('.myReviews__locked')).toBeVisible();
+    await expect(item.locator('[data-edit]')).toHaveCount(0);
+    await expect(item.locator('[data-remove]')).toHaveCount(0);
   });
 });

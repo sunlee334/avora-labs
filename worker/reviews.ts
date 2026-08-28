@@ -10,7 +10,15 @@
  * 한 건만 남습니다.
  */
 
-export type ReviewStatus = 'visible' | 'hidden';
+/**
+ * `removed` 는 **본인이 내린 것** 입니다. 관리자가 내린 `hidden` 과 구분합니다.
+ *
+ * 물리 삭제를 하지 않는 이유는 이 표의 설계가 말합니다(`0004_reviews.sql:22-25`) —
+ * "기준 없이 지운 기록이 없으면, 부정적 리뷰만 골라 지웠는지 나중에 아무도
+ * 증명할 수 없습니다." 손님이 원하는 것(공개 화면에서 사라짐)은 그대로
+ * 이루면서 기록은 남깁니다.
+ */
+export type ReviewStatus = 'visible' | 'hidden' | 'removed';
 
 export interface ReviewRecord {
   id: string;
@@ -167,9 +175,12 @@ export async function createReview(
  * 있기 때문입니다. 손님이 "이전 주문 가져오기"(`/api/account/claim`)로 주문을
  * 계정에 붙이면 그때 함께 나타납니다 — 화면이 그 사실을 말해야 합니다.
  *
- * 숨긴 후기도 돌려줍니다. 자기 후기가 안 보이게 됐다는 것을 본인이 모르는
- * 편이 더 나쁩니다. 다만 `hidden_reason` 은 내보내지 않습니다 — 운영자가
- * 기록용으로 쓰는 문장이고, 손님에게 보이라고 쓴 것이 아닙니다.
+ * 숨긴 후기(`hidden`)는 돌려줍니다. 자기 후기가 안 보이게 됐다는 것을 본인이
+ * 모르는 편이 더 나쁩니다. 다만 `hidden_reason` 은 내보내지 않습니다 —
+ * 운영자가 기록용으로 쓰는 문장이고, 손님에게 보이라고 쓴 것이 아닙니다.
+ *
+ * 본인이 내린 것(`removed`)은 **돌려주지 않습니다.** 그 주문은 "아직 안 쓴
+ * 주문" 으로 돌아가 있으므로, 목록에도 남으면 같은 주문이 두 곳에 보입니다.
  */
 export async function reviewsForUser(
   db: D1Database,
@@ -180,7 +191,7 @@ export async function reviewsForUser(
     .prepare(
       `SELECT r.* FROM reviews r
          JOIN orders o ON o.id = r.order_id
-        WHERE o.user_id = ?
+        WHERE o.user_id = ? AND r.status <> 'removed'
         ORDER BY r.created_at DESC
         LIMIT ?`,
     )
@@ -204,7 +215,7 @@ export async function ordersAwaitingReview(
   const { results } = await db
     .prepare(
       `SELECT o.id, o.created_at, o.items FROM orders o
-         LEFT JOIN reviews r ON r.order_id = o.id
+         LEFT JOIN reviews r ON r.order_id = o.id AND r.status <> 'removed'
         WHERE o.user_id = ? AND o.status = 'paid' AND r.id IS NULL
         ORDER BY o.created_at DESC
         LIMIT ?`,
@@ -241,6 +252,111 @@ export function myReview(review: ReviewRecord) {
     status: review.status,
     createdAt: review.createdAt,
   };
+}
+
+/**
+ * 본인이 자기 후기를 고칩니다.
+ *
+ * ── 관리자가 내린 후기는 손댈 수 없습니다 ──────────────────
+ * `hidden` 은 운영자의 판단이고 이유가 함께 기록돼 있습니다. 본인이 그것을
+ * 고쳐 다시 보이게 할 수 있으면 조정이 조정이 아니게 됩니다. 그래서
+ * `visible` 인 것만 고칠 수 있습니다.
+ *
+ * 소유 확인은 부르는 쪽이 합니다 — 이 함수는 그것을 조건에 담아
+ * **한 번의 UPDATE 로** 처리합니다. 먼저 조회하고 나중에 쓰면 그 사이에
+ * 상태가 바뀔 수 있습니다.
+ */
+export async function updateOwnReview(
+  db: D1Database,
+  id: string,
+  userId: string,
+  patch: { rating: number; body: string },
+  now: Date,
+): Promise<'ok' | 'not-found' | 'locked'> {
+  const changed = await db
+    .prepare(
+      `UPDATE reviews SET rating = ?, body = ?, updated_at = ?
+        WHERE id = ?
+          AND status = 'visible'
+          AND order_id IN (SELECT id FROM orders WHERE user_id = ?)`,
+    )
+    .bind(patch.rating, patch.body, now.toISOString(), id, userId)
+    .run();
+
+  if ((changed.meta?.changes ?? 0) > 0) return 'ok';
+  // 아무것도 안 바뀐 이유가 둘입니다 — 남의 것이거나 없거나(not-found),
+  // 관리자가 내린 것이거나(locked). 구분하려면 한 번 더 물어야 합니다.
+  return (await ownReviewStatus(db, id, userId)) === 'hidden' ? 'locked' : 'not-found';
+}
+
+/**
+ * 본인이 자기 후기를 내립니다.
+ *
+ * 지우지 않고 `removed` 로 바꿉니다. 공개 화면에서는 즉시 사라지고,
+ * 그 주문은 "아직 안 쓴 주문" 으로 돌아옵니다 — 한 번 내린 사람이 영영
+ * 후기를 못 쓰게 되면 그것은 삭제가 아니라 박탈입니다.
+ *
+ * `hidden` 은 여기서도 손댈 수 없습니다. 관리자가 내린 것을 본인이 지워
+ * 기록을 없앨 수 있으면, 조정의 근거가 사라집니다.
+ */
+export async function removeOwnReview(
+  db: D1Database,
+  id: string,
+  userId: string,
+  now: Date,
+): Promise<'ok' | 'not-found' | 'locked'> {
+  const changed = await db
+    .prepare(
+      `UPDATE reviews SET status = 'removed', updated_at = ?
+        WHERE id = ?
+          AND status = 'visible'
+          AND order_id IN (SELECT id FROM orders WHERE user_id = ?)`,
+    )
+    .bind(now.toISOString(), id, userId)
+    .run();
+
+  if ((changed.meta?.changes ?? 0) > 0) return 'ok';
+  return (await ownReviewStatus(db, id, userId)) === 'hidden' ? 'locked' : 'not-found';
+}
+
+/** 내 후기의 현재 상태. 남의 것이거나 없으면 `null`. */
+async function ownReviewStatus(
+  db: D1Database,
+  id: string,
+  userId: string,
+): Promise<ReviewStatus | null> {
+  const row = await db
+    .prepare(
+      `SELECT r.status FROM reviews r
+         JOIN orders o ON o.id = r.order_id
+        WHERE r.id = ? AND o.user_id = ?`,
+    )
+    .bind(id, userId)
+    .first();
+  return row ? ((row as Record<string, unknown>).status as ReviewStatus) : null;
+}
+
+/**
+ * 내렸던 후기를 다시 씁니다.
+ *
+ * `idx_reviews_order` 가 주문 하나에 후기 하나를 강제하므로, 내린 뒤에
+ * 새로 INSERT 하면 UNIQUE 에 걸립니다. 같은 행을 되살립니다 —
+ * 그래서 "내렸다가 다시 쓴" 사실이 `updated_at` 에 남습니다.
+ */
+export async function reviveRemovedReview(
+  db: D1Database,
+  orderId: string,
+  patch: { rating: number; body: string },
+  now: Date,
+): Promise<boolean> {
+  const changed = await db
+    .prepare(
+      `UPDATE reviews SET rating = ?, body = ?, status = 'visible', updated_at = ?
+        WHERE order_id = ? AND status = 'removed'`,
+    )
+    .bind(patch.rating, patch.body, now.toISOString(), orderId)
+    .run();
+  return (changed.meta?.changes ?? 0) > 0;
 }
 
 export async function listVisibleReviews(
