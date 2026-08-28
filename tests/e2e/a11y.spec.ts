@@ -119,6 +119,30 @@ test.describe('움직인 뒤의 상태', () => {
     expect(await scan(page, testInfo)).toEqual([]);
   });
 
+  test('데스크톱 드롭다운을 연 상태', async ({ page }, testInfo) => {
+    // 900px 이상에서만 나오는 요소입니다. 뷰포트를 지정하지 않으면
+    // mobile 프로젝트(390px)에서 display:none 이라 아무것도 검사하지
+    // 않은 채 통과합니다.
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/ko/');
+    await page.locator('[data-nav-drop]').click();
+    await expect(page.locator('.nav__dropdown')).toBeVisible();
+    expect(await scan(page, testInfo)).toEqual([]);
+  });
+
+  test('모바일 메뉴의 묶음을 전부 펼친 상태', async ({ page }, testInfo) => {
+    // 펼치기 전에는 하위 링크가 hidden 이라 axe 가 보지 않습니다.
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/ko/');
+    await page.locator('[data-menu-open]').click();
+    for (let guard = 0; guard < 10; guard++) {
+      const closed = page.locator('.menu__sheet [aria-expanded="false"]');
+      if ((await closed.count()) === 0) break;
+      await closed.first().click();
+    }
+    expect(await scan(page, testInfo)).toEqual([]);
+  });
+
   test('모바일 메뉴를 연 상태', async ({ page }, testInfo) => {
     // 이 폭에서만 나오는 요소라, 데스크톱 크기로만 검사하면 아무도 보지 않습니다.
     await page.setViewportSize({ width: 390, height: 844 });

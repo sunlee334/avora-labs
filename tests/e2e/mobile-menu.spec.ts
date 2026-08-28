@@ -32,26 +32,43 @@ test.describe('모바일에서 메뉴가 통로가 된다', () => {
   });
 
   test('메뉴로 고객센터까지 갈 수 있다', async ({ page }) => {
+    // 고객센터는 이제 잎이 셋인 묶음이라 링크가 아니라 펼치는 버튼입니다.
+    // 목적지는 그 안의 "자주 묻는 질문" 이고 주소는 그대로 /ko/support 입니다.
     await page.goto('/ko/');
     await openMenu(page);
-    await page.locator('.menu__item', { hasText: '고객센터' }).click();
+    await page.locator('.menu__item--group', { hasText: '고객센터' }).click();
+    await page.locator('.menu__item--sub', { hasText: '자주 묻는 질문' }).click();
     await expect(page).toHaveURL(/\/ko\/support\/?$/);
   });
 
-  test('제품·브랜드 스토리도 메뉴에 있다', async ({ page }) => {
+  test('제품·브랜드도 메뉴에 있다', async ({ page }) => {
     await page.goto('/ko/');
     await openMenu(page);
+    // 최상위 라벨은 묶음의 이름입니다 — "브랜드 스토리" 는 그 아래 잎의
+    // 이름이고, 하위가 하나뿐이라 접혀서 부모 라벨만 보입니다.
     const labels = await page.locator('.menu__item').allInnerTexts();
-    expect(labels.join(' ')).toContain('브랜드 스토리');
+    expect(labels.join(' ')).toContain('브랜드');
     expect(labels.join(' ')).toContain('제품');
+    expect(labels.join(' ')).toContain('고객센터');
   });
 
   test('지금 보고 있는 페이지가 표시된다', async ({ page }) => {
     await page.goto('/ko/support');
     await openMenu(page);
     const current = page.locator('.menu__item[aria-current="page"]');
+    // 표시는 **잎에만** 붙습니다. 그룹 버튼에도 붙이면 둘이 됩니다.
     await expect(current).toHaveCount(1);
-    await expect(current).toContainText('고객센터');
+    await expect(current).toContainText('자주 묻는 질문');
+  });
+
+  test('현재 페이지를 품은 묶음은 처음부터 펼쳐져 있다', async ({ page }) => {
+    // 닫힌 서랍 안에 현재 위치가 숨어 있으면 "여기가 어디인지" 를 알 수
+    // 없습니다. 한 번 더 눌러야 보이는 것은 표시가 아닙니다.
+    await page.goto('/ko/support');
+    await openMenu(page);
+    const group = page.locator('.menu__item--group', { hasText: '고객센터' });
+    await expect(group).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.locator('.menu__item--sub', { hasText: '자주 묻는 질문' })).toBeVisible();
   });
 });
 

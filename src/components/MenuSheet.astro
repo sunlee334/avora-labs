@@ -21,7 +21,8 @@
  * 메뉴가 안 열려도 갈 곳을 잃지 않습니다.
  */
 import { dict, localePath } from '../i18n';
-import { ACCOUNTS_ENABLED } from '../config/runtime';
+import { TOP } from '../config/nav';
+import { UTILITY_VISIBLE } from '../config/nav-gates';
 import type { Locale } from '../config/site';
 
 interface Props {
@@ -35,19 +36,21 @@ const t = dict(locale);
 /**
  * 법적 페이지는 넣지 않습니다.
  * 메뉴는 짧을수록 쓸모 있고, 약관·개인정보·배송의 정본 자리는 푸터입니다.
+ *
+ * 목록은 `src/config/nav.ts` 하나가 정합니다 — 예전에는 이 파일이 자체 배열을
+ * 갖고 있어 헤더·푸터와 각자 어긋날 수 있었습니다.
  */
-const links: Array<{ href: string; label: string; match: string }> = [
-  { href: localePath(locale), label: t.nav.story, match: '' },
-  { href: localePath(locale, 'product'), label: t.nav.product, match: 'product' },
-  { href: localePath(locale, 'support'), label: t.nav.support, match: 'support' },
-];
+const isCurrent = (leaf: { path: string; match?: string }): boolean =>
+  (leaf.match ?? leaf.path) === path;
 
-// 마이페이지는 헤더가 아니라 여기에 둡니다. 커머스를 켜면 헤더 우측이
-// 장바구니·마이페이지·언어·메뉴 넷이 되는데, 360px 에서는 들어가지 않습니다.
-// 장바구니는 배지가 붙는 거래 단축키라 헤더에 남기고, 마이페이지는 한 단계 들어갑니다.
-if (ACCOUNTS_ENABLED) {
-  links.push({ href: localePath(locale, 'account'), label: t.nav.account, match: 'account' });
-}
+/** 현재 페이지를 품은 그룹만 처음부터 펼칩니다. */
+const opened = (children: readonly { path: string; match?: string }[]): boolean =>
+  children.some(isCurrent);
+
+// 장바구니는 여기 넣지 않습니다 — 배지가 붙는 거래 단축키라 헤더에 남습니다.
+// 마이페이지·주문조회는 한 단계 들어옵니다. 360px 에서 헤더 우측에 넷이
+// 들어가지 않기 때문입니다.
+const utility = UTILITY_VISIBLE.filter((item) => item.badge !== 'cart');
 ---
 
 <div class="menu">
@@ -71,19 +74,68 @@ if (ACCOUNTS_ENABLED) {
     </div>
     <ul class="menu__list">
       {
-        links.map((link) => (
-          <li>
-            <a
-              class="menu__item"
-              href={link.href}
-              aria-current={link.match === path ? 'page' : undefined}
-            >
-              {link.label}
-            </a>
-          </li>
-        ))
+        TOP.map((top) =>
+          top.kind === 'link' ? (
+            <li>
+              {/* 하위가 하나뿐이라 서랍을 만들지 않습니다 — 화살표도 없고,
+                  누르면 바로 그 페이지로 갑니다 (spec 제약 2). */}
+              <a
+                class="menu__item"
+                href={localePath(locale, top.path)}
+                aria-current={top.match === path ? 'page' : undefined}
+              >
+                {top.label(t)}
+              </a>
+            </li>
+          ) : (
+            <li>
+              <button
+                class="menu__item menu__item--group"
+                type="button"
+                aria-expanded={opened(top.children) ? 'true' : 'false'}
+                aria-controls={`menu-${top.id}`}
+                data-menu-group
+              >
+                <span>{top.label(t)}</span>
+                <span class="menu__caret" aria-hidden="true"></span>
+              </button>
+              {/* <ul> 이 이 <li> **안**에 있어야 합니다 — 형제로 두면
+                  .menu__list 의 직계 자식에 <ul> 이 생겨 axe list 규칙 위반. */}
+              <ul class="menu__sub" id={`menu-${top.id}`} hidden={!opened(top.children)}>
+                {top.children.map((leaf) => (
+                  <li>
+                    <a
+                      class="menu__item menu__item--sub"
+                      href={localePath(locale, leaf.path)}
+                      aria-current={isCurrent(leaf) ? 'page' : undefined}
+                    >
+                      {leaf.label(t)}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ),
+        )
       }
     </ul>
+    {
+      utility.length > 0 && (
+        <ul class="menu__list menu__list--utility">
+          {utility.map((item) => (
+            <li>
+              <a
+                class="menu__item menu__item--utility"
+                href={localePath(locale, item.path)}
+                aria-current={isCurrent(item) ? 'page' : undefined}
+              >
+                {item.label(t)}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
   </dialog>
 </div>
 
@@ -111,6 +163,23 @@ if (ACCOUNTS_ENABLED) {
 
     // 닫힌 뒤 포커스를 열었던 버튼으로 돌려줍니다. 없으면 포커스가 문서 처음으로
     // 튀어, 키보드 사용자는 메뉴를 닫을 때마다 자리를 잃습니다.
+    /*
+     * 그룹 펼치기.
+     *
+     * 하위가 하나뿐인 그룹에는 이 버튼 자체가 렌더되지 않습니다 — 마크업이
+     * `kind:'group'` 가지 안에만 있고, 그 판정은 `nav.ts` 의 resolveTop() 이
+     * 이미 했습니다. 여기서 개수를 다시 세지 않습니다.
+     */
+    for (const button of sheet.querySelectorAll<HTMLButtonElement>('[data-menu-group]')) {
+      button.addEventListener('click', () => {
+        const panel = sheet.querySelector<HTMLElement>(`#${button.getAttribute('aria-controls')}`);
+        if (!panel) return;
+        const willOpen = panel.hidden;
+        panel.hidden = !willOpen;
+        button.setAttribute('aria-expanded', String(willOpen));
+      });
+    }
+
     sheet.addEventListener('close', () => open.focus());
   });
 </script>

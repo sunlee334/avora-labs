@@ -23,10 +23,33 @@ import { readFileSync, readdirSync } from 'node:fs';
 
 const STYLE_DIR = new URL('../../src/styles/', import.meta.url);
 
-/** :root 에 실제로 선언된 이름. tokens.css 는 build-tokens.mjs 가 만듭니다. */
-function definedNames(): Set<string> {
+/** 브랜드 토큰. tokens.css 는 build-tokens.mjs 가 tokens/design-tokens.json 에서 만듭니다. */
+function tokenNames(): Set<string> {
   const css = readFileSync(new URL('tokens.css', STYLE_DIR), 'utf-8');
   return new Set([...css.matchAll(/(--[a-zA-Z0-9-]+)\s*:/g)].map((m) => m[1]));
+}
+
+/**
+ * 선언된 이름 전부 — 토큰 + 스타일시트 안에서 선언한 것.
+ *
+ * 모든 커스텀 속성이 브랜드 토큰인 것은 아닙니다. `--nav-height` 는
+ * 팔레트 값이 아니라 **레이아웃에서 파생된 사실** 이고(padding + 탭영역 +
+ * border), 900px 에서 값이 달라집니다 — design-tokens.json 은 평면 구조라
+ * 분기별 값을 표현할 수 없습니다. 그런 것은 쓰는 자리 옆에서 선언합니다.
+ *
+ * 이 검사가 지키는 것은 "브랜드 토큰만 써라" 가 아니라 **"참조한 이름이
+ * 어디에도 선언돼 있지 않다"** 입니다 — `--brand-ink` 가 21곳에서 쓰이는데
+ * 어디에도 없던 것이 이 파일이 생긴 이유입니다. 그래서 선언 위치를 넓혀도
+ * 감시망은 그대로입니다: 오타(`--nav-heigth`)는 여전히 어디에도 없습니다.
+ */
+function definedNames(): Set<string> {
+  const names = tokenNames();
+  for (const name of readdirSync(STYLE_DIR)) {
+    if (!name.endsWith('.css')) continue;
+    const css = readFileSync(new URL(name, STYLE_DIR), 'utf-8');
+    for (const m of css.matchAll(/(--[a-zA-Z0-9-]+)\s*:/g)) names.add(m[1]);
+  }
+  return names;
 }
 
 /** 스타일시트와 페이지 안 <style> 에서 var(--...) 참조를 모읍니다. */
@@ -72,6 +95,9 @@ test.describe('디자인 토큰', () => {
     const defined = definedNames();
     expect(defined.has('--brand-ink-does-not-exist')).toBe(false);
     expect(defined.has('--color-ink'), '--color-ink 는 있어야 합니다').toBe(true);
+    // 넓힌 쪽이 토큰 파일을 대체하지 않았는지 — tokens.css 가 비면 위
+    // 검사가 global.css 만으로 통과해 버립니다.
+    expect(tokenNames().size, 'tokens.css 가 비었습니다').toBeGreaterThan(10);
   });
 });
 

@@ -2,7 +2,8 @@
 import LanguageSwitcher from './LanguageSwitcher.astro';
 import MenuSheet from './MenuSheet.astro';
 import { dict, localePath } from '../i18n';
-import { SELLS_DIRECTLY, ACCOUNTS_ENABLED } from '../config/runtime';
+import { TOP } from '../config/nav';
+import { UTILITY_VISIBLE } from '../config/nav-gates';
 import type { Locale } from '../config/site';
 
 interface Props {
@@ -11,6 +12,11 @@ interface Props {
 }
 const { locale, path = '' } = Astro.props;
 const t = dict(locale);
+
+// 장바구니는 배지가 붙는 거래 단축키라 유틸리티 줄이 아니라 .nav__right 에
+// 남습니다. 나머지(주문조회·마이페이지)가 유틸리티 줄을 이룹니다.
+const cartItem = UTILITY_VISIBLE.find((item) => item.badge === 'cart') ?? null;
+const utility = UTILITY_VISIBLE.filter((item) => item.badge !== 'cart');
 ---
 
 <nav class="nav" aria-label={t.nav.menu}>
@@ -19,11 +25,54 @@ const t = dict(locale);
     <img src="/brand/avora-wordmark-forest.svg" alt="AVORA" width="120" height="21" />
   </a>
 
-  <div class="nav__links">
-    <a href={`${localePath(locale)}#story`}>{t.nav.story}</a>
-    <a href={localePath(locale, 'product')}>{t.nav.product}</a>
-    <a href={localePath(locale, 'support')}>{t.nav.support}</a>
-  </div>
+  {/*
+    항목은 `src/config/nav.ts` 하나가 정합니다. 하위가 하나뿐인 그룹은
+    resolveTop() 이 이미 링크로 접어 두었으므로, 여기서 개수를 다시 세거나
+    화살표를 조건부로 그리지 않습니다 — 화살표 마크업은 kind:'group' 가지
+    안에만 존재할 수 있습니다.
+
+    패널은 right: 0 정박입니다. .nav__links 가 justify-self:end 라 마지막
+    트리거가 오른쪽 끝에 앉고, left: 0 이면 5개 언어 전부 뷰포트를 넘칩니다
+    (최악 vi 133.7px). body{overflow-x:hidden} 때문에 스크롤바 없이 잘립니다.
+  */}
+  <ul class="nav__links">
+    {
+      TOP.map((top) =>
+        top.kind === 'link' ? (
+          <li>
+            <a href={localePath(locale, top.path)}
+               aria-current={top.match === path ? 'page' : undefined}>
+              {top.label(t)}
+            </a>
+          </li>
+        ) : (
+          <li class="nav__group">
+            <button
+              type="button"
+              aria-expanded="false"
+              aria-controls={`nav-${top.id}`}
+              data-nav-drop
+            >
+              <span>{top.label(t)}</span>
+              <span class="nav__caret" aria-hidden="true"></span>
+            </button>
+            <ul class="nav__dropdown" id={`nav-${top.id}`} hidden>
+              {top.children.map((leaf) => (
+                <li>
+                  <a
+                    href={localePath(locale, leaf.path)}
+                    aria-current={(leaf.match ?? leaf.path) === path ? 'page' : undefined}
+                  >
+                    {leaf.label(t)}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </li>
+        ),
+      )
+    }
+  </ul>
 
   <div class="nav__right">
     {/*
@@ -31,10 +80,10 @@ const t = dict(locale);
       담을 수 없는 장바구니로 가는 링크를 헤더에 두면 막다른 길이 됩니다.
     */}
     {
-      SELLS_DIRECTLY && (
+      cartItem && (
         <a
           class="nav__cart"
-          href={localePath(locale, 'cart')}
+          href={localePath(locale, cartItem.path)}
           data-nav-cart
           data-count-template={t.cart.itemCount}
         >
@@ -60,11 +109,31 @@ const t = dict(locale);
       그 폭에서는 시트 자체가 숨겨지기 때문입니다. 로그인할 방법이 없는
       사이트가 되었고, 그래서 이 자리를 다시 만들었습니다.
     */}
+    {/*
+      유틸리티 — "둘러보는 길" 과 "내 것을 확인하는 길" 을 가릅니다.
+      훅은 data-nav-{id} 로 일반화합니다. 리터럴 비교를 두면 축 2(컴포넌트에
+      목적지 리터럴 0개)가 그 비교에 걸립니다.
+
+      두 번째 <nav> 를 만들지 않습니다 — 같은 <nav> 안의 별도 행입니다.
+      랜드마크가 늘면 스크린리더 사용자가 모든 페이지에서 지나쳐야 할
+      정거장이 늘고, mobile-ux.spec.ts:132 가 개수 1 을 지킵니다.
+    */}
     {
-      ACCOUNTS_ENABLED && (
-        <a class="nav__account" href={localePath(locale, 'account')} data-nav-account>
-          {t.nav.account}
-        </a>
+      utility.length > 0 && (
+        <ul class="nav__utility">
+          {utility.map((item) => (
+            <li>
+              <a
+                class={`nav__${item.id}`}
+                href={localePath(locale, item.path)}
+                aria-current={(item.match ?? item.path) === path ? 'page' : undefined}
+                {...{ [`data-nav-${item.id}`]: true }}
+              >
+                {item.label(t)}
+              </a>
+            </li>
+          ))}
+        </ul>
       )
     }
     <LanguageSwitcher locale={locale} path={path} />
@@ -73,6 +142,52 @@ const t = dict(locale);
 </nav>
 
 <script>
+  /*
+   * 드롭다운 — 탭·클릭과 키보드로만 엽니다.
+   *
+   * hover 로 여는 보조 동작은 넣지 않습니다. matchMedia('(hover: hover)') 는
+   * 터치 되는 윈도우 노트북에서 참이라 모바일 최우선이 지키려는 기기군에
+   * 정확히 출하되고, hover-open + click-toggle 은 "hover 로 열림 → 마우스가
+   * 벗어나 닫힘 → 닫으려 누른 클릭이 다시 엶" 이라는 상태 경합을 만듭니다.
+   *
+   * <dialog> 를 쓰지 않는 이유: showModal() 은 top layer 라 뷰포트 기준
+   * 배치가 되고 헤더 나머지를 inert 로 만듭니다. 여기 패널은 트리거에
+   * 붙어야 하고 헤더를 죽이면 안 됩니다.
+   */
+  const triggers = document.querySelectorAll<HTMLButtonElement>('[data-nav-drop]');
+
+  function closeAll(): void {
+    for (const trigger of triggers) {
+      const panel = document.getElementById(trigger.getAttribute('aria-controls') ?? '');
+      if (panel) panel.hidden = true;
+      trigger.setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  for (const trigger of triggers) {
+    trigger.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const panel = document.getElementById(trigger.getAttribute('aria-controls') ?? '');
+      if (!panel) return;
+      const willOpen = panel.hidden;
+      closeAll();
+      panel.hidden = !willOpen;
+      trigger.setAttribute('aria-expanded', String(willOpen));
+    });
+  }
+
+  if (triggers.length > 0) {
+    document.addEventListener('click', closeAll);
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      // 열려 있던 트리거로 포커스를 돌려줍니다 — 없으면 키보드 사용자가
+      // 닫을 때마다 자리를 잃습니다.
+      const open = [...triggers].find((t) => t.getAttribute('aria-expanded') === 'true');
+      closeAll();
+      open?.focus();
+    });
+  }
+
   import { subscribe, itemCount } from '../lib/cart';
 
   const link = document.querySelector<HTMLElement>('[data-nav-cart]');

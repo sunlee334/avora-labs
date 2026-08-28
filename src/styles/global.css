@@ -270,6 +270,21 @@ button {
 }
 
 /* ── 네비게이션 ───────────────────────────────────────────── */
+/* 헤더 높이를 토큰으로 둡니다.
+   :root 에 선언해야 합니다 — .nav 에 두면 #story 가 <main> 안이라 상속받지
+   못하고 scroll-margin-top 이 0px 으로 조용히 떨어집니다(두 엔진 실측).
+   .lang__sheet 는 .nav 자손이라 양쪽 다 동작하므로 그 실수를 못 잡습니다. */
+:root {
+  /* 모바일 = padding(12+12) + 44(워드마크) + 1(border) */
+  --nav-height: 69px;
+}
+
+/* 브랜드 항목이 #story 로 가므로 착지가 스티키 헤더에 가리지 않게 합니다.
+   저장소에 scroll-margin/scroll-padding 선언이 0건이었습니다. */
+#story {
+  scroll-margin-top: var(--nav-height);
+}
+
 .nav {
   position: sticky;
   top: 0;
@@ -295,6 +310,9 @@ button {
 }
 
 .nav__links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: none;
   gap: 26px;
   font-size: 13px;
@@ -310,6 +328,101 @@ button {
   text-decoration: underline;
 }
 
+/* ── 드롭다운 ─────────────────────────────────────────────
+   .nav 가 position: sticky 라 이미 absolute 자손의 컨테이닝 블록입니다.
+   그래서 트리거 <li> 의 position: relative 가 패널을 트리거에 묶는 **유일한
+   조건**입니다 — 지우면 패널이 헤더 왼쪽 아래로 갑니다. */
+.nav__group {
+  position: relative;
+}
+.nav__links button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: var(--size-tap-min);
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.nav__caret {
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg) translate(-1px, -1px);
+  transition: transform 160ms ease;
+  opacity: 0.55;
+}
+[aria-expanded='true'] .nav__caret {
+  transform: rotate(-135deg) translate(-1px, -1px);
+}
+.nav__dropdown {
+  position: absolute;
+  top: 100%;
+  /* right 정박 — .nav__links 가 justify-self:end 라 마지막 트리거가 오른쪽
+     끝에 앉습니다. left: 0 이면 5개 언어 전부 넘칩니다(최악 vi 133.7px). */
+  right: 0;
+  left: auto;
+  z-index: 1;
+  min-width: 180px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--brand-surface);
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  box-shadow: 0 18px 40px -18px rgba(35, 41, 31, 0.3);
+}
+.nav__dropdown[hidden] {
+  display: none;
+}
+.nav__dropdown a {
+  display: flex;
+  align-items: center;
+  min-height: var(--size-tap-min);
+  padding: 0 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+/* ── 유틸리티 줄 ──────────────────────────────────────────
+   --brand-muted 를 쓰지 않습니다. .nav 배경이 color-mix(...88%, transparent)
+   라 옅게 덧칠한 면이 되고, 그 위에서 --brand-muted 는 4.44:1 로 AA 미달입니다. */
+.nav__utility {
+  display: none;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.nav__utility a {
+  display: inline-flex;
+  align-items: center;
+  /* 데스크톱에만 있는 행이라 이 저장소의 44px 검사(전부 390px 전용)가
+     닿지 않습니다. 그래서 여기서 명시합니다. */
+  min-height: var(--size-tap-min);
+  padding: 0 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+@media (min-width: 900px) {
+  .nav__utility {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border-bottom: 1px solid var(--color-line);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav__caret {
+    transition: none;
+  }
+}
+
 .nav__right {
   display: flex;
   align-items: center;
@@ -317,13 +430,34 @@ button {
 }
 
 @media (min-width: 900px) {
+  :root {
+    /* padding(14+14) + 행1(44) + row-gap(0) + 행2(44) + border(1) = 117 */
+    --nav-height: 117px;
+  }
   .nav {
     padding: 14px var(--space-gutter-desktop);
+    /* 두 행 — 위는 유틸리티, 아래는 기본 메뉴. row-gap 은 0 입니다:
+       두 행이 각자 44px 를 갖고 유틸리티 줄에 hairline 이 이미 있어,
+       그 사이 죽은 공간은 스티키 헤더에서 순손실입니다. */
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      'brand util'
+      'brand links';
+    row-gap: 0;
+    column-gap: 16px;
+    align-items: center;
   }
-  .nav__wordmark img {
-    height: 21px;
+  .nav__wordmark {
+    grid-area: brand;
+  }
+  .nav__right {
+    grid-area: util;
+    justify-self: end;
   }
   .nav__links {
+    grid-area: links;
+    justify-self: end;
     display: flex;
   }
 }
@@ -419,7 +553,10 @@ button {
 
 @media (min-width: 900px) {
   .lang__sheet {
-    inset: 74px var(--space-gutter-desktop) auto auto;
+    /* 74px 하드코딩이었습니다 — 헤더가 두 행이 되면 이 패널이 헤더
+       **안쪽** 에 떠서 기본 메뉴 줄을 덮습니다. +1px 은 오늘의 73/74
+       관계를 그대로 보존하기 위한 것입니다. */
+    inset: calc(var(--nav-height) + 1px) var(--space-gutter-desktop) auto auto;
     width: 260px;
     border: 1px solid var(--color-line);
     border-radius: 12px;
@@ -1625,6 +1762,62 @@ button {
 }
 
 @media (min-width: 900px) {
+.menu__item--group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--color-line);
+  cursor: pointer;
+}
+.menu__caret {
+  width: 8px;
+  height: 8px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform 160ms ease;
+  flex: none;
+  opacity: 0.55;
+}
+[aria-expanded='true'] .menu__caret {
+  transform: rotate(-135deg) translate(-2px, -2px);
+}
+.menu__sub {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.menu__sub[hidden] {
+  display: none;
+}
+/* 하위도 54px 을 지킵니다 — mobile-menu.spec.ts:110 이 시트 안 모든
+   a·button 을 44px 로 재고, 펼친 뒤에는 이것들도 그 대상이 됩니다. */
+.menu__item--sub {
+  padding-left: 32px;
+  color: var(--brand-muted);
+}
+/* 유틸리티 구획. 소제목을 두지 않고 굵은 선으로 가릅니다 — .menu__item 이
+   이미 1px 을 가지므로 2px 이 구획 경계로 읽힙니다. */
+.menu__list--utility {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+  border-top: 2px solid var(--color-line);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu__caret {
+    transition: none;
+  }
+}
+
   /* 이 폭부터는 헤더에 링크가 그대로 나와 있어 메뉴 버튼이 할 일이 없습니다. */
   .menu {
     display: none;
