@@ -15,6 +15,7 @@ import { dict, localePath } from '../../i18n';
 import { ACCOUNTS_ENABLED } from '../../config/runtime';
 import carriers from '../../config/carriers.json';
 import InquirySection from '../../components/InquirySection.astro';
+import MyReviewsSection from '../../components/MyReviewsSection.astro';
 
 export function getStaticPaths() {
   if (!ACCOUNTS_ENABLED) return [];
@@ -58,7 +59,16 @@ const a = t.account;
 
       <h2 class="kicker" style="margin-top: 40px">{a.orders.heading}</h2>
       <p class="body" data-orders-state>{a.orders.loading}</p>
-      <dl class="orderResult__facts" data-orders hidden></dl>
+      {/*
+        주문 목록은 정의 목록이 아니라 **목록** 입니다. <dl> 이던 것을
+        <ul> 로 바꿉니다 — 스크립트가 넣는 것은 <article class="orderCard"> 이고,
+        <dl> 의 직계 자식으로 허용되는 것은 <dt>/<dd> 짝뿐이라 axe 의
+        definition-list 규칙(impact: serious)에 걸립니다.
+
+        기존 a11y 검사가 이것을 못 봤습니다 — 그 사용자에게 주문이 없어
+        빈 컨테이너만 검사됐기 때문입니다.
+      */}
+      <ul class="orderList" data-orders hidden></ul>
 
       <div class="sectionHead" style="margin-top: 40px">
         <h2 class="kicker">{a.address.heading}</h2>
@@ -135,6 +145,9 @@ const a = t.account;
         <button class="cta" type="submit" data-claim-submit>{a.claim.submit}</button>
       </form>
 
+      {/* 후기는 주문에서 나오므로 주문 근처에 둡니다. */}
+      <MyReviewsSection locale={locale} />
+
       {/* 로그인한 사람만 보고 남깁니다. 주문이 없어도 됩니다 —
           구매 전 질문을 받기 위해서입니다. */}
       <InquirySection locale={locale} mode="account" />
@@ -175,6 +188,19 @@ const a = t.account;
 
 <script>
   import { mountInquiry, drain } from '../../lib/inquiry';
+
+  import { mountMyReviews } from '../../lib/my-reviews';
+
+  const reviewsRoot = document.querySelector<HTMLElement>('[data-my-reviews]');
+  if (reviewsRoot) {
+    mountMyReviews(
+      reviewsRoot,
+      JSON.parse(reviewsRoot.dataset.copy ?? '{}'),
+      // 후기 쓰기는 리뷰 페이지로 보냅니다. 로그인한 사람은 그 화면에서
+      // 주문번호·연락처를 적지 않아도 됩니다 — 서버가 세션으로 확인합니다.
+      reviewsRoot.dataset.claimAnchor?.replace(/\/account$/, '/reviews') ?? '',
+    );
+  }
 
   const root = document.querySelector<HTMLElement>('[data-account]');
   /*
@@ -385,7 +411,15 @@ const a = t.account;
         return;
       }
 
-      box.replaceChildren(...orders.map(orderCard));
+      // <ul> 의 직계 자식은 <li> 여야 합니다. 카드 자체는 <article> 로 두고
+      // 감쌉니다 — 주문 하나가 독립적으로 읽히는 단위라는 뜻은 유지합니다.
+      box.replaceChildren(
+        ...orders.map((o: any) => {
+          const li = document.createElement('li');
+          li.append(orderCard(o));
+          return li;
+        }),
+      );
       state.hidden = true;
       box.hidden = false;
     }

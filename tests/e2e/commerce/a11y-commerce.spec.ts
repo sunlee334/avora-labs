@@ -135,6 +135,47 @@ test.describe('마이페이지', () => {
     await expect(page.locator('[data-account-signed]')).toBeVisible();
     expect(await scan(page, testInfo)).toEqual([]);
   });
+
+  test('내 후기 목록과 안 쓴 주문이 그려진 상태', async ({ page }, testInfo) => {
+    // 위 테스트의 사용자는 후기가 없어 **빈 상태**만 검사됩니다. 목록이
+    // 실제로 그려지면 별점·배지·"후기 쓰기" 링크가 새로 생기고, 그것들은
+    // 스크립트가 만든 DOM 이라 정적 스캔에 잡히지 않습니다.
+    const code = `a11y-reviews-${Date.now().toString(36)}`;
+    const start = await page.request.get('/api/auth/login?provider=mock&returnTo=%2Fko%2Faccount', {
+      maxRedirects: 0,
+    });
+    const callback = new URL(start.headers()['location']);
+    callback.searchParams.set('code', code);
+    await page.request.get(callback.href, { maxRedirects: 0 });
+
+    const phone = `010${String(Math.floor(Math.random() * 100000000)).padStart(8, '0')}`;
+    const mk = async () => {
+      const id = `AVORA-${String(20261101000000 + Math.floor(Math.random() * 999999)).padEnd(14, '0').slice(0, 14)}-A11YRV`;
+      await page.request.post('/api/orders', {
+        data: {
+          orderId: id, amount: 32000, currency: 'KRW', locale: 'ko',
+          items: [{ id: 'daily-sunscreen', qty: 1 }],
+          recipientName: '접근성', recipientPhone: phone,
+          postalCode: '04039', address1: '서울특별시 마포구',
+        },
+      });
+      await page.request.post('/api/payments/confirm', {
+        headers: { 'X-Admin-Dev-Token': ADMIN_DEV_TOKEN },
+        data: { orderId: id, paymentKey: `a11y-${id}`, amount: 32000 },
+      });
+      return id;
+    };
+    const written = await mk();
+    await mk(); // 이쪽은 후기를 안 써서 "안 쓴 주문" 이 됩니다
+    await page.request.post('/api/reviews', {
+      data: { orderId: written, phone, rating: 4, body: '접근성 검사를 위한 후기 본문입니다.' },
+    });
+
+    await page.goto('/ko/account');
+    await expect(page.locator('[data-my-reviews] .myReviews__body').first()).toBeVisible();
+    await expect(page.locator('[data-my-reviews-pending]')).toBeVisible();
+    expect(await scan(page, testInfo)).toEqual([]);
+  });
 });
 
 test.describe('관리 화면', () => {

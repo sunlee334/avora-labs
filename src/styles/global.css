@@ -2083,6 +2083,16 @@ button {
   gap: 10px;
 }
 
+/* 주문 목록. <dl class="orderResult__facts"> 이던 것을 <ul> 로 바꿨습니다 —
+   그 클래스는 dt/dd 짝을 위한 것이라 <article> 카드에 맞지 않았습니다. */
+.orderList {
+  list-style: none;
+  margin: 30px 0 0;
+  padding: 0;
+  max-width: 620px;
+  border-top: 1px solid var(--color-line);
+}
+
 .orderCard {
   /* 그리드 칸은 기본이 min-width:auto 라, 긴 주문번호가 칸을 밀어냅니다. */
   min-width: 0;
@@ -2281,6 +2291,71 @@ button {
    그래서 CSS 가 아니라 HTML 트리 단계에서 감쌉니다. */
 
 /* ── 문의 ──────────────────────────────────────────────────── */
+
+/* ── 내 후기 ──────────────────────────────────────────────
+   문의 목록과 같은 뼈대를 씁니다 — 마이페이지 안에서 두 섹션이 서로
+   다른 언어로 보이면 한 화면이 아니라 두 화면처럼 읽힙니다. */
+.myReviews__list {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+}
+.myReviews__item {
+  padding: 16px 0;
+  border-top: 1px solid var(--color-line);
+}
+.myReviews__item--pending {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.myReviews__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.myReviews__stars {
+  letter-spacing: 2px;
+  font-size: 14px;
+}
+.myReviews__date,
+.myReviews__order {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--brand-muted);
+  margin: 0;
+}
+.myReviews__order {
+  margin-top: 4px;
+}
+.myReviews__badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--color-line);
+  color: var(--brand-muted);
+}
+.myReviews__body {
+  margin: 8px 0 0;
+}
+.myReviews__subhead {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--brand-muted);
+  margin: 28px 0 0;
+}
+.myReviews__write {
+  flex: none;
+  /* 이 저장소의 탭 영역 기준 */
+  min-height: var(--size-tap-min);
+}
 
 .inquiryList {
   list-style: none;
