@@ -705,6 +705,20 @@
       "trackingLink": "Theo dõi giao hàng",
       "noTracking": "Mã vận đơn hiện ra sau khi gửi hàng."
     },
+    "reviews": {
+      "heading": "Đánh giá của tôi",
+      "body": "Những đánh giá bạn đã viết, và đơn hàng chưa được đánh giá.",
+      "loading": "Đang tải.",
+      "empty": "Bạn chưa viết đánh giá nào.",
+      "pendingHeading": "Chưa đánh giá",
+      "write": "Viết đánh giá",
+      "status": {
+        "visible": "Đang hiển thị",
+        "hidden": "Đã ẩn"
+      },
+      "error": "Không tải được đánh giá.",
+      "note": "Đánh giá viết khi chưa đăng nhập sẽ không hiện ở đây. Liên kết đơn hàng với tài khoản ở mục “Thêm đơn hàng trước đây” bên dưới thì đánh giá sẽ xuất hiện."
+    },
     "address": {
       "heading": "Địa chỉ đã lưu",
       "empty": "Chưa có địa chỉ nào được lưu. Địa chỉ sẽ được ghi nhớ từ đơn hàng tiếp theo.",

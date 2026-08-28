@@ -1,0 +1,63 @@
+---
+/**
+ * 내가 쓴 후기 · 아직 안 쓴 주문.
+ *
+ * ── 왜 "안 쓴 주문" 이 함께 있는가 ──────────────────────────
+ * 마이페이지에서 값어치 있는 것은 "내가 쓴 걸 다시 읽는 것" 보다
+ * **"쓸 게 남았다는 걸 아는 것"** 입니다. 알려주지 않으면 손님은 후기를 쓸
+ * 수 있다는 사실 자체를 모릅니다.
+ *
+ * ── 로그인 없이 쓴 후기는 여기 안 보입니다 ──────────────────
+ * 후기의 소유 열쇠는 `order_id` 하나이고, 그 주문에 `user_id` 가 붙어야
+ * "내 것" 이 됩니다. 로그인 없이 산 주문은 비어 있습니다. 그 사실을 화면이
+ * 말하지 않으면 "후기를 썼는데 없어졌다" 가 됩니다.
+ *
+ * ── 마크업만 있습니다 ───────────────────────────────────────
+ * 동작은 `src/lib/my-reviews.ts`, 문구는 `data-copy` 로 넘깁니다 —
+ * 문의 섹션(`InquirySection.astro`)과 같은 방식이라 스크립트가 5개 언어
+ * 사전을 안고 갈 필요가 없습니다.
+ */
+import type { Locale } from '../config/site';
+import { dict, localePath } from '../i18n';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = dict(locale);
+const r = t.account.reviews;
+---
+
+<section
+  class="myReviews"
+  data-my-reviews
+  data-claim-anchor={localePath(locale, 'account')}
+  data-copy={JSON.stringify({
+    loading: r.loading,
+    empty: r.empty,
+    pendingHeading: r.pendingHeading,
+    write: r.write,
+    status: r.status,
+    error: r.error,
+    outOf: t.reviews.outOf,
+  })}
+>
+  <h2 class="kicker" style="margin-top: 40px">{r.heading}</h2>
+  <p class="body">{r.body}</p>
+
+  <p class="body" data-my-reviews-state>{r.loading}</p>
+  <ul class="myReviews__list" data-my-reviews-list hidden></ul>
+
+  {/* 아직 안 쓴 주문. 없으면 통째로 감춥니다 — 빈 제목만 남기지 않습니다. */}
+  <div data-my-reviews-pending hidden>
+    <h3 class="myReviews__subhead" data-my-reviews-pending-heading></h3>
+    <ul class="myReviews__list" data-my-reviews-pending-list></ul>
+  </div>
+
+  {/*
+    로그인 없이 남긴 후기가 안 보이는 이유를 밝힙니다. 숨기면 "썼는데
+    없어졌다" 가 되고, 그건 화면이 거짓말한 것과 같습니다.
+  */}
+  <p class="cart__notice">{r.note}</p>
+</section>

@@ -155,6 +155,94 @@ export async function createReview(
 }
 
 /** 화면에 보이는 리뷰만. 최신순. */
+/**
+ * 로그인한 사람이 쓴 후기 전부.
+ *
+ * `reviews` 에는 `user_id` 가 없습니다 — 후기의 소유 열쇠는 `order_id` 하나이고,
+ * 후기는 주문 없이 존재할 수 없기 때문입니다. 대신 `orders.user_id`
+ * (`migrations/0003_accounts.sql:53`)를 타고 들어갑니다. 스키마를 바꾸지
+ * 않아도 "내 후기" 가 정확히 나옵니다.
+ *
+ * **로그인 없이 쓴 후기는 여기 안 잡힙니다.** 그 주문의 `user_id` 가 비어
+ * 있기 때문입니다. 손님이 "이전 주문 가져오기"(`/api/account/claim`)로 주문을
+ * 계정에 붙이면 그때 함께 나타납니다 — 화면이 그 사실을 말해야 합니다.
+ *
+ * 숨긴 후기도 돌려줍니다. 자기 후기가 안 보이게 됐다는 것을 본인이 모르는
+ * 편이 더 나쁩니다. 다만 `hidden_reason` 은 내보내지 않습니다 — 운영자가
+ * 기록용으로 쓰는 문장이고, 손님에게 보이라고 쓴 것이 아닙니다.
+ */
+export async function reviewsForUser(
+  db: D1Database,
+  userId: string,
+  limit = 50,
+): Promise<ReviewRecord[]> {
+  const { results } = await db
+    .prepare(
+      `SELECT r.* FROM reviews r
+         JOIN orders o ON o.id = r.order_id
+        WHERE o.user_id = ?
+        ORDER BY r.created_at DESC
+        LIMIT ?`,
+    )
+    .bind(userId, limit)
+    .all();
+  return (results ?? []).map((row) => rowToReview(row as Record<string, unknown>));
+}
+
+/**
+ * 아직 후기를 쓰지 않은, 결제 완료된 내 주문.
+ *
+ * 마이페이지에서 값어치 있는 것은 "내가 쓴 걸 다시 읽는 것" 보다 **"쓸 게
+ * 남았다는 걸 아는 것"** 입니다. 그것을 알려주지 않으면 손님은 후기를 쓸 수
+ * 있다는 사실 자체를 모릅니다.
+ */
+export async function ordersAwaitingReview(
+  db: D1Database,
+  userId: string,
+  limit = 20,
+): Promise<Array<{ orderId: string; createdAt: string; items: unknown }>> {
+  const { results } = await db
+    .prepare(
+      `SELECT o.id, o.created_at, o.items FROM orders o
+         LEFT JOIN reviews r ON r.order_id = o.id
+        WHERE o.user_id = ? AND o.status = 'paid' AND r.id IS NULL
+        ORDER BY o.created_at DESC
+        LIMIT ?`,
+    )
+    .bind(userId, limit)
+    .all();
+  return (results ?? []).map((row) => {
+    const r = row as Record<string, unknown>;
+    let items: unknown = [];
+    try {
+      items = JSON.parse(String(r.items ?? '[]'));
+    } catch {
+      // 저장된 값이 깨져 있어도 목록은 나와야 합니다 — 주문번호만으로도
+      // 후기를 쓸 수 있습니다.
+    }
+    return { orderId: String(r.id), createdAt: String(r.created_at), items };
+  });
+}
+
+/**
+ * 본인에게 보여줄 모양.
+ *
+ * `publicReview` 와 다릅니다 — 공개 목록은 `orderId` 를 지우고 이름을
+ * 마스킹하지만, 본인 화면에서는 **어느 주문에 쓴 후기인지** 를 알아야
+ * 합니다. 대신 `authorName`(실명)과 `hiddenReason` 은 나가지 않습니다.
+ */
+export function myReview(review: ReviewRecord) {
+  return {
+    id: review.id,
+    orderId: review.orderId,
+    rating: review.rating,
+    body: review.body,
+    sponsored: review.sponsored,
+    status: review.status,
+    createdAt: review.createdAt,
+  };
+}
+
 export async function listVisibleReviews(
   db: D1Database,
   limit: number,

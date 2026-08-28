@@ -705,6 +705,20 @@
       "trackingLink": "Track delivery",
       "noTracking": "A tracking number appears once it ships."
     },
+    "reviews": {
+      "heading": "My reviews",
+      "body": "Reviews you have written, and orders still waiting for one.",
+      "loading": "Loading.",
+      "empty": "You have not written a review yet.",
+      "pendingHeading": "Not reviewed yet",
+      "write": "Write a review",
+      "status": {
+        "visible": "Visible",
+        "hidden": "Hidden"
+      },
+      "error": "Could not load your reviews.",
+      "note": "Reviews written without signing in do not appear here. Link the order to your account under “Add a past order” below and it will show up."
+    },
     "address": {
       "heading": "Saved address",
       "empty": "No saved address yet. It is remembered from your next order.",

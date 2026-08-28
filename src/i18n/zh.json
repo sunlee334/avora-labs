@@ -705,6 +705,20 @@
       "trackingLink": "查询配送",
       "noTracking": "发货后将显示运单号。"
     },
+    "reviews": {
+      "heading": "我的评价",
+      "body": "您写过的评价，以及还未评价的订单。",
+      "loading": "加载中。",
+      "empty": "您还没有写过评价。",
+      "pendingHeading": "尚未评价",
+      "write": "写评价",
+      "status": {
+        "visible": "显示中",
+        "hidden": "已隐藏"
+      },
+      "error": "无法加载评价。",
+      "note": "未登录时写的评价不会显示在这里。在下方“添加过往订单”中关联订单后即可看到。"
+    },
     "address": {
       "heading": "已保存的配送地址",
       "empty": "尚未保存配送地址。下单时填写后会记录在这里。",

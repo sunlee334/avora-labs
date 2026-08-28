@@ -279,6 +279,29 @@ export async function saveAddress(
 }
 
 /** 이 계정에 연결된 주문. 최신순. */
+/**
+ * 이 주문이 이 계정의 것인가 — `findOrderForCustomer` 의 세션 판입니다.
+ *
+ * 연락처 대신 `user_id` 로 봅니다. 연락처보다 강한 열쇠입니다 — 연락처는
+ * 주문할 때 적은 문자열이고 남이 알 수도 있지만, `user_id` 는 로그인해야
+ * 얻습니다.
+ *
+ * `OrderRecord` 에 `userId` 를 더하지 않는 이유: 그 타입은 관리 화면·알림·
+ * 주문조회가 모두 쓰고, 필드 하나가 늘면 그 표면 전부가 넓어집니다.
+ * 필요한 곳에서만 묻습니다.
+ */
+export async function findOrderForUser(
+  db: D1Database,
+  orderId: string,
+  userId: string,
+): Promise<OrderRecord | null> {
+  const row = await db
+    .prepare('SELECT * FROM orders WHERE id = ? AND user_id = ?')
+    .bind(orderId, userId)
+    .first();
+  return row ? rowToOrder(row as Record<string, unknown>) : null;
+}
+
 export async function ordersForUser(
   db: D1Database,
   userId: string,

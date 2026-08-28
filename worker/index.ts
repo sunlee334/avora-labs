@@ -52,6 +52,9 @@ import {
   reviewSummary,
   setReviewStatus,
   type ReviewStatus,
+  reviewsForUser,
+  ordersAwaitingReview,
+  myReview,
 } from './reviews';
 import { notifyNewOrder, toNotification } from './notify';
 import { notifyNewInquiry } from './notify/inquiry';
@@ -66,7 +69,13 @@ import {
   currentUser,
   type AuthEnv,
 } from './auth';
-import { publicUser, ordersForUser, saveAddress, claimOrder } from './accounts';
+import {
+  publicUser,
+  ordersForUser,
+  saveAddress,
+  claimOrder,
+  findOrderForUser,
+} from './accounts';
 
 const LOCALES = ['ko', 'en', 'zh', 'th', 'vi'] as const;
 type Locale = (typeof LOCALES)[number];
@@ -467,6 +476,22 @@ async function handleReviewList(request: Request, env: Env): Promise<Response> {
   });
 }
 
+/**
+ * 후기 쓰기.
+ *
+ * 길이 둘입니다.
+ *
+ *   비로그인   주문번호 + 연락처   — 지금까지의 유일한 길
+ *   로그인     주문번호만          — 주문이 그 계정 것이면 연락처를 묻지 않습니다
+ *
+ * 두 번째를 더한 이유: 로그인한 사람에게 자기 주문번호와 연락처를 손으로
+ * 적게 하는 것은 이상합니다. 마이페이지가 이미 그 주문을 보여주고 있는데
+ * 다시 물을 이유가 없습니다.
+ *
+ * **연락처 검사를 느슨하게 한 것이 아닙니다.** 세션으로 온 요청은 주문의
+ * `user_id` 가 그 사람과 같은지를 봅니다 — 연락처보다 강한 열쇠입니다.
+ * 비로그인 경로의 판정은 글자 하나 바뀌지 않았습니다.
+ */
 async function handleReviewCreate(request: Request, env: Env): Promise<Response> {
   if (!env.DB) return json({ error: 'REVIEWS_NOT_CONFIGURED' }, 503);
 
@@ -488,7 +513,11 @@ async function handleReviewCreate(request: Request, env: Env): Promise<Response>
   const reviewBody = text(body.body, REVIEW_BODY_MAX);
   const rating = Number(body.rating);
 
-  if (!orderId || !phone || !reviewBody) return json({ error: 'MISSING_FIELDS' }, 400);
+  // 로그인했으면 연락처 없이도 됩니다 — 소유는 세션으로 확인합니다.
+  const user = await currentUser(request, env);
+  if (!orderId || !reviewBody || (!phone && !user)) {
+    return json({ error: 'MISSING_FIELDS' }, 400);
+  }
   if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
     return json({ error: 'INVALID_RATING', message: '별점은 1점부터 5점까지입니다.' }, 400);
   }
@@ -499,10 +528,18 @@ async function handleReviewCreate(request: Request, env: Env): Promise<Response>
     );
   }
 
-  // 주문번호와 연락처가 함께 맞아야 합니다. 주문 조회와 같은 열쇠입니다.
-  const order = await findOrderForCustomer(env.DB, orderId, phone);
-  // 없는 주문과 연락처 불일치를 같은 응답으로 돌려줍니다 —
-  // 다르게 답하면 주문번호가 존재하는지를 알려주는 셈이 됩니다.
+  /*
+   * 소유 확인.
+   *
+   * 연락처를 준 경우는 지금까지와 같습니다 — 주문번호와 연락처가 **함께**
+   * 맞아야 합니다. 연락처 없이 온 경우(로그인)는 주문을 가져와 그 주문의
+   * user_id 가 이 사람인지 봅니다.
+   *
+   * 어느 쪽이든 없는 주문과 남의 주문을 **같은 응답**으로 돌려줍니다 —
+   * 다르게 답하면 주문번호가 존재하는지를 알려주는 셈이 됩니다.
+   */
+  let order = phone ? await findOrderForCustomer(env.DB, orderId, phone) : null;
+  if (!order && user) order = await findOrderForUser(env.DB, orderId, user.id);
   if (!order) return json({ error: 'ORDER_NOT_FOUND' }, 404);
 
   if (order.status !== 'paid') {
@@ -784,6 +821,25 @@ async function handleAccountMe(request: Request, env: Env): Promise<Response> {
   const user = await currentUser(request, env);
   if (!user) return json({ error: 'NOT_LOGGED_IN' }, 401);
   return json({ user: publicUser(user) });
+}
+
+/**
+ * 내가 쓴 후기 + 아직 안 쓴 주문.
+ *
+ * 한 번에 돌려줍니다. 화면이 두 번 부르면 둘 중 하나만 늦게 와서 목록이
+ * 두 단계로 그려집니다 — 같은 섹션 안의 두 목록이 따로 노는 것으로 보입니다.
+ */
+async function handleAccountReviews(request: Request, env: Env): Promise<Response> {
+  const user = await currentUser(request, env);
+  if (!user) return json({ error: 'NOT_LOGGED_IN' }, 401);
+  if (!env.DB) return json({ error: 'REVIEWS_NOT_CONFIGURED' }, 503);
+
+  const [reviews, pending] = await Promise.all([
+    reviewsForUser(env.DB, user.id),
+    ordersAwaitingReview(env.DB, user.id),
+  ]);
+
+  return json({ ok: true, reviews: reviews.map(myReview), pending });
 }
 
 async function handleAccountOrders(request: Request, env: Env): Promise<Response> {
@@ -1127,6 +1183,9 @@ export default {
     }
     if (pathname === '/api/account/orders' && request.method === 'GET') {
       return handleAccountOrders(request, env);
+    }
+    if (pathname === '/api/account/reviews' && request.method === 'GET') {
+      return handleAccountReviews(request, env);
     }
     if (pathname === '/api/account/address' && request.method === 'PUT') {
       return handleAccountAddress(request, env);
