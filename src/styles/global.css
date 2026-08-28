@@ -316,9 +316,18 @@ button {
   align-items: center;
   min-height: var(--size-tap-min);
 }
-.nav__wordmark img {
-  height: 17px;
-  width: auto;
+/*
+ * 워드마크가 이미지에서 글자로 바뀌었습니다(Nav.astro 주석 참조).
+ * 자간을 넉넉히 벌려 이름처럼 보이게 합니다 — 로고 자리의 글자는 문장이
+ * 아니라 표식이라 본문과 같은 조판이면 안 됩니다.
+ */
+.nav__wordmark {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-decoration: none;
+  color: var(--color-ink);
 }
 
 .nav__links {
@@ -1520,9 +1529,13 @@ button {
   padding-block: 48px 40px;
 }
 .footer__wordmark {
-  width: 100%;
-  max-width: 520px;
-  margin-bottom: 32px;
+  font-family: var(--font-display);
+  font-size: clamp(38px, 11vw, 76px);
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  margin: 0 0 32px;
+  color: var(--brand-surface-alt);
 }
 .footer__tagline {
   font-family: var(--font-display);

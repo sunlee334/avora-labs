@@ -5,7 +5,7 @@
 import '../styles/global.css';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
-import { ORIGIN, LOCALE_TAGS, DEFAULT_LOCALE, type Locale } from '../config/site';
+import { ORIGIN, LOCALE_TAGS, DEFAULT_LOCALE, BUSINESS, type Locale } from '../config/site';
 import { dict, alternates, localePath } from '../i18n';
 // 모바일 브라우저의 주소창 색입니다. 브랜드 색이므로 토큰에서 읽습니다 —
 // 여기 값을 베껴 적으면 팔레트가 바뀔 때 이 한 줄만 옛 색으로 남습니다.
@@ -97,7 +97,7 @@ const xDefault = !wanted || wanted.includes(DEFAULT_LOCALE)
 
     {/* SNS 공유 */}
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="AVORA" />
+    <meta property="og:site_name" content={BUSINESS.brandName} />
     <meta property="og:locale" content={LOCALE_TAGS[locale].replace('-', '_')} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />

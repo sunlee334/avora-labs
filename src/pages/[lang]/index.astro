@@ -9,7 +9,7 @@ import { Picture } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import heroImage from '../../assets/images/hero-runner-sunrise.jpg';
 import skinImage from '../../assets/images/skin-sweat.jpg';
-import { LOCALES, type Locale } from '../../config/site';
+import { BUSINESS, LOCALES, type Locale } from '../../config/site';
 import { dict, localePath } from '../../i18n';
 import { organization, website, breadcrumb } from '../../lib/jsonld';
 
@@ -31,7 +31,7 @@ const h = t.home;
   jsonLd={[
     organization(),
     website(locale),
-    breadcrumb([{ name: 'AVORA', path: localePath(locale) }]),
+    breadcrumb([{ name: BUSINESS.brandName, path: localePath(locale) }]),
   ]}
 >
   {/* 1 — Hero */}

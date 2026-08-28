@@ -14,7 +14,7 @@
  */
 import { getCollection, render } from 'astro:content';
 import Base from '../../../../layouts/Base.astro';
-import { LOCALES, type Locale } from '../../../../config/site';
+import { BUSINESS, LOCALES, type Locale } from '../../../../config/site';
 import { dict, localePath, isLocale } from '../../../../i18n';
 import { article, breadcrumb } from '../../../../lib/jsonld';
 
@@ -76,7 +76,7 @@ const isoDate = (date: Date) => date.toISOString().slice(0, 10);
   locale={locale}
   path={path}
   locales={locales}
-  title={`${post.data.title} — AVORA`}
+  title={`${post.data.title} — ${BUSINESS.brandName}`}
   description={post.data.summary}
   jsonLd={[
     article({
@@ -88,7 +88,7 @@ const isoDate = (date: Date) => date.toISOString().slice(0, 10);
       ...(post.data.updatedAt ? { updatedAt: isoDate(post.data.updatedAt) } : {}),
     }),
     breadcrumb([
-      { name: 'AVORA', path: localePath(locale) },
+      { name: BUSINESS.brandName, path: localePath(locale) },
       { name: t.support.heading, path: localePath(locale, 'support') },
       { name: page.heading, path: localePath(locale, 'support/posts') },
       { name: post.data.title, path: localePath(locale, path) },

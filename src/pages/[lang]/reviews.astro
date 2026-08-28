@@ -18,7 +18,7 @@
  * 다시 안고 있을 이유가 없기 때문입니다.
  */
 import Base from '../../layouts/Base.astro';
-import { LOCALES, type Locale } from '../../config/site';
+import { BUSINESS, LOCALES, type Locale } from '../../config/site';
 import { dict, localePath } from '../../i18n';
 import { breadcrumb } from '../../lib/jsonld';
 import { SELLS_DIRECTLY } from '../../config/runtime';
@@ -39,7 +39,7 @@ const page = t.reviews;
   description={page.meta.description}
   jsonLd={[
     breadcrumb([
-      { name: 'AVORA', path: localePath(locale) },
+      { name: BUSINESS.brandName, path: localePath(locale) },
       { name: page.heading, path: localePath(locale, 'reviews') },
     ]),
   ]}

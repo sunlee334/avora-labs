@@ -1,4 +1,5 @@
 import { test, expect, type APIRequestContext } from '@playwright/test';
+import { BUSINESS } from '../../src/config/site';
 
 /**
  * 공지·읽을거리.
@@ -225,7 +226,7 @@ test.describe('구조화 데이터', () => {
     expect(schema.headline).toBe('배송 안내');
     expect(schema.datePublished).toBe('2026-08-27');
     expect(schema.inLanguage).toBe('ko');
-    expect(schema.author.name).toBe('AVORA');
+    expect(schema.author.name).toBe(BUSINESS.brandName);
   });
 
   test('고치지 않은 글에는 dateModified 가 없다', async ({ request }) => {
@@ -240,7 +241,7 @@ test.describe('구조화 데이터', () => {
     const html = await (await request.get(`/ko/support/posts/${SLUG}`)).text();
     const crumb = jsonLdOf(html).find((s) => s['@type'] === 'BreadcrumbList');
     const names = crumb.itemListElement.map((i: any) => i.name);
-    expect(names).toEqual(['AVORA', '고객센터', '공지·읽을거리', '배송 안내']);
+    expect(names).toEqual([BUSINESS.brandName, '고객센터', '공지·읽을거리', '배송 안내']);
   });
 });
 

@@ -50,7 +50,8 @@ export const LOCALE_TAGS: Record<Locale, string> = {
  * 슬로건을 번역하면 브랜드 식별자가 언어 수만큼 쪼개집니다.
  */
 export const KEEP_ORIGINAL = [
-  'AVORA',
+  'PAROS',
+  'AVORA LABS',
   'For every movement.',
   'MOVE. SWEAT. REAPPLY.',
   'LIGHT',
@@ -78,8 +79,16 @@ export function absoluteUrl(path: string): string {
  * 출처: 사업자등록증명 (2026-07-22 발급, 마포세무서)
  */
 export const BUSINESS = {
-  /** 브랜드명. 화면과 JSON-LD 에 쓰입니다. */
-  brandName: 'AVORA',
+  /**
+   * 브랜드명 — 손님이 아는 이름. 화면과 JSON-LD 에 쓰입니다.
+   *
+   * 회사(AVORA LABS)와 브랜드(PAROS)는 다릅니다. 브랜딩 문서가 둘을 나눕니다:
+   * AVORA LABS 가 브랜드를 만들고, PAROS 가 그중 첫 번째입니다.
+   * 사업자 정보·저작권·약관의 주체는 회사이고, 제품과 서사의 주인은 브랜드입니다.
+   */
+  brandName: 'PAROS',
+  /** 운영사. 사업자 정보와 저작권의 주체입니다. */
+  companyName: 'AVORA LABS',
   /** 등기상 상호. 법이 요구하는 표시 항목입니다. */
   legalName: '아보라랩스',
   representative: '이영규',

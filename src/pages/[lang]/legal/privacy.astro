@@ -8,7 +8,7 @@
  * 문안이 확정되면 src/i18n/{언어}.json 의 legal.privacy 아래에 넣으면 됩니다.
  */
 import Base from '../../../layouts/Base.astro';
-import { LOCALES, type Locale } from '../../../config/site';
+import { BUSINESS, LOCALES, type Locale } from '../../../config/site';
 import { dict, localePath } from '../../../i18n';
 import { breadcrumb } from '../../../lib/jsonld';
 import { ACCOUNTS_ENABLED, SELLS_DIRECTLY, EXTERNAL_STORE_URL } from '../../../config/runtime';
@@ -66,7 +66,7 @@ const rows = [
   description={page.meta.description}
   jsonLd={[
     breadcrumb([
-      { name: 'AVORA', path: localePath(locale) },
+      { name: BUSINESS.brandName, path: localePath(locale) },
       { name: page.heading, path: localePath(locale, 'legal/privacy') },
     ]),
   ]}

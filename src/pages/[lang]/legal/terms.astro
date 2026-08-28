@@ -11,7 +11,7 @@
  * 확인되지 않은 약속이 게시되는 셈이라 그렇게 하지 않았습니다.
  */
 import Base from '../../../layouts/Base.astro';
-import { LOCALES, type Locale } from '../../../config/site';
+import { BUSINESS, LOCALES, type Locale } from '../../../config/site';
 import { dict, localePath } from '../../../i18n';
 import { breadcrumb } from '../../../lib/jsonld';
 import { MAX_LINES } from '../../../../worker/catalog';
@@ -51,7 +51,7 @@ const methods = payment.countries[payment.defaultCountry as 'KR'].methods
   description={page.meta.description}
   jsonLd={[
     breadcrumb([
-      { name: 'AVORA', path: localePath(locale) },
+      { name: BUSINESS.brandName, path: localePath(locale) },
       { name: page.heading, path: localePath(locale, 'legal/terms') },
     ]),
   ]}

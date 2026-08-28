@@ -118,7 +118,7 @@ export function reviewJsonLd(
     '@type': 'Product',
     name: 'Daily Sunscreen',
     url: productUrl,
-    brand: { '@type': 'Brand', name: 'AVORA' },
+    brand: { '@type': 'Brand', name: 'PAROS' },
     aggregateRating: {
       '@type': 'AggregateRating',
       ratingValue: summary.average,

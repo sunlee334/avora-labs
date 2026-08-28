@@ -12,7 +12,8 @@
   "order": {
     "maxQuantityPerItem": 10,
     "minOrderAmount": 0,
-    "orderIdPrefix": "AVORA"
+    "orderIdPrefix": "AVORA",
+    "$orderIdPrefixNote": "브랜드가 PAROS 로 바뀌어도 이 접두사는 AVORA 그대로입니다. 이미 발급된 주문번호가 이 형태이고 손님은 그 번호로 주문을 조회합니다. 바꾸면 기존 주문이 전부 '없는 주문' 이 됩니다. worker/index.ts 의 ORDER_ID_PATTERN 과 짝입니다."
   },
   "accounts": {
     "enabled": true,

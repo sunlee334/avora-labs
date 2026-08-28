@@ -89,7 +89,7 @@ export const emailNotifier: Notifier = {
       const raw = buildMime(
         from,
         to,
-        `[AVORA] 새 주문 ${notification.orderId}`,
+        `[PAROS] 새 주문 ${notification.orderId}`,
         composeMessage(notification),
       );
 

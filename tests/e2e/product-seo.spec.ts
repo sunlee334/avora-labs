@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
-import { ORIGIN } from '../../src/config/site';
+import { ORIGIN, BUSINESS } from '../../src/config/site';
 import { jsonLdOf, sitemapUrls } from '../support/sitemap';
+import en from '../../src/i18n/en.json' with { type: 'json' };
 
 /**
  * 제품 페이지와 구조화 데이터.
@@ -36,7 +37,11 @@ test.describe('제품 상세', () => {
 
     expect(product).toBeTruthy();
     expect(product.name).toBe('Daily Sunscreen');
-    expect(product.brand.name).toBe('AVORA');
+    // 브랜드명을 여기 베껴 적으면, 브랜드가 바뀔 때 이 검사가 **바뀌었다는
+    // 이유로** 깨집니다. 잡아야 할 것(구조화 데이터가 화면과 어긋나는 것)과
+    // 구분이 안 됩니다. 설정에서 읽습니다.
+    expect(product.brand.name).toBe(BUSINESS.brandName);
+    expect(product.manufacturer.name).toBe(BUSINESS.companyName);
     // offers 는 가격 유무에 따라 달라지므로 모드별 테스트에서 확인합니다.
     // (launch: offers 없음 / commerce: 화면 가격과 일치)
   });
@@ -69,7 +74,9 @@ test.describe('제품 상세', () => {
 
     // details/summary 로 접으면 답변엔진이 본문으로 보지 않을 수 있습니다.
     expect(html).not.toContain('<details');
-    expect(html).toContain('What kind of brand is AVORA?');
+    // 질문 문구는 번역 파일이 정합니다 — 여기 베껴 적으면 문구를 다듬을
+    // 때마다 이 검사가 함께 깨집니다.
+    expect(html).toContain(en.product.faq.items[0].q);
     expect(html).toContain('SPF50+ / PA++++');
   });
 });
@@ -114,7 +121,7 @@ test.describe('사이트 전역 SEO', () => {
     const res = await request.get('/llms.txt');
     expect(res.status()).toBe(200);
     const body = await res.text();
-    expect(body).toContain('AVORA');
+    expect(body).toContain(BUSINESS.brandName);
     expect(body).toContain('Do not state values');
   });
 

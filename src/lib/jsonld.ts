@@ -15,13 +15,18 @@ import product from '../data/product.json';
 export function organization() {
   return {
     '@context': 'https://schema.org',
+    /*
+      * 여기는 **회사** 입니다. 사업자 정보와 저작권의 주체이므로 브랜드
+      * (PAROS)가 아니라 운영사(AVORA LABS)의 이름이 들어갑니다. 브랜드는
+      * 아래 productSchema 의 Brand 노드가 가리킵니다.
+      */
     '@type': 'Organization',
-    name: 'AVORA',
+    name: BUSINESS.companyName,
     url: ORIGIN,
     logo: absoluteUrl('/brand/avora-wordmark-forest.svg'),
-    slogan: 'For every movement.',
+    slogan: 'We create brands for people in motion.',
     description:
-      'AVORA is an active lifestyle skincare brand. The name joins the "A" of Athlete and Active with Vitality & Aura. Positioned as ACTIVE LIFESTYLE BEAUTY rather than sports beauty.',
+      'AVORA LABS creates brands for people in motion. Its first brand is PAROS, an active lifestyle beauty brand named after the Aegean island, positioned as ACTIVE LIFESTYLE BEAUTY rather than sports beauty.',
 
     // 사업자 정보. 답변엔진이 "이 브랜드는 누가 파는가" 에 답할 수 있어야
     // 하고, 그 답이 푸터의 법정 표시와 어긋나면 안 됩니다.
@@ -49,7 +54,8 @@ export function website(locale: Locale) {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'AVORA',
+    // 손님이 보는 사이트 이름입니다 — 페이지 제목도 이 이름으로 끝납니다.
+    name: BUSINESS.brandName,
     url: absoluteUrl(localePath(locale)),
     inLanguage: locale,
   };
@@ -75,7 +81,8 @@ export function productSchema(locale: Locale, name: string, description: string)
     name,
     description,
     sku: product.sku,
-    brand: { '@type': 'Brand', name: 'AVORA' },
+    brand: { '@type': 'Brand', name: BUSINESS.brandName },
+    manufacturer: { '@type': 'Organization', name: BUSINESS.companyName },
     category: 'Sunscreen',
     image: absoluteUrl('/og/product.jpg'),
     url: absoluteUrl(localePath(locale, 'product')),

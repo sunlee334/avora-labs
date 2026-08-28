@@ -17,7 +17,7 @@
  */
 import { getCollection } from 'astro:content';
 import Base from '../../../../layouts/Base.astro';
-import { LOCALES, type Locale } from '../../../../config/site';
+import { BUSINESS, LOCALES, type Locale } from '../../../../config/site';
 import { dict, localePath } from '../../../../i18n';
 import { breadcrumb } from '../../../../lib/jsonld';
 
@@ -63,7 +63,7 @@ const isoDate = (date: Date) => date.toISOString().slice(0, 10);
   description={page.meta.description}
   jsonLd={[
     breadcrumb([
-      { name: 'AVORA', path: localePath(locale) },
+      { name: BUSINESS.brandName, path: localePath(locale) },
       { name: t.support.heading, path: localePath(locale, 'support') },
       { name: page.heading, path: localePath(locale, 'support/posts') },
     ]),

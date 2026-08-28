@@ -160,6 +160,11 @@ function json(body: unknown, status = 200): Response {
   });
 }
 
+/*
+ * 주문번호 접두사는 브랜드가 PAROS 로 바뀌어도 AVORA 그대로입니다.
+ * 이미 발급된 주문번호가 이 형태이고, 손님은 그 번호로 주문을 조회합니다.
+ * 접두사를 바꾸면 기존 주문이 전부 "없는 주문" 이 됩니다.
+ */
 const ORDER_ID_PATTERN = /^AVORA-\d{14}-[A-Z0-9]{6}$/;
 
 /** 사용자가 보낸 문자열을 길이 제한과 함께 다듬습니다. */
@@ -1240,7 +1245,7 @@ async function handleAdminPage(request: Request, env: Env): Promise<Response> {
     return new Response(
       `<!doctype html><html lang="ko"><head><meta charset="utf-8">` +
         `<meta name="viewport" content="width=device-width,initial-scale=1">` +
-        `<title>접근 권한 없음 — AVORA 주문 관리</title></head>` +
+        `<title>접근 권한 없음 — AVORA LABS 주문 관리</title></head>` +
         `<body><main><h1>접근 권한이 없습니다</h1><p>${escaped}</p></main></body></html>`,
       {
         status: auth.status,

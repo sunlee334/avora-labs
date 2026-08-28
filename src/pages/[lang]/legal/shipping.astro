@@ -12,7 +12,7 @@
  * 목록으로 드러냅니다. 빈 페이지보다 확정해야 할 것이 보이는 편이 낫습니다.
  */
 import Base from '../../../layouts/Base.astro';
-import { LOCALES, type Locale } from '../../../config/site';
+import { BUSINESS, LOCALES, type Locale } from '../../../config/site';
 import { dict, localePath } from '../../../i18n';
 import { breadcrumb } from '../../../lib/jsonld';
 import { FULFILLMENTS } from '../../../../worker/orders';
@@ -69,7 +69,7 @@ const steps = FULFILLMENTS.map((value) => ({
   description={page.meta.description}
   jsonLd={[
     breadcrumb([
-      { name: 'AVORA', path: localePath(locale) },
+      { name: BUSINESS.brandName, path: localePath(locale) },
       { name: page.heading, path: localePath(locale, 'legal/shipping') },
     ]),
   ]}

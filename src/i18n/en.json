@@ -19,8 +19,8 @@
   },
   "home": {
     "meta": {
-      "title": "AVORA — For every movement.",
-      "description": "AVORA is an active lifestyle skincare brand where athletic energy meets gentle care. First product: Daily Sunscreen SPF50+ / PA++++.",
+      "title": "PAROS — For every movement.",
+      "description": "PAROS is an active lifestyle skincare brand where athletic energy meets gentle care. First product: Daily Sunscreen SPF50+ / PA++++.",
       "ogAlt": "Silhouette of a runner against a low sun"
     },
     "hero": {
@@ -36,7 +36,7 @@
       "kicker": "The Question",
       "quote": "When our bodies come most alive, why should the skincare our skin feels stay ordinary?",
       "body": "The beauty market sat at two extremes. Conventional cosmetics chased polish but felt heavy through a day of movement, while sports formulas shouted function and gave up the comfort and refinement skin deserves.",
-      "naming": "AVORA joins the A of Athlete and Active with Vitality & Aura — the clear energy and poise that come from skin in good condition."
+      "naming": "PAROS is an island in the Aegean. The sun is fierce, yet the sea stays clear; the wind is rough, yet people keep moving freely. We took the brand's posture from a place where nature's strength and its beauty never work against each other."
     },
     "journey": {
       "kicker": "The Journey",
@@ -91,8 +91,8 @@
     },
     "philosophy": {
       "kicker": "Philosophy",
-      "quote": "Movement is the purest, most powerful expression of being alive. From an easy walk at dawn to the moment you take hold of the day, AVORA stays out of the way and lets skin find its own texture.",
-      "body": "Right after you have moved hard, AVORA meets your skin with a precise, unhurried softness. That reversal is what makes it ours."
+      "quote": "Movement is the purest, most powerful expression of being alive. From an easy walk at dawn to the moment you take hold of the day, PAROS stays out of the way and lets skin find its own texture.",
+      "body": "Right after you have moved hard, PAROS meets your skin with a precise, unhurried softness. That reversal is what makes it ours."
     },
     "product": {
       "kicker": "First Product",
@@ -103,12 +103,12 @@
   },
   "product": {
     "meta": {
-      "title": "Daily Sunscreen SPF50+ / PA++++ — AVORA",
-      "description": "AVORA Daily Sunscreen. SPF50+ / PA++++ UV protection in a watery gel that leaves no white cast — light and comfortable through running, pilates and climbing.",
-      "ogAlt": "AVORA Daily Sunscreen on a bright surface"
+      "title": "Daily Sunscreen SPF50+ / PA++++ — PAROS",
+      "description": "PAROS Daily Sunscreen. SPF50+ / PA++++ UV protection in a watery gel that leaves no white cast — light and comfortable through running, pilates and climbing.",
+      "ogAlt": "PAROS Daily Sunscreen on a bright surface"
     },
     "hero": {
-      "imageAlt": "AVORA Daily Sunscreen bottle on a bright surface",
+      "imageAlt": "PAROS Daily Sunscreen bottle on a bright surface",
       "headline": "Through every movement, skin still breathes easy.",
       "priceUnknown": "Price to be announced",
       "ctaExternal": "Buy on Smart Store",
@@ -207,8 +207,8 @@
       "kicker": "Frequently asked",
       "items": [
         {
-          "q": "What kind of brand is AVORA?",
-          "a": "AVORA is an active lifestyle skincare brand for people in their twenties and thirties who move often. The name joins the A of Athlete and Active with Vitality & Aura. It is not a sports-only brand — it is made for anyone who moves."
+          "q": "What kind of brand is PAROS?",
+          "a": "PAROS is an active lifestyle beauty brand for people in their twenties and thirties who move. The name comes from Paros, an island in the Aegean. It is the first brand created by AVORA LABS, and it is not made for athletes only but for anyone in motion."
         },
         {
           "q": "What is the SPF rating of Daily Sunscreen?",
@@ -259,8 +259,8 @@
   },
   "support": {
     "meta": {
-      "title": "Support — AVORA",
-      "description": "Answers to common questions about AVORA orders, shipping and privacy."
+      "title": "Support — PAROS",
+      "description": "Answers to common questions about PAROS orders, shipping and privacy."
     },
     "heading": "Support",
     "intro": "Common questions about ordering and shipping. Where something is not settled yet, we say so.",
@@ -317,8 +317,8 @@
       "empty": "Nothing here yet. We will post as things are ready.",
       "backToList": "Back to list",
       "meta": {
-        "title": "Notices & Reading — AVORA",
-        "description": "Operational notices from AVORA and reading about sunscreen."
+        "title": "Notices & Reading — PAROS",
+        "description": "Operational notices from PAROS and reading about sunscreen."
       },
       "categories": {
         "notice": "Notice",
@@ -328,8 +328,8 @@
   },
   "reviews": {
     "meta": {
-      "title": "Reviews — AVORA",
-      "description": "Reviews from people who bought AVORA Daily Sunscreen."
+      "title": "Reviews — PAROS",
+      "description": "Reviews from people who bought PAROS Daily Sunscreen."
     },
     "heading": "Reviews",
     "intro": "Only from people whose purchase we could verify.",
@@ -393,13 +393,13 @@
       "address": "Address",
       "phone": "Phone"
     },
-    "copyright": "© 2026 AVORA. All rights reserved."
+    "copyright": "© 2026 AVORA LABS. All rights reserved."
   },
   "legal": {
     "privacy": {
       "meta": {
-        "title": "Privacy Policy — AVORA",
-        "description": "The privacy policy for the AVORA website."
+        "title": "Privacy Policy — PAROS",
+        "description": "The privacy policy for the PAROS website."
       },
       "heading": "Privacy Policy",
       "collect": {
@@ -484,8 +484,8 @@
     },
     "terms": {
       "meta": {
-        "title": "Terms of Service — AVORA",
-        "description": "The terms of service for the AVORA website."
+        "title": "Terms of Service — PAROS",
+        "description": "The terms of service for the PAROS website."
       },
       "heading": "Terms of Service",
       "intro": "Below is how this site actually works today, written from the code itself. The full terms are still blank — they need our business details and legal review.",
@@ -535,8 +535,8 @@
     },
     "shipping": {
       "meta": {
-        "title": "Shipping & Returns — AVORA",
-        "description": "Shipping fees, delivery stages, and returns for AVORA products."
+        "title": "Shipping & Returns — PAROS",
+        "description": "Shipping fees, delivery stages, and returns for PAROS products."
       },
       "heading": "Shipping & Returns",
       "intro": "The shipping fee and delivery stages below are the values the code actually applies. Return conditions are not settled yet, so they are left blank.",
@@ -591,7 +591,7 @@
   },
   "notFound": {
     "meta": {
-      "title": "Page not found — AVORA",
+      "title": "Page not found — PAROS",
       "description": "We could not find the page you asked for."
     },
     "heading": "This path does not exist yet.",
@@ -606,8 +606,8 @@
   },
   "cart": {
     "meta": {
-      "title": "Cart — AVORA",
-      "description": "Your AVORA cart."
+      "title": "Cart — PAROS",
+      "description": "Your PAROS cart."
     },
     "heading": "Cart",
     "empty": "Your cart is empty.",
@@ -627,8 +627,8 @@
   },
   "checkout": {
     "meta": {
-      "title": "Checkout — AVORA",
-      "description": "Complete your AVORA order."
+      "title": "Checkout — PAROS",
+      "description": "Complete your PAROS order."
     },
     "heading": "Checkout",
     "shippingSection": "Shipping details",
@@ -677,7 +677,7 @@
   "order": {
     "complete": {
       "meta": {
-        "title": "Order complete — AVORA",
+        "title": "Order complete — PAROS",
         "description": "Your order has been placed."
       },
       "heading": "Your order is complete.",
@@ -698,7 +698,7 @@
     },
     "lookup": {
       "meta": {
-        "title": "Order lookup — AVORA",
+        "title": "Order lookup — PAROS",
         "description": "Look up an order by number and phone."
       },
       "heading": "Order lookup",
@@ -722,7 +722,7 @@
   },
   "account": {
     "meta": {
-      "title": "My Page — AVORA",
+      "title": "My Page — PAROS",
       "description": "Your orders and saved address."
     },
     "heading": "My Page",

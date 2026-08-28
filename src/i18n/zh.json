@@ -19,8 +19,8 @@
   },
   "home": {
     "meta": {
-      "title": "AVORA — For every movement.",
-      "description": "AVORA 是一个将运动活力与温和护理结合的活跃生活方式护肤品牌。首款产品 Daily Sunscreen SPF50+ / PA++++。",
+      "title": "PAROS — For every movement.",
+      "description": "PAROS 是一个将运动活力与温和护理结合的活跃生活方式护肤品牌。首款产品 Daily Sunscreen SPF50+ / PA++++。",
       "ogAlt": "低角度阳光下奔跑者的剪影"
     },
     "hero": {
@@ -36,7 +36,7 @@
       "kicker": "The Question",
       "quote": "当身体最富生机的时刻，为什么肌肤所感受到的护理却总是平淡而千篇一律？",
       "body": "以往的美妆市场停留在两个极端。追求华丽的普通化妆品在日常活动中显得厚重闷塞，而只强调功能的运动化妆品则粗糙生硬，忽略了肌肤应有的舒适与质感。",
-      "naming": "AVORA 由代表运动主体的 Athlete·Active 的 A，与象征肌肤本真活力与格调的 Vitality & Aura 结合而成。"
+      "naming": "PAROS 是爱琴海上的一座岛。阳光强烈，海水依然清澈；风很粗粝，人们依然自由地活动。我们从这个自然的力量与美并不对立的地方，取来了品牌的态度。"
     },
     "journey": {
       "kicker": "The Journey",
@@ -91,8 +91,8 @@
     },
     "philosophy": {
       "kicker": "Philosophy",
-      "quote": "运动是生命最纯粹、最有力的表达。从清晨的漫步，到全神贯注掌控生活的时刻，AVORA 不打扰这份流动，只是让肌肤回到它本来的样子。",
-      "body": "在尽情活动之后，AVORA 触及肌肤的瞬间所带来的细腻柔滑 —— 这份反差正是 AVORA 的独特之处。"
+      "quote": "运动是生命最纯粹、最有力的表达。从清晨的漫步，到全神贯注掌控生活的时刻，PAROS 不打扰这份流动，只是让肌肤回到它本来的样子。",
+      "body": "在尽情活动之后，PAROS 触及肌肤的瞬间所带来的细腻柔滑 —— 这份反差正是 PAROS 的独特之处。"
     },
     "product": {
       "kicker": "First Product",
@@ -103,12 +103,12 @@
   },
   "product": {
     "meta": {
-      "title": "Daily Sunscreen SPF50+ / PA++++ — AVORA",
-      "description": "AVORA 首款产品 Daily Sunscreen。SPF50+ / PA++++ 防晒功能性化妆品，无泛白的水感凝胶质地，跑步、普拉提、攀岩等户外活动中依然轻盈舒适。",
-      "ogAlt": "置于明亮台面上的 AVORA Daily Sunscreen"
+      "title": "Daily Sunscreen SPF50+ / PA++++ — PAROS",
+      "description": "PAROS 首款产品 Daily Sunscreen。SPF50+ / PA++++ 防晒功能性化妆品，无泛白的水感凝胶质地，跑步、普拉提、攀岩等户外活动中依然轻盈舒适。",
+      "ogAlt": "置于明亮台面上的 PAROS Daily Sunscreen"
     },
     "hero": {
-      "imageAlt": "置于明亮台面上的 AVORA Daily Sunscreen 瓶身",
+      "imageAlt": "置于明亮台面上的 PAROS Daily Sunscreen 瓶身",
       "headline": "在每一次移动中，肌肤依然自在呼吸。",
       "priceUnknown": "价格待定",
       "ctaExternal": "前往 Smart Store 购买",
@@ -207,8 +207,8 @@
       "kicker": "常见问题",
       "items": [
         {
-          "q": "AVORA 是怎样的品牌？",
-          "a": "AVORA 是面向 20~30 岁活跃人群的活跃生活方式护肤品牌。品牌名由 Athlete·Active 的 A 与 Vitality & Aura 组合而成。它并非运动专用品牌，而是为所有会活动的人而做。"
+          "q": "PAROS 是什么样的品牌？",
+          "a": "PAROS 是面向 20~30 岁活跃男女的活力生活方式美妆品牌。名字来自爱琴海上的帕罗斯岛。它是 AVORA LABS 打造的第一个品牌，不只为运动员，而是为每一个在移动的人而做。"
         },
         {
           "q": "Daily Sunscreen 的防晒指数是多少？",
@@ -259,8 +259,8 @@
   },
   "support": {
     "meta": {
-      "title": "客户服务 — AVORA",
-      "description": "关于 AVORA 订购、配送与隐私的常见问题解答。"
+      "title": "客户服务 — PAROS",
+      "description": "关于 PAROS 订购、配送与隐私的常见问题解答。"
     },
     "heading": "客户服务",
     "intro": "关于订购与配送的常见问题。尚未确定的内容，我们如实注明。",
@@ -317,8 +317,8 @@
       "empty": "目前还没有内容。准备好后会发布在这里。",
       "backToList": "返回列表",
       "meta": {
-        "title": "公告与阅读 — AVORA",
-        "description": "AVORA 的运营公告与防晒相关阅读。"
+        "title": "公告与阅读 — PAROS",
+        "description": "PAROS 的运营公告与防晒相关阅读。"
       },
       "categories": {
         "notice": "公告",
@@ -328,8 +328,8 @@
   },
   "reviews": {
     "meta": {
-      "title": "评价 — AVORA",
-      "description": "购买 AVORA Daily Sunscreen 的顾客留下的评价。"
+      "title": "评价 — PAROS",
+      "description": "购买 PAROS Daily Sunscreen 的顾客留下的评价。"
     },
     "heading": "评价",
     "intro": "仅限已确认购买的顾客撰写。",
@@ -393,13 +393,13 @@
       "address": "营业场所地址",
       "phone": "电话"
     },
-    "copyright": "© 2026 AVORA. All rights reserved."
+    "copyright": "© 2026 AVORA LABS. All rights reserved."
   },
   "legal": {
     "privacy": {
       "meta": {
-        "title": "隐私政策 — AVORA",
-        "description": "AVORA 网站的隐私政策。"
+        "title": "隐私政策 — PAROS",
+        "description": "PAROS 网站的隐私政策。"
       },
       "heading": "隐私政策",
       "collect": {
@@ -484,8 +484,8 @@
     },
     "terms": {
       "meta": {
-        "title": "服务条款 — AVORA",
-        "description": "AVORA 网站的服务条款。"
+        "title": "服务条款 — PAROS",
+        "description": "PAROS 网站的服务条款。"
       },
       "heading": "服务条款",
       "intro": "以下内容依据代码撰写，说明本网站目前的实际运作方式。条款全文尚待企业信息与法律审核后补充。",
@@ -535,8 +535,8 @@
     },
     "shipping": {
       "meta": {
-        "title": "配送与退换货说明 — AVORA",
-        "description": "AVORA 产品的运费、配送阶段与退换货说明。"
+        "title": "配送与退换货说明 — PAROS",
+        "description": "PAROS 产品的运费、配送阶段与退换货说明。"
       },
       "heading": "配送与退换货说明",
       "intro": "以下运费与配送阶段是代码实际采用的值。退换货条件尚未确定，因此留空。",
@@ -591,7 +591,7 @@
   },
   "notFound": {
     "meta": {
-      "title": "未找到页面 — AVORA",
+      "title": "未找到页面 — PAROS",
       "description": "未能找到您请求的页面。"
     },
     "heading": "这条路径尚不存在。",
@@ -606,8 +606,8 @@
   },
   "cart": {
     "meta": {
-      "title": "购物车 — AVORA",
-      "description": "AVORA 购物车。"
+      "title": "购物车 — PAROS",
+      "description": "PAROS 购物车。"
     },
     "heading": "购物车",
     "empty": "购物车是空的。",
@@ -627,8 +627,8 @@
   },
   "checkout": {
     "meta": {
-      "title": "订单 · 结算 — AVORA",
-      "description": "AVORA 订单结算页面。"
+      "title": "订单 · 结算 — PAROS",
+      "description": "PAROS 订单结算页面。"
     },
     "heading": "订单 · 结算",
     "shippingSection": "配送信息",
@@ -677,7 +677,7 @@
   "order": {
     "complete": {
       "meta": {
-        "title": "下单成功 — AVORA",
+        "title": "下单成功 — PAROS",
         "description": "您的订单已成功提交。"
       },
       "heading": "下单成功。",
@@ -698,7 +698,7 @@
     },
     "lookup": {
       "meta": {
-        "title": "订单查询 — AVORA",
+        "title": "订单查询 — PAROS",
         "description": "使用订单号与联系电话查询订单。"
       },
       "heading": "订单查询",
@@ -722,7 +722,7 @@
   },
   "account": {
     "meta": {
-      "title": "我的页面 — AVORA",
+      "title": "我的页面 — PAROS",
       "description": "订单记录与配送地址。"
     },
     "heading": "我的页面",

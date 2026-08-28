@@ -19,8 +19,8 @@
   },
   "home": {
     "meta": {
-      "title": "AVORA — For every movement.",
-      "description": "AVORA là thương hiệu chăm sóc da theo phong cách sống năng động, kết hợp sức sống của vận động với sự chăm sóc dịu nhẹ. Sản phẩm đầu tiên: Daily Sunscreen SPF50+ / PA++++.",
+      "title": "PAROS — For every movement.",
+      "description": "PAROS là thương hiệu chăm sóc da theo phong cách sống năng động, kết hợp sức sống của vận động với sự chăm sóc dịu nhẹ. Sản phẩm đầu tiên: Daily Sunscreen SPF50+ / PA++++.",
       "ogAlt": "Bóng người chạy in trên nền mặt trời thấp"
     },
     "hero": {
@@ -36,7 +36,7 @@
       "kicker": "The Question",
       "quote": "Vào khoảnh khắc cơ thể bừng lên sức sống nhất, tại sao thứ mà làn da cảm nhận lại luôn bình thường và giống hệt nhau?",
       "body": "Thị trường làm đẹp lâu nay dừng ở hai thái cực. Mỹ phẩm thông thường chạy theo vẻ hào nhoáng lại trở nên nặng nề và bí bách giữa những chuyển động thường ngày, trong khi mỹ phẩm thể thao chỉ hô hào công năng thì thô ráp, bỏ quên sự thoải mái và tinh tế mà làn da xứng đáng có.",
-      "naming": "AVORA được tạo nên từ chữ A của Athlete·Active — chủ thể của vận động — kết hợp với Vitality & Aura, sức sống trong trẻo và khí chất vốn có của làn da."
+      "naming": "PAROS là tên một hòn đảo ở biển Aegean. Nắng gắt nhưng biển vẫn trong; gió mạnh nhưng người ta vẫn chuyển động tự do. Chúng tôi lấy thái độ của thương hiệu từ nơi mà sức mạnh và vẻ đẹp của thiên nhiên không chống lại nhau."
     },
     "journey": {
       "kicker": "The Journey",
@@ -91,8 +91,8 @@
     },
     "philosophy": {
       "kicker": "Philosophy",
-      "quote": "Chuyển động là biểu hiện thuần khiết và mạnh mẽ nhất của sự sống. Từ một buổi đi bộ nhẹ lúc sáng sớm đến khoảnh khắc bạn nắm lấy nhịp sống của mình, AVORA không cắt ngang dòng chảy ấy, chỉ để làn da trở về đúng kết cấu của nó.",
-      "body": "Ngay sau khi vận động hết mình, sự mềm mại tinh tế mà AVORA mang đến khi chạm vào da — chính sự tương phản đó làm nên nét riêng của AVORA."
+      "quote": "Chuyển động là biểu hiện thuần khiết và mạnh mẽ nhất của sự sống. Từ một buổi đi bộ nhẹ lúc sáng sớm đến khoảnh khắc bạn nắm lấy nhịp sống của mình, PAROS không cắt ngang dòng chảy ấy, chỉ để làn da trở về đúng kết cấu của nó.",
+      "body": "Ngay sau khi vận động hết mình, sự mềm mại tinh tế mà PAROS mang đến khi chạm vào da — chính sự tương phản đó làm nên nét riêng của PAROS."
     },
     "product": {
       "kicker": "First Product",
@@ -103,12 +103,12 @@
   },
   "product": {
     "meta": {
-      "title": "Daily Sunscreen SPF50+ / PA++++ — AVORA",
-      "description": "Daily Sunscreen — sản phẩm đầu tiên của AVORA. Chống nắng SPF50+ / PA++++ với kết cấu gel dạng nước không để lại vệt trắng, nhẹ và thoải mái khi chạy bộ, tập pilates hay leo núi.",
-      "ogAlt": "AVORA Daily Sunscreen đặt trên bề mặt sáng"
+      "title": "Daily Sunscreen SPF50+ / PA++++ — PAROS",
+      "description": "Daily Sunscreen — sản phẩm đầu tiên của PAROS. Chống nắng SPF50+ / PA++++ với kết cấu gel dạng nước không để lại vệt trắng, nhẹ và thoải mái khi chạy bộ, tập pilates hay leo núi.",
+      "ogAlt": "PAROS Daily Sunscreen đặt trên bề mặt sáng"
     },
     "hero": {
-      "imageAlt": "Chai AVORA Daily Sunscreen đặt trên bề mặt sáng",
+      "imageAlt": "Chai PAROS Daily Sunscreen đặt trên bề mặt sáng",
       "headline": "Qua mọi chuyển động, làn da vẫn thở thật dễ chịu.",
       "priceUnknown": "Giá sẽ được công bố",
       "ctaExternal": "Mua tại Smart Store",
@@ -207,8 +207,8 @@
       "kicker": "Câu hỏi thường gặp",
       "items": [
         {
-          "q": "AVORA là thương hiệu như thế nào?",
-          "a": "AVORA là thương hiệu chăm sóc da theo phong cách sống năng động, dành cho những người trong độ tuổi 20–30 thường xuyên vận động. Tên thương hiệu ghép chữ A của Athlete·Active với Vitality & Aura. Đây không phải thương hiệu chỉ dành cho vận động viên, mà dành cho tất cả những ai chuyển động."
+          "q": "PAROS là thương hiệu như thế nào?",
+          "a": "PAROS là thương hiệu làm đẹp cho lối sống năng động, dành cho nam nữ ở độ tuổi 20-30 thường xuyên vận động. Tên gọi đến từ đảo Paros ở biển Aegean. Đây là thương hiệu đầu tiên do AVORA LABS tạo ra, không chỉ dành riêng cho vận động viên mà cho tất cả những ai đang chuyển động."
         },
         {
           "q": "Daily Sunscreen có chỉ số chống nắng bao nhiêu?",
@@ -259,8 +259,8 @@
   },
   "support": {
     "meta": {
-      "title": "Hỗ trợ khách hàng — AVORA",
-      "description": "Giải đáp các câu hỏi thường gặp về đặt hàng, giao hàng và quyền riêng tư của AVORA."
+      "title": "Hỗ trợ khách hàng — PAROS",
+      "description": "Giải đáp các câu hỏi thường gặp về đặt hàng, giao hàng và quyền riêng tư của PAROS."
     },
     "heading": "Hỗ trợ khách hàng",
     "intro": "Những câu hỏi thường gặp về đặt hàng và giao hàng. Điều gì chưa được quyết định, chúng tôi ghi rõ là chưa.",
@@ -317,8 +317,8 @@
       "empty": "Chưa có nội dung nào. Chúng tôi sẽ đăng tại đây khi sẵn sàng.",
       "backToList": "Về danh sách",
       "meta": {
-        "title": "Thông báo & Bài viết — AVORA",
-        "description": "Thông báo vận hành của AVORA và bài viết về kem chống nắng."
+        "title": "Thông báo & Bài viết — PAROS",
+        "description": "Thông báo vận hành của PAROS và bài viết về kem chống nắng."
       },
       "categories": {
         "notice": "Thông báo",
@@ -328,8 +328,8 @@
   },
   "reviews": {
     "meta": {
-      "title": "Đánh giá — AVORA",
-      "description": "Đánh giá từ những người đã mua AVORA Daily Sunscreen."
+      "title": "Đánh giá — PAROS",
+      "description": "Đánh giá từ những người đã mua PAROS Daily Sunscreen."
     },
     "heading": "Đánh giá",
     "intro": "Chỉ từ những người đã được xác nhận mua hàng.",
@@ -393,13 +393,13 @@
       "address": "Địa chỉ kinh doanh",
       "phone": "Điện thoại"
     },
-    "copyright": "© 2026 AVORA. All rights reserved."
+    "copyright": "© 2026 AVORA LABS. All rights reserved."
   },
   "legal": {
     "privacy": {
       "meta": {
-        "title": "Chính sách bảo mật — AVORA",
-        "description": "Chính sách bảo mật của website AVORA."
+        "title": "Chính sách bảo mật — PAROS",
+        "description": "Chính sách bảo mật của website PAROS."
       },
       "heading": "Chính sách bảo mật",
       "collect": {
@@ -484,8 +484,8 @@
     },
     "terms": {
       "meta": {
-        "title": "Điều khoản sử dụng — AVORA",
-        "description": "Điều khoản sử dụng của website AVORA."
+        "title": "Điều khoản sử dụng — PAROS",
+        "description": "Điều khoản sử dụng của website PAROS."
       },
       "heading": "Điều khoản sử dụng",
       "intro": "Dưới đây là cách website hoạt động trên thực tế, được viết dựa trên chính mã nguồn. Toàn văn điều khoản vẫn còn trống vì cần thông tin doanh nghiệp và rà soát pháp lý.",
@@ -535,8 +535,8 @@
     },
     "shipping": {
       "meta": {
-        "title": "Giao hàng và đổi trả — AVORA",
-        "description": "Phí giao hàng, các bước giao hàng và chính sách đổi trả của AVORA."
+        "title": "Giao hàng và đổi trả — PAROS",
+        "description": "Phí giao hàng, các bước giao hàng và chính sách đổi trả của PAROS."
       },
       "heading": "Giao hàng và đổi trả",
       "intro": "Phí giao hàng và các bước giao hàng dưới đây là giá trị mà mã nguồn thực sự áp dụng. Điều kiện đổi trả chưa được chốt nên còn để trống.",
@@ -591,7 +591,7 @@
   },
   "notFound": {
     "meta": {
-      "title": "Không tìm thấy trang — AVORA",
+      "title": "Không tìm thấy trang — PAROS",
       "description": "Không tìm thấy trang bạn yêu cầu."
     },
     "heading": "Đường dẫn này chưa tồn tại.",
@@ -606,8 +606,8 @@
   },
   "cart": {
     "meta": {
-      "title": "Giỏ hàng — AVORA",
-      "description": "Giỏ hàng AVORA của bạn."
+      "title": "Giỏ hàng — PAROS",
+      "description": "Giỏ hàng PAROS của bạn."
     },
     "heading": "Giỏ hàng",
     "empty": "Giỏ hàng của bạn đang trống.",
@@ -627,8 +627,8 @@
   },
   "checkout": {
     "meta": {
-      "title": "Thanh toán — AVORA",
-      "description": "Trang đặt hàng và thanh toán của AVORA."
+      "title": "Thanh toán — PAROS",
+      "description": "Trang đặt hàng và thanh toán của PAROS."
     },
     "heading": "Đặt hàng · Thanh toán",
     "shippingSection": "Thông tin giao hàng",
@@ -677,7 +677,7 @@
   "order": {
     "complete": {
       "meta": {
-        "title": "Đặt hàng thành công — AVORA",
+        "title": "Đặt hàng thành công — PAROS",
         "description": "Đơn hàng của bạn đã được tiếp nhận."
       },
       "heading": "Đơn hàng đã hoàn tất.",
@@ -698,7 +698,7 @@
     },
     "lookup": {
       "meta": {
-        "title": "Tra cứu đơn hàng — AVORA",
+        "title": "Tra cứu đơn hàng — PAROS",
         "description": "Tra cứu đơn hàng bằng mã đơn và số điện thoại."
       },
       "heading": "Tra cứu đơn hàng",
@@ -722,7 +722,7 @@
   },
   "account": {
     "meta": {
-      "title": "Trang của tôi — AVORA",
+      "title": "Trang của tôi — PAROS",
       "description": "Lịch sử đơn hàng và địa chỉ giao hàng."
     },
     "heading": "Trang của tôi",
