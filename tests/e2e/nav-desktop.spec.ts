@@ -132,9 +132,72 @@ test.describe('드롭다운', () => {
 
   test('키보드만으로 열고 닫는다', async ({ page }) => {
     await page.goto('/ko/');
+    test.skip(!(await finePointer(page)), '마우스가 없는 기기입니다');
     const trigger = page.locator('[data-nav-drop]');
     await trigger.focus();
     await page.keyboard.press('Enter');
+    await expect(page.locator('.nav__dropdown')).toBeVisible();
+  });
+
+  /*
+   * hover 는 마우스가 있는 기기에서만 걸립니다. mobile 프로젝트는
+   * iPhone 14(hasTouch) 라 `pointer: fine` 이 거짓이고, 그 폭에서 아래
+   * 단언들은 **실패하는 것이 옳습니다** — 손가락이 스치는 것으로 메뉴가
+   * 열리면 안 되기 때문입니다. 그래서 건너뜁니다.
+   */
+  const finePointer = (page: Page) =>
+    page.evaluate(() => window.matchMedia('(hover: hover) and (pointer: fine)').matches);
+
+  test('마우스를 올리면 열린다', async ({ page }) => {
+    await page.goto('/ko/');
+    test.skip(!(await finePointer(page)), '마우스가 없는 기기입니다');
+    const trigger = page.locator('[data-nav-drop]');
+    await page.locator('.nav__group').hover();
+    await expect(page.locator('.nav__dropdown')).toBeVisible();
+    // 눈에 보이는 것과 보조기술이 듣는 것이 어긋나면 안 됩니다.
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  test('패널로 마우스를 옮겨도 닫히지 않는다', async ({ page }) => {
+    // 이벤트를 버튼에 걸면 패널로 가는 순간 버튼을 벗어나 닫힙니다.
+    // 패널이 <li> 안에 있으므로 <li> 에 걸어야 합니다.
+    await page.goto('/ko/');
+    test.skip(!(await finePointer(page)), '마우스가 없는 기기입니다');
+    await page.locator('.nav__group').hover();
+    await page.locator('.nav__dropdown a').first().hover();
+    await expect(page.locator('.nav__dropdown a').first()).toBeVisible();
+  });
+
+  test('벗어나면 닫힌다', async ({ page }) => {
+    await page.goto('/ko/');
+    test.skip(!(await finePointer(page)), '마우스가 없는 기기입니다');
+    await page.locator('.nav__group').hover();
+    await expect(page.locator('.nav__dropdown')).toBeVisible();
+    await page.locator('.nav__wordmark').hover();
+    await expect(page.locator('.nav__dropdown')).toBeHidden();
+    await expect(page.locator('[data-nav-drop]')).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  test('키보드로 연 것은 마우스가 스쳐도 유지된다', async ({ page }) => {
+    // hover 는 보조 수단입니다. 키보드로 연 것을 마우스가 지나가며 닫으면
+    // 키보드 사용자가 자기가 연 것을 잃습니다.
+    await page.goto('/ko/');
+    const trigger = page.locator('[data-nav-drop]');
+    await trigger.focus();
+    await page.keyboard.press('Enter');
+    await page.locator('.nav__group').hover();
+    await page.locator('.nav__wordmark').hover();
+    await expect(page.locator('.nav__dropdown')).toBeVisible();
+  });
+
+  test('올려서 열린 것을 눌러도 닫히지 않는다', async ({ page }) => {
+    // 마우스가 트리거에 닿는 순간 mouseenter 가 이미 열었습니다. 클릭이
+    // 토글이면 "보이길래 눌렀더니 사라지는" 상태가 됩니다.
+    await page.goto('/ko/');
+    test.skip(!(await finePointer(page)), '마우스가 없는 기기입니다');
+    await page.locator('.nav__group').hover();
+    await expect(page.locator('.nav__dropdown')).toBeVisible();
+    await page.locator('[data-nav-drop]').click();
     await expect(page.locator('.nav__dropdown')).toBeVisible();
   });
 
@@ -184,6 +247,20 @@ test.describe('유틸리티 줄', () => {
       if (box.height < 44) small.push(`${(await el.innerText()).trim()} ${Math.round(box.height)}px`);
     }
     expect(small, `44px 미만: ${small.join(', ')}`).toEqual([]);
+  });
+
+  test('메뉴가 화면 중앙에 있다', async ({ page }) => {
+    // 워드마크가 왼쪽 열을 차지한 채 justify-self: center 를 주면 그 열
+    // 너비의 절반(47px)만큼 늘 치우칩니다. 메뉴 줄이 두 열을 다 써야 합니다.
+    for (const width of [900, 1280, 1600]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto('/ko/');
+      const off = await page.evaluate(() => {
+        const box = document.querySelector('.nav__links')!.getBoundingClientRect();
+        return Math.round(box.left + box.width / 2) - Math.round(window.innerWidth / 2);
+      });
+      expect(Math.abs(off), `${width}px: 중앙에서 ${off}px 치우쳤습니다`).toBeLessThanOrEqual(1);
+    }
   });
 
   test('<nav> 는 여전히 하나다', async ({ page }) => {

@@ -143,12 +143,19 @@ const utility = UTILITY_VISIBLE.filter((item) => item.badge !== 'cart');
 
 <script>
   /*
-   * 드롭다운 — 탭·클릭과 키보드로만 엽니다.
+   * 드롭다운 — 클릭·키보드로 열고, 마우스가 있는 기기에서는 올려도 열립니다.
    *
-   * hover 로 여는 보조 동작은 넣지 않습니다. matchMedia('(hover: hover)') 는
-   * 터치 되는 윈도우 노트북에서 참이라 모바일 최우선이 지키려는 기기군에
-   * 정확히 출하되고, hover-open + click-toggle 은 "hover 로 열림 → 마우스가
-   * 벗어나 닫힘 → 닫으려 누른 클릭이 다시 엶" 이라는 상태 경합을 만듭니다.
+   * hover 는 **보조** 입니다. 클릭과 키보드만으로 모든 동작이 가능해야 하고,
+   * hover 는 그 위에 얹힙니다 — 없어도 아무것도 잃지 않습니다.
+   *
+   * 두 가지를 조심합니다.
+   *
+   * (1) `(hover: hover)` 하나만 보면 **터치 되는 윈도우 노트북에서 참** 입니다.
+   *     그 기기에서 hover 는 손가락이 아니라 우연히 스치는 것이 되고, 메뉴가
+   *     의도 없이 열립니다. `(pointer: fine)` 을 함께 봐야 걸러집니다.
+   *
+   * (2) 이벤트를 버튼에 걸면 패널로 마우스를 옮기는 순간 버튼을 벗어나
+   *     닫힙니다. 패널이 <li> **안**에 있으므로 <li> 에 겁니다.
    *
    * <dialog> 를 쓰지 않는 이유: showModal() 은 top layer 라 뷰포트 기준
    * 배치가 되고 헤더 나머지를 inert 로 만듭니다. 여기 패널은 트리거에
@@ -164,12 +171,58 @@ const utility = UTILITY_VISIBLE.filter((item) => item.badge !== 'cart');
     }
   }
 
+  /*
+   * 마우스가 있는 기기에서만. matchMedia 는 실시간이라 외장 마우스를 꽂았다
+   * 뺐다 해도 그때그때 맞는 답을 냅니다.
+   */
+  const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+
+  for (const trigger of triggers) {
+    const group = trigger.closest('li');
+    const panel = document.getElementById(trigger.getAttribute('aria-controls') ?? '');
+    if (!group || !panel) continue;
+
+    const setOpen = (open: boolean) => {
+      panel.hidden = !open;
+      trigger.setAttribute('aria-expanded', String(open));
+    };
+
+    group.addEventListener('mouseenter', () => {
+      if (!finePointer.matches) return;
+      closeAll();
+      setOpen(true);
+    });
+
+    group.addEventListener('mouseleave', () => {
+      if (!finePointer.matches) return;
+      // 키보드로 연 것을 마우스가 스쳐 지나가며 닫지 않게, 포커스가 이 묶음
+      // 안에 있으면 그대로 둡니다.
+      if (group.contains(document.activeElement)) return;
+      setOpen(false);
+    });
+  }
+
   for (const trigger of triggers) {
     trigger.addEventListener('click', (event) => {
       event.stopPropagation();
       const panel = document.getElementById(trigger.getAttribute('aria-controls') ?? '');
       if (!panel) return;
-      const willOpen = panel.hidden;
+
+      /*
+       * 마우스로 누를 때는 **닫지 않습니다.**
+       *
+       * 마우스가 트리거에 닿는 순간 mouseenter 가 이미 열었으므로, 클릭이
+       * 토글이면 "올려서 열린 것을 누르면 닫히는" 상태가 됩니다. 올려서
+       * 보이길래 누른 사람에게는 메뉴가 사라진 것으로 보입니다.
+       *
+       * 키보드로 활성화한 click 은 `detail === 0` 입니다(포인터 클릭은 1 이상).
+       * 그쪽은 Enter 로 열고 Enter 로 닫는 토글이 맞습니다.
+       *
+       * 마우스에서 닫는 길은 벗어나기·Esc·바깥 클릭 셋입니다.
+       */
+      const byPointer = event.detail > 0 && finePointer.matches;
+      const willOpen = byPointer ? true : panel.hidden;
+
       closeAll();
       panel.hidden = !willOpen;
       trigger.setAttribute('aria-expanded', String(willOpen));

@@ -441,9 +441,11 @@ button {
        그 사이 죽은 공간은 스티키 헤더에서 순손실입니다. */
     display: grid;
     grid-template-columns: auto 1fr;
+    /* 메뉴 줄이 두 열을 다 씁니다 — 워드마크가 왼쪽 열을 차지한 채로
+       가운데 정렬하면 그 열 너비의 절반(47px)만큼 늘 치우칩니다. */
     grid-template-areas:
       'brand util'
-      'brand links';
+      'links links';
     row-gap: 0;
     column-gap: 16px;
     align-items: center;
@@ -457,7 +459,7 @@ button {
   }
   .nav__links {
     grid-area: links;
-    justify-self: end;
+    justify-self: center;
     display: flex;
   }
 }
