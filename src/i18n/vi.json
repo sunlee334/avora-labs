@@ -6,6 +6,7 @@
   },
   "nav": {
     "story": "Câu chuyện thương hiệu",
+    "brand": "Thương hiệu",
     "product": "Sản phẩm",
     "cart": "Giỏ hàng",
     "language": "Chọn ngôn ngữ",
@@ -13,6 +14,7 @@
     "close": "Đóng",
     "account": "Trang của tôi",
     "support": "Hỗ trợ",
+    "faq": "Câu hỏi thường gặp",
     "reviews": "Đánh giá"
   },
   "home": {

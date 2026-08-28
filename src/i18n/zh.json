@@ -6,6 +6,7 @@
   },
   "nav": {
     "story": "品牌故事",
+    "brand": "品牌",
     "product": "产品",
     "cart": "购物车",
     "language": "选择语言",
@@ -13,6 +14,7 @@
     "close": "关闭",
     "account": "我的页面",
     "support": "客户服务",
+    "faq": "常见问题",
     "reviews": "评价"
   },
   "home": {

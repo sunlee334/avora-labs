@@ -6,6 +6,7 @@
   },
   "nav": {
     "story": "브랜드 스토리",
+    "brand": "브랜드",
     "product": "제품",
     "cart": "장바구니",
     "language": "언어 선택",
@@ -13,6 +14,7 @@
     "close": "닫기",
     "account": "마이페이지",
     "support": "고객센터",
+    "faq": "자주 묻는 질문",
     "reviews": "리뷰"
   },
   "home": {

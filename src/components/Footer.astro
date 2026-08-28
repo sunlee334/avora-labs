@@ -1,6 +1,6 @@
 ---
 import { dict, localePath } from '../i18n';
-import { ACCOUNTS_ENABLED } from '../config/runtime';
+import { MENU_DESTINATIONS } from '../config/nav-gates';
 import { BUSINESS, LOCALES, LOCALE_LABELS, LOCALE_TAGS, type Locale } from '../config/site';
 
 interface Props {
@@ -34,18 +34,23 @@ const businessRows = [
     <p class="footer__tagline">{t.footer.tagline}</p>
 
     <div class="footer__cols">
+      {/*
+        목적지 목록을 여기서 적지 않습니다 — `src/config/nav.ts` 하나가 정의하고
+        헤더·시트·푸터 셋이 그것을 읽습니다. 예전에는 세 곳이 각자 적어 두어,
+        홈 링크가 헤더만 `/{lang}/#story` 이고 나머지는 `/{lang}/` 였습니다.
+
+        평면 목록이라 `flatLabel` 을 먼저 씁니다. 드롭다운 안에서는 부모가
+        문맥을 주지만("고객센터 > 자주 묻는 질문") 푸터에는 부모가 없어서,
+        그 주소의 `<title>`·`<h1>` 과 같은 말을 보여야 합니다.
+      */}
       <div class="footer__col">
         <h2>{t.nav.menu}</h2>
-        <ul>
-          <li><a href={localePath(locale)}>{t.nav.story}</a></li>
-          <li><a href={localePath(locale, 'product')}>{t.nav.product}</a></li>
-          <li><a href={localePath(locale, 'reviews')}>{t.nav.reviews}</a></li>
-          <li><a href={localePath(locale, 'support')}>{t.nav.support}</a></li>
-          {
-            ACCOUNTS_ENABLED && (
-              <li><a href={localePath(locale, 'account')}>{t.nav.account}</a></li>
-            )
-          }
+        <ul data-footer-menu>
+          {MENU_DESTINATIONS.map((item) => (
+            <li>
+              <a href={localePath(locale, item.path)}>{(item.flatLabel ?? item.label)(t)}</a>
+            </li>
+          ))}
         </ul>
       </div>
 
