@@ -54,6 +54,7 @@ import {
   type ReviewStatus,
 } from './reviews';
 import { notifyNewOrder, toNotification } from './notify';
+import { notifyNewInquiry } from './notify/inquiry';
 import {
   handleLogin,
   handleCallback,
@@ -600,7 +601,11 @@ const INQUIRY_SUBJECT_MAX = 100;
 const INQUIRY_BODY_MIN = 10;
 const INQUIRY_BODY_MAX = 2000;
 
-async function handleInquiryCreate(request: Request, env: Env): Promise<Response> {
+async function handleInquiryCreate(
+  request: Request,
+  env: Env,
+  ctx: ExecutionContext,
+): Promise<Response> {
   if (!env.DB) return json({ error: 'INQUIRIES_NOT_CONFIGURED' }, 503);
 
   let body: { orderId?: string; phone?: string; subject?: string; body?: string; locale?: string };
@@ -652,6 +657,19 @@ async function handleInquiryCreate(request: Request, env: Env): Promise<Response
       },
       new Date(),
     );
+    // 응답 뒤에 보냅니다 — 손님은 이미 남겼고, 알림이 느리다고 "받았습니다"
+    // 화면이 기다려야 할 이유가 없습니다. 실패해도 문의는 D1 에 있습니다.
+    ctx.waitUntil(
+      notifyNewInquiry(
+        {
+          inquiryId: inquiry.id,
+          locale,
+          via: 'order',
+          adminUrl: new URL('/admin', request.url).href,
+        },
+        env as unknown as Record<string, unknown>,
+      ),
+    );
     return json({ ok: true, inquiry: publicInquiry(inquiry) }, 201);
   }
 
@@ -662,6 +680,17 @@ async function handleInquiryCreate(request: Request, env: Env): Promise<Response
     env.DB,
     { userId: user.id, subject, body: message, locale },
     new Date(),
+  );
+  ctx.waitUntil(
+    notifyNewInquiry(
+      {
+        inquiryId: inquiry.id,
+        locale,
+        via: 'account',
+        adminUrl: new URL('/admin', request.url).href,
+      },
+      env as unknown as Record<string, unknown>,
+    ),
   );
   return json({ ok: true, inquiry: publicInquiry(inquiry) }, 201);
 }
@@ -1052,7 +1081,7 @@ export default {
 
     // 문의 — 공개 게시판이 아닙니다. 조회는 본인 확인을 지납니다.
     if (pathname === '/api/inquiries' && request.method === 'POST') {
-      return handleInquiryCreate(request, env);
+      return handleInquiryCreate(request, env, ctx);
     }
     if (pathname === '/api/inquiries' && request.method === 'GET') {
       return handleInquiryList(request, env);

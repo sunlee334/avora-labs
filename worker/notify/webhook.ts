@@ -65,42 +65,58 @@ export function composeMessage(n: OrderNotification, escape: (v: string) => stri
   return lines.join('\n');
 }
 
+/** 웹훅이 설정돼 있는가. 주문·문의 양쪽이 같은 판정을 씁니다. */
+export function webhookConfigured(env: Record<string, unknown>): boolean {
+  return typeof env.NOTIFY_WEBHOOK_URL === 'string' && env.NOTIFY_WEBHOOK_URL.length > 0;
+}
+
+/**
+ * 채널로 한 줄 보냅니다 — 무엇을 보내는지는 부르는 쪽이 정합니다.
+ *
+ * 여기 있는 것은 **전송 방식**뿐입니다: Slack 과 Discord 의 본문 키가 다르고,
+ * 이스케이프 방식도 다릅니다. 그 갈림을 두 곳에서 되풀이하지 않으려고
+ * 문구가 아니라 **문구를 만드는 함수**를 받습니다 — 어떤 이스케이프를 써야
+ * 하는지는 URL 을 봐야 알 수 있기 때문입니다.
+ */
+export async function postWebhook(
+  compose: (escape: (v: string) => string) => string,
+  env: Record<string, unknown>,
+): Promise<NotifyResult> {
+  const url = env.NOTIFY_WEBHOOK_URL as string;
+  const discord = isDiscord(url);
+
+  // Slack 은 엔티티로 막고, Discord 는 엔티티를 그대로 글자로 보여주므로
+  // 대신 멘션 자체를 끕니다. allowed_mentions 를 비우면 @everyone 을 포함해
+  // 어떤 멘션도 알림을 울리지 않습니다.
+  const message = compose(discord ? (v) => v : escapeSlack);
+  const body = discord
+    ? { content: message, allowed_mentions: { parse: [] as string[] } }
+    : { text: message };
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  } catch (cause) {
+    return { ok: false, error: cause instanceof Error ? cause.message : String(cause) };
+  }
+
+  if (!response.ok) {
+    // 본문을 읽어 로그에 남깁니다 — Slack 은 왜 거절했는지 평문으로 알려줍니다.
+    const detail = await response.text().catch(() => '');
+    return { ok: false, error: `HTTP ${response.status} ${detail}`.trim() };
+  }
+
+  return { ok: true };
+}
+
 export const webhookNotifier: Notifier = {
   name: 'webhook',
-
-  isConfigured(env) {
-    return typeof env.NOTIFY_WEBHOOK_URL === 'string' && env.NOTIFY_WEBHOOK_URL.length > 0;
-  },
-
-  async send(notification, env): Promise<NotifyResult> {
-    const url = env.NOTIFY_WEBHOOK_URL as string;
-    const discord = isDiscord(url);
-
-    // Slack 은 엔티티로 막고, Discord 는 엔티티를 그대로 글자로 보여주므로
-    // 대신 멘션 자체를 끕니다. allowed_mentions 를 비우면 @everyone 을 포함해
-    // 어떤 멘션도 알림을 울리지 않습니다.
-    const message = composeMessage(notification, discord ? undefined : escapeSlack);
-    const body = discord
-      ? { content: message, allowed_mentions: { parse: [] as string[] } }
-      : { text: message };
-
-    let response: Response;
-    try {
-      response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-    } catch (cause) {
-      return { ok: false, error: cause instanceof Error ? cause.message : String(cause) };
-    }
-
-    if (!response.ok) {
-      // 본문을 읽어 로그에 남깁니다 — Slack 은 왜 거절했는지 평문으로 알려줍니다.
-      const detail = await response.text().catch(() => '');
-      return { ok: false, error: `HTTP ${response.status} ${detail}`.trim() };
-    }
-
-    return { ok: true };
+  isConfigured: webhookConfigured,
+  send(notification, env): Promise<NotifyResult> {
+    return postWebhook((escape) => composeMessage(notification, escape), env);
   },
 };
