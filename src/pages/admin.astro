@@ -52,6 +52,7 @@ const FULFILLMENT_LABEL: Record<string, string> = {
         <button type="button" data-tab="inquiries">
           문의<span class="tabs__count" data-inq-badge hidden></span>
         </button>
+        <button type="button" data-tab="reviews">후기</button>
       </nav>
       <div class="bar__right">
         <span class="who" data-who></span>
@@ -171,7 +172,96 @@ const FULFILLMENT_LABEL: Record<string, string> = {
           <button type="button" data-inq-next>다음</button>
         </nav>
       </div>
+
+      {/*
+        후기 탭.
+
+        API 는 처음부터 있었는데(`GET/PATCH /api/admin/reviews`) 부를 화면이
+        없었습니다. 그래서 후기를 숨기려면 API 를 직접 불러야 했고,
+        마이페이지가 "관리자가 내린 후기는 고객센터로 문의해 주세요" 라고
+        안내하기 시작하면서 그 문의를 받아도 처리할 자리가 없었습니다.
+      */}
+      <div data-panel="reviews" hidden>
+        <form class="filters" data-rv-filters>
+          <label class="sr-only" for="rv-status">상태</label>
+          <select id="rv-status" name="status">
+            <option value="" selected>전체</option>
+            <option value="visible">보이는 중</option>
+            <option value="hidden">숨김</option>
+            <option value="removed">작성자가 내림</option>
+          </select>
+          <button type="submit">보기</button>
+        </form>
+
+        <p class="state" data-rv-state>불러오는 중…</p>
+
+        <div class="tableWrap" data-rv-table-wrap hidden>
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">후기번호</th>
+                <th scope="col">별점</th>
+                <th scope="col">내용</th>
+                <th scope="col">쓴 때</th>
+                <th scope="col">상태</th>
+              </tr>
+            </thead>
+            <tbody data-rv-rows></tbody>
+          </table>
+        </div>
+
+        <nav class="pager" data-rv-pager hidden aria-label="후기 페이지">
+          <button type="button" data-rv-prev>이전</button>
+          <span data-rv-page-info></span>
+          <button type="button" data-rv-next>다음</button>
+        </nav>
+      </div>
     </main>
+
+    {/* 후기 상세 — 행을 누르면 열립니다 */}
+    <dialog class="detail" data-rv-detail aria-label="후기 상세">
+      <div class="detail__head">
+        <h2 data-rv-d-id></h2>
+        <button type="button" data-rv-detail-close aria-label="닫기">✕</button>
+      </div>
+
+      <dl class="detail__facts">
+        <div><dt>별점</dt><dd data-rv-d-rating></dd></div>
+        <div><dt>내용</dt><dd data-rv-d-body></dd></div>
+        <div><dt>작성자</dt><dd data-rv-d-author></dd></div>
+        <div><dt>주문번호</dt><dd data-rv-d-order></dd></div>
+        <div><dt>쓴 때</dt><dd data-rv-d-when></dd></div>
+        <div><dt>상태</dt><dd data-rv-d-status></dd></div>
+        <div data-rv-d-reason-row hidden><dt>숨긴 이유</dt><dd data-rv-d-reason></dd></div>
+      </dl>
+
+      {/*
+        작성자가 내린 후기는 손댈 수 없습니다. 지운 사람의 뜻과 반대로 그 글을
+        공개 화면에 되돌리는 일이 되기 때문입니다(서버도 409 로 막습니다).
+      */}
+      <div class="detail__notice" data-rv-removed hidden>
+        <p>작성자가 내린 후기입니다. 다시 보이게 할 수 없습니다.</p>
+      </div>
+
+      <form class="detail__form" data-rv-form>
+        <h3>상태 바꾸기</h3>
+        <div class="row">
+          <label for="rv-reason">숨기는 이유</label>
+          <input type="text" id="rv-reason" name="reason" maxlength="200"
+                 placeholder="개인정보 노출 · 광고 · 욕설 · 제품과 무관" />
+        </div>
+        {/*
+          이유를 적는 칸이 먼저 있고 그 아래 버튼이 있습니다. 숨기는 이유가
+          없으면 서버가 400 으로 막습니다 — 기준 없이 숨긴 기록이 없으면,
+          부정적 후기만 골라 숨겼는지 나중에 아무도 증명할 수 없습니다.
+        */}
+        <div class="row row--actions">
+          <button type="submit" data-rv-hide>숨기기</button>
+          <button type="button" data-rv-show>다시 보이기</button>
+        </div>
+        <p class="detail__error" data-rv-error hidden></p>
+      </form>
+    </dialog>
 
     {/* 문의 상세 — 행을 누르면 열립니다 */}
     <dialog class="detail" data-inq-detail aria-label="문의 상세">
@@ -918,7 +1008,151 @@ const FULFILLMENT_LABEL: Record<string, string> = {
        */
       let activeTab: 'orders' | 'inquiries' = 'orders';
 
-      function showTab(name: 'orders' | 'inquiries') {
+      /* ── 후기 ─────────────────────────────────────────────
+         DOM 은 전부 createElement + textContent 로 만듭니다. 후기 본문은
+         손님이 쓴 문자열이고, 이 화면은 Access 뒤에 있지만 innerHTML 로
+         넣으면 그 사람의 <script> 가 관리자 세션에서 실행됩니다. */
+      const rvState = $('[data-rv-state]');
+      const rvWrap = $('[data-rv-table-wrap]');
+      const rvRows = $('[data-rv-rows]');
+      const rvPager = $('[data-rv-pager]');
+      const rvPageInfo = $('[data-rv-page-info]');
+      const rvDetail = document.querySelector<HTMLDialogElement>('[data-rv-detail]')!;
+      const rvForm = document.querySelector<HTMLFormElement>('[data-rv-form]')!;
+      const rvError = $('[data-rv-error]');
+      const RV_PAGE = 20;
+      let rvOffset = 0;
+      let rvCurrent: any = null;
+
+      const RV_STATUS: Record<string, string> = {
+        visible: '보이는 중',
+        hidden: '숨김',
+        removed: '작성자가 내림',
+      };
+
+      async function loadReviews() {
+        rvState.hidden = false;
+        rvState.textContent = '불러오는 중…';
+        rvWrap.hidden = true;
+        try {
+          const filters = document.querySelector<HTMLFormElement>('[data-rv-filters]')!;
+          const status = new FormData(filters).get('status');
+          const data = await api(`/api/admin/reviews?limit=${RV_PAGE}&offset=${rvOffset}`);
+          // 서버에 상태 필터가 없어 여기서 좁힙니다. 목록이 길어지면
+          // 서버로 옮겨야 합니다 — 지금은 후기 수가 적습니다.
+          const all = (data.reviews ?? []) as any[];
+          const rows = status ? all.filter((r) => r.status === status) : all;
+
+          if (rows.length === 0) {
+            rvState.textContent = status ? '해당 상태의 후기가 없습니다.' : '후기가 없습니다.';
+            rvPager.hidden = true;
+            return;
+          }
+
+          rvRows.replaceChildren(
+            ...rows.map((review) => {
+              const tr = document.createElement('tr');
+              tr.tabIndex = 0;
+              tr.dataset.rvRow = review.id;
+
+              const cells = [
+                review.id,
+                '★'.repeat(review.rating),
+                // 표에서는 줄여 보여주고 전체는 상세에서 봅니다.
+                review.body.length > 40 ? `${review.body.slice(0, 40)}…` : review.body,
+                String(review.createdAt).slice(0, 10),
+                RV_STATUS[review.status] ?? review.status,
+              ];
+              for (const value of cells) {
+                const td = document.createElement('td');
+                td.textContent = value;
+                tr.append(td);
+              }
+              tr.addEventListener('click', () => openReview(review));
+              tr.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  openReview(review);
+                }
+              });
+              return tr;
+            }),
+          );
+
+          rvState.hidden = true;
+          rvWrap.hidden = false;
+          const total = data.total ?? rows.length;
+          rvPageInfo.textContent = `${rvOffset + 1}–${rvOffset + rows.length} / ${total}`;
+          rvPager.hidden = false;
+        } catch (error) {
+          rvState.textContent = error instanceof Error ? error.message : '불러오지 못했습니다.';
+          rvPager.hidden = true;
+        }
+      }
+
+      function openReview(review: any) {
+        rvCurrent = review;
+        $('[data-rv-d-id]').textContent = review.id;
+        $('[data-rv-d-rating]').textContent = `${'★'.repeat(review.rating)} (${review.rating}/5)`;
+        $('[data-rv-d-body]').textContent = review.body;
+        $('[data-rv-d-author]').textContent = review.authorName ?? '';
+        $('[data-rv-d-order]').textContent = review.orderId ?? '';
+        $('[data-rv-d-when]').textContent = String(review.createdAt).slice(0, 16).replace('T', ' ');
+        $('[data-rv-d-status]').textContent = RV_STATUS[review.status] ?? review.status;
+
+        const reasonRow = $('[data-rv-d-reason-row]');
+        $('[data-rv-d-reason]').textContent = review.hiddenReason ?? '';
+        reasonRow.hidden = !review.hiddenReason;
+
+        // 작성자가 내린 것은 손댈 수 없습니다 — 폼 자체를 감춥니다.
+        const removed = review.status === 'removed';
+        $('[data-rv-removed]').hidden = !removed;
+        rvForm.hidden = removed;
+
+        rvError.hidden = true;
+        rvForm.reset();
+        rvDetail.showModal();
+      }
+
+      async function setReviewStatus(status: 'visible' | 'hidden') {
+        if (!rvCurrent) return;
+        const reason = new FormData(rvForm).get('reason');
+        rvError.hidden = true;
+        try {
+          await api(`/api/admin/reviews/${encodeURIComponent(rvCurrent.id)}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status, reason: String(reason ?? '') }),
+          });
+          rvDetail.close();
+          await loadReviews();
+        } catch (error) {
+          rvError.textContent = error instanceof Error ? error.message : '바꾸지 못했습니다.';
+          rvError.hidden = false;
+        }
+      }
+
+      rvForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        void setReviewStatus('hidden');
+      });
+      $('[data-rv-show]').addEventListener('click', () => void setReviewStatus('visible'));
+      $('[data-rv-detail-close]').addEventListener('click', () => rvDetail.close());
+      document.querySelector('[data-rv-filters]')!.addEventListener('submit', (event) => {
+        event.preventDefault();
+        rvOffset = 0;
+        void loadReviews();
+      });
+      $('[data-rv-prev]').addEventListener('click', () => {
+        rvOffset = Math.max(0, rvOffset - RV_PAGE);
+        void loadReviews();
+      });
+      $('[data-rv-next]').addEventListener('click', () => {
+        rvOffset += RV_PAGE;
+        void loadReviews();
+      });
+
+      function showTab(name: 'orders' | 'inquiries' | 'reviews') {
         activeTab = name;
         document.querySelectorAll<HTMLElement>('[data-panel]').forEach((panel) => {
           panel.hidden = panel.dataset.panel !== name;
@@ -928,10 +1162,13 @@ const FULFILLMENT_LABEL: Record<string, string> = {
           else tab.removeAttribute('aria-current');
         });
         if (name === 'inquiries') loadInquiries();
+        if (name === 'reviews') loadReviews();
       }
 
       document.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach((tab) => {
-        tab.addEventListener('click', () => showTab(tab.dataset.tab as 'orders' | 'inquiries'));
+        tab.addEventListener('click', () =>
+          showTab(tab.dataset.tab as 'orders' | 'inquiries' | 'reviews'),
+        );
       });
 
       // 미답변 건수는 어느 탭에 있든 알아야 하므로 처음에 한 번 물어봅니다.

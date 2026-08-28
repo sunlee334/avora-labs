@@ -181,6 +181,36 @@ test.describe('마이페이지', () => {
 test.describe('관리 화면', () => {
   test.use({ extraHTTPHeaders: { 'X-Admin-Dev-Token': ADMIN_DEV_TOKEN } });
 
+  test('후기 탭 — 목록과 상세', async ({ page }, testInfo) => {
+    // 관리 화면의 세 번째 탭입니다. 상세는 <dialog> 라 초점 관리와 이름표가
+    // 없으면 스크린리더에서 길을 잃습니다.
+    const phone = `010${String(Math.floor(Math.random() * 100000000)).padStart(8, '0')}`;
+    const id = `AVORA-${String(20261101000000 + Math.floor(Math.random() * 999999)).padEnd(14, '0').slice(0, 14)}-A11YAD`;
+    await page.request.post('/api/orders', {
+      data: {
+        orderId: id, amount: 32000, currency: 'KRW', locale: 'ko',
+        items: [{ id: 'daily-sunscreen', qty: 1 }],
+        recipientName: '접근성', recipientPhone: phone,
+        postalCode: '04039', address1: '서울특별시 마포구',
+      },
+    });
+    await page.request.post('/api/payments/confirm', {
+      data: { orderId: id, paymentKey: `a11y-rv-${id}`, amount: 32000 },
+    });
+    await page.request.post('/api/reviews', {
+      data: { orderId: id, phone, rating: 3, body: '관리 화면 접근성 검사를 위한 후기입니다.' },
+    });
+
+    await page.goto('/admin');
+    await page.locator('[data-tab="reviews"]').click();
+    await expect(page.locator('[data-rv-rows] tr').first()).toBeVisible();
+    expect(await scan(page, testInfo)).toEqual([]);
+
+    await page.locator('[data-rv-rows] tr').first().click();
+    await expect(page.locator('[data-rv-detail]')).toBeVisible();
+    expect(await scan(page, testInfo)).toEqual([]);
+  });
+
   test('주문 목록', async ({ page }, testInfo) => {
     await page.goto('/admin');
     await expect(page.locator('[data-rows] tr').first()).toBeVisible();

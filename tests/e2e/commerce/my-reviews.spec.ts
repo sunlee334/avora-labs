@@ -467,3 +467,120 @@ test.describe('화면에서 고치고 지운다', () => {
     await expect(item.locator('[data-remove]')).toHaveCount(0);
   });
 });
+
+test.describe('관리 화면 후기 탭', () => {
+  test.use({ extraHTTPHeaders: { 'X-Admin-Dev-Token': ADMIN_DEV_TOKEN } });
+
+  /** 후기 하나를 만들고 id 를 돌려줍니다. 관리 화면은 남의 후기도 봅니다. */
+  async function someReview(page: Page): Promise<string> {
+    const phone = freshPhone();
+    const order = await paidOrder(page.request, phone, '관리시험');
+    const created = await page.request.post('/api/reviews', {
+      data: { orderId: order, phone, rating: 2, body: '관리 화면에서 볼 후기 본문입니다.' },
+    });
+    expect(created.status()).toBe(201);
+    return (await created.json()).review.id;
+  }
+
+  test('탭이 있고 목록이 그려진다', async ({ page }) => {
+    await someReview(page);
+    await page.goto('/admin');
+    await page.locator('[data-tab="reviews"]').click();
+    await expect(page.locator('[data-panel="reviews"]')).toBeVisible();
+    await expect(page.locator('[data-rv-rows] tr').first()).toBeVisible();
+  });
+
+  test('행을 누르면 상세가 열리고 전체 본문이 보인다', async ({ page }) => {
+    await someReview(page);
+    await page.goto('/admin');
+    await page.locator('[data-tab="reviews"]').click();
+    await page.locator('[data-rv-rows] tr').first().click();
+    await expect(page.locator('[data-rv-detail]')).toBeVisible();
+    await expect(page.locator('[data-rv-d-body]')).toContainText('관리 화면에서 볼');
+  });
+
+  test('이유 없이 숨길 수 없다', async ({ page }) => {
+    // 기준 없이 숨긴 기록이 없으면, 부정적 후기만 골라 숨겼는지 나중에
+    // 아무도 증명할 수 없습니다.
+    await someReview(page);
+    await page.goto('/admin');
+    await page.locator('[data-tab="reviews"]').click();
+    await page.locator('[data-rv-rows] tr').first().click();
+    await page.locator('[data-rv-hide]').click();
+    await expect(page.locator('[data-rv-error]')).toBeVisible();
+    await expect(page.locator('[data-rv-error]')).toContainText('이유');
+  });
+
+  test('이유를 적으면 숨겨지고 공개 목록에서 빠진다', async ({ page, request }) => {
+    const id = await someReview(page);
+    await page.goto('/admin');
+    await page.locator('[data-tab="reviews"]').click();
+    await page.locator(`[data-rv-row="${id}"]`).click();
+    await page.locator('#rv-reason').fill('제품과 무관한 내용');
+    await page.locator('[data-rv-hide]').click();
+    await expect(page.locator('[data-rv-detail]')).toBeHidden();
+
+    const publicList = await (await request.get('/api/reviews?limit=50')).json();
+    expect(publicList.reviews.some((r: { id: string }) => r.id === id)).toBe(false);
+  });
+
+  test('작성자가 내린 후기는 관리자도 되살릴 수 없다', async ({ page, browser }) => {
+    // updateOwnReview 가 막는 것(본인이 관리자 조정을 되돌리는 것)의 짝입니다.
+    const owner = await browser.newContext();
+    const ownerPage = await owner.newPage();
+    await loginAs(ownerPage, freshCode());
+    const phone = freshPhone();
+    const order = await paidOrder(ownerPage.request, phone);
+    await ownerPage.request.post('/api/account/claim', { data: { orderId: order, phone } });
+    const created = await ownerPage.request.post('/api/reviews', {
+      data: { orderId: order, phone, rating: 1, body: '작성자가 곧 내릴 후기입니다.' },
+    });
+    const id = (await created.json()).review.id;
+    await ownerPage.request.delete(`/api/account/reviews/${id}`);
+    await owner.close();
+
+    const res = await page.request.patch(`/api/admin/reviews/${id}`, {
+      data: { status: 'visible' },
+    });
+    expect(res.status(), '지운 후기를 관리자가 되살렸습니다').toBe(409);
+    expect((await res.json()).error).toBe('AUTHOR_REMOVED');
+  });
+
+  test('작성자가 내린 후기에는 상태 폼이 안 보인다', async ({ page, browser }) => {
+    const owner = await browser.newContext();
+    const ownerPage = await owner.newPage();
+    await loginAs(ownerPage, freshCode());
+    const phone = freshPhone();
+    const order = await paidOrder(ownerPage.request, phone);
+    await ownerPage.request.post('/api/account/claim', { data: { orderId: order, phone } });
+    const created = await ownerPage.request.post('/api/reviews', {
+      data: { orderId: order, phone, rating: 1, body: '폼이 감춰져야 하는 후기입니다.' },
+    });
+    const id = (await created.json()).review.id;
+    await ownerPage.request.delete(`/api/account/reviews/${id}`);
+    await owner.close();
+
+    await page.goto('/admin');
+    await page.locator('[data-tab="reviews"]').click();
+    await page.locator('#rv-status').selectOption('removed');
+    await page.locator('[data-rv-filters] button[type="submit"]').click();
+    await page.locator(`[data-rv-row="${id}"]`).click();
+    await expect(page.locator('[data-rv-removed]')).toBeVisible();
+    await expect(page.locator('[data-rv-form]')).toBeHidden();
+  });
+
+  test('후기 본문이 관리 화면에서 실행되지 않는다', async ({ page }) => {
+    // 이 화면은 Access 뒤에 있지만, innerHTML 로 넣으면 손님의 <script> 가
+    // 관리자 세션에서 실행됩니다.
+    const phone = freshPhone();
+    const order = await paidOrder(page.request, phone);
+    await page.request.post('/api/reviews', {
+      data: { orderId: order, phone, rating: 1, body: '<img src=x onerror=alert(1)> 실행 금지' },
+    });
+
+    await page.goto('/admin');
+    await page.locator('[data-tab="reviews"]').click();
+    await expect(page.locator('[data-rv-rows]')).toContainText('<img');
+    await expect(page.locator('[data-rv-rows] img')).toHaveCount(0);
+  });
+});

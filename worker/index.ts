@@ -634,6 +634,29 @@ async function handleAdminReviewPatch(
     );
   }
 
+  /*
+   * 손님이 지운 후기는 되살리지 않습니다.
+   *
+   * `removed` 는 본인이 내린 것입니다. 운영자가 그것을 다시 보이게 할 수
+   * 있으면, 지운 사람의 뜻과 반대로 그 글이 공개 화면에 돌아옵니다.
+   * 반대 방향(본인이 관리자 조정을 되돌리는 것)은 `updateOwnReview` 가
+   * 이미 막고 있고, 이쪽이 그 짝입니다.
+   *
+   * 숨기는 것은 허용합니다 — 이미 안 보이지만, 나중에 본인이 다시 쓰려 할 때
+   * 기록으로 남아야 하는 경우가 있습니다.
+   */
+  const before = await getReview(env.DB, id);
+  if (!before) return json({ error: 'REVIEW_NOT_FOUND' }, 404);
+  if (before.status === 'removed' && status === 'visible') {
+    return json(
+      {
+        error: 'AUTHOR_REMOVED',
+        message: '작성자가 내린 후기입니다. 다시 보이게 할 수 없습니다.',
+      },
+      409,
+    );
+  }
+
   const changed = await setReviewStatus(
     env.DB,
     id,
