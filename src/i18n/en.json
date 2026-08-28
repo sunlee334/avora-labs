@@ -114,25 +114,43 @@
       "ctaExternal": "Buy on Smart Store",
       "ctaCart": "Add to cart",
       "added": "Added to your cart",
-      "viewCart": "View cart"
+      "viewCart": "View cart",
+      "launchWindow": "Launching in the first half of 2027",
+      "notify": {
+        "heading": "We'll tell you when it's out",
+        "body": "Twice only — when the funding opens, and when it launches.",
+        "emailLabel": "Email address",
+        "emailPlaceholder": "you@example.com",
+        "submit": "Notify me at launch",
+        "sending": "Signing up…",
+        "done": "You're on the list. We'll write to this address.",
+        "invalid": "Please check the email address.",
+        "error": "That didn't go through. Please try again in a moment.",
+        "consent": "I agree to receive marketing email. Every message carries an unsubscribe link."
+      }
     },
     "principles": {
       "kicker": "Product Principles",
       "items": [
         {
-          "term": "Stay",
-          "label": "Protection that holds",
-          "body": "Built to stay put through heat and sweat."
+          "term": "LIGHT",
+          "label": "Never heavy",
+          "body": "A low-viscosity texture that sinks in fast and leaves no oily film behind."
         },
         {
-          "term": "Breathe",
-          "label": "Light, never heavy",
-          "body": "A watery gel with no white cast that sinks in without pressing on pores."
+          "term": "COMFORT",
+          "label": "Comfortable in motion",
+          "body": "It should hold through sweat and friction, and never sting when it runs into your eyes."
         },
         {
-          "term": "Pure",
-          "label": "Stripped back",
-          "body": "Designed toward fragrance-free, with artificial scent and colour kept to a minimum."
+          "term": "PROTECTION",
+          "label": "From sun and from the day",
+          "body": "SPF50+ / PA++++ with very water-resistant performance as the target spec."
+        },
+        {
+          "term": "RESET",
+          "label": "Composed again",
+          "body": "Reapply over it without pilling or turning white."
         }
       ]
     },
@@ -143,16 +161,25 @@
         "texture": "Texture",
         "waterResistant": "Water resistance",
         "volume": "Volume",
-        "category": "Category"
+        "category": "Category",
+        "scent": "Fragrance",
+        "tone": "Tone",
+        "area": "Where to use"
       },
       "values": {
         "category": "Functional cosmetic (UV protection)",
-        "pending": "To be confirmed"
+        "pending": "To be confirmed",
+        "texture": "Organic-led hybrid lotion / milk",
+        "waterResistant": "Very water resistant (80 min)",
+        "scent": "Fragrance free",
+        "tone": "No tone-up · no white cast",
+        "area": "Face and neck",
+        "target": "target"
       },
       "note": "Texture, volume and full ingredient list will be updated once the formula is finalised."
     },
     "howto": {
-      "kicker": "How to use",
+      "kicker": "A day in motion",
       "steps": [
         {
           "title": "Last step of your routine",
@@ -166,6 +193,14 @@
           "title": "Every two hours",
           "body": "Reapply sooner if you have been sweating heavily."
         }
+      ],
+      "lead": "Apply, move, sweat, meet water, and apply again.",
+      "day": [
+        "SUN",
+        "MOVE",
+        "SWEAT",
+        "WATER",
+        "RESET"
       ]
     },
     "faq": {
@@ -215,7 +250,12 @@
       },
       "pending": "To be confirmed"
     },
-    "backToStory": "Back to the story"
+    "backToStory": "Back to the story",
+    "standards": {
+      "kicker": "How we choose",
+      "lead": "No stinging. No white cast.",
+      "body": "A formula that misses either one is dropped, however good the rest of it looks. Until the product exists, what we can promise is not a finished spec but what we refuse to trade away."
+    }
   },
   "support": {
     "meta": {
@@ -431,7 +471,15 @@
             "purpose": "Verifying it is your question",
             "when": "When asking with an order number (required)"
           }
-        ]
+        ],
+        "notifyRows": [
+          {
+            "item": "Email address",
+            "purpose": "Launch and funding announcements",
+            "when": "When signing up for launch alerts (required)"
+          }
+        ],
+        "notifyNote": "Launch alerts are marketing email you opted into. Every message carries an unsubscribe link that takes effect immediately."
       }
     },
     "terms": {

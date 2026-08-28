@@ -41,15 +41,26 @@ test.describe('제품 상세', () => {
     // (launch: offers 없음 / commerce: 화면 가격과 일치)
   });
 
-  test('미확정 스펙은 감추지 않고 "확정 예정" 으로 노출한다', async ({ page }) => {
+  test('아직 확정이 아닌 스펙을 확정처럼 적지 않는다', async ({ page }) => {
     await page.goto('/ko/product');
 
-    // 확정된 값
     await expect(page.locator('.spec')).toContainText('SPF50+ / PA++++');
-    // 미확정 값 — 제형·내수성·용량 세 항목.
-    // `.spec` 안으로 한정합니다. 같은 페이지의 제품 정보 고시 표도 같은 표시를
-    // 쓰기 때문에, 범위를 두지 않으면 두 표의 개수를 합쳐 세게 됩니다.
-    await expect(page.locator('.spec .spec__value--pending')).toHaveCount(3);
+
+    /*
+     * 제품 기획안이 값을 정해 주면서 "확정 예정" 자리가 줄었습니다. 그렇다고
+     * 단정해도 되는 것은 아닙니다 — 공장 처방 선정은 2026년 9~10월이고,
+     * 기능성화장품은 심사·보고가 남아 있습니다. 심사 전에 차단지수를 확정
+     * 사실로 적으면 표시·광고 문제가 됩니다.
+     *
+     * 그래서 검사하는 것은 "확정 예정이 몇 개인가" 가 아니라 **미확정인 것이
+     * 미확정으로 보이는가** 입니다. 차단지수·제형·내수성 세 줄에는 값이 있되
+     * '목표' 꼬리표가 붙어 있어야 합니다.
+     */
+    await expect(page.locator('.spec .spec__target')).toHaveCount(3);
+
+    // 값이 없는 항목은 여전히 감추지 않고 "확정 예정" 으로 드러냅니다.
+    const rows = await page.locator('.spec .spec__row').count();
+    expect(rows, '스펙 줄이 사라지지 않았습니다').toBeGreaterThanOrEqual(8);
   });
 
   test('FAQ 가 접히지 않고 초기 HTML 에 그대로 있다', async ({ request }) => {

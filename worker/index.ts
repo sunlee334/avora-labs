@@ -41,6 +41,7 @@ import {
   publicInquiry,
 } from './inquiries';
 import { canonicalHostRedirect } from './canonical-host';
+import { normalizeEmail, signup, unsubscribe } from './launch-notify';
 import { renderReviewsPage } from './reviews-page';
 import { handleKakaoWebhook } from './auth/kakao-webhook';
 import {
@@ -683,6 +684,47 @@ const INQUIRY_SUBJECT_MAX = 100;
 const INQUIRY_BODY_MIN = 10;
 const INQUIRY_BODY_MAX = 2000;
 
+/**
+ * 출시 알림 신청.
+ *
+ * 실패해도 이유를 자세히 말하지 않습니다. "이미 신청된 주소입니다" 는 그
+ * 주소가 명단에 있는지를 아무에게나 알려 주는 것이라, 남의 주소를 넣어 보며
+ * 명단을 캐낼 수 있습니다. 그래서 성공과 중복은 화면에서 구분되지 않습니다.
+ */
+async function handleLaunchNotify(request: Request, env: Env): Promise<Response> {
+  if (!env.DB) return json({ error: 'NOTIFY_NOT_CONFIGURED' }, 503);
+
+  let body: { email?: unknown; locale?: unknown; source?: unknown };
+  try {
+    body = (await request.json()) as typeof body;
+  } catch {
+    return json({ error: 'INVALID_JSON' }, 400);
+  }
+
+  const email = normalizeEmail(body.email);
+  if (!email) return json({ error: 'INVALID_EMAIL' }, 400);
+
+  const locale = typeof body.locale === 'string' ? body.locale.slice(0, 8) : 'ko';
+  const source = typeof body.source === 'string' ? body.source.slice(0, 32) : null;
+
+  await signup(env.DB, { email, locale, source }, new Date());
+  // 중복이어도 201 입니다 — 신청한 사람 입장에서는 성공했습니다.
+  return json({ ok: true }, 201);
+}
+
+/**
+ * 수신 거부.
+ *
+ * 메일 안의 링크로 들어오므로 GET 입니다. 없는 토큰이어도 성공처럼 응답합니다 —
+ * 토큰을 찍어 보며 어떤 것이 살아 있는지 알아낼 이유를 없앱니다.
+ */
+async function handleLaunchUnsubscribe(request: Request, env: Env): Promise<Response> {
+  if (!env.DB) return json({ error: 'NOTIFY_NOT_CONFIGURED' }, 503);
+  const token = new URL(request.url).searchParams.get('t') ?? '';
+  if (token) await unsubscribe(env.DB, token, new Date());
+  return json({ ok: true });
+}
+
 async function handleInquiryCreate(
   request: Request,
   env: Env,
@@ -1252,6 +1294,14 @@ export default {
     }
     if (pathname === '/api/reviews' && request.method === 'POST') {
       return handleReviewCreate(request, env);
+    }
+
+    // 출시 알림 — 제품이 나오기 전까지 관심을 담아 두는 유일한 자리입니다.
+    if (pathname === '/api/launch-notify' && request.method === 'POST') {
+      return handleLaunchNotify(request, env);
+    }
+    if (pathname === '/api/launch-notify/unsubscribe' && request.method === 'GET') {
+      return handleLaunchUnsubscribe(request, env);
     }
 
     // 문의 — 공개 게시판이 아닙니다. 조회는 본인 확인을 지납니다.

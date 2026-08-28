@@ -181,8 +181,10 @@ test.describe('수집 항목 표가 코드와 어긋나지 않는다', () => {
     // 이름이 아니라 값의 모양으로 찾습니다.
     const rowGroups = Object.keys(collect).filter((key) => Array.isArray(collect[key]));
 
-    // 주문·계정·리뷰·문의 네 갈래가 전부 있어야 합니다.
-    expect(rowGroups.sort()).toEqual(['accountRows', 'inquiryRows', 'reviewRows', 'rows'].sort());
+    // 주문·계정·리뷰·문의·출시알림 다섯 갈래가 전부 있어야 합니다.
+    expect(rowGroups.sort()).toEqual(
+      ['accountRows', 'inquiryRows', 'notifyRows', 'reviewRows', 'rows'].sort(),
+    );
   });
 
   test('문의 수집 항목이 5개 언어에 모두 있다', () => {

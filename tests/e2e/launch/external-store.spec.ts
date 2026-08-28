@@ -31,9 +31,14 @@ test.describe('1차 오픈 상태', () => {
     await expect(page.locator('.cart__notice')).toBeVisible();
   });
 
-  test('가격이 없으면 제품 페이지에 가격 확정 예정으로 표시된다', async ({ page }) => {
+  test('가격이 없으면 가격을 지어내지 않고 할 일을 준다', async ({ page }) => {
+    // 예전에는 이 자리에 눌리지 않는 회색 글자("가격 확정 예정")가 있었습니다.
+    // 제품이 2027년 상반기에 나오는데 그때까지 관심이 생긴 사람이 남길 수
+    // 있는 것이 아무것도 없었습니다. 지금은 출시 시기를 밝히고 알림을 받습니다.
     await page.goto('/ko/product');
-    await expect(page.locator('.product-hero__price')).toContainText('가격 확정 예정');
+    await expect(page.locator('.product-hero__price')).toHaveCount(0);
+    await expect(page.locator('.product-hero__window')).toContainText('2027');
+    await expect(page.locator('[data-launch-notify]')).toBeVisible();
   });
 
   test('장바구니 페이지는 색인되지 않는다', async ({ request }) => {

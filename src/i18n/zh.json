@@ -114,25 +114,43 @@
       "ctaExternal": "前往 Smart Store 购买",
       "ctaCart": "加入购物车",
       "added": "已加入购物车",
-      "viewCart": "查看购物车"
+      "viewCart": "查看购物车",
+      "launchWindow": "预计 2027 年上半年上市",
+      "notify": {
+        "heading": "上市时通知您",
+        "body": "只发两次：众筹开始时，以及正式上市时。",
+        "emailLabel": "电子邮箱",
+        "emailPlaceholder": "you@example.com",
+        "submit": "接收上市通知",
+        "sending": "正在提交…",
+        "done": "已登记。我们会发到这个邮箱。",
+        "invalid": "请再确认一下邮箱地址。",
+        "error": "这次没有提交成功，请稍后再试。",
+        "consent": "我同意接收营销邮件。每封邮件都附有退订链接。"
+      }
     },
     "principles": {
       "kicker": "Product Principles",
       "items": [
         {
-          "term": "Stay",
-          "label": "不易脱妆的持久",
-          "body": "针对汗水与高温设计，力求持久稳固。"
+          "term": "LIGHT",
+          "label": "不厚重的肤感",
+          "body": "以低黏度快速吸收、涂后不留油膜为目标。"
         },
         {
-          "term": "Breathe",
-          "label": "轻盈不厚重",
-          "body": "无泛白的水感凝胶，轻盈渗透，不压迫毛孔。"
+          "term": "COMFORT",
+          "label": "活动中也舒适",
+          "body": "出汗与摩擦下不易脱妆，流入眼睛也不刺痛。"
         },
         {
-          "term": "Pure",
-          "label": "减法的纯粹",
-          "body": "最大限度减少人工香料与色素，趋向无香设计。"
+          "term": "PROTECTION",
+          "label": "抵御阳光与日常",
+          "body": "以 SPF50+ / PA++++ 与持久防水为目标规格。"
+        },
+        {
+          "term": "RESET",
+          "label": "重新整理的感觉",
+          "body": "补涂时不搓泥、不泛白。"
         }
       ]
     },
@@ -143,16 +161,25 @@
         "texture": "质地",
         "waterResistant": "抗水性",
         "volume": "容量",
-        "category": "分类"
+        "category": "分类",
+        "scent": "香味",
+        "tone": "肤色",
+        "area": "使用部位"
       },
       "values": {
         "category": "功能性化妆品（防晒）",
-        "pending": "待确定"
+        "pending": "待确定",
+        "texture": "以有机为主的混合乳液 / 乳霜",
+        "waterResistant": "持久防水 80 分钟",
+        "scent": "无香",
+        "tone": "不提亮肤色 · 不泛白",
+        "area": "面部及颈部",
+        "target": "目标"
       },
       "note": "质地、容量与全成分将在配方确定后更新。"
     },
     "howto": {
-      "kicker": "How to use",
+      "kicker": "一个在移动中的日子",
       "steps": [
         {
           "title": "护肤的最后一步",
@@ -166,6 +193,14 @@
           "title": "每两小时补涂",
           "body": "若大量出汗，请提前补涂。"
         }
+      ],
+      "lead": "涂抹、活动、出汗、遇水，然后再涂一次。",
+      "day": [
+        "SUN",
+        "MOVE",
+        "SWEAT",
+        "WATER",
+        "RESET"
       ]
     },
     "faq": {
@@ -215,7 +250,12 @@
       },
       "pending": "待确定"
     },
-    "backToStory": "返回品牌故事"
+    "backToStory": "返回品牌故事",
+    "standards": {
+      "kicker": "我们的取舍标准",
+      "lead": "不刺激眼睛，不泛白",
+      "body": "达不到这两点的配方，其他条件再好也不会采用。产品尚未面世，我们能承诺的不是完成的规格，而是绝不让步的部分。"
+    }
   },
   "support": {
     "meta": {
@@ -431,7 +471,15 @@
             "purpose": "确认咨询本人",
             "when": "使用订单号咨询时（必填）"
           }
-        ]
+        ],
+        "notifyRows": [
+          {
+            "item": "电子邮箱",
+            "purpose": "上市与众筹开始通知",
+            "when": "登记上市通知时（必填）"
+          }
+        ],
+        "notifyNote": "上市通知属于您已同意接收的营销信息。每封邮件都附有退订链接，点击后立即生效。"
       }
     },
     "terms": {

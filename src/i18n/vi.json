@@ -114,25 +114,43 @@
       "ctaExternal": "Mua tại Smart Store",
       "ctaCart": "Thêm vào giỏ",
       "added": "Đã thêm vào giỏ",
-      "viewCart": "Xem giỏ hàng"
+      "viewCart": "Xem giỏ hàng",
+      "launchWindow": "Dự kiến ra mắt nửa đầu năm 2027",
+      "notify": {
+        "heading": "Chúng tôi sẽ báo khi sản phẩm ra mắt",
+        "body": "Chỉ hai lần: khi mở gọi vốn và khi chính thức ra mắt.",
+        "emailLabel": "Địa chỉ email",
+        "emailPlaceholder": "you@example.com",
+        "submit": "Nhận thông báo ra mắt",
+        "sending": "Đang đăng ký…",
+        "done": "Đã đăng ký. Chúng tôi sẽ gửi tin đến địa chỉ này.",
+        "invalid": "Vui lòng kiểm tra lại địa chỉ email.",
+        "error": "Lần này chưa đăng ký được. Vui lòng thử lại sau giây lát.",
+        "consent": "Tôi đồng ý nhận email quảng cáo. Mỗi email đều có liên kết hủy nhận."
+      }
     },
     "principles": {
       "kicker": "Product Principles",
       "items": [
         {
-          "term": "Stay",
-          "label": "Bền vững không trôi",
-          "body": "Được thiết kế để giữ vững trước mồ hôi và hơi nóng."
+          "term": "LIGHT",
+          "label": "Cảm giác không nặng mặt",
+          "body": "Kết cấu loãng, thẩm thấu nhanh và không để lại màng dầu sau khi thoa."
         },
         {
-          "term": "Breathe",
-          "label": "Nhẹ tênh, không nặng mặt",
-          "body": "Gel dạng nước không để lại vệt trắng, thẩm thấu nhẹ nhàng mà không đè lên lỗ chân lông."
+          "term": "COMFORT",
+          "label": "Da vẫn dễ chịu khi vận động",
+          "body": "Không trôi vì mồ hôi và ma sát, chảy vào mắt cũng không cay."
         },
         {
-          "term": "Pure",
-          "label": "Thuần khiết tối giản",
-          "body": "Giảm tối đa hương liệu và màu nhân tạo, hướng đến công thức không mùi."
+          "term": "PROTECTION",
+          "label": "Trước nắng và trước cả ngày dài",
+          "body": "Đặt mục tiêu SPF50+ / PA++++ cùng khả năng kháng nước lâu."
+        },
+        {
+          "term": "RESET",
+          "label": "Cảm giác được chỉnh lại",
+          "body": "Thoa dặm lại mà không vón và không bị trắng bệch."
         }
       ]
     },
@@ -143,16 +161,25 @@
         "texture": "Kết cấu",
         "waterResistant": "Kháng nước",
         "volume": "Dung tích",
-        "category": "Phân loại"
+        "category": "Phân loại",
+        "scent": "Hương",
+        "tone": "Tông da",
+        "area": "Vùng sử dụng"
       },
       "values": {
         "category": "Mỹ phẩm chức năng (chống tia UV)",
-        "pending": "Sẽ xác nhận"
+        "pending": "Sẽ xác nhận",
+        "texture": "Hybrid thiên hữu cơ, dạng lotion / milk",
+        "waterResistant": "Kháng nước lâu (80 phút)",
+        "scent": "Không hương liệu",
+        "tone": "Không nâng tông · không trắng bệch",
+        "area": "Mặt và cổ",
+        "target": "mục tiêu"
       },
       "note": "Kết cấu, dung tích và bảng thành phần đầy đủ sẽ được cập nhật sau khi công thức được chốt."
     },
     "howto": {
-      "kicker": "How to use",
+      "kicker": "Một ngày của người đang chuyển động",
       "steps": [
         {
           "title": "Bước cuối của quy trình dưỡng da",
@@ -166,6 +193,14 @@
           "title": "Thoa lại mỗi hai giờ",
           "body": "Nếu ra nhiều mồ hôi, hãy thoa lại sớm hơn."
         }
+      ],
+      "lead": "Thoa, vận động, đổ mồ hôi, gặp nước, rồi thoa lại.",
+      "day": [
+        "SUN",
+        "MOVE",
+        "SWEAT",
+        "WATER",
+        "RESET"
       ]
     },
     "faq": {
@@ -215,7 +250,12 @@
       },
       "pending": "Sẽ xác nhận"
     },
-    "backToStory": "Quay lại câu chuyện thương hiệu"
+    "backToStory": "Quay lại câu chuyện thương hiệu",
+    "standards": {
+      "kicker": "Tiêu chí chúng tôi chọn",
+      "lead": "Không cay mắt, không trắng bệch",
+      "body": "Công thức không đạt một trong hai điều này sẽ bị loại, dù những điểm khác có tốt đến đâu. Khi sản phẩm chưa có thật, thứ chúng tôi hứa được không phải là thông số đã hoàn thiện mà là điều chúng tôi không nhân nhượng."
+    }
   },
   "support": {
     "meta": {
@@ -431,7 +471,15 @@
             "purpose": "Xác minh người hỏi",
             "when": "Khi hỏi bằng mã đơn hàng (bắt buộc)"
           }
-        ]
+        ],
+        "notifyRows": [
+          {
+            "item": "Địa chỉ email",
+            "purpose": "Thông báo ra mắt và mở gọi vốn",
+            "when": "Khi đăng ký nhận thông báo ra mắt (bắt buộc)"
+          }
+        ],
+        "notifyNote": "Thông báo ra mắt là email quảng cáo mà bạn đã đồng ý nhận. Mỗi email đều có liên kết hủy nhận, có hiệu lực ngay lập tức."
       }
     },
     "terms": {

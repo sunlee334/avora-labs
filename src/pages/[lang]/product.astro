@@ -14,6 +14,7 @@ import { LOCALES, BUSINESS, type Locale } from '../../config/site';
 import { dict, localePath } from '../../i18n';
 import { breadcrumb, productSchema } from '../../lib/jsonld';
 import productData from '../../data/product.json';
+import LaunchNotify from '../../components/LaunchNotify.astro';
 import { SELLS_DIRECTLY, EXTERNAL_STORE_URL, PRICE, CURRENCY } from '../../config/runtime';
 
 export function getStaticPaths() {
@@ -74,12 +75,23 @@ const priceLabel =
       }).format(PRICE)
     : null;
 
+/*
+ * 스펙.
+ *
+ * 기획안이 값을 정해 준 항목이라도 **아직 확정은 아닙니다.** 공장 처방
+ * 선정은 2026년 9~10월이고, 기능성화장품은 심사·보고 절차가 남아 있습니다.
+ * 심사 전에 차단지수를 확정 사실로 적으면 표시·광고 문제가 됩니다.
+ * 그래서 정해진 값은 보여주되 `target` 인 것은 "목표" 를 달아 둡니다.
+ */
 const specRows = [
-  { key: p.spec.labels.protection, value: productData.spec.protection },
-  { key: p.spec.labels.texture, value: productData.spec.texture },
-  { key: p.spec.labels.waterResistant, value: productData.spec.waterResistant },
-  { key: p.spec.labels.volume, value: productData.spec.volume },
-  { key: p.spec.labels.category, value: p.spec.values.category },
+  { key: p.spec.labels.protection, value: productData.spec.protection, target: true },
+  { key: p.spec.labels.texture, value: p.spec.values.texture, target: true },
+  { key: p.spec.labels.waterResistant, value: p.spec.values.waterResistant, target: true },
+  { key: p.spec.labels.volume, value: productData.spec.volume, target: false },
+  { key: p.spec.labels.scent, value: p.spec.values.scent, target: false },
+  { key: p.spec.labels.tone, value: p.spec.values.tone, target: false },
+  { key: p.spec.labels.area, value: p.spec.values.area, target: false },
+  { key: p.spec.labels.category, value: p.spec.values.category, target: false },
 ];
 ---
 
@@ -118,11 +130,15 @@ const specRows = [
       <div class="rise">
         <p class="kicker">{productData.spf}</p>
         <h1 class="display display--tight">{productData.name}</h1>
+        {
+          /* 언제 나오는지 말하지 않으면 "확정 예정" 이 불확실로 읽힙니다. */
+          !sellsDirectly && !externalUrl && (
+            <p class="product-hero__window">{p.hero.launchWindow}</p>
+          )
+        }
         <p class="body" style="margin-top: 18px">{p.hero.headline}</p>
 
-        <p class="product-hero__price">
-          {priceLabel ?? <small>{p.hero.priceUnknown}</small>}
-        </p>
+        {priceLabel && <p class="product-hero__price">{priceLabel}</p>}
 
         {
           sellsDirectly ? (
@@ -134,16 +150,21 @@ const specRows = [
               {p.hero.ctaExternal}
             </a>
           ) : (
-            <span class="cta cta--ghost" aria-disabled="true">
-              {p.hero.priceUnknown}
-            </span>
+            /*
+             * 팔 수 없는 동안에도 할 일은 있어야 합니다.
+             *
+             * 예전에는 여기에 눌리지 않는 회색 글자("가격 확정 예정")가
+             * 있었습니다. 제품이 2027년 상반기에 나오는데, 그때까지 관심이
+             * 생긴 사람이 남길 수 있는 것이 아무것도 없었습니다.
+             */
+            <LaunchNotify locale={locale} source="product" />
           )
         }
       </div>
     </div>
   </section>
 
-  {/* Stay · Breathe · Pure */}
+  {/* 네 감각 — LIGHT · COMFORT · PROTECTION · RESET */}
   <section class="rise">
     <div class="principles">
       {
@@ -158,6 +179,19 @@ const specRows = [
     </div>
   </section>
 
+  {/*
+    고르는 기준.
+
+    아직 제품이 없습니다. 이럴 때 신뢰를 만드는 것은 완성된 사양이 아니라
+    **무엇을 양보하지 않는가** 입니다. 기획안은 눈 시림과 백탁 두 가지를
+    "미달하면 단가가 낮아도 채택하지 않는다" 고 못 박았습니다.
+  */}
+  <section class="section wrap rise">
+    <p class="kicker">{p.standards.kicker}</p>
+    <p class="display display--tight standards__lead">{p.standards.lead}</p>
+    <p class="body" style="margin-top: 18px">{p.standards.body}</p>
+  </section>
+
   {/* 스펙 */}
   <section class="section wrap rise">
     <p class="kicker">{p.spec.kicker}</p>
@@ -168,6 +202,9 @@ const specRows = [
             <p class="spec__key">{row.key}</p>
             <p class={`spec__value${row.value ? '' : ' spec__value--pending'}`}>
               {row.value ?? p.spec.values.pending}
+              {row.value && row.target && (
+                <span class="spec__target">{p.spec.values.target}</span>
+              )}
             </p>
           </div>
         ))
@@ -176,9 +213,13 @@ const specRows = [
     <p class="spec__note">{p.spec.note}</p>
   </section>
 
-  {/* 사용법 */}
+  {/* 움직이는 사람의 하루 — 사용법이 곧 브랜드 서사입니다 */}
   <section class="section section--alt wrap rise">
     <p class="kicker">{p.howto.kicker}</p>
+    <p class="body" style="margin-top: 10px">{p.howto.lead}</p>
+    <ol class="day" aria-label={p.howto.kicker}>
+      {p.howto.day.map((label) => <li>{label}</li>)}
+    </ol>
     <ol class="steps">
       {
         p.howto.steps.map((step) => (
@@ -300,6 +341,10 @@ const specRows = [
 
 <script>
   import { add } from '../../lib/cart';
+  import { mountLaunchNotify } from '../../lib/launch-notify';
+
+  // 팔 수 없는 동안에만 화면에 있습니다. 없으면 조용히 넘어갑니다.
+  mountLaunchNotify();
 
   const button = document.querySelector<HTMLButtonElement>('[data-add-to-cart]');
   const toast = document.querySelector<HTMLElement>('[data-toast]');

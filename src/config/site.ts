@@ -53,9 +53,10 @@ export const KEEP_ORIGINAL = [
   'AVORA',
   'For every movement.',
   'MOVE. SWEAT. REAPPLY.',
-  'Stay',
-  'Breathe',
-  'Pure',
+  'LIGHT',
+  'COMFORT',
+  'PROTECTION',
+  'RESET',
   'ACTIVE LIFESTYLE BEAUTY',
   'SPF50+ / PA++++',
 ] as const;

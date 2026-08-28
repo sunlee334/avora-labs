@@ -1,0 +1,74 @@
+---
+/**
+ * 출시 알림 신청.
+ *
+ * ── 왜 여기에 있는가 ────────────────────────────────────────
+ * 제품이 2027년 상반기에 나옵니다. 그때까지 제품 페이지에는 "확정 예정" 이
+ * 열네 곳 있고, 히어로의 버튼은 눌리지 않는 회색 글자였습니다. 관심이 생긴
+ * 사람이 할 수 있는 일이 **아무것도 없었습니다.**
+ *
+ * 제품 기획안은 이것을 핵심이라고 부릅니다 — 펀딩 오픈 전에 모은 명단이
+ * 초반 달성률을 좌우하고, 그 명단은 플랫폼이 아니라 우리 쪽에 남습니다.
+ *
+ * ── 동의를 화면에 적습니다 ──────────────────────────────────
+ * 광고성 정보를 보내려면 동의가 필요하고, 동의는 "제출 버튼을 눌렀으니
+ * 동의한 것" 으로 갈음할 수 없습니다. 그래서 무엇에 동의하는지와 어떻게
+ * 해지하는지를 버튼 옆에 적습니다. 서버는 그 시각을 행에 남깁니다
+ * (migrations/0007_launch_notify.sql).
+ *
+ * ── 마크업만 있습니다 ───────────────────────────────────────
+ * 동작은 `src/lib/launch-notify.ts`, 문구는 `data-copy` 로 넘깁니다 —
+ * 문의 섹션과 같은 방식이라 스크립트가 5개 언어 사전을 안고 갈 필요가
+ * 없습니다.
+ */
+import type { Locale } from '../config/site';
+import { dict } from '../i18n';
+
+interface Props {
+  locale: Locale;
+  /** 어느 화면에서 신청했는지 기록합니다 — 어디가 명단을 만드는지 알아야 합니다. */
+  source: string;
+}
+
+const { locale, source } = Astro.props;
+const n = dict(locale).product.hero.notify;
+---
+
+<form
+  class="notify"
+  data-launch-notify
+  data-locale={locale}
+  data-source={source}
+  novalidate
+  data-copy={JSON.stringify({
+    sending: n.sending,
+    done: n.done,
+    invalid: n.invalid,
+    error: n.error,
+    submit: n.submit,
+  })}
+>
+  <p class="notify__heading">{n.heading}</p>
+  <p class="notify__body">{n.body}</p>
+
+  <div class="notify__row">
+    <label class="notify__field">
+      <span class="field__label--visually-hidden">{n.emailLabel}</span>
+      <input
+        type="email"
+        name="email"
+        required
+        autocomplete="email"
+        enterkeyhint="send"
+        placeholder={n.emailPlaceholder}
+        aria-label={n.emailLabel}
+      />
+    </label>
+    <button class="cta" type="submit" data-notify-submit>{n.submit}</button>
+  </div>
+
+  {/* 결과는 폼 위가 아니라 아래에 둡니다 — 제출 버튼을 누른 손가락 근처입니다. */}
+  <p class="notify__state" data-notify-state role="status" aria-live="polite" hidden></p>
+
+  <p class="notify__consent">{n.consent}</p>
+</form>
