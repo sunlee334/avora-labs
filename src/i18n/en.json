@@ -25,7 +25,11 @@
     "done": "You're on the list. We'll write to this address.",
     "invalid": "Please check the email address.",
     "error": "That didn't go through. Please try again in a moment.",
-    "consent": "I agree to receive marketing email. Every message carries an unsubscribe link."
+    "consent": "I agree to receive marketing email. Every message carries an unsubscribe link.",
+    "privacy": {
+      "summary": "We ask for your email address and nothing else. It is used only to tell you when the funding opens and when the product launches. Unsubscribe and you are removed from the send list immediately; the address itself is kept so we do not write to you again.",
+      "link": "Read the privacy policy"
+    }
   },
   "home": {
     "meta": {
@@ -54,23 +58,23 @@
       "steps": [
         {
           "word": "Sun",
-          "body": "The first application in morning light"
+          "body": "The first layer, under morning light"
+        },
+        {
+          "word": "Move",
+          "body": "A finish that does not get in the way"
         },
         {
           "word": "Sweat",
-          "body": "Holding through heat and perspiration"
+          "body": "Holding through sweat and heat"
         },
         {
           "word": "Water",
-          "body": "Staying put when water hits"
+          "body": "Staying put after contact with water"
         },
         {
-          "word": "Movement",
-          "body": "A finish that never gets in the way"
-        },
-        {
-          "word": "Reapply",
-          "body": "Reapplying without it being a chore"
+          "word": "Reset",
+          "body": "Reapplied, and settled again"
         }
       ]
     },
@@ -432,6 +436,9 @@
   "footer": {
     "tagline": "For every movement.",
     "language": "Language",
+    "social": {
+      "heading": "Follow"
+    },
     "legal": {
       "privacy": "Privacy Policy",
       "terms": "Terms of Service",
@@ -534,6 +541,10 @@
           }
         ],
         "notifyNote": "Launch alerts are marketing email you opted into. Every message carries an unsubscribe link that takes effect immediately."
+      },
+      "analytics": {
+        "heading": "Traffic measurement",
+        "body": "We count how often each page is opened using Cloudflare Web Analytics. It sets no cookies, stores nothing in your browser, and does not identify you as an individual or follow you across other sites. That is why we do not ask for consent. While the tool is switched off, the script is not served at all."
       }
     },
     "terms": {

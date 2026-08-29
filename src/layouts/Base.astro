@@ -5,7 +5,14 @@
 import '../styles/global.css';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
-import { ORIGIN, LOCALE_TAGS, DEFAULT_LOCALE, BUSINESS, type Locale } from '../config/site';
+import {
+  ORIGIN,
+  LOCALE_TAGS,
+  DEFAULT_LOCALE,
+  BUSINESS,
+  WEB_ANALYTICS_TOKEN,
+  type Locale,
+} from '../config/site';
 import { dict, alternates, localePath } from '../i18n';
 // 모바일 브라우저의 주소창 색입니다. 브랜드 색이므로 토큰에서 읽습니다 —
 // 여기 값을 베껴 적으면 팔레트가 바뀔 때 이 한 줄만 옛 색으로 남습니다.
@@ -111,7 +118,16 @@ const xDefault = !wanted || wanted.includes(DEFAULT_LOCALE)
 
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png" />
-    <meta name="theme-color" content={tokens.color.brand.primary.value} />
+    {/*
+      브라우저 상단바 색. 사이트가 아니라 **브라우저 크롬** 을 칠하는 값이라
+      본문 대비 규칙이 걸리지 않습니다. 그래서 화면 어디에도 글자색으로는 쓸 수
+      없는 Mist Blue(오프 화이트 위 1.62:1)를 여기서는 쓸 수 있습니다.
+
+      브랜딩 문서가 값까지 지정한 Core Color 는 Mist Blue 하나뿐이고, 패키지도
+      그 색입니다. 페이지를 열 때 가장 먼저 보이는 면을 브랜드 색으로 두어
+      웹과 제품의 첫인상을 맞춥니다.
+    */}
+    <meta name="theme-color" content={tokens.color.brand.surfaceAlt.value} />
 
     {/*
       폰트는 언어별 서브셋입니다. 이 페이지 언어에 실제로 쓰이는 글자만 담겨 있어
@@ -130,6 +146,38 @@ const xDefault = !wanted || wanted.includes(DEFAULT_LOCALE)
           set:html={JSON.stringify(schema)}
         />
       ))
+    }
+
+    {/*
+      Cloudflare Web Analytics.
+
+      ── 왜 지금 넣는가 ─────────────────────────────────────────
+      계측은 소급되지 않습니다. 2027년 1월까지 알림 신청 500명을 모으는 것이
+      목표인데, 지금 심지 않으면 그 넉 달이 통째로 빈 채로 지나갑니다.
+
+      ── 왜 쿠키 동의 배너가 없는가 ─────────────────────────────
+      이 도구는 쿠키도 로컬 저장소도 쓰지 않고 개인을 식별하지 않습니다.
+      그래서 사전 동의 대상이 아닙니다. 쿠키를 쓰는 도구로 바꾸는 순간
+      배너와 개인정보처리방침이 함께 필요해집니다 — 도구를 바꿀 때
+      이 주석을 먼저 보세요.
+
+      ── 왜 조건부인가 ──────────────────────────────────────────
+      토큰이 없으면 스크립트 자체가 나가지 않습니다. 처리방침에는
+      "측정 도구를 씁니다" 라고 적혀 있는데 실제로는 아무것도 수집하지 않는
+      상태가 되지 않도록, 켜짐 여부를 한 값이 정하게 두었습니다.
+
+      is:inline 인 이유: Astro 가 번들에 넣으면 외부 스크립트가 아니게 되어
+      beacon 이 자기 토큰을 읽지 못합니다.
+    */}
+    {
+      WEB_ANALYTICS_TOKEN && (
+        <script
+          is:inline
+          type="module"
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon={JSON.stringify({ token: WEB_ANALYTICS_TOKEN, spa: false })}
+        />
+      )
     }
   </head>
 

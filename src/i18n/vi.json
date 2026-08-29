@@ -25,7 +25,11 @@
     "done": "Đã đăng ký. Chúng tôi sẽ gửi tin đến địa chỉ này.",
     "invalid": "Vui lòng kiểm tra lại địa chỉ email.",
     "error": "Lần này chưa đăng ký được. Vui lòng thử lại sau giây lát.",
-    "consent": "Tôi đồng ý nhận email quảng cáo. Mỗi email đều có liên kết hủy nhận."
+    "consent": "Tôi đồng ý nhận email quảng cáo. Mỗi email đều có liên kết hủy nhận.",
+    "privacy": {
+      "summary": "Chúng tôi chỉ xin địa chỉ email, và chỉ dùng để báo ngày mở gọi vốn và ngày ra mắt sản phẩm. Khi bạn hủy nhận tin, bạn được loại khỏi danh sách gửi ngay lập tức; địa chỉ được giữ lại chỉ để chúng tôi không gửi lại lần nữa.",
+      "link": "Xem chính sách quyền riêng tư"
+    }
   },
   "home": {
     "meta": {
@@ -54,7 +58,11 @@
       "steps": [
         {
           "word": "Sun",
-          "body": "Lần thoa đầu tiên dưới nắng sớm"
+          "body": "Lớp đầu tiên dưới nắng sớm"
+        },
+        {
+          "word": "Move",
+          "body": "Lớp finish không cản trở chuyển động"
         },
         {
           "word": "Sweat",
@@ -62,15 +70,11 @@
         },
         {
           "word": "Water",
-          "body": "Vẫn bám khi gặp nước"
+          "body": "Vẫn bám sau khi tiếp xúc với nước"
         },
         {
-          "word": "Movement",
-          "body": "Kết thúc nhẹ tênh, không cản trở chuyển động"
-        },
-        {
-          "word": "Reapply",
-          "body": "Thoa lại mà không thấy phiền"
+          "word": "Reset",
+          "body": "Thoa lại, và chỉnh lại từ đầu"
         }
       ]
     },
@@ -432,6 +436,9 @@
   "footer": {
     "tagline": "For every movement.",
     "language": "Ngôn ngữ",
+    "social": {
+      "heading": "Theo dõi"
+    },
     "legal": {
       "privacy": "Chính sách bảo mật",
       "terms": "Điều khoản dịch vụ",
@@ -534,6 +541,10 @@
           }
         ],
         "notifyNote": "Thông báo ra mắt là email quảng cáo mà bạn đã đồng ý nhận. Mỗi email đều có liên kết hủy nhận, có hiệu lực ngay lập tức."
+      },
+      "analytics": {
+        "heading": "Đo lượt truy cập",
+        "body": "Chúng tôi dùng Cloudflare Web Analytics để đếm mỗi trang được mở bao nhiêu lần. Công cụ này không tạo cookie, không lưu gì trong trình duyệt của bạn, và không nhận dạng bạn như một cá nhân hay theo dõi bạn qua các trang khác. Vì vậy chúng tôi không xin đồng ý riêng. Khi công cụ chưa được bật, tập lệnh này hoàn toàn không được gửi đi."
       }
     },
     "terms": {

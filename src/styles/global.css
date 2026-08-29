@@ -2700,6 +2700,43 @@ button {
   line-height: 1.6;
   color: var(--brand-muted);
 }
+/*
+ * 수집 항목 안내는 동의 문구보다 한 단 더 작고 옅게 둡니다. 둘 다 같은 무게면
+ * 폼 아래가 회색 글씨 벽이 되어 어느 쪽도 읽히지 않습니다.
+ */
+.notify__privacy {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--brand-muted);
+}
+.notify__privacy--link {
+  margin-top: 0;
+}
+.notify__privacy a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--size-tap-min);
+  padding-inline: 2px;
+  color: inherit;
+  /* 옅은 글씨에서 밑줄까지 빼면 링크인지 알 수 없습니다. */
+  text-underline-offset: 2px;
+}
+
+/*
+ * 계정 이름은 채널 이름보다 덜 중요합니다 — 같은 줄에서 한 단 내립니다.
+ *
+ * 푸터는 차콜 지반입니다. 여기서 muted(Slate)를 쓰면 읽을 수 없습니다 —
+ * 토큰 파일이 그렇게 적어 두었는데도 한 번 그대로 밟았고, axe 가 잡았습니다.
+ * 어두운 면 위 보조 텍스트는 mutedOnDark 입니다(차콜 위 7.15:1).
+ */
+.footer__handle {
+  /* 부모(.footer__col li a)가 flex 라 사이의 공백 텍스트 노드가 버려집니다 —
+     그대로 두면 "Instagram@avora_labs" 로 붙어 나옵니다. */
+  margin-inline-start: 6px;
+  color: var(--brand-muted-on-dark);
+}
+
 /* 라벨은 placeholder 와 겹쳐 보이지만, 화면 낭독기에는 남아 있어야 합니다. */
 .field__label--visually-hidden {
   position: absolute;

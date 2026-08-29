@@ -7,7 +7,7 @@
  * 원칙: 확정되지 않은 값은 넣지 않습니다. 가격이 없는데 offers 를 만들어
  * 0원이나 빈 문자열을 넣으면 검색엔진에 잘못된 사실을 주게 됩니다.
  */
-import { ORIGIN, absoluteUrl, BUSINESS, type Locale } from '../config/site';
+import { ORIGIN, absoluteUrl, BUSINESS, SOCIAL, type Locale } from '../config/site';
 import { localePath } from '../i18n';
 import { PRICE, CURRENCY } from '../config/runtime';
 import product from '../data/product.json';
@@ -25,6 +25,14 @@ export function organization() {
     url: ORIGIN,
     logo: absoluteUrl('/brand/avora-wordmark-forest.svg'),
     slogan: 'We create brands for people in motion.',
+
+    /*
+     * sameAs — "이 사이트와 이 계정은 같은 주체" 라는 선언입니다.
+     * 브랜드명을 검색했을 때 사이트와 인스타그램이 따로 흩어지지 않고 한
+     * 덩어리로 묶이게 하는 신호이고, 답변엔진이 계정을 인용할 근거이기도
+     * 합니다. 계정이 비어 있으면 항목 자체를 넣지 않습니다.
+     */
+    ...(SOCIAL.instagramUrl ? { sameAs: [SOCIAL.instagramUrl] } : {}),
     description:
       'AVORA LABS creates brands for people in motion. Its first brand is PAROS, an active lifestyle beauty brand named after the Aegean island, positioned as ACTIVE LIFESTYLE BEAUTY rather than sports beauty.',
 

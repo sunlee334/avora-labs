@@ -109,3 +109,38 @@ export const BUSINESS = {
   // 만들어 이 주소로 넘기면, 여기 한 줄만 바꾸면 됩니다.
   email: 'hello.avoralabs@gmail.com',
 } as const;
+
+/**
+ * 브랜드 계정. 푸터 링크와 Organization JSON-LD 의 `sameAs` 가 여기서 나옵니다.
+ *
+ * **비어 있으면 링크도 JSON-LD 항목도 나오지 않습니다.** BUSINESS 와 같은 규칙입니다 —
+ * 없는 계정을 가리키는 링크는 없는 것보다 나쁩니다.
+ *
+ * `sameAs` 를 함께 내는 이유: 검색엔진과 답변엔진이 "이 사이트"와 "이 인스타
+ * 계정"이 같은 주체라는 것을 알아야, 브랜드명을 검색했을 때 둘이 한 덩어리로
+ * 묶입니다. 푸터 링크만으로는 그 연결이 확실하지 않습니다.
+ */
+export const SOCIAL = {
+  /** @avora_labs — 표시용 이름. `@` 를 포함해 적습니다. */
+  instagramHandle: '@avora_labs',
+  instagramUrl: 'https://www.instagram.com/avora_labs/',
+} as const;
+
+/**
+ * Cloudflare Web Analytics 사이트 토큰.
+ *
+ * **값이 없으면 계측 스크립트를 아예 넣지 않습니다.** 그래서 이 파일에 토큰을
+ * 넣기 전까지 사이트는 방문자에 대해 아무것도 수집하지 않습니다 — 개인정보
+ * 처리방침에 적힌 내용과 실제 동작이 어긋나지 않게 하려는 것입니다.
+ *
+ * 토큰 받는 곳: Cloudflare 대시보드 → Analytics & Logs → Web Analytics →
+ * avoralabs.co → Manage site → JS snippet 의 `token` 값(32자리 16진수).
+ *
+ * 이 값은 비밀이 아닙니다. 어차피 모든 방문자의 HTML 에 그대로 실려 나가므로
+ * 환경변수가 아니라 저장소에 둡니다 — 그래야 무엇이 켜져 있는지가 코드에 남습니다.
+ *
+ * 쿠키를 쓰지 않는 도구라 동의 배너가 필요 없습니다. 개인정보처리방침의
+ * `legal.privacy.analytics` 항목이 이 도구를 설명합니다. 다른 도구로 바꾸면
+ * 그 문구도 함께 고쳐야 합니다.
+ */
+export const WEB_ANALYTICS_TOKEN = '';

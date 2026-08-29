@@ -110,6 +110,16 @@ const rows = [
     )}
     <p class="body" style="margin-top: 14px">{c.retention}</p>
 
+    {/*
+      측정 도구는 "수집 항목" 표에 넣지 않았습니다. 표는 손님이 **직접 입력한**
+      것을 다루는데, 이쪽은 입력 없이 화면을 여는 것만으로 생기는 일이라
+      성격이 다릅니다. 표 안에 섞으면 "내가 언제 이걸 냈지" 가 됩니다.
+    */}
+    <h2 class="display display--tight" style="margin-top: 44px">
+      {t.legal.privacy.analytics.heading}
+    </h2>
+    <p class="body" style="margin-top: 14px">{t.legal.privacy.analytics.body}</p>
+
     <p class="cart__notice" style="margin-top: 36px">{c.pending}</p>
   </section>
 </Base>

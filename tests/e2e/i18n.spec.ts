@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import ko from '../../src/i18n/ko.json' with { type: 'json' };
 
 const LOCALES = ['ko', 'en', 'zh', 'th', 'vi'] as const;
 const LANG_TAGS: Record<string, string> = {
@@ -32,9 +33,17 @@ test.describe('언어별 페이지', () => {
 
       expect(html).toContain('For every movement.');
       expect(html).toContain('MOVE. SWEAT. REAPPLY.');
-      // 여정 5단계가 전부 마크업에 있어야 합니다.
-      for (const word of ['Sun', 'Sweat', 'Water', 'Movement', 'Reapply']) {
-        expect(html).toContain(word);
+      /*
+       * 여정 5단계가 전부 마크업에 있어야 합니다.
+       *
+       * 단어를 여기 베껴 적지 않습니다 — 예전에는 옛 순서(Movement·Reapply)가
+       * 박혀 있어서, 기획안대로 여정을 고치자 **고친 쪽이 맞는데도** 이 검사가
+       * 깨졌습니다. 잡아야 할 것(본문이 초기 HTML 에 없는 것)과 구분이 안 됩니다.
+       *
+       * 여정 단어는 5개 언어가 공유하는 브랜드 코드라 ko 하나에서 읽습니다.
+       */
+      for (const step of ko.home.journey.steps) {
+        expect(html, `${locale} 에 ${step.word} 가 없습니다`).toContain(step.word);
       }
     });
   }
