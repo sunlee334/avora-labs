@@ -88,7 +88,7 @@
     //
     // 사람이 늘면 여기에 이메일을 추가하고 배포하세요. 대시보드 정책도
     // 함께 넓혀야 합니다 — 둘 다 통과해야 들어옵니다.
-    "ADMIN_ALLOWED_EMAILS": "sunlee334@gmail.com,hello.avoralabs@gmail.com"
+    "ADMIN_ALLOWED_EMAILS": "sunlee334@gmail.com,hello.avoralabs@gmail.com,soohong10@gmail.com"
   },
 
   "observability": {
@@ -98,6 +98,25 @@
   // 주문 저장소. 배송지·연락처가 여기 들어가므로 개인정보 보관 정책이 필요합니다.
   // 최초 1회: wrangler d1 create avora-orders  → 나온 database_id 를 아래에 넣고
   //           wrangler d1 migrations apply avora-orders --remote
+  /*
+   * 공개 쓰기 엔드포인트의 속도 제한.
+   *
+   * 로그인 없이 행을 만들 수 있는 자리가 넷입니다 — 주문·후기·문의·출시 알림.
+   * 그중 출시 알림이 가장 아픕니다: 그 명단의 값어치는 "진짜 사람" 하나이고,
+   * 그 숫자가 펀딩 초반 달성률을 좌우합니다. 아무 방어가 없을 때 로컬에서
+   * 초당 245건이 들어갔습니다.
+   *
+   * period 는 10 또는 60 만 됩니다. colo 단위로 세고 최종 일관성이라 정확한
+   * 회계가 아니라 **홍수를 막는 문턱** 입니다 — 그 용도에는 충분합니다.
+   */
+  "ratelimits": [
+    {
+      "name": "WRITE_LIMITER",
+      "namespace_id": "1001",
+      "simple": { "limit": 20, "period": 60 }
+    }
+  ],
+
   "d1_databases": [
     {
       "binding": "DB",

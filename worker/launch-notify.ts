@@ -118,3 +118,111 @@ export async function activeCount(db: D1Database): Promise<number> {
     .first<{ n: number }>();
   return row?.n ?? 0;
 }
+
+export interface NotifyRow {
+  id: string;
+  email: string;
+  locale: string;
+  source: string | null;
+  createdAt: string;
+  consentedAt: string;
+  unsubscribedAt: string | null;
+}
+
+/**
+ * 관리 화면에 뿌릴 명단 한 쪽.
+ *
+ * 수신거부한 사람도 함께 돌려줍니다 — 명단에서 지우면 "몇 명이 나갔는가" 를
+ * 볼 수 없고, 그 숫자가 문구를 고칠지 말지를 정합니다. 대신 화면이 구분해
+ * 표시하고, 실제 발송은 unsubscribed_at 이 비어 있는 행만 씁니다.
+ */
+export async function listSignups(
+  db: D1Database,
+  options: { limit: number; offset: number; source?: string; active?: boolean },
+): Promise<{ rows: NotifyRow[]; matched: number; total: number; active: number }> {
+  const where: string[] = [];
+  const args: unknown[] = [];
+  if (options.source) {
+    where.push('source = ?');
+    args.push(options.source);
+  }
+  if (options.active !== undefined) {
+    where.push(options.active ? 'unsubscribed_at IS NULL' : 'unsubscribed_at IS NOT NULL');
+  }
+  const clause = where.length ? `WHERE ${where.join(' AND ')}` : '';
+
+  /*
+   * 세 숫자가 각각 다른 것을 셉니다. 하나로 뭉치면 화면이 거짓말을 합니다 —
+   * 예전에는 필터를 건 목록 옆에 필터를 무시한 "수신 중" 이 나란히 놓여서
+   * "수신 중 120 · 전체 5" 같은 문장이 나왔습니다.
+   *   matched — 지금 조건에 맞는 수. 쪽 나누기가 쓰는 값입니다.
+   *   total   — 조건과 무관한 명단 전체.
+   *   active  — 그중 수신 거부하지 않은 사람.
+   */
+  const matchedRow = await db
+    .prepare(`SELECT COUNT(*) AS n FROM launch_notify ${clause}`)
+    .bind(...args)
+    .first<{ n: number }>();
+
+  const totalRow = await db
+    .prepare('SELECT COUNT(*) AS n FROM launch_notify')
+    .first<{ n: number }>();
+
+  const { results } = await db
+    .prepare(
+      `SELECT id, email, locale, source, created_at, consented_at, unsubscribed_at
+         FROM launch_notify ${clause}
+        ORDER BY created_at DESC
+        LIMIT ? OFFSET ?`,
+    )
+    .bind(...args, options.limit, options.offset)
+    .all<Record<string, unknown>>();
+
+  return {
+    rows: (results ?? []).map((r) => ({
+      id: String(r.id),
+      email: String(r.email),
+      locale: String(r.locale),
+      source: r.source === null ? null : String(r.source),
+      createdAt: String(r.created_at),
+      consentedAt: String(r.consented_at),
+      unsubscribedAt: r.unsubscribed_at === null ? null : String(r.unsubscribed_at),
+    })),
+    matched: matchedRow?.n ?? 0,
+    total: totalRow?.n ?? 0,
+    active: await activeCount(db),
+  };
+}
+
+/**
+ * 어느 화면이 명단을 만들고 있는가.
+ *
+ * 홈 첫 화면·홈 끝·제품 페이지 중 어디가 실제로 도는지 모르면 다음에 무엇을
+ * 고칠지 고를 수 없습니다. 그래서 목록과 별개로 이 집계를 함께 냅니다.
+ */
+export async function signupsBySource(
+  db: D1Database,
+): Promise<Array<{ source: string | null; n: number }>> {
+  /*
+   * LIMIT 이 반드시 있어야 합니다. source 는 손님이 보내는 값이고 32자까지
+   * 무엇이든 됩니다 — 신청마다 다른 값을 넣으면 묶음 수가 행 수만큼 늘어나고,
+   * 그러면 이 배열이 목록을 부를 때마다 통째로 따라 나옵니다. 화면도 요약
+   * 타일을 그 수만큼 그립니다. 우리가 심어 둔 자리는 셋뿐이라 20이면 넉넉하고,
+   * 넘치는 꼬리는 어차피 볼 값이 아닙니다.
+   */
+  const { results } = await db
+    .prepare(
+      `SELECT source, COUNT(*) AS n
+         FROM launch_notify
+        WHERE unsubscribed_at IS NULL
+        GROUP BY source
+        ORDER BY n DESC
+        LIMIT 20`,
+    )
+    .all<Record<string, unknown>>();
+
+  return (results ?? []).map((r) => ({
+    source: r.source === null ? null : String(r.source),
+    n: Number(r.n),
+  }));
+}

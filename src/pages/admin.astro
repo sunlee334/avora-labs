@@ -53,6 +53,10 @@ const FULFILLMENT_LABEL: Record<string, string> = {
           문의<span class="tabs__count" data-inq-badge hidden></span>
         </button>
         <button type="button" data-tab="reviews">후기</button>
+        <button type="button" data-tab="signups">
+          출시 알림<span class="tabs__count" data-su-badge hidden></span>
+        </button>
+        <button type="button" data-tab="users">회원</button>
       </nav>
       <div class="bar__right">
         <span class="who" data-who></span>
@@ -216,6 +220,96 @@ const FULFILLMENT_LABEL: Record<string, string> = {
           <button type="button" data-rv-next>다음</button>
         </nav>
       </div>
+
+      {/*
+        출시 알림 명단.
+
+        출시 전인 지금 이 화면이 보는 유일한 "사람 명단" 입니다. 유입 화면별
+        집계를 표 위에 두는 이유는, 어디가 명단을 만드는지 모르면 다음에
+        무엇을 고칠지 고를 수 없기 때문입니다.
+      */}
+      <div data-panel="signups" hidden>
+        <dl class="summary" data-su-summary aria-label="명단 요약"></dl>
+
+        <form class="filters" data-su-filters>
+          <label class="sr-only" for="su-source">유입 화면</label>
+          <select id="su-source" name="source">
+            <option value="" selected>전체 화면</option>
+            <option value="home-hero">홈 첫 화면</option>
+            <option value="home-end">홈 끝</option>
+            <option value="product">제품 페이지</option>
+          </select>
+          <label class="sr-only" for="su-state">상태</label>
+          <select id="su-state" name="state">
+            <option value="" selected>전체</option>
+            <option value="active">수신 중</option>
+            <option value="unsubscribed">수신 거부</option>
+          </select>
+          <button type="submit">보기</button>
+        </form>
+
+        <p class="state" data-su-state>불러오는 중…</p>
+
+        <div class="tableWrap" data-su-table-wrap hidden>
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">이메일</th>
+                <th scope="col">언어</th>
+                <th scope="col">유입 화면</th>
+                <th scope="col">신청</th>
+                <th scope="col">상태</th>
+              </tr>
+            </thead>
+            <tbody data-su-rows></tbody>
+          </table>
+        </div>
+
+        <nav class="pager" data-su-pager hidden aria-label="명단 페이지">
+          <button type="button" data-su-prev>이전</button>
+          <span data-su-page-info></span>
+          <button type="button" data-su-next>다음</button>
+        </nav>
+      </div>
+
+      {/*
+        가입 회원.
+
+        출시 전이라 지금은 거의 비어 있습니다. 출시 후에는 이쪽이 주 명단입니다.
+      */}
+      <div data-panel="users" hidden>
+        <form class="filters" data-us-filters>
+          <label class="filters__search">
+            <span class="sr-only">이메일 또는 이름</span>
+            <input type="search" name="q" placeholder="이메일 또는 이름" autocomplete="off" />
+          </label>
+          <button type="submit">찾기</button>
+        </form>
+
+        <p class="state" data-us-state>불러오는 중…</p>
+
+        <div class="tableWrap" data-us-table-wrap hidden>
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">이메일</th>
+                <th scope="col">이름</th>
+                <th scope="col">로그인 수단</th>
+                <th scope="col">주문</th>
+                <th scope="col">배송지</th>
+                <th scope="col">가입</th>
+              </tr>
+            </thead>
+            <tbody data-us-rows></tbody>
+          </table>
+        </div>
+
+        <nav class="pager" data-us-pager hidden aria-label="회원 페이지">
+          <button type="button" data-us-prev>이전</button>
+          <span data-us-page-info></span>
+          <button type="button" data-us-next>다음</button>
+        </nav>
+      </div>
     </main>
 
     {/* 후기 상세 — 행을 누르면 열립니다 */}
@@ -373,6 +467,8 @@ const FULFILLMENT_LABEL: Record<string, string> = {
 
       .admin .bar {
         display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        /* 탭이 다섯입니다 — 좁은 화면에서는 줄을 바꿔야 헤더가 옆으로 밀지 않습니다. */
+        flex-wrap: wrap;
         padding: 14px 20px;
         background: var(--brand-primary); color: var(--brand-surface-alt);
         position: sticky; top: 0; z-index: 5;
@@ -385,6 +481,19 @@ const FULFILLMENT_LABEL: Record<string, string> = {
         display: flex;
         gap: 4px;
         margin-inline-start: 20px;
+        /*
+         * 탭이 다 안 들어가면 **탭 줄 안에서만** 옆으로 밉니다.
+         * min-width:0 이 없으면 flex 항목이 내용만큼 벌어져서, 넘치는 쪽이
+         * 여기가 아니라 문서 전체가 됩니다.
+         */
+        min-width: 0;
+        overflow-x: auto;
+      }
+      .admin .tabs button { flex: 0 0 auto; white-space: nowrap; }
+
+      /* 좁은 화면에서는 탭이 제 줄을 통째로 씁니다. */
+      @media (max-width: 640px) {
+        .admin .tabs { order: 3; flex-basis: 100%; margin-inline-start: 0; }
       }
       .admin .tabs button {
         padding: 8px 14px;
@@ -818,9 +927,12 @@ const FULFILLMENT_LABEL: Record<string, string> = {
 
       $('[data-detail-close]').addEventListener('click', () => detail.close());
       $('[data-refresh]').addEventListener('click', () => {
-        // 지금 보고 있는 탭을 다시 부릅니다. 늘 주문만 부르면 문의 탭에서
+        // 지금 보고 있는 탭을 다시 부릅니다. 늘 주문만 부르면 다른 탭에서
         // 새로고침이 아무 일도 안 하는 것처럼 보입니다.
         if (activeTab === 'inquiries') loadInquiries();
+        else if (activeTab === 'reviews') loadReviews();
+        else if (activeTab === 'signups') loadSignups();
+        else if (activeTab === 'users') loadUsers();
         else load();
       });
       filters.addEventListener('submit', (event) => { event.preventDefault(); page = 0; load(); });
@@ -1006,7 +1118,7 @@ const FULFILLMENT_LABEL: Record<string, string> = {
       /* ── 탭 ─────────────────────────────────────────────────
        * 새로고침 버튼이 지금 보고 있는 탭을 다시 불러야 합니다.
        */
-      let activeTab: 'orders' | 'inquiries' = 'orders';
+      let activeTab: 'orders' | 'inquiries' | 'reviews' | 'signups' | 'users' = 'orders';
 
       /* ── 후기 ─────────────────────────────────────────────
          DOM 은 전부 createElement + textContent 로 만듭니다. 후기 본문은
@@ -1152,7 +1264,241 @@ const FULFILLMENT_LABEL: Record<string, string> = {
         void loadReviews();
       });
 
-      function showTab(name: 'orders' | 'inquiries' | 'reviews') {
+      /* ── 출시 알림 명단 ─────────────────────────────────────────── */
+
+      const SU_PAGE = 20;
+      let suOffset = 0;
+
+      const suState = $('[data-su-state]');
+      const suWrap = $('[data-su-table-wrap]');
+      const suRows = $('[data-su-rows]');
+      const suPager = $('[data-su-pager]');
+      const suBadge = $('[data-su-badge]');
+
+      /** 화면 코드 → 사람이 읽는 이름. 모르는 코드는 그대로 보여줍니다. */
+      const SU_SOURCE: Record<string, string> = {
+        'home-hero': '홈 첫 화면',
+        'home-end': '홈 끝',
+        product: '제품 페이지',
+      };
+
+      async function loadSignups() {
+        suState.hidden = false;
+        suState.textContent = '불러오는 중…';
+        suWrap.hidden = true;
+        try {
+          const filters = document.querySelector<HTMLFormElement>('[data-su-filters]')!;
+          const form = new FormData(filters);
+          const query = new URLSearchParams({ limit: String(SU_PAGE), offset: String(suOffset) });
+          for (const key of ['source', 'state']) {
+            const value = String(form.get(key) ?? '');
+            if (value) query.set(key, value);
+          }
+
+          const data = await api(`/api/admin/launch-notify?${query}`);
+          if (data.who) $('[data-who]').textContent = data.who;
+
+          // 요약: 수신 중 / 전체 / 유입 화면별.
+          const summary = $('[data-su-summary]');
+          const facts: Array<[string, string]> = [
+            ['수신 중', String(data.active ?? 0)],
+            ['전체', String(data.total ?? 0)],
+            ...((data.bySource ?? []) as Array<{ source: string | null; n: number }>).map(
+              (entry) =>
+                [SU_SOURCE[entry.source ?? ''] ?? entry.source ?? '알 수 없음', String(entry.n)] as [
+                  string,
+                  string,
+                ],
+            ),
+          ];
+          summary.replaceChildren(
+            ...facts.flatMap(([label, value]) => {
+              const wrap = document.createElement('div');
+              const dt = document.createElement('dt');
+              dt.textContent = label;
+              const dd = document.createElement('dd');
+              dd.textContent = value;
+              wrap.append(dt, dd);
+              return [wrap];
+            }),
+          );
+
+          suBadge.textContent = String(data.active ?? 0);
+          suBadge.hidden = !data.active;
+
+          const rows = (data.rows ?? []) as any[];
+          if (rows.length === 0) {
+            /*
+             * 필터가 걸려 있으면 "없다" 가 아니라 "이 조건에 없다" 입니다.
+             * 예전에는 filtered 건수로 갈랐는데, 조건에 안 맞으면 그 값도 0 이라
+             * 늘 "아직 신청자가 없습니다" 만 나왔습니다.
+             */
+            const filtered = Boolean(form.get('source') || form.get('state'));
+            suState.textContent = filtered
+              ? '조건에 맞는 신청자가 없습니다.'
+              : '아직 신청자가 없습니다.';
+            // ⑥ 마지막 쪽이 비면 앞쪽으로 돌아갑니다. 쪽 이동을 감추면
+            //    stale offset 에 갇혀서 탭을 다시 열어도 계속 비어 보입니다.
+            if (suOffset > 0) {
+              suOffset = Math.max(0, suOffset - SU_PAGE);
+              void loadSignups();
+              return;
+            }
+            suPager.hidden = true;
+            return;
+          }
+
+          suRows.replaceChildren(
+            ...rows.map((row) => {
+              const tr = document.createElement('tr');
+              const cells = [
+                row.email,
+                row.locale,
+                SU_SOURCE[row.source ?? ''] ?? row.source ?? '—',
+                String(row.createdAt).slice(0, 10),
+                row.unsubscribedAt ? '수신 거부' : '수신 중',
+              ];
+              for (const value of cells) {
+                const td = document.createElement('td');
+                td.textContent = value;
+                tr.append(td);
+              }
+              return tr;
+            }),
+          );
+
+          // 쪽 나누기는 "지금 조건에 맞는 수" 를 씁니다. 위 요약의 전체·수신 중과
+          // 다른 숫자입니다 — 그래서 서버가 셋을 따로 줍니다.
+          const matched = data.matched ?? 0;
+          const pages = Math.max(1, Math.ceil(matched / SU_PAGE));
+          const page = Math.floor(suOffset / SU_PAGE);
+          $('[data-su-page-info]').textContent = `${page + 1} / ${pages} · ${matched}건`;
+          $<HTMLButtonElement>('[data-su-prev]').disabled = page === 0;
+          $<HTMLButtonElement>('[data-su-next]').disabled = page + 1 >= pages;
+
+          suState.hidden = true;
+          suWrap.hidden = false;
+          suPager.hidden = false;
+        } catch (error) {
+          suState.textContent = (error as Error).message;
+          suPager.hidden = true;
+        }
+      }
+
+      document.querySelector<HTMLFormElement>('[data-su-filters]')!.addEventListener(
+        'submit',
+        (event) => {
+          event.preventDefault();
+          suOffset = 0;
+          void loadSignups();
+        },
+      );
+      $('[data-su-prev]').addEventListener('click', () => {
+        suOffset = Math.max(0, suOffset - SU_PAGE);
+        void loadSignups();
+      });
+      $('[data-su-next]').addEventListener('click', () => {
+        suOffset += SU_PAGE;
+        void loadSignups();
+      });
+
+      /* ── 가입 회원 ──────────────────────────────────────────────── */
+
+      const US_PAGE = 20;
+      let usOffset = 0;
+
+      const usState = $('[data-us-state]');
+      const usWrap = $('[data-us-table-wrap]');
+      const usRows = $('[data-us-rows]');
+      const usPager = $('[data-us-pager]');
+
+      /** 제공자 코드 → 사람이 읽는 이름. */
+      const US_PROVIDER: Record<string, string> = {
+        google: '구글',
+        kakao: '카카오',
+        naver: '네이버',
+        mock: '테스트',
+      };
+
+      async function loadUsers() {
+        usState.hidden = false;
+        usState.textContent = '불러오는 중…';
+        usWrap.hidden = true;
+        try {
+          const filters = document.querySelector<HTMLFormElement>('[data-us-filters]')!;
+          const q = String(new FormData(filters).get('q') ?? '').trim();
+          const query = new URLSearchParams({ limit: String(US_PAGE), offset: String(usOffset) });
+          if (q) query.set('q', q);
+
+          const data = await api(`/api/admin/users?${query}`);
+          if (data.who) $('[data-who]').textContent = data.who;
+
+          const rows = (data.rows ?? []) as any[];
+          if (rows.length === 0) {
+            usState.textContent = q ? '찾는 회원이 없습니다.' : '아직 가입한 회원이 없습니다.';
+            if (usOffset > 0) {
+              usOffset = Math.max(0, usOffset - US_PAGE);
+              void loadUsers();
+              return;
+            }
+            usPager.hidden = true;
+            return;
+          }
+
+          usRows.replaceChildren(
+            ...rows.map((row) => {
+              const tr = document.createElement('tr');
+              const cells = [
+                row.email ?? '—',
+                row.name ?? '—',
+                (row.providers as string[]).map((x) => US_PROVIDER[x] ?? x).join(', ') || '—',
+                String(row.orders),
+                row.hasAddress ? '있음' : '—',
+                String(row.createdAt).slice(0, 10),
+              ];
+              for (const value of cells) {
+                const td = document.createElement('td');
+                td.textContent = value;
+                tr.append(td);
+              }
+              return tr;
+            }),
+          );
+
+          const total = data.total ?? 0;
+          const pages = Math.max(1, Math.ceil(total / US_PAGE));
+          const page = Math.floor(usOffset / US_PAGE);
+          $('[data-us-page-info]').textContent = `${page + 1} / ${pages} · 전체 ${total}명`;
+          $<HTMLButtonElement>('[data-us-prev]').disabled = page === 0;
+          $<HTMLButtonElement>('[data-us-next]').disabled = page + 1 >= pages;
+
+          usState.hidden = true;
+          usWrap.hidden = false;
+          usPager.hidden = false;
+        } catch (error) {
+          usState.textContent = (error as Error).message;
+          usPager.hidden = true;
+        }
+      }
+
+      document.querySelector<HTMLFormElement>('[data-us-filters]')!.addEventListener(
+        'submit',
+        (event) => {
+          event.preventDefault();
+          usOffset = 0;
+          void loadUsers();
+        },
+      );
+      $('[data-us-prev]').addEventListener('click', () => {
+        usOffset = Math.max(0, usOffset - US_PAGE);
+        void loadUsers();
+      });
+      $('[data-us-next]').addEventListener('click', () => {
+        usOffset += US_PAGE;
+        void loadUsers();
+      });
+
+      function showTab(name: 'orders' | 'inquiries' | 'reviews' | 'signups' | 'users') {
         activeTab = name;
         document.querySelectorAll<HTMLElement>('[data-panel]').forEach((panel) => {
           panel.hidden = panel.dataset.panel !== name;
@@ -1163,13 +1509,29 @@ const FULFILLMENT_LABEL: Record<string, string> = {
         });
         if (name === 'inquiries') loadInquiries();
         if (name === 'reviews') loadReviews();
+        if (name === 'signups') loadSignups();
+        if (name === 'users') loadUsers();
       }
 
       document.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach((tab) => {
         tab.addEventListener('click', () =>
-          showTab(tab.dataset.tab as 'orders' | 'inquiries' | 'reviews'),
+          showTab(tab.dataset.tab as 'orders' | 'inquiries' | 'reviews' | 'signups' | 'users'),
         );
       });
+
+      /*
+       * 명단 수도 어느 탭에 있든 보여야 합니다. loadSignups 안에서만 채우면
+       * 이미 그 탭에 간 사람에게만 보이고, 배지가 하려던 일을 못 합니다.
+       */
+      api('/api/admin/launch-notify?limit=1')
+        .then((data) => {
+          const active = data.active ?? 0;
+          suBadge.textContent = active > 0 ? String(active) : '';
+          suBadge.hidden = active === 0;
+        })
+        .catch(() => {
+          /* 인증이 막혔거나 DB 가 없는 경우입니다. 배지만 안 뜹니다. */
+        });
 
       // 미답변 건수는 어느 탭에 있든 알아야 하므로 처음에 한 번 물어봅니다.
       api('/api/admin/inquiries?status=open&limit=1')

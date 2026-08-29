@@ -1,5 +1,5 @@
 import { test, expect, type APIRequestContext } from '@playwright/test';
-import { ADMIN_DEV_TOKEN, CAPTURE_URL } from '../../../playwright.config';
+import { ADMIN_DEV_TOKEN, CAPTURE_URL, TEST_HEADERS } from '../../../playwright.config';
 
 /**
  * 운영에서 실제로 돈과 개인정보가 걸리는 지점들.
@@ -114,7 +114,7 @@ test.describe('돈을 받지 않은 물건은 나가지 않는다', () => {
 
 test.describe('관리 화면도 같은 규칙을 보여준다', () => {
   // 페이지는 Worker 가 인증한 뒤에야 나가므로 브라우저 컨텍스트에도 토큰이 필요합니다.
-  test.use({ extraHTTPHeaders: AUTH });
+  test.use({ extraHTTPHeaders: { ...TEST_HEADERS, ...AUTH } });
 
   test('관리 화면이 미결제 주문의 발송 항목을 잠근다', async ({ page, request }) => {
     const orderId = await seedOrder(request);

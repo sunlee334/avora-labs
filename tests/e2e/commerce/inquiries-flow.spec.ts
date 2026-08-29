@@ -1,5 +1,5 @@
 import { test, expect, type APIRequestContext, type Page } from '@playwright/test';
-import { ADMIN_DEV_TOKEN } from '../../../playwright.config';
+import { ADMIN_DEV_TOKEN, TEST_HEADERS } from '../../../playwright.config';
 
 /**
  * 문의 왕복.
@@ -206,7 +206,7 @@ test.describe('남이 쓴 글이 실행되지 않는다', () => {
 });
 
 test.describe('관리 화면 문의 탭', () => {
-  test.use({ extraHTTPHeaders: AUTH });
+  test.use({ extraHTTPHeaders: { ...TEST_HEADERS, ...AUTH } });
 
   test('탭을 눌러야 문의가 보인다', async ({ page }) => {
     await page.goto('/admin');

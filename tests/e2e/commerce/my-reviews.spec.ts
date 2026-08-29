@@ -1,5 +1,5 @@
 import { test, expect, type Page, type APIRequestContext } from '@playwright/test';
-import { ADMIN_DEV_TOKEN } from '../../../playwright.config';
+import { ADMIN_DEV_TOKEN, TEST_HEADERS } from '../../../playwright.config';
 
 /**
  * 마이페이지 — 내가 쓴 후기 · 아직 안 쓴 주문.
@@ -469,7 +469,7 @@ test.describe('화면에서 고치고 지운다', () => {
 });
 
 test.describe('관리 화면 후기 탭', () => {
-  test.use({ extraHTTPHeaders: { 'X-Admin-Dev-Token': ADMIN_DEV_TOKEN } });
+  test.use({ extraHTTPHeaders: { ...TEST_HEADERS, 'X-Admin-Dev-Token': ADMIN_DEV_TOKEN } });
 
   /** 후기 하나를 만들고 id 를 돌려줍니다. 관리 화면은 남의 후기도 봅니다. */
   async function someReview(page: Page): Promise<string> {

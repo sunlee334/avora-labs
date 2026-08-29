@@ -41,7 +41,15 @@ import {
   publicInquiry,
 } from './inquiries';
 import { canonicalHostRedirect } from './canonical-host';
-import { normalizeEmail, signup, unsubscribe } from './launch-notify';
+import { overWriteLimit, tooManyRequests, type RateLimitEnv } from './rate-limit';
+import { jsonOnError } from './errors';
+import {
+  normalizeEmail,
+  signup,
+  unsubscribe,
+  listSignups,
+  signupsBySource,
+} from './launch-notify';
 import { renderReviewsPage } from './reviews-page';
 import { handleKakaoWebhook } from './auth/kakao-webhook';
 import {
@@ -79,6 +87,7 @@ import {
   saveAddress,
   claimOrder,
   findOrderForUser,
+  listUsers,
 } from './accounts';
 
 const LOCALES = ['ko', 'en', 'zh', 'th', 'vi'] as const;
@@ -103,7 +112,7 @@ const ADAPTERS: Record<string, PaymentAdapter> = {
   mock: mockPayments,
 };
 
-interface Env extends AdminEnv, AuthEnv {
+interface Env extends AdminEnv, AuthEnv, RateLimitEnv {
   ASSETS: Fetcher;
   DB?: D1Database;
   /** 어떤 PG 어댑터를 쓸지. 미설정이면 결제 엔드포인트가 비활성입니다. */
@@ -148,6 +157,14 @@ export function localeFromPath(pathname: string): Locale {
   const first = pathname.split('/').filter(Boolean)[0];
   return LOCALES.includes(first as Locale) ? (first as Locale) : DEFAULT_LOCALE;
 }
+
+/** 속도 제한을 걸 공개 쓰기 길 — 값은 제한을 세는 칸 이름입니다. */
+const WRITE_ROUTES: Record<string, string> = {
+  '/api/orders': 'orders',
+  '/api/reviews': 'reviews',
+  '/api/inquiries': 'inquiries',
+  '/api/launch-notify': 'launch-notify',
+};
 
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -875,6 +892,55 @@ async function handleAdminInquiryList(env: Env, url: URL, who: string): Promise<
   });
 }
 
+/**
+ * 출시 알림 명단.
+ *
+ * 출시 전인 지금 이 화면이 보는 유일한 "사람 명단" 입니다. 목록과 함께
+ * 유입 화면별 집계를 냅니다 — 어디가 명단을 만드는지 모르면 다음에 무엇을
+ * 고칠지 고를 수 없습니다.
+ */
+async function handleAdminSignupList(env: Env, url: URL, who: string): Promise<Response> {
+  if (!env.DB) return json({ error: 'DB_NOT_CONFIGURED' }, 503);
+
+  const limit = clampInt(url.searchParams.get('limit'), 20, 1, ADMIN_MAX_LIMIT);
+  const offset = clampInt(url.searchParams.get('offset'), 0, 0, 100000);
+  const source = url.searchParams.get('source') || undefined;
+  const state = url.searchParams.get('state');
+
+  const { rows, matched, total, active } = await listSignups(env.DB, {
+    limit,
+    offset,
+    source,
+    active: state === 'active' ? true : state === 'unsubscribed' ? false : undefined,
+  });
+
+  return json({
+    ok: true,
+    who,
+    matched,
+    total,
+    active,
+    bySource: await signupsBySource(env.DB),
+    rows,
+  });
+}
+
+/**
+ * 가입 회원.
+ *
+ * 출시 전이라 지금은 거의 비어 있습니다. 출시 후에는 이쪽이 주 명단이 됩니다.
+ */
+async function handleAdminUserList(env: Env, url: URL, who: string): Promise<Response> {
+  if (!env.DB) return json({ error: 'DB_NOT_CONFIGURED' }, 503);
+
+  const limit = clampInt(url.searchParams.get('limit'), 20, 1, ADMIN_MAX_LIMIT);
+  const offset = clampInt(url.searchParams.get('offset'), 0, 0, 100000);
+  const q = url.searchParams.get('q')?.trim() || undefined;
+
+  const { rows, total } = await listUsers(env.DB, { limit, offset, q });
+  return json({ ok: true, who, total, rows });
+}
+
 async function handleAdminInquiryAnswer(
   request: Request,
   env: Env,
@@ -1266,204 +1332,236 @@ async function handleAdminPage(request: Request, env: Env): Promise<Response> {
   return new Response(page.body, { status: page.status, headers });
 }
 
+/**
+ * 요청 하나를 길에 맞게 넘깁니다.
+ *
+ * fetch 에서 갈라 둔 것은 오직 worker/errors.ts 의 `jsonOnError` 로 통째로
+ * 감싸기 위해서입니다. 본문을 건드리지 않고 문 하나에 예외 처리를 둡니다.
+ */
+async function route(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  const url = new URL(request.url);
+  const { pathname } = url;
+
+  // 0 — 정식 호스트가 아니면(www 등) 여기서 301 로 보냅니다.
+  //     규칙과 이유는 worker/canonical-host.ts 에 있습니다.
+  const canonical = canonicalHostRedirect(request);
+  if (canonical) return canonical;
+
+  // 1 — 루트 진입: 언어를 골라 보냅니다.
+  if (pathname === '/' || pathname === '') {
+    const locale = pickLocale(request.headers.get('accept-language'));
+    return Response.redirect(new URL(`/${locale}/`, url).href, 302);
+  }
+
+  /*
+   * 2 — 공개 쓰기의 문턱.
+   *
+   * 로그인 없이 우리 DB 에 행을 만드는 네 자리입니다. 라우팅 앞에 한 번 두는
+   * 편이 네 핸들러에 각각 넣는 것보다 안전합니다 — 다섯 번째 공개 쓰기가
+   * 생겼을 때 여기 한 줄을 빠뜨리면 눈에 띄지만, 핸들러 안이면 안 띕니다.
+   *
+   * 문턱을 라우팅보다 앞에 두는 대신, 막을 길만 골라 적습니다. 조회(GET)와
+   * 로그인이 필요한 길은 여기 없습니다.
+   */
+  const bucket = request.method === 'POST' ? WRITE_ROUTES[pathname] : undefined;
+  if (bucket && (await overWriteLimit(request, env, bucket))) {
+    return tooManyRequests();
+  }
+
+  // 2 — API
+  if (pathname === '/api/orders' && request.method === 'POST') {
+    return handleCreateOrder(request, env);
+  }
+  if (pathname === '/api/orders/lookup' && request.method === 'POST') {
+    return handleOrderLookup(request, env);
+  }
+  if (pathname === '/api/payments/confirm') {
+    return handlePaymentConfirm(request, env, ctx);
+  }
+
+  // 후기
+  if (pathname === '/api/reviews' && request.method === 'GET') {
+    return handleReviewList(request, env);
+  }
+  if (pathname === '/api/reviews' && request.method === 'POST') {
+    return handleReviewCreate(request, env);
+  }
+
+  // 출시 알림 — 제품이 나오기 전까지 관심을 담아 두는 유일한 자리입니다.
+  if (pathname === '/api/launch-notify' && request.method === 'POST') {
+    return handleLaunchNotify(request, env);
+  }
+  if (pathname === '/api/launch-notify/unsubscribe' && request.method === 'GET') {
+    return handleLaunchUnsubscribe(request, env);
+  }
+
+  // 문의 — 공개 게시판이 아닙니다. 조회는 본인 확인을 지납니다.
+  if (pathname === '/api/inquiries' && request.method === 'POST') {
+    return handleInquiryCreate(request, env, ctx);
+  }
+  if (pathname === '/api/inquiries' && request.method === 'GET') {
+    return handleInquiryList(request, env);
+  }
+  if (pathname === '/api/inquiries/lookup' && request.method === 'POST') {
+    return handleInquiryLookup(request, env);
+  }
+
+  // 로그인
+  if (pathname === '/api/auth/login' && request.method === 'GET') {
+    return handleLogin(request, env);
+  }
+  // 제공자 이름이 경로에 있습니다 — 제공자마다 Redirect URI 를 따로
+  // 등록해야 하고, 등록된 주소와 한 글자라도 다르면 코드가 오지 않습니다.
+  const callback = pathname.match(/^\/api\/auth\/callback(?:\/([a-z0-9-]+))?$/);
+  if (callback && request.method === 'GET') {
+    return handleCallback(request, env, callback[1] ?? null);
+  }
+  if (pathname === '/api/auth/link' && request.method === 'GET') {
+    return handleLinkStart(request, env);
+  }
+  if (pathname === '/api/auth/providers' && request.method === 'GET') {
+    return handleProviders(request, env);
+  }
+
+  /*
+   * 카카오 계정 상태 변경 웹훅.
+   *
+   * 사용자가 우리 사이트 밖에서(카카오 앱 목록·계정 탈퇴) 연결을 끊었을 때
+   * 알림을 받습니다. 받지 못하면 탈퇴한 사람의 개인정보가 계속 남습니다.
+   * 본문은 카카오가 서명한 JWT 이고, 서명·발급자·대상을 모두 확인합니다.
+   */
+  if (pathname === '/api/webhooks/kakao' && request.method === 'POST') {
+    return handleKakaoWebhook(request, env);
+  }
+  if (pathname === '/api/auth/logout' && request.method === 'POST') {
+    return handleLogout(request, env);
+  }
+
+  // 계정
+  if (pathname === '/api/account/me' && request.method === 'GET') {
+    return handleAccountMe(request, env);
+  }
+  if (pathname === '/api/account/orders' && request.method === 'GET') {
+    return handleAccountOrders(request, env);
+  }
+  if (pathname === '/api/account/reviews' && request.method === 'GET') {
+    return handleAccountReviews(request, env);
+  }
+  {
+    const mine = pathname.match(/^\/api\/account\/reviews\/([\w-]+)$/);
+    if (mine && (request.method === 'PATCH' || request.method === 'DELETE')) {
+      return handleAccountReviewPatch(request, env, mine[1]);
+    }
+  }
+  if (pathname === '/api/account/address' && request.method === 'PUT') {
+    return handleAccountAddress(request, env);
+  }
+  if (pathname === '/api/account/claim' && request.method === 'POST') {
+    return handleAccountClaim(request, env);
+  }
+  if (pathname === '/api/account/identities' && request.method === 'GET') {
+    return handleIdentities(request, env);
+  }
+  if (pathname === '/api/account/identities/unlink' && request.method === 'POST') {
+    return handleUnlink(request, env);
+  }
+
+  // 관리 API — 무엇을 하려는지 보기 전에 먼저 신원을 확인합니다.
+  if (pathname.startsWith('/api/admin/')) {
+    const auth = await verifyAdmin(request, env);
+    if (!auth.ok) {
+      return json({ error: auth.error, message: auth.message }, auth.status);
+    }
+
+    if (pathname === '/api/admin/orders' && request.method === 'GET') {
+      return handleAdminList(request, env, auth.who);
+    }
+    const detail = pathname.match(/^\/api\/admin\/orders\/([^/]+)$/);
+    if (detail && request.method === 'PATCH') {
+      return handleAdminPatch(request, env, decodeURIComponent(detail[1]));
+    }
+
+    if (pathname === '/api/admin/reviews' && request.method === 'GET') {
+      return handleAdminReviewList(env, url, auth.who);
+    }
+    const reviewDetail = pathname.match(/^\/api\/admin\/reviews\/([^/]+)$/);
+    if (reviewDetail && request.method === 'PATCH') {
+      return handleAdminReviewPatch(request, env, decodeURIComponent(reviewDetail[1]));
+    }
+
+    if (pathname === '/api/admin/inquiries' && request.method === 'GET') {
+      return handleAdminInquiryList(env, url, auth.who);
+    }
+
+    if (pathname === '/api/admin/launch-notify' && request.method === 'GET') {
+      return handleAdminSignupList(env, url, auth.who);
+    }
+    if (pathname === '/api/admin/users' && request.method === 'GET') {
+      return handleAdminUserList(env, url, auth.who);
+    }
+    const inquiryDetail = pathname.match(/^\/api\/admin\/inquiries\/([^/]+)$/);
+    if (inquiryDetail && request.method === 'PATCH') {
+      return handleAdminInquiryAnswer(
+        request,
+        env,
+        decodeURIComponent(inquiryDetail[1]),
+        auth.who,
+      );
+    }
+
+    return json({ error: 'NOT_FOUND' }, 404);
+  }
+
+  if (pathname.startsWith('/api/')) {
+    return json({ error: 'NOT_FOUND' }, 404);
+  }
+
+  // 3 — 관리 화면 페이지
+  if (pathname === '/admin' || pathname.startsWith('/admin/')) {
+    return handleAdminPage(request, env);
+  }
+
+  /*
+   * 4 — 리뷰 페이지는 정적 껍데기에 실제 후기를 채워 내보냅니다.
+   *
+   * 자바스크립트로만 채우면 답변엔진과 크롤러가 후기를 보지 못합니다.
+   * 리뷰 페이지의 값어치는 대부분 거기서 나오므로 초기 HTML 에 넣습니다.
+   * 후기가 0건이면 정적 페이지를 그대로 내보냅니다 — 그 화면이 이미
+   * "아직 리뷰가 없습니다" 라고 말하고 있고, 그게 사실입니다.
+   */
+  const reviewsPage = pathname.match(/^\/([a-z]{2})\/reviews\/?$/);
+  if (reviewsPage && env.DB && (LOCALES as readonly string[]).includes(reviewsPage[1])) {
+    const page = await env.ASSETS.fetch(request);
+    if (page.ok) {
+      return renderReviewsPage(
+        page,
+        env.DB,
+        new URL(`/${reviewsPage[1]}/product`, url).href,
+      );
+    }
+    return page;
+  }
+
+  // 5 — 그 외에는 정적 에셋에 넘깁니다.
+  const assetResponse = await env.ASSETS.fetch(request);
+
+  // 에셋에도 없으면 언어에 맞는 404 페이지를 상태 코드 404 로 돌려줍니다.
+  if (assetResponse.status === 404) {
+    const locale = localeFromPath(pathname);
+    const notFound = await env.ASSETS.fetch(new URL(`/${locale}/404/`, url).href);
+    if (notFound.ok) {
+      return new Response(notFound.body, {
+        status: 404,
+        headers: notFound.headers,
+      });
+    }
+  }
+
+  return assetResponse;
+}
+
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-    const url = new URL(request.url);
-    const { pathname } = url;
-
-    // 0 — 정식 호스트가 아니면(www 등) 여기서 301 로 보냅니다.
-    //     규칙과 이유는 worker/canonical-host.ts 에 있습니다.
-    const canonical = canonicalHostRedirect(request);
-    if (canonical) return canonical;
-
-    // 1 — 루트 진입: 언어를 골라 보냅니다.
-    if (pathname === '/' || pathname === '') {
-      const locale = pickLocale(request.headers.get('accept-language'));
-      return Response.redirect(new URL(`/${locale}/`, url).href, 302);
-    }
-
-    // 2 — API
-    if (pathname === '/api/orders' && request.method === 'POST') {
-      return handleCreateOrder(request, env);
-    }
-    if (pathname === '/api/orders/lookup' && request.method === 'POST') {
-      return handleOrderLookup(request, env);
-    }
-    if (pathname === '/api/payments/confirm') {
-      return handlePaymentConfirm(request, env, ctx);
-    }
-
-    // 후기
-    if (pathname === '/api/reviews' && request.method === 'GET') {
-      return handleReviewList(request, env);
-    }
-    if (pathname === '/api/reviews' && request.method === 'POST') {
-      return handleReviewCreate(request, env);
-    }
-
-    // 출시 알림 — 제품이 나오기 전까지 관심을 담아 두는 유일한 자리입니다.
-    if (pathname === '/api/launch-notify' && request.method === 'POST') {
-      return handleLaunchNotify(request, env);
-    }
-    if (pathname === '/api/launch-notify/unsubscribe' && request.method === 'GET') {
-      return handleLaunchUnsubscribe(request, env);
-    }
-
-    // 문의 — 공개 게시판이 아닙니다. 조회는 본인 확인을 지납니다.
-    if (pathname === '/api/inquiries' && request.method === 'POST') {
-      return handleInquiryCreate(request, env, ctx);
-    }
-    if (pathname === '/api/inquiries' && request.method === 'GET') {
-      return handleInquiryList(request, env);
-    }
-    if (pathname === '/api/inquiries/lookup' && request.method === 'POST') {
-      return handleInquiryLookup(request, env);
-    }
-
-    // 로그인
-    if (pathname === '/api/auth/login' && request.method === 'GET') {
-      return handleLogin(request, env);
-    }
-    // 제공자 이름이 경로에 있습니다 — 제공자마다 Redirect URI 를 따로
-    // 등록해야 하고, 등록된 주소와 한 글자라도 다르면 코드가 오지 않습니다.
-    const callback = pathname.match(/^\/api\/auth\/callback(?:\/([a-z0-9-]+))?$/);
-    if (callback && request.method === 'GET') {
-      return handleCallback(request, env, callback[1] ?? null);
-    }
-    if (pathname === '/api/auth/link' && request.method === 'GET') {
-      return handleLinkStart(request, env);
-    }
-    if (pathname === '/api/auth/providers' && request.method === 'GET') {
-      return handleProviders(request, env);
-    }
-
-    /*
-     * 카카오 계정 상태 변경 웹훅.
-     *
-     * 사용자가 우리 사이트 밖에서(카카오 앱 목록·계정 탈퇴) 연결을 끊었을 때
-     * 알림을 받습니다. 받지 못하면 탈퇴한 사람의 개인정보가 계속 남습니다.
-     * 본문은 카카오가 서명한 JWT 이고, 서명·발급자·대상을 모두 확인합니다.
-     */
-    if (pathname === '/api/webhooks/kakao' && request.method === 'POST') {
-      return handleKakaoWebhook(request, env);
-    }
-    if (pathname === '/api/auth/logout' && request.method === 'POST') {
-      return handleLogout(request, env);
-    }
-
-    // 계정
-    if (pathname === '/api/account/me' && request.method === 'GET') {
-      return handleAccountMe(request, env);
-    }
-    if (pathname === '/api/account/orders' && request.method === 'GET') {
-      return handleAccountOrders(request, env);
-    }
-    if (pathname === '/api/account/reviews' && request.method === 'GET') {
-      return handleAccountReviews(request, env);
-    }
-    {
-      const mine = pathname.match(/^\/api\/account\/reviews\/([\w-]+)$/);
-      if (mine && (request.method === 'PATCH' || request.method === 'DELETE')) {
-        return handleAccountReviewPatch(request, env, mine[1]);
-      }
-    }
-    if (pathname === '/api/account/address' && request.method === 'PUT') {
-      return handleAccountAddress(request, env);
-    }
-    if (pathname === '/api/account/claim' && request.method === 'POST') {
-      return handleAccountClaim(request, env);
-    }
-    if (pathname === '/api/account/identities' && request.method === 'GET') {
-      return handleIdentities(request, env);
-    }
-    if (pathname === '/api/account/identities/unlink' && request.method === 'POST') {
-      return handleUnlink(request, env);
-    }
-
-    // 관리 API — 무엇을 하려는지 보기 전에 먼저 신원을 확인합니다.
-    if (pathname.startsWith('/api/admin/')) {
-      const auth = await verifyAdmin(request, env);
-      if (!auth.ok) {
-        return json({ error: auth.error, message: auth.message }, auth.status);
-      }
-
-      if (pathname === '/api/admin/orders' && request.method === 'GET') {
-        return handleAdminList(request, env, auth.who);
-      }
-      const detail = pathname.match(/^\/api\/admin\/orders\/([^/]+)$/);
-      if (detail && request.method === 'PATCH') {
-        return handleAdminPatch(request, env, decodeURIComponent(detail[1]));
-      }
-
-      if (pathname === '/api/admin/reviews' && request.method === 'GET') {
-        return handleAdminReviewList(env, url, auth.who);
-      }
-      const reviewDetail = pathname.match(/^\/api\/admin\/reviews\/([^/]+)$/);
-      if (reviewDetail && request.method === 'PATCH') {
-        return handleAdminReviewPatch(request, env, decodeURIComponent(reviewDetail[1]));
-      }
-
-      if (pathname === '/api/admin/inquiries' && request.method === 'GET') {
-        return handleAdminInquiryList(env, url, auth.who);
-      }
-      const inquiryDetail = pathname.match(/^\/api\/admin\/inquiries\/([^/]+)$/);
-      if (inquiryDetail && request.method === 'PATCH') {
-        return handleAdminInquiryAnswer(
-          request,
-          env,
-          decodeURIComponent(inquiryDetail[1]),
-          auth.who,
-        );
-      }
-
-      return json({ error: 'NOT_FOUND' }, 404);
-    }
-
-    if (pathname.startsWith('/api/')) {
-      return json({ error: 'NOT_FOUND' }, 404);
-    }
-
-    // 3 — 관리 화면 페이지
-    if (pathname === '/admin' || pathname.startsWith('/admin/')) {
-      return handleAdminPage(request, env);
-    }
-
-    /*
-     * 4 — 리뷰 페이지는 정적 껍데기에 실제 후기를 채워 내보냅니다.
-     *
-     * 자바스크립트로만 채우면 답변엔진과 크롤러가 후기를 보지 못합니다.
-     * 리뷰 페이지의 값어치는 대부분 거기서 나오므로 초기 HTML 에 넣습니다.
-     * 후기가 0건이면 정적 페이지를 그대로 내보냅니다 — 그 화면이 이미
-     * "아직 리뷰가 없습니다" 라고 말하고 있고, 그게 사실입니다.
-     */
-    const reviewsPage = pathname.match(/^\/([a-z]{2})\/reviews\/?$/);
-    if (reviewsPage && env.DB && (LOCALES as readonly string[]).includes(reviewsPage[1])) {
-      const page = await env.ASSETS.fetch(request);
-      if (page.ok) {
-        return renderReviewsPage(
-          page,
-          env.DB,
-          new URL(`/${reviewsPage[1]}/product`, url).href,
-        );
-      }
-      return page;
-    }
-
-    // 5 — 그 외에는 정적 에셋에 넘깁니다.
-    const assetResponse = await env.ASSETS.fetch(request);
-
-    // 에셋에도 없으면 언어에 맞는 404 페이지를 상태 코드 404 로 돌려줍니다.
-    if (assetResponse.status === 404) {
-      const locale = localeFromPath(pathname);
-      const notFound = await env.ASSETS.fetch(new URL(`/${locale}/404/`, url).href);
-      if (notFound.ok) {
-        return new Response(notFound.body, {
-          status: 404,
-          headers: notFound.headers,
-        });
-      }
-    }
-
-    return assetResponse;
+    return jsonOnError(request, () => route(request, env, ctx));
   },
 };

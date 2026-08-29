@@ -423,3 +423,75 @@ export function publicUser(user: User) {
     createdAt: user.createdAt,
   };
 }
+
+export interface AdminUserRow {
+  id: string;
+  email: string | null;
+  name: string | null;
+  /** 연결된 로그인 수단 — 'google' · 'kakao' 등. 없을 수 없습니다(가입이 곧 연결). */
+  providers: string[];
+  /** 이 사람 이름으로 남은 주문 수. 0 이면 가입만 하고 산 적이 없습니다. */
+  orders: number;
+  hasAddress: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * 관리 화면에 뿌릴 회원 한 쪽.
+ *
+ * 로그인 수단과 주문 수를 한 번의 질의로 함께 가져옵니다. 행마다 따로 물으면
+ * 한 쪽(20행)에 41번을 묻게 되고, D1 은 그 왕복이 비쌉니다.
+ *
+ * identities 와 orders 를 각각 GROUP BY 로 접은 뒤 붙입니다 — 그냥 조인하면
+ * 수단이 둘인 사람의 주문이 두 번 세어집니다.
+ */
+export async function listUsers(
+  db: D1Database,
+  options: { limit: number; offset: number; q?: string },
+): Promise<{ rows: AdminUserRow[]; total: number }> {
+  const where: string[] = [];
+  const args: unknown[] = [];
+  if (options.q) {
+    /*
+     * % 와 _ 를 막아 둡니다. 그대로 넣으면 "a_b" 를 찾을 때 "axb" 가 걸리고,
+     * "%" 만 넣으면 전부 나오면서 화면은 "찾은 결과" 라고 말합니다.
+     */
+    const needle = options.q.replace(/[\\%_]/g, (c) => `\\${c}`);
+    where.push("(u.email LIKE ? ESCAPE '\\' OR u.name LIKE ? ESCAPE '\\')");
+    args.push(`%${needle}%`, `%${needle}%`);
+  }
+  const clause = where.length ? `WHERE ${where.join(' AND ')}` : '';
+
+  const countRow = await db
+    .prepare(`SELECT COUNT(*) AS n FROM users u ${clause}`)
+    .bind(...args)
+    .first<{ n: number }>();
+
+  const { results } = await db
+    .prepare(
+      `SELECT u.id, u.email, u.name, u.created_at, u.updated_at,
+              u.postal_code, u.address1,
+              (SELECT GROUP_CONCAT(i.provider) FROM identities i WHERE i.user_id = u.id) AS providers,
+              (SELECT COUNT(*) FROM orders o WHERE o.user_id = u.id) AS orders
+         FROM users u ${clause}
+        ORDER BY u.created_at DESC
+        LIMIT ? OFFSET ?`,
+    )
+    .bind(...args, options.limit, options.offset)
+    .all<Record<string, unknown>>();
+
+  return {
+    rows: (results ?? []).map((r) => ({
+      id: String(r.id),
+      email: r.email === null ? null : String(r.email),
+      name: r.name === null ? null : String(r.name),
+      providers: r.providers ? String(r.providers).split(',') : [],
+      orders: Number(r.orders ?? 0),
+      hasAddress: Boolean(r.postal_code && r.address1),
+      createdAt: String(r.created_at),
+      updatedAt: String(r.updated_at),
+    })),
+    total: countRow?.n ?? 0,
+  };
+}

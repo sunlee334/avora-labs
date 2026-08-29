@@ -1,6 +1,6 @@
 import { test, expect, type APIRequestContext } from '@playwright/test';
 import { readFileSync } from 'node:fs';
-import { ADMIN_DEV_TOKEN } from '../../../playwright.config';
+import { ADMIN_DEV_TOKEN, TEST_HEADERS } from '../../../playwright.config';
 
 /**
  * 관리 화면과 관리 API.
@@ -345,7 +345,7 @@ test.describe('배송 상태 변경', () => {
 
 test.describe('관리 화면', () => {
   // 페이지는 Worker 가 인증한 뒤에야 나가므로, 브라우저 컨텍스트에도 토큰이 필요합니다.
-  test.use({ extraHTTPHeaders: AUTH });
+  test.use({ extraHTTPHeaders: { ...TEST_HEADERS, ...AUTH } });
 
   test('주문이 표에 뜨고 상세를 열어 발송 처리할 수 있다', async ({ page, request }) => {
     const orderId = await seedPaidOrder(request);
@@ -430,7 +430,7 @@ test.describe('Access 설정이 어긋났을 때 무엇이 잘못됐는지 알�
    * 이때 "로그인이 필요합니다" 라고 안내하면, 이미 로그인한 사람을 로그인
    * 화면으로 무한히 돌려보내게 됩니다. 진짜 원인은 경로 설정입니다.
    */
-  test.use({ extraHTTPHeaders: AUTH });
+  test.use({ extraHTTPHeaders: { ...TEST_HEADERS, ...AUTH } });
 
   test('화면은 열렸는데 API 에만 토큰이 없으면 경로 설정을 지목한다', async ({ page }) => {
     // 페이지 요청에는 토큰이 붙고, /api/admin 요청에서만 떼어냅니다.
@@ -490,5 +490,7 @@ test.describe('운영 배포 설정에 Access 가 실제로 들어 있다', () =
     // 배포 전 점검(.github/workflows/deploy.yml)도 같은 것을 보지만,
     // 그건 푸시한 뒤에야 돕니다. 여기서 먼저 걸립니다.
     expect(wrangler).not.toContain('ADMIN_DEV_TOKEN');
+    // 공개 쓰기의 속도 제한을 지나가는 열쇠입니다.
+    expect(wrangler).not.toContain('RATE_LIMIT_BYPASS');
   });
 });

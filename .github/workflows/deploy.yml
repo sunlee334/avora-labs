@@ -210,7 +210,8 @@ jobs:
           # mock 결제 어댑터는 돈을 받지 않고 승인된 척합니다.
           # NOTIFY_WEBHOOK_URL 은 그 자체가 발송 권한이라 secret 으로만 넣습니다.
           # wrangler.jsonc 는 저장소에 그대로 올라가므로 여기 적히면 URL 이 공개됩니다.
-          for leaked in ADMIN_DEV_TOKEN PRODUCT_PRICE NOTIFY_WEBHOOK_URL; do
+          # RATE_LIMIT_BYPASS 는 공개 쓰기의 속도 제한을 지나가는 열쇠입니다.
+          for leaked in ADMIN_DEV_TOKEN PRODUCT_PRICE NOTIFY_WEBHOOK_URL RATE_LIMIT_BYPASS; do
             if grep -q "\"$leaked\"" wrangler.jsonc; then
               echo "::error::$leaked 는 테스트 전용입니다. wrangler.jsonc 에서 지우세요."
               exit 1

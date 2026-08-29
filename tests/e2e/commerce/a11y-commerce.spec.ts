@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { ADMIN_DEV_TOKEN } from '../../../playwright.config';
+import { ADMIN_DEV_TOKEN, TEST_HEADERS } from '../../../playwright.config';
 
 /**
  * 결제 흐름의 접근성.
@@ -179,7 +179,7 @@ test.describe('마이페이지', () => {
 });
 
 test.describe('관리 화면', () => {
-  test.use({ extraHTTPHeaders: { 'X-Admin-Dev-Token': ADMIN_DEV_TOKEN } });
+  test.use({ extraHTTPHeaders: { ...TEST_HEADERS, 'X-Admin-Dev-Token': ADMIN_DEV_TOKEN } });
 
   test('후기 탭 — 목록과 상세', async ({ page }, testInfo) => {
     // 관리 화면의 세 번째 탭입니다. 상세는 <dialog> 라 초점 관리와 이름표가

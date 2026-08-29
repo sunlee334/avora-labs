@@ -13,7 +13,8 @@ import { defineConfig, devices } from '@playwright/test';
  *   npm run test:e2e:launch   launch 모드
  */
 const MODE = (process.env.E2E_MODE ?? 'commerce') as 'commerce' | 'launch';
-const PORT = 8787;
+/** 문턱을 직접 두드리는 테스트가 자기 요청 컨텍스트를 만들 때 씁니다. */
+export const PORT = 8787;
 
 const buildEnv =
   MODE === 'commerce'
@@ -22,6 +23,26 @@ const buildEnv =
 
 /** commerce 모드 관리 API 테스트가 쓰는 열쇠. 로컬·CI 안에서만 존재합니다. */
 export const ADMIN_DEV_TOKEN = 'e2e-admin-token';
+
+/*
+ * 속도 제한을 건너뛰는 열쇠.
+ *
+ * 테스트는 127.0.0.1 한 곳에서 수백 건을 씁니다 — 문턱을 그대로 두면 스위트가
+ * 자기 자신에 걸립니다. 문턱 자체는 rate-limit.spec.ts 가 이 헤더를 **빼고**
+ * 두드려서 검사합니다. 운영에서는 절대 설정하지 않습니다.
+ */
+export const RATE_LIMIT_BYPASS = 'e2e-rate-limit-bypass';
+
+/*
+ * 모든 요청에 붙어야 하는 헤더.
+ *
+ * `test.use({ extraHTTPHeaders })` 는 최상위 설정을 **병합하지 않고 덮습니다.**
+ * 그래서 자기 헤더를 얹는 describe 는 이걸 펼쳐 넣어야 합니다:
+ *   test.use({ extraHTTPHeaders: { ...TEST_HEADERS, ...AUTH } })
+ * 빠뜨리면 그 describe 만 429 로 죽습니다 — rate-limit.spec.ts 가 소스를 훑어
+ * 미리 잡습니다.
+ */
+export const TEST_HEADERS = { 'X-Rate-Limit-Bypass': RATE_LIMIT_BYPASS };
 
 /**
  * 새 주문 알림을 받아 두는 테스트용 서버.
@@ -75,8 +96,9 @@ const workerVars =
     // wrangler.jsonc 에서 이 이름을 발견하면 배포를 멈춥니다.
     ? `${accessOff} ${realProvidersOff} --var PAYMENT_PROVIDER:mock --var PRODUCT_PRICE:32000` +
       ` --var ADMIN_DEV_TOKEN:${ADMIN_DEV_TOKEN}` +
-      ` --var NOTIFY_WEBHOOK_URL:${CAPTURE_URL}/hook --var AUTH_PROVIDER:mock,mock2`
-    : `${accessOff} ${realProvidersOff}`;
+      ` --var NOTIFY_WEBHOOK_URL:${CAPTURE_URL}/hook --var AUTH_PROVIDER:mock,mock2` +
+      ` --var RATE_LIMIT_BYPASS:${RATE_LIMIT_BYPASS}`
+    : `${accessOff} ${realProvidersOff} --var RATE_LIMIT_BYPASS:${RATE_LIMIT_BYPASS}`;
 
 /** 해당 모드에서만 의미 있는 테스트는 폴더로 갈라 두었습니다. */
 const testIgnore =
@@ -103,6 +125,7 @@ export default defineConfig({
   use: {
     baseURL: `http://127.0.0.1:${PORT}`,
     trace: 'on-first-retry',
+    extraHTTPHeaders: TEST_HEADERS,
   },
 
   projects: [
