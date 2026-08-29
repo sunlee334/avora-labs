@@ -13,7 +13,7 @@ import { BUSINESS, LOCALES, type Locale } from '../../config/site';
 import { dict, localePath } from '../../i18n';
 import { organization, website, breadcrumb } from '../../lib/jsonld';
 import LaunchNotify from '../../components/LaunchNotify.astro';
-import { SELLS_DIRECTLY, EXTERNAL_STORE_URL } from '../../config/runtime';
+import { CAN_ORDER } from '../../config/runtime';
 
 export function getStaticPaths() {
   return LOCALES.map((lang) => ({ params: { lang } }));
@@ -75,7 +75,7 @@ const h = t.home;
     요청이 됩니다.
   */}
   {
-    !SELLS_DIRECTLY && !EXTERNAL_STORE_URL && (
+    !CAN_ORDER && (
       <section class="section wrap heroNotify">
         <p class="product-hero__window">{t.product.hero.launchWindow}</p>
         <LaunchNotify
@@ -172,9 +172,6 @@ const h = t.home;
     <p class="kicker">{h.product.kicker}</p>
     <h2 class="display display--tight">{h.product.name}</h2>
     <p class="body" style="margin-top: 14px">{h.product.spec}</p>
-    <p style="margin-top: 30px">
-      <a class="cta" href={localePath(locale, 'product')}>{h.product.cta}</a>
-    </p>
 
     {/*
       두 번째 신청 자리.
@@ -183,9 +180,17 @@ const h = t.home;
       섹션에 설득된 사람에게 다시 묻지 않는 것은 그냥 버리는 것입니다.
       같은 폼이지만 말은 다릅니다 — 앞은 "나오면 알려드릴게요", 여기는
       "여기까지 읽으셨다면".
+
+      ── 왜 "제품 보기" 보다 위인가 ─────────────────────────────
+      처음에는 "제품 보기" 가 위, 폼이 아래였고 둘의 간격이 64px 였습니다.
+      스토리를 끝까지 읽은 사람에게 두 가지를 동시에 시킨 셈이고, 게다가
+      "제품 보기" 를 누르면 도착한 곳에서 **또 같은 요청** 을 받았습니다.
+
+      지금 1순위는 명단이므로 폼이 주된 것입니다. 제품 페이지로 가는 길은
+      남기되 보조 형태(cta--ghost)로 내립니다.
     */}
     {
-      !SELLS_DIRECTLY && !EXTERNAL_STORE_URL && (
+      !CAN_ORDER && (
         <LaunchNotify
           locale={locale}
           source="home-end"
@@ -194,6 +199,15 @@ const h = t.home;
         />
       )
     }
+
+    <p style="margin-top: 30px">
+      <a
+        class={`cta${!CAN_ORDER ? ' cta--ghost' : ''}`}
+        href={localePath(locale, 'product')}
+      >
+        {h.product.cta}
+      </a>
+    </p>
   </section>
 </Base>
 

@@ -52,11 +52,23 @@ const POST_PAGES = ['/ko/support/posts/shipping-notice', '/en/support/posts/ship
  */
 const WIDTHS = [320, 360, 390, 430];
 
-/** 자사 결제·회원 기능이 켜진 빌드에서만 존재하는 페이지. */
+/**
+ * 자사 결제·회원 기능이 켜진 빌드에서만 존재하는 페이지.
+ *
+ * 이 목록은 오래도록 **선언만 되고 아무 데서도 쓰이지 않았습니다.** 파일
+ * 첫머리의 설명은 모든 화면을 잰다고 읽히는데 실제로는 네 화면이 빠져
+ * 있었고, `noUnusedLocals` 가 없어 아무도 알려주지 않았습니다.
+ *
+ * 이 스펙 파일은 commerce·launch 양쪽에서 도는데(루트 폴더) 이 네 화면은
+ * commerce 에만 있으므로, 없는 빌드에서는 건너뜁니다.
+ */
 const COMMERCE_PAGES = ['/ko/cart', '/ko/checkout', '/ko/order/lookup', '/ko/account'];
 
+/** commerce 빌드에서만 존재하는 화면인가. */
+const COMMERCE_BUILD = process.env.E2E_MODE !== 'launch';
+
 test.describe('모바일 레이아웃', () => {
-  for (const path of [...PAGES, ...POST_PAGES]) {
+  for (const path of [...PAGES, ...POST_PAGES, ...(COMMERCE_BUILD ? COMMERCE_PAGES : [])]) {
     test(`${path} — 320~430px 폭에서 가로 스크롤이 없다`, async ({ page }) => {
       for (const width of WIDTHS) {
         await page.setViewportSize({ width, height: 800 });
@@ -93,7 +105,7 @@ test.describe('모바일 레이아웃', () => {
     return tooSmall;
   }
 
-  for (const path of [...PAGES, ...POST_PAGES]) {
+  for (const path of [...PAGES, ...POST_PAGES, ...(COMMERCE_BUILD ? COMMERCE_PAGES : [])]) {
     test(`${path} — 탭 가능한 요소가 최소 44×44px`, async ({ page }) => {
       await page.setViewportSize({ width: 390, height: 844 });
       await page.goto(path);

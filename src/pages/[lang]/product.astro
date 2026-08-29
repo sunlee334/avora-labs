@@ -15,7 +15,7 @@ import { dict, localePath } from '../../i18n';
 import { breadcrumb, productSchema } from '../../lib/jsonld';
 import productData from '../../data/product.json';
 import LaunchNotify from '../../components/LaunchNotify.astro';
-import { SELLS_DIRECTLY, EXTERNAL_STORE_URL, PRICE, CURRENCY } from '../../config/runtime';
+import { SELLS_DIRECTLY, EXTERNAL_STORE_URL, CAN_ORDER, PRICE, CURRENCY } from '../../config/runtime';
 
 export function getStaticPaths() {
   return LOCALES.map((lang) => ({ params: { lang } }));
@@ -132,7 +132,7 @@ const specRows = [
         <h1 class="display display--tight">{productData.name}</h1>
         {
           /* 언제 나오는지 말하지 않으면 "확정 예정" 이 불확실로 읽힙니다. */
-          !sellsDirectly && !externalUrl && (
+          !CAN_ORDER && (
             <p class="product-hero__window">{p.hero.launchWindow}</p>
           )
         }

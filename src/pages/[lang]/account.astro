@@ -12,7 +12,7 @@
 import Base from '../../layouts/Base.astro';
 import { LOCALES, type Locale } from '../../config/site';
 import { dict, localePath } from '../../i18n';
-import { ACCOUNTS_ENABLED } from '../../config/runtime';
+import { ACCOUNTS_ENABLED, CAN_ORDER, SELLS_DIRECTLY } from '../../config/runtime';
 import carriers from '../../config/carriers.json';
 import InquirySection from '../../components/InquirySection.astro';
 import MyReviewsSection from '../../components/MyReviewsSection.astro';
@@ -25,6 +25,7 @@ export function getStaticPaths() {
 const locale = Astro.params.lang as Locale;
 const t = dict(locale);
 const a = t.account;
+
 ---
 
 <Base
@@ -34,20 +35,25 @@ const a = t.account;
   description={a.meta.description}
   noindex
 >
-  <section class="section wrap account" data-account data-locale={locale}>
+  <section
+    class="section wrap account"
+    data-account
+    data-locale={locale}
+    data-has-orders={SELLS_DIRECTLY ? 'true' : undefined}
+  >
     <h1 class="display display--tight">{a.heading}</h1>
 
     {/* 로그인 전 */}
     <div data-account-anon hidden>
       <h2 class="kicker" style="margin-top: 36px">{a.loginHeading}</h2>
-      <p class="body">{a.loginBody}</p>
+      <p class="body">{CAN_ORDER ? a.loginBody : a.preLaunch.loginBody}</p>
       {/*
         버튼은 서버가 켜 둔 제공자만큼만 그립니다(/api/auth/providers).
         키가 없는 제공자의 버튼을 미리 그려 두면, 눌러도 아무 일이 없는
         로그인 버튼이 됩니다 — 없는 것만 못합니다.
       */}
       <div class="providerButtons" data-login-buttons></div>
-      <p class="cart__notice">{a.guestNote}</p>
+      <p class="cart__notice">{CAN_ORDER ? a.guestNote : a.preLaunch.guestNote}</p>
     </div>
 
     {/* 로그인 후 */}
@@ -57,6 +63,28 @@ const a = t.account;
         <button class="linkButton" type="button" data-logout>{a.logout}</button>
       </p>
 
+      {/*
+        출시 전 안내.
+
+        아래 영역들(주문 내역·저장된 배송지·주문 연결·내 후기)은 **주문이
+        존재해야** 의미가 있습니다. 팔 수 없는 동안에는 전부 빈 목록이고,
+        문구는 "주문할 때 입력하면" 처럼 일어날 수 없는 일을 말합니다.
+
+        지우지 않고 감춥니다 — 스크립트가 이 요소들을 즉시 잡아 쓰기 때문에
+        (`$()` 는 null 을 돌려줍니다) 마크업을 없애면 로그인·로그아웃까지
+        함께 죽습니다. 감싸서 감추면 화면에서는 사라지고 낭독기도 건너뜁니다.
+      */}
+      {!CAN_ORDER && (
+        <div class="preLaunch">
+          <h2 class="kicker" style="margin-top: 40px">{a.preLaunch.heading}</h2>
+          <p class="body">{a.preLaunch.body}</p>
+          <p style="margin-top: 20px">
+            <a class="cta cta--ghost" href={localePath(locale, 'product')}>{a.preLaunch.cta}</a>
+          </p>
+        </div>
+      )}
+
+      <div data-order-only hidden={!SELLS_DIRECTLY}>
       <h2 class="kicker" style="margin-top: 40px">{a.orders.heading}</h2>
       <p class="body" data-orders-state>{a.orders.loading}</p>
       {/*
@@ -114,6 +142,7 @@ const a = t.account;
           <button class="linkButton" type="button" data-address-cancel>{a.address.cancel}</button>
         </div>
       </form>
+      </div>
 
       <h2 class="kicker" style="margin-top: 40px">{a.profile.heading}</h2>
       <dl class="orderResult__facts">
@@ -129,6 +158,7 @@ const a = t.account;
       <div class="providerButtons" data-link-buttons></div>
       <p class="cart__notice" data-identities-note hidden>{a.identities.lastNote}</p>
 
+      <div data-order-only hidden={!SELLS_DIRECTLY}>
       <h2 class="kicker" style="margin-top: 40px">{a.claim.heading}</h2>
       <p class="body">{a.claim.body}</p>
       <form data-claim style="margin-top: 20px">
@@ -147,6 +177,7 @@ const a = t.account;
 
       {/* 후기는 주문에서 나오므로 주문 근처에 둡니다. */}
       <MyReviewsSection locale={locale} />
+      </div>
 
       {/* 로그인한 사람만 보고 남깁니다. 주문이 없어도 됩니다 —
           구매 전 질문을 받기 위해서입니다. */}
@@ -191,7 +222,16 @@ const a = t.account;
 
   import { mountMyReviews } from '../../lib/my-reviews';
 
-  const reviewsRoot = document.querySelector<HTMLElement>('[data-my-reviews]');
+  /*
+   * 감춰진 자리에 그릴 것은 불러오지 않습니다.
+   *
+   * 주문 영역은 팔 수 없는 동안 감싸개로 가려집니다(`[data-order-only]`).
+   * 그 안의 후기 목록을 그래도 불러오면, 구조적으로 비어 있을 수밖에 없는
+   * 응답을 위해 왕복이 한 번 더 생기고 아무도 그 결과를 보지 못합니다.
+   */
+  const hasOrders = document.querySelector<HTMLElement>('[data-account]')?.dataset.hasOrders === 'true';
+
+  const reviewsRoot = hasOrders ? document.querySelector<HTMLElement>('[data-my-reviews]') : null;
   if (reviewsRoot) {
     mountMyReviews(
       reviewsRoot,
@@ -207,13 +247,25 @@ const a = t.account;
    * 문의 섹션.
    *
    * 로그인한 사람이므로 자격증명을 따로 넘기지 않습니다 — 서버가 세션
-   * 쿠키로 user_id 를 찾습니다. 로그인 전에는 이 섹션 자체가 감춰져 있어
-   * (부모가 [data-signed-in]) 여기서 다시 확인하지 않습니다.
+   * 쿠키로 user_id 를 찾습니다.
+   *
+   * ── 왜 즉시 부르지 않는가 ────────────────────────────────
+   * 이 섹션은 [data-account-signed] 안이라 로그인 전에는 감춰져 있습니다.
+   * 그런데 감춰진 것과 불러오지 않는 것은 다릅니다 — 예전에는 여기서 바로
+   * mount 해서, 로그인하지 않은 방문자도 /api/inquiries 를 한 번 던지고
+   * 401 을 받았습니다. 아무도 그 결과를 보지 못하는 왕복이었습니다.
+   *
+   * 로그인이 확인된 뒤 한 번만 부릅니다. `load()` 는 배송지를 저장할 때
+   * 다시 도는데(아래 saveAddress), 그때 또 mount 하면 리스너가 겹쳐
+   * 문의가 두 번 등록됩니다. 그래서 한 번 걸었는지 기억합니다.
    */
-  const inquiryRoot = document.querySelector<HTMLElement>('[data-inquiry]');
-  if (inquiryRoot) {
-    const copy = JSON.parse(inquiryRoot.dataset.copy ?? '{}');
-    mountInquiry(inquiryRoot, copy, () => null);
+  let inquiryMounted = false;
+  function mountInquiryOnce(): void {
+    if (inquiryMounted) return;
+    const el = document.querySelector<HTMLElement>('[data-inquiry]');
+    if (!el) return;
+    inquiryMounted = true;
+    mountInquiry(el, JSON.parse(el.dataset.copy ?? '{}'), () => null);
   }
 
   const labels = document.querySelector<HTMLTemplateElement>('[data-account-labels]');
@@ -370,6 +422,7 @@ const a = t.account;
 
       const { user } = await meRes.json();
       signed.hidden = false;
+      mountInquiryOnce();
       void drawIdentities();
       $('[data-account-name]').textContent = user.name ?? user.email ?? '';
 
@@ -390,7 +443,7 @@ const a = t.account;
         $('[data-address-empty]').hidden = false;
       }
 
-      await loadOrders();
+      if (hasOrders) await loadOrders();
     }
 
     async function loadOrders() {

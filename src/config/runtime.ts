@@ -47,6 +47,31 @@ export const SELLS_DIRECTLY = CHECKOUT_MODE === 'internal' && PRICE != null;
 export const EXTERNAL_STORE_URL: string | null = country.externalStoreUrl || null;
 
 /**
+ * 주문이 존재할 수 있는가.
+ *
+ * 자사 결제든 외부몰이든, 살 길이 하나라도 있으면 참입니다. 이 사실 하나에
+ * 여러 화면이 걸려 있습니다 — 마이페이지의 주문 영역, 홈의 신청 폼과 CTA
+ * 무게, 개인정보처리방침의 수집 항목.
+ *
+ * 각자 `!SELLS_DIRECTLY && !EXTERNAL_STORE_URL` 로 다시 쓰면 같은 사실이
+ * 여러 벌이 됩니다. 외부몰을 켜는 날(payment-config.json 의 externalStoreUrl
+ * 한 줄) 전부를 함께 고쳐야 하는데, 하나를 빠뜨려도 아무것도 알려주지
+ * 않습니다.
+ *
+ * ⚠️ `SELLS_DIRECTLY` 와 헷갈리면 안 됩니다. 오늘은 externalStoreUrl 이 전부
+ *    비어 있어 두 값이 같지만, 물어보는 것이 다릅니다:
+ *
+ *      SELLS_DIRECTLY  우리 DB 에 주문이 생기는가
+ *      CAN_ORDER       손님이 어디서든 살 수 있는가
+ *
+ *    주문 내역·배송지·후기처럼 **우리 주문에 매달린 것** 은 SELLS_DIRECTLY 를
+ *    봐야 합니다. 외부몰만 켠 빌드에서 CAN_ORDER 로 열면 빈 목록과 죽은 폼이
+ *    나옵니다. 반대로 "살 수 있느냐" 를 묻는 자리(출시 알림 폼, 그 수집 고지)는
+ *    CAN_ORDER 가 맞습니다.
+ */
+export const CAN_ORDER = SELLS_DIRECTLY || EXTERNAL_STORE_URL !== null;
+
+/**
  * 회원 기능(로그인·마이페이지)을 노출할지.
  *
  * 카카오·네이버 연동은 도메인과 사업자 정보가 있어야 켤 수 있습니다.

@@ -21,8 +21,7 @@
  * 메뉴가 안 열려도 갈 곳을 잃지 않습니다.
  */
 import { dict, localePath } from '../i18n';
-import { TOP } from '../config/nav';
-import { UTILITY_VISIBLE } from '../config/nav-gates';
+import { TOP_VISIBLE, UTILITY_VISIBLE } from '../config/nav-gates';
 import type { Locale } from '../config/site';
 
 interface Props {
@@ -74,7 +73,7 @@ const utility = UTILITY_VISIBLE.filter((item) => item.badge !== 'cart');
     </div>
     <ul class="menu__list">
       {
-        TOP.map((top) =>
+        TOP_VISIBLE.map((top) =>
           top.kind === 'link' ? (
             <li>
               {/* 하위가 하나뿐이라 서랍을 만들지 않습니다 — 화살표도 없고,

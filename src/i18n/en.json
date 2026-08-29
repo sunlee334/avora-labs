@@ -735,7 +735,7 @@
   "account": {
     "meta": {
       "title": "My Page — PAROS",
-      "description": "Your orders and saved address."
+      "description": "Sign in, account details and enquiries. Orders and addresses join once we start selling."
     },
     "heading": "My Page",
     "loginHeading": "Sign in",
@@ -836,6 +836,13 @@
       "joined": "Joined",
       "managedBy": "Your name and email are managed by the service you signed in with. Change them there and they update on your next sign-in.",
       "noEmail": "The provider did not supply an email address."
+    },
+    "preLaunch": {
+      "heading": "Not on sale yet",
+      "body": "Once the product launches, this is where you will manage orders and delivery addresses. Signing in now simply carries over.",
+      "cta": "Sign up for launch alerts",
+      "loginBody": "Sign in now and your orders and addresses will collect here once we launch.",
+      "guestNote": "Signing in is not required right now. Launch alerts work without an account."
     }
   },
   "inquiry": {

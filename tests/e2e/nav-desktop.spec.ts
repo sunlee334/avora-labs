@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { TOP, allLeaves, menuDestinations } from '../../src/config/nav';
+import { visibleTop, allLeaves, menuDestinations } from '../../src/config/nav';
 import { LOCALES } from '../../src/config/site';
 import ko from '../../src/i18n/ko.json' with { type: 'json' };
 import commerce from '../../src/config/commerce.json' with { type: 'json' };
@@ -83,7 +83,7 @@ test.describe('한 항목 규칙', () => {
   test('하위가 하나뿐인 최상위에는 화살표가 없다', async ({ page }) => {
     await page.goto('/ko/');
     for (const id of ['product', 'brand']) {
-      const label = TOP.find((t) => t.id === id)!.label(ko as never);
+      const label = visibleTop(FLAGS).find((top) => top.id === id)!.label(ko as never);
       const li = page.locator('.nav__links > li', { hasText: label });
       await expect(li.locator('.nav__caret'), `${id}: 화살표가 있습니다`).toHaveCount(0);
     }
@@ -110,14 +110,29 @@ test.describe('한 항목 규칙', () => {
 test.describe('드롭다운', () => {
   test.beforeEach(async ({ page }) => desktop(page));
 
-  test('열면 하위 셋이 나오고 리뷰가 그중에 있다', async ({ page }) => {
+  test('열면 정의에 있는 하위가 그대로 나온다', async ({ page }) => {
+    /*
+     * 개수를 여기 적지 않습니다.
+     *
+     * 예전에는 3 과 "리뷰가 있다" 를 박아 두었는데, 리뷰에 게이트가 생겨
+     * 팔 수 없는 빌드에서는 2 가 됐습니다. 값을 베껴 적으면 "정의가
+     * 바뀌었다" 와 "화면이 정의와 어긋난다" 가 구분되지 않습니다.
+     */
+    const group = visibleTop(FLAGS).find((top) => top.kind === 'group');
+    expect(group, '하위가 여럿인 묶음이 없습니다').toBeTruthy();
+    const expected = group!.kind === 'group' ? group!.children : [];
+
     await page.goto('/ko/');
     await page.locator('[data-nav-drop]').click();
     const panel = page.locator('.nav__dropdown');
     await expect(panel).toBeVisible();
-    await expect(panel.locator('a')).toHaveCount(3);
-    // 리뷰는 지금까지 푸터에만 있었습니다.
-    await expect(panel.locator('a[href="/ko/reviews"]')).toBeVisible();
+    await expect(panel.locator('a')).toHaveCount(expected.length);
+    for (const leaf of expected) {
+      await expect(
+        panel.locator(`a[href="${href('ko', leaf.path)}"]`),
+        `${leaf.id} 이 서랍에 없습니다`,
+      ).toBeVisible();
+    }
   });
 
   test('Esc 로 닫히고 포커스가 트리거로 돌아온다', async ({ page }) => {
@@ -392,9 +407,9 @@ test.describe('정의는 한 곳이다', () => {
   test('세 화면이 서로 같다 — 하나만 고쳐도 셋이 따라온다', async ({ page }) => {
     // allLeaves() 가 정의 파일의 잎 전부입니다. 셋 다 이것을 담고 있어야
     // "한 파일만 고치면 세 화면에 반영된다"(AC-24)가 사실이 됩니다.
-    expect(allLeaves().length).toBeGreaterThan(0);
+    expect(allLeaves(FLAGS).length).toBeGreaterThan(0);
     await page.goto('/ko/');
-    for (const leaf of allLeaves()) {
+    for (const leaf of allLeaves(FLAGS)) {
       const target = href('ko', leaf.path);
       await expect(
         page.locator(`[data-footer-menu] a[href="${target}"]`),

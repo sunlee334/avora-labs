@@ -32,10 +32,21 @@ import type { Dict } from '../i18n';
  */
 type Label = (t: Dict) => string;
 
+/** 노출 여부를 가르는 빌드 사실. */
+export type Gate = 'checkout' | 'accounts';
+
 /** 실제로 갈 수 있는 한 곳. */
 export interface NavLeaf {
   id: string;
   label: Label;
+  /**
+   * 생략하면 항상 노출.
+   *
+   * 최상위 묶음의 자식에도 붙습니다 — 리뷰가 그 경우입니다. 후기는 결제된
+   * 주문에서만 나오므로 자사 결제가 꺼져 있으면 존재할 수 없고, 그러면
+   * 내비 항목이 **영원히 빈 페이지로 가는 길** 이 됩니다.
+   */
+  gate?: Gate;
   /**
    * `''` 은 홈. `localePath(locale, path)` 로 주소가 됩니다.
    *
@@ -74,8 +85,6 @@ export interface NavGroup {
 
 /** 런타임 플래그로 노출이 갈리는 항목. */
 export interface UtilityItem extends NavLeaf {
-  /** 생략하면 항상 노출 */
-  gate?: 'checkout' | 'accounts';
   /** 배지 마크업이 붙는 항목. 헤더 렌더러만 봅니다 */
   badge?: 'cart';
 }
@@ -100,9 +109,9 @@ export type ResolvedTop =
   | { kind: 'group'; id: string; label: Label; children: readonly NavLeaf[] };
 
 // ── 내부 ────────────────────────────────────────────────────
-// NAV 와 resolveTop 을 함께 내보내면 컴포넌트가 TOP 을 우회해 NAV 를 직접
-// 순회할 수 있고, 그러면 "한 항목 규칙의 유일한 판정 지점" 이 깨집니다.
-// 밖으로는 TOP 만 나갑니다.
+// NAV 와 resolveTop 을 함께 내보내면 컴포넌트가 visibleTop() 을 우회해 NAV 를
+// 직접 순회할 수 있고, 그러면 "한 항목 규칙의 유일한 판정 지점" 이 깨집니다.
+// 밖으로는 게이트를 지난 결과만 나갑니다.
 
 const NAV: readonly NavGroup[] = [
   {
@@ -129,7 +138,12 @@ const NAV: readonly NavGroup[] = [
         path: 'support',
       },
       { id: 'posts', label: (t) => t.support.posts.heading, path: 'support/posts' },
-      { id: 'reviews', label: (t) => t.nav.reviews, path: 'reviews' },
+      // 후기는 결제된 주문에서만 생깁니다(worker/reviews.ts). 자사 결제가
+      // 꺼져 있으면 후기가 존재할 수 없어, 이 항목은 언제 눌러도 빈 페이지로
+      // 갑니다. 빈 상태 문구가 잘 쓰여 있어도 빈 페이지는 빈 페이지입니다.
+      // 페이지 자체는 그대로 두고 **길만** 감춥니다 — 제품 페이지 하단에서는
+      // 계속 갈 수 있고, 첫 후기가 쌓이는 순간 저절로 돌아옵니다.
+      { id: 'reviews', label: (t) => t.nav.reviews, path: 'reviews', gate: 'checkout' },
     ],
   },
 ];
@@ -147,30 +161,69 @@ const UTILITY: readonly UtilityItem[] = [
   { id: 'cart', label: (t) => t.nav.cart, path: 'cart', gate: 'checkout', badge: 'cart' },
 ];
 
-function resolveTop(item: NavGroup): ResolvedTop {
-  if (item.children.length === 1) {
-    const only = item.children[0];
+/**
+ * 자식 목록을 받습니다 — NavGroup 전체가 아니라.
+ *
+ * 게이트로 걸러낸 뒤에는 "최소 1개" 라는 길이 보장이 더 이상 성립하지
+ * 않습니다. NavGroup 을 그대로 받으면 걸러낸 배열을 다시 그 타입으로
+ * 우겨넣어야 하는데, 그건 타입이 말리는 것을 캐스팅으로 덮는 것입니다.
+ * 호출하는 쪽이 빈 목록을 먼저 거르고, 여기는 1개인지 여럿인지만 봅니다.
+ */
+/**
+ * 이 항목을 지금 보여도 되는가.
+ *
+ * 게이트가 없으면 항상 보입니다. 판정이 세 곳(최상위·잎·유틸리티)에
+ * 흩어져 있으면 한 곳만 고쳐도 나머지가 조용히 달라집니다.
+ */
+function passes(item: { gate?: Gate }, flags: NavFlags): boolean {
+  return item.gate ? flags[item.gate] : true;
+}
+
+function resolveTop(
+  id: string,
+  label: Label,
+  children: readonly [NavLeaf, ...NavLeaf[]],
+): ResolvedTop {
+  if (children.length === 1) {
+    const only = children[0];
     return {
       kind: 'link',
-      id: item.id,
+      id,
       // 접힌 항목의 라벨은 **부모의 것** 입니다. 자식 라벨을 올리면 최상위가
       // "브랜드" 가 아니라 "브랜드 스토리" 로 바뀝니다.
-      label: item.label,
+      label,
       path: only.path,
       match: only.match ?? only.path,
     };
   }
-  return { kind: 'group', id: item.id, label: item.label, children: item.children };
+  return { kind: 'group', id, label, children };
 }
 
 // ── 공개 표면 ───────────────────────────────────────────────
 
-/** 최상위 3개. 세 화면이 전부 이것만 순회합니다. */
-export const TOP: readonly ResolvedTop[] = NAV.map(resolveTop);
+/**
+ * 최상위 항목. 세 화면이 전부 이것만 순회합니다.
+ *
+ * 상수가 아니라 함수인 이유: 잎에도 게이트가 생겼기 때문입니다. 상수로 두면
+ * 게이트를 지나지 않은 목록이 존재하게 되고, 어느 화면이 그것을 집어 쓰면
+ * 감춰야 할 항목이 새어 나갑니다. NAV 를 내보내지 않는 것과 같은 이유입니다.
+ *
+ * 자식이 게이트로 빠져 하나만 남으면 resolveTop 이 링크로 접고, 전부 빠지면
+ * 묶음 자체가 사라집니다 — 빈 서랍을 만들지 않습니다.
+ */
+export function visibleTop(flags: NavFlags): readonly ResolvedTop[] {
+  const out: ResolvedTop[] = [];
+  for (const group of NAV) {
+    const [first, ...rest] = group.children.filter((leaf) => passes(leaf, flags));
+    if (!first) continue;
+    out.push(resolveTop(group.id, group.label, [first, ...rest]));
+  }
+  return out;
+}
 
-/** 모든 잎을 평평하게 — 푸터·시트·테스트가 씁니다. */
-export function allLeaves(): readonly NavLeaf[] {
-  return NAV.flatMap((group) => group.children);
+/** 게이트를 지난 모든 잎을 평평하게 — 푸터·시트·테스트가 씁니다. */
+export function allLeaves(flags: NavFlags): readonly NavLeaf[] {
+  return NAV.flatMap((group) => group.children.filter((leaf) => passes(leaf, flags)));
 }
 
 /**
@@ -178,7 +231,7 @@ export function allLeaves(): readonly NavLeaf[] {
  * 헤더가 장바구니를 갈라 쓰기 위해 포함시킵니다.
  */
 export function visibleUtility(flags: NavFlags): readonly UtilityItem[] {
-  return UTILITY.filter((item) => (item.gate ? flags[item.gate] : true));
+  return UTILITY.filter((item) => passes(item, flags));
 }
 
 /**
@@ -192,5 +245,5 @@ export function visibleUtility(flags: NavFlags): readonly UtilityItem[] {
  * "부모가 있는가" 라는 표현 층의 사실이고, 정의 층이 그것을 알면 안 됩니다.
  */
 export function menuDestinations(flags: NavFlags): readonly NavLeaf[] {
-  return [...allLeaves(), ...visibleUtility(flags).filter((item) => item.badge !== 'cart')];
+  return [...allLeaves(flags), ...visibleUtility(flags).filter((item) => item.badge !== 'cart')];
 }

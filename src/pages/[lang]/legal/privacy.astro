@@ -11,7 +11,7 @@ import Base from '../../../layouts/Base.astro';
 import { BUSINESS, LOCALES, type Locale } from '../../../config/site';
 import { dict, localePath } from '../../../i18n';
 import { breadcrumb } from '../../../lib/jsonld';
-import { ACCOUNTS_ENABLED, SELLS_DIRECTLY, EXTERNAL_STORE_URL } from '../../../config/runtime';
+import { ACCOUNTS_ENABLED, SELLS_DIRECTLY, CAN_ORDER } from '../../../config/runtime';
 
 export function getStaticPaths() {
   return LOCALES.map((lang) => ({ params: { lang } }));
@@ -55,7 +55,7 @@ const rows = [
    * 사라져야 합니다 — 하지 않는 수집을 적어 두는 것도 틀린 고지입니다.
    * 조건은 제품 페이지의 것과 같아야 하며, 한쪽만 고치면 어긋납니다.
    */
-  ...(!SELLS_DIRECTLY && !EXTERNAL_STORE_URL ? c.notifyRows : []),
+  ...(!CAN_ORDER ? c.notifyRows : []),
 ];
 ---
 
@@ -105,7 +105,7 @@ const rows = [
     <p class="body" style="margin-top: 24px">{c.notCollected}</p>
     {/* 후기에 이름이 어떻게 나가는지는 후기를 받을 때만 말이 됩니다. */}
     {SELLS_DIRECTLY && <p class="body" style="margin-top: 12px">{c.reviewMask}</p>}
-    {!SELLS_DIRECTLY && !EXTERNAL_STORE_URL && (
+    {!CAN_ORDER && (
       <p class="body" style="margin-top: 12px">{c.notifyNote}</p>
     )}
     <p class="body" style="margin-top: 14px">{c.retention}</p>

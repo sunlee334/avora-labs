@@ -2,8 +2,7 @@
 import LanguageSwitcher from './LanguageSwitcher.astro';
 import MenuSheet from './MenuSheet.astro';
 import { dict, localePath } from '../i18n';
-import { TOP } from '../config/nav';
-import { UTILITY_VISIBLE } from '../config/nav-gates';
+import { TOP_VISIBLE, UTILITY_VISIBLE } from '../config/nav-gates';
 import { BUSINESS, type Locale } from '../config/site';
 
 interface Props {
@@ -39,13 +38,13 @@ const utility = UTILITY_VISIBLE.filter((item) => item.badge !== 'cart');
     화살표를 조건부로 그리지 않습니다 — 화살표 마크업은 kind:'group' 가지
     안에만 존재할 수 있습니다.
 
-    패널은 right: 0 정박입니다. .nav__links 가 justify-self:end 라 마지막
-    트리거가 오른쪽 끝에 앉고, left: 0 이면 5개 언어 전부 뷰포트를 넘칩니다
-    (최악 vi 133.7px). body{overflow-x:hidden} 때문에 스크롤바 없이 잘립니다.
+    패널은 right: 0 정박입니다. 트리거가 최상위 목록의 마지막이라 오른쪽으로
+    치우쳐 앉고, left: 0 이면 5개 언어 전부 뷰포트를 넘칩니다(최악 vi 133.7px).
+    body{overflow-x:hidden} 때문에 스크롤바 없이 잘립니다.
   */}
   <ul class="nav__links">
     {
-      TOP.map((top) =>
+      TOP_VISIBLE.map((top) =>
         top.kind === 'link' ? (
           <li>
             <a href={localePath(locale, top.path)}

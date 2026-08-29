@@ -10,9 +10,12 @@
  * `nav.ts` 에 있고, 여기 있는 것은 **플래그를 한 번 읽어 묶는 세 줄** 뿐입니다.
  */
 import { SELLS_DIRECTLY, ACCOUNTS_ENABLED } from './runtime';
-import { visibleUtility, menuDestinations, type NavFlags } from './nav';
+import { visibleTop, visibleUtility, menuDestinations, type NavFlags } from './nav';
 
 export const FLAGS: NavFlags = { checkout: SELLS_DIRECTLY, accounts: ACCOUNTS_ENABLED };
+
+/** 헤더·시트가 쓰는 최상위 목록. 게이트를 지난 결과입니다. */
+export const TOP_VISIBLE = visibleTop(FLAGS);
 
 /** 헤더·시트가 쓰는 유틸리티 목록 (장바구니 포함). */
 export const UTILITY_VISIBLE = visibleUtility(FLAGS);

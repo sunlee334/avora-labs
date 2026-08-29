@@ -335,9 +335,26 @@ button {
   margin: 0;
   padding: 0;
   display: none;
-  gap: 26px;
+  /*
+   * 항목 사이 간격은 gap 과 좌우 padding 이 함께 만듭니다.
+   * padding 6px 씩 두 항목이면 12px 이므로, gap 을 26 에서 14 로 내려
+   * 보이는 간격은 그대로 26px 을 유지합니다.
+   */
+  gap: 14px;
   font-size: 13px;
   letter-spacing: 0.03em;
+}
+/*
+ * 좌우 여백은 장식이 아니라 탭 영역입니다.
+ *
+ * "제품" 처럼 두 글자짜리 한글 항목은 글자 폭만으로 23px 이라 WCAG 2.5.8(AA)
+ * 이 요구하는 24×24 에 1px 모자랐습니다. 높이는 44 로 넉넉했는데 폭이
+ * 걸린 경우입니다. 글자 수가 적은 언어에서 먼저 터지므로 값이 아니라
+ * padding 으로 바닥을 만듭니다.
+ */
+.nav__links a,
+.nav__links button {
+  padding-inline: 6px;
 }
 .nav__links a {
   display: inline-flex;
@@ -382,8 +399,8 @@ button {
 .nav__dropdown {
   position: absolute;
   top: 100%;
-  /* right 정박 — .nav__links 가 justify-self:end 라 마지막 트리거가 오른쪽
-     끝에 앉습니다. left: 0 이면 5개 언어 전부 넘칩니다(최악 vi 133.7px). */
+  /* right 정박 — 트리거가 최상위 목록의 마지막이라 오른쪽으로 치우쳐 앉습니다.
+     left: 0 이면 5개 언어 전부 넘칩니다(최악 vi 133.7px). */
   right: 0;
   left: auto;
   z-index: 1;
