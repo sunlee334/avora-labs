@@ -30,7 +30,7 @@
   "home": {
     "meta": {
       "title": "PAROS — For every movement.",
-      "description": "PAROS is an active lifestyle skincare brand where athletic energy meets gentle care. First product: Daily Sunscreen SPF50+ / PA++++.",
+      "description": "PAROS is an active lifestyle skincare brand where athletic energy meets gentle care. The formula for our first product, Daily Sunscreen SPF50+ / PA++++, is chosen by dozens of runners in a blind comparison. Launching in the first half of 2027.",
       "ogAlt": "Silhouette of a runner against a low sun"
     },
     "hero": {
@@ -104,10 +104,49 @@
       "quote": "Movement is the purest, most powerful expression of being alive. From an easy walk at dawn to the moment you take hold of the day, PAROS stays out of the way and lets skin find its own texture.",
       "body": "Right after you have moved hard, PAROS meets your skin with a precise, unhurried softness. That reversal is what makes it ours."
     },
+    "choice": {
+      "kicker": "The Choice",
+      "lead": "We didn't make it. We chose it.",
+      "body": "We decided not to develop a new formula for our first product. We are choosing from formulas that have already passed testing and review. There is no reason to hide that, so we are saying it first.",
+      "body2": "But we are not the ones doing the choosing. We are handing that over to people who actually run, climb and sweat. Even with the same contents inside, a formula picked by a lab and one picked by the people who wear it are not the same product."
+    },
+    "panel": {
+      "kicker": "Test Panel",
+      "lead": "The people choosing are the people running.",
+      "body": "We are inviting thirty to fifty people from running crews, climbing gyms and surf communities. They receive two or three samples with the manufacturer's name hidden, and compare them against the same criteria during real activity.",
+      "criteriaHeading": "What they compare",
+      "criteria": [
+        {
+          "term": "Eye sting",
+          "body": "After 30+ minutes of exercise, while sweat is running"
+        },
+        {
+          "term": "White cast",
+          "body": "Right after application and 30 seconds later, under the same light"
+        },
+        {
+          "term": "Tackiness",
+          "body": "One minute after application, pressing the back of the hand"
+        },
+        {
+          "term": "Adhesion · water resistance",
+          "body": "After contact with water and a light towel dry"
+        },
+        {
+          "term": "Reapplication",
+          "body": "Layered again 30 minutes later"
+        },
+        {
+          "term": "Absorption speed",
+          "body": "Until it has fully sunk in"
+        }
+      ],
+      "note": "We publish the tally as it comes out. We use the formula with the highest score, not the one we like. Recruiting opens in October 2026."
+    },
     "product": {
       "kicker": "First Product",
       "name": "Daily Sunscreen",
-      "spec": "SPF50+ / PA++++ · Watery gel · Water-resistant formula",
+      "spec": "SPF50+ / PA++++ · 50ml tube",
       "cta": "View product"
     },
     "notify": {
@@ -116,15 +155,15 @@
         "body": "Twice only — when the funding opens, and when it launches."
       },
       "end": {
-        "heading": "If you read this far, shall we write to you?",
-        "body": "We'll send word to this address the day it launches."
+        "heading": "Shall we send you the panel recruitment news too?",
+        "body": "We'll write to this address on the day recruiting opens and the day the product launches."
       }
     }
   },
   "product": {
     "meta": {
       "title": "Daily Sunscreen SPF50+ / PA++++ — PAROS",
-      "description": "PAROS Daily Sunscreen. SPF50+ / PA++++ UV protection in a watery gel that leaves no white cast — light and comfortable through running, pilates and climbing.",
+      "description": "PAROS Daily Sunscreen. SPF50+ / PA++++ UV protection, a functional cosmetic. The formula is chosen by people who actually run, comparing samples blind with the manufacturer hidden. Launching in the first half of 2027.",
       "ogAlt": "PAROS Daily Sunscreen on a bright surface"
     },
     "hero": {
@@ -181,8 +220,7 @@
       "values": {
         "category": "Functional cosmetic (UV protection)",
         "pending": "To be confirmed",
-        "texture": "Organic-led hybrid lotion / milk",
-        "waterResistant": "Very water resistant (80 min)",
+        "waterResistant": "Very water resistant",
         "scent": "Fragrance free",
         "tone": "No tone-up · no white cast",
         "area": "Face and neck",
@@ -223,20 +261,24 @@
           "a": "PAROS is an active lifestyle beauty brand for people in their twenties and thirties who move. The name comes from Paros, an island in the Aegean. It is the first brand created by AVORA LABS, and it is not made for athletes only but for anyone in motion."
         },
         {
+          "q": "Did you develop the formula yourselves?",
+          "a": "No. We are choosing from formulas the manufacturer already holds, ones that have passed testing and review. Instead of developing a new one, we handed the choosing over to people who actually train. Thirty to fifty of them compare samples with the manufacturer's name hidden, against the same criteria, and we publish the tally as it comes out."
+        },
+        {
           "q": "What is the SPF rating of Daily Sunscreen?",
-          "a": "SPF50+ / PA++++, the highest grade under Korean standards, designed for long stretches of outdoor activity."
+          "a": "SPF50+ / PA++++, the highest grade under Korean standards. We set that bar against long stretches of outdoor activity."
         },
         {
           "q": "Can I wear it while working out?",
-          "a": "Yes. It is designed toward a water-resistant formula that holds through sweat, with a light finish that does not interfere with movement. If you have been sweating heavily, reapply before the two-hour mark."
+          "a": "Yes. Water resistance that holds through sweat is a condition we check when choosing the formula, along with a light finish that does not interfere with movement. If you have been sweating heavily, reapply before the two-hour mark."
         },
         {
           "q": "Does it leave a white cast?",
-          "a": "Minimising white cast is one of the core design goals. The target is a watery gel with no white cast; the final formula is confirmed through sensory evaluation."
+          "a": "Leaving no white cast is a condition we do not trade away when choosing the formula. The panel checks it right after application and 30 seconds later under the same light, and a formula that misses the mark here is not used even if its total score is higher."
         },
         {
           "q": "Is it fragranced?",
-          "a": "It is designed toward fragrance-free, with artificial scent and colour kept to a minimum, and is intended to work for anyone regardless of gender."
+          "a": "Fragrance free, with artificial scent and colour kept to a minimum, is one of the conditions we set. It is intended to work for anyone regardless of gender."
         }
       ]
     },
@@ -265,8 +307,8 @@
     "backToStory": "Back to the story",
     "standards": {
       "kicker": "How we choose",
-      "lead": "No stinging. No white cast.",
-      "body": "A formula that misses either one is dropped, however good the rest of it looks. Until the product exists, what we can promise is not a finished spec but what we refuse to trade away."
+      "lead": "There are two things we won't give up.",
+      "body": "It must not sting when sweat runs into the eyes, and it must not leave a white cast on any skin tone. A formula that fails either one is dropped from the shortlist however good the rest of it looks. The judgement is not ours — it comes from the panel's tally."
     }
   },
   "support": {

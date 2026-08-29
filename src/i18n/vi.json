@@ -30,7 +30,7 @@
   "home": {
     "meta": {
       "title": "PAROS — For every movement.",
-      "description": "PAROS là thương hiệu chăm sóc da theo phong cách sống năng động, kết hợp sức sống của vận động với sự chăm sóc dịu nhẹ. Sản phẩm đầu tiên: Daily Sunscreen SPF50+ / PA++++.",
+      "description": "PAROS là thương hiệu chăm sóc da theo phong cách sống năng động, kết hợp sức sống của vận động với sự chăm sóc dịu nhẹ. Công thức của sản phẩm đầu tiên Daily Sunscreen SPF50+ / PA++++ do hàng chục người chạy bộ chọn ra qua so sánh ẩn danh. Dự kiến ra mắt nửa đầu năm 2027.",
       "ogAlt": "Bóng người chạy in trên nền mặt trời thấp"
     },
     "hero": {
@@ -104,10 +104,49 @@
       "quote": "Chuyển động là biểu hiện thuần khiết và mạnh mẽ nhất của sự sống. Từ một buổi đi bộ nhẹ lúc sáng sớm đến khoảnh khắc bạn nắm lấy nhịp sống của mình, PAROS không cắt ngang dòng chảy ấy, chỉ để làn da trở về đúng kết cấu của nó.",
       "body": "Ngay sau khi vận động hết mình, sự mềm mại tinh tế mà PAROS mang đến khi chạm vào da — chính sự tương phản đó làm nên nét riêng của PAROS."
     },
+    "choice": {
+      "kicker": "The Choice",
+      "lead": "Chúng tôi không tạo ra nó. Chúng tôi chọn nó.",
+      "body": "Chúng tôi quyết định không phát triển công thức mới cho sản phẩm đầu tiên, mà chọn từ những công thức đã qua kiểm nghiệm và thẩm định. Không có lý do gì để giấu, nên chúng tôi nói ra trước.",
+      "body2": "Nhưng người chọn không phải chúng tôi. Chúng tôi giao việc đó cho những người thật sự chạy, leo và đổ mồ hôi. Dù bên trong là cùng một thứ, công thức do phòng thí nghiệm chọn và công thức do người dùng chọn không phải cùng một sản phẩm."
+    },
+    "panel": {
+      "kicker": "Test Panel",
+      "lead": "Người chọn chính là người chạy.",
+      "body": "Chúng tôi mời ba mươi đến năm mươi người từ các nhóm chạy bộ, phòng leo núi và cộng đồng lướt sóng. Họ nhận hai đến ba mẫu đã ẩn tên nhà sản xuất và so sánh theo cùng một bộ tiêu chí trong tình huống vận động thật.",
+      "criteriaHeading": "Những gì được so sánh",
+      "criteria": [
+        {
+          "term": "Cay mắt",
+          "body": "Sau hơn 30 phút vận động, khi mồ hôi đang chảy"
+        },
+        {
+          "term": "Vệt trắng",
+          "body": "Ngay sau khi thoa và 30 giây sau, dưới cùng một ánh sáng"
+        },
+        {
+          "term": "Bết dính",
+          "body": "Một phút sau khi thoa, ấn lên mu bàn tay"
+        },
+        {
+          "term": "Độ bám · kháng nước",
+          "body": "Sau khi tiếp xúc với nước và thấm nhẹ bằng khăn"
+        },
+        {
+          "term": "Thoa lại",
+          "body": "Thoa chồng lên sau 30 phút"
+        },
+        {
+          "term": "Tốc độ thẩm thấu",
+          "body": "Cho đến khi thấm hoàn toàn"
+        }
+      ],
+      "note": "Chúng tôi công bố nguyên kết quả tổng hợp. Chúng tôi dùng công thức có điểm cao nhất, không phải công thức mình thích. Việc tuyển chọn bắt đầu vào tháng 10 năm 2026."
+    },
     "product": {
       "kicker": "First Product",
       "name": "Daily Sunscreen",
-      "spec": "SPF50+ / PA++++ · Gel dạng nước · Công thức kháng nước",
+      "spec": "SPF50+ / PA++++ · Tuýp 50ml",
       "cta": "Xem sản phẩm"
     },
     "notify": {
@@ -116,15 +155,15 @@
         "body": "Chỉ hai lần: khi mở gọi vốn và khi chính thức ra mắt."
       },
       "end": {
-        "heading": "Đã đọc đến đây, bạn muốn nhận tin chứ?",
-        "body": "Ngày sản phẩm ra mắt, chúng tôi sẽ gửi tin đến địa chỉ này."
+        "heading": "Bạn có muốn nhận cả tin tuyển nhóm thử nghiệm không?",
+        "body": "Ngày mở tuyển và ngày sản phẩm ra mắt, chúng tôi sẽ gửi tin đến địa chỉ này."
       }
     }
   },
   "product": {
     "meta": {
       "title": "Daily Sunscreen SPF50+ / PA++++ — PAROS",
-      "description": "Daily Sunscreen — sản phẩm đầu tiên của PAROS. Chống nắng SPF50+ / PA++++ với kết cấu gel dạng nước không để lại vệt trắng, nhẹ và thoải mái khi chạy bộ, tập pilates hay leo núi.",
+      "description": "Daily Sunscreen — sản phẩm đầu tiên của PAROS. Chống nắng SPF50+ / PA++++, mỹ phẩm chức năng. Công thức do những người thật sự chạy bộ chọn ra qua so sánh ẩn tên nhà sản xuất. Dự kiến ra mắt nửa đầu năm 2027.",
       "ogAlt": "PAROS Daily Sunscreen đặt trên bề mặt sáng"
     },
     "hero": {
@@ -181,8 +220,7 @@
       "values": {
         "category": "Mỹ phẩm chức năng (chống tia UV)",
         "pending": "Sẽ xác nhận",
-        "texture": "Hybrid thiên hữu cơ, dạng lotion / milk",
-        "waterResistant": "Kháng nước lâu (80 phút)",
+        "waterResistant": "Kháng nước lâu",
         "scent": "Không hương liệu",
         "tone": "Không nâng tông · không trắng bệch",
         "area": "Mặt và cổ",
@@ -223,20 +261,24 @@
           "a": "PAROS là thương hiệu làm đẹp cho lối sống năng động, dành cho nam nữ ở độ tuổi 20-30 thường xuyên vận động. Tên gọi đến từ đảo Paros ở biển Aegean. Đây là thương hiệu đầu tiên do AVORA LABS tạo ra, không chỉ dành riêng cho vận động viên mà cho tất cả những ai đang chuyển động."
         },
         {
+          "q": "Công thức do các bạn tự phát triển phải không?",
+          "a": "Không. Chúng tôi chọn từ những công thức nhà máy đã có sẵn và đã qua kiểm nghiệm, thẩm định. Thay vì phát triển công thức mới, chúng tôi giao việc chọn cho những người thật sự tập luyện. Ba mươi đến năm mươi người so sánh các mẫu đã ẩn tên nhà sản xuất theo cùng một bộ tiêu chí, và chúng tôi công bố nguyên kết quả tổng hợp."
+        },
+        {
           "q": "Daily Sunscreen có chỉ số chống nắng bao nhiêu?",
-          "a": "SPF50+ / PA++++, mức cao nhất theo tiêu chuẩn Hàn Quốc, được thiết kế cho các hoạt động ngoài trời kéo dài."
+          "a": "SPF50+ / PA++++, mức cao nhất theo tiêu chuẩn Hàn Quốc. Chúng tôi đặt mức này dựa trên các hoạt động ngoài trời kéo dài."
         },
         {
           "q": "Có dùng được khi tập luyện không?",
-          "a": "Có. Sản phẩm được thiết kế hướng tới công thức kháng nước giữ vững trước mồ hôi, với lớp finish nhẹ không cản trở chuyển động. Nếu ra nhiều mồ hôi, nên thoa lại trước mốc hai giờ."
+          "a": "Có. Khả năng kháng nước giữ vững trước mồ hôi là điều kiện chúng tôi luôn kiểm tra khi chọn công thức, cùng với lớp finish nhẹ không cản trở chuyển động. Nếu ra nhiều mồ hôi, nên thoa lại trước mốc hai giờ."
         },
         {
           "q": "Có để lại vệt trắng không?",
-          "a": "Giảm thiểu vệt trắng là một trong những mục tiêu thiết kế cốt lõi. Mục tiêu là gel dạng nước không để lại vệt trắng; công thức cuối cùng được xác nhận qua đánh giá cảm quan."
+          "a": "Không để lại vệt trắng là điều kiện chúng tôi không nhân nhượng khi chọn công thức. Nhóm thử nghiệm kiểm tra ngay sau khi thoa và 30 giây sau dưới cùng một ánh sáng; công thức không đạt ở hạng mục này sẽ không được dùng dù tổng điểm có cao hơn."
         },
         {
           "q": "Sản phẩm có mùi hương không?",
-          "a": "Hương liệu và màu nhân tạo được giảm tối đa, hướng đến công thức không mùi, phù hợp với mọi người không phân biệt giới tính."
+          "a": "Giảm tối đa hương liệu và màu nhân tạo để không mùi là một trong những điều kiện chúng tôi đặt ra. Sản phẩm phù hợp với mọi người không phân biệt giới tính."
         }
       ]
     },
@@ -265,8 +307,8 @@
     "backToStory": "Quay lại câu chuyện thương hiệu",
     "standards": {
       "kicker": "Tiêu chí chúng tôi chọn",
-      "lead": "Không cay mắt, không trắng bệch",
-      "body": "Công thức không đạt một trong hai điều này sẽ bị loại, dù những điểm khác có tốt đến đâu. Khi sản phẩm chưa có thật, thứ chúng tôi hứa được không phải là thông số đã hoàn thiện mà là điều chúng tôi không nhân nhượng."
+      "lead": "Có hai điều chúng tôi không nhân nhượng.",
+      "body": "Không được cay mắt khi mồ hôi chảy vào, và không được để lại vệt trắng trên bất kỳ tông da nào. Công thức không đạt một trong hai điều này sẽ bị loại, dù những điểm khác có tốt đến đâu. Phán quyết không thuộc về chúng tôi mà thuộc về kết quả tổng hợp của nhóm thử nghiệm."
     }
   },
   "support": {

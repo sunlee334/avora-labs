@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { ORIGIN, BUSINESS } from '../../src/config/site';
 import { jsonLdOf, sitemapUrls } from '../support/sitemap';
 import en from '../../src/i18n/en.json' with { type: 'json' };
+import ko from '../../src/i18n/ko.json' with { type: 'json' };
 
 /**
  * 제품 페이지와 구조화 데이터.
@@ -58,10 +59,23 @@ test.describe('제품 상세', () => {
      * 사실로 적으면 표시·광고 문제가 됩니다.
      *
      * 그래서 검사하는 것은 "확정 예정이 몇 개인가" 가 아니라 **미확정인 것이
-     * 미확정으로 보이는가** 입니다. 차단지수·제형·내수성 세 줄에는 값이 있되
-     * '목표' 꼬리표가 붙어 있어야 합니다.
+     * 미확정으로 보이는가** 입니다. 차단지수·제형·내수성 세 줄이 그 대상입니다.
+     *
+     * 미확정을 드러내는 방법은 두 가지고, 둘 중 어느 쪽이든 됩니다.
+     *   값이 있으면 → '목표' 꼬리표
+     *   값이 없으면 → '확정 예정'
+     * 처음에는 꼬리표 개수를 3으로 박아 두었는데, 제형이 값을 잃고 '확정
+     * 예정' 으로 바뀌자 **더 정직해졌는데도** 검사가 깨졌습니다. 개수가 아니라
+     * 줄마다 확인합니다.
      */
-    await expect(page.locator('.spec .spec__target')).toHaveCount(3);
+    // 라벨을 여기 베껴 적으면 문구를 다듬을 때마다 이 검사가 함께 깨집니다.
+    const labels = ko.product.spec.labels;
+    for (const label of [labels.protection, labels.texture, labels.waterResistant]) {
+      const row = page.locator('.spec .spec__row').filter({ hasText: label }).first();
+      await expect(row, `${label} 줄`).toHaveCount(1);
+      const marks = await row.locator('.spec__target, .spec__value--pending').count();
+      expect(marks, `${label} 이 확정된 것처럼 보입니다`).toBe(1);
+    }
 
     // 값이 없는 항목은 여전히 감추지 않고 "확정 예정" 으로 드러냅니다.
     const rows = await page.locator('.spec .spec__row').count();

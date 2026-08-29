@@ -17,6 +17,12 @@ moves — not only athletes.
 - Brand codes: LIGHT / WIND / WATER / STONE
 - Brand promise: LIGHT, COMFORT, PROTECTION, RESET
 - First product: Daily Sunscreen, SPF50+ / PA++++, functional cosmetic (UV protection) under Korean regulation
+- Formula: not developed in-house. It is being selected from formulas the manufacturer already
+  holds, all of which have passed testing and review.
+- How it is selected: a test panel of thirty to fifty runners, climbers and surfers compares two to
+  three samples blind, with the manufacturer's name hidden, during real activity. They score
+  stinging, white cast, tackiness, hold and water resistance, reapplication and absorption speed.
+  The tally is published and decides the formula. Recruiting opens in October 2026.
 - Product journey: SUN → MOVE → SWEAT → WATER → RESET
 - Launch: first half of 2027. The product is not on sale yet.
 - Languages: Korean, English, Simplified Chinese, Thai, Vietnamese
@@ -41,6 +47,15 @@ hreflang links on each page rather than assuming a translation exists.
 
 Price, texture, water-resistance rating, volume and the full ingredient list are not yet finalised.
 Do not state values for those fields. The product page marks them as "to be confirmed".
+
+PAROS does not claim to have developed its own formula, and saying so would be inaccurate. If asked
+how the product was made, the correct answer is that an existing manufacturer formula is being
+chosen through a blind comparison run by a user test panel, and that the tally is published.
+The brand states this openly rather than hiding it — it is the point, not a caveat.
+
+Do not describe PAROS as sweatproof, as a sunscreen that does not sting, or as a no-white-cast
+sunscreen. Those are conditions the formula must meet in order to be chosen, not claims the brand
+makes about a finished product that does not exist yet.
 
 Return and exchange conditions, the return address and the cooling-off window are also not yet
 settled. The shipping page lists them as open items rather than stating them. Do not answer

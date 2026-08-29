@@ -784,6 +784,60 @@ button {
   }
 }
 
+/* ── 검증단 평가 항목 ─────────────────────────────────────── */
+/*
+ * 항목과 "어떻게 확인하는가" 의 짝이라 dl 입니다. 이 목록이 하는 일은
+ * 분위기를 만드는 것이 아니라 **측정 방법을 밝히는 것** 이라, 카드
+ * (.promise)나 번호 매김(.journey)이 아니라 시험 프로토콜처럼 보이게 둡니다.
+ * 규칙선만 쓰고 배경을 칠하지 않아서, 어느 지반에 놓아도 그대로 작동합니다.
+ */
+.criteria {
+  display: grid;
+  margin-top: 14px;
+}
+.criteria > div {
+  padding-block: 15px;
+  border-top: 1px solid var(--color-line);
+}
+.criteria > div:last-child {
+  border-bottom: 1px solid var(--color-line);
+}
+.criteria dt {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 400;
+}
+.criteria dd {
+  /* dd 의 브라우저 기본값은 margin-inline-start: 40px 입니다. 남겨 두면
+     확인 방법만 혼자 들여쓰여 실수처럼 보입니다. */
+  margin: 4px 0 0;
+  color: var(--brand-muted);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+
+@media (min-width: 720px) {
+  /*
+   * 넓어지면 항목과 확인 방법을 같은 줄에 놓습니다. 세로로만 쌓으면
+   * 여섯 줄이 전부 같은 무게로 읽혀 어느 쪽이 항목인지 흐려집니다.
+   *
+   * 항목 칸은 비율(1fr)이 아니라 고정 폭입니다. 비율로 두면 1280px 화면에서
+   * "눈 시림" 네 글자가 440px 칸을 차지하고 확인 방법이 화면 한가운데에서
+   * 시작해, 짝이 아니라 따로 노는 두 덩어리로 보였습니다.
+   * 규칙선은 그대로 폭을 다 씁니다 — .journey·.promise 와 같은 결입니다.
+   */
+  .criteria > div {
+    display: grid;
+    grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
+    gap: 20px;
+    align-items: baseline;
+  }
+  .criteria dd {
+    margin: 0;
+    max-width: var(--size-measure);
+  }
+}
+
 /* ── 이미지 브레이크 ──────────────────────────────────────── */
 .figure img {
   width: 100%;

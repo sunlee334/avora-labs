@@ -66,8 +66,8 @@ const h = t.home;
     두고 바로 아래에 놓아, 스크롤 한 번 안에 둘 다 들어오게 합니다.
 
     ── 왜 홈에도 두는가 ───────────────────────────────────────
-    커뮤니티(러닝 크루·클라이밍짐)에서 링크를 타고 온 사람이 스토리 일곱
-    섹션을 다 읽을 확률보다, 첫 화면에서 이메일을 남길 확률이 높습니다.
+    커뮤니티(러닝 크루·클라이밍짐)에서 링크를 타고 온 사람이 스토리를 끝까지
+    다 읽을 확률보다, 첫 화면에서 이메일을 남길 확률이 높습니다.
     홈화면의 역할은 명단을 만드는 것이 아니라 **놓치지 않는** 것입니다.
 
     출시 시기를 먼저 밝히는 이유: "왜 지금 살 수 없는가" 에 답하지 않으면
@@ -167,27 +167,66 @@ const h = t.home;
     <p class="body" style="margin-top: 28px">{h.philosophy.body}</p>
   </section>
 
-  {/* 8 — First Product */}
-  <section class="section wrap rise">
-    <p class="kicker">{h.product.kicker}</p>
-    <h2 class="display display--tight">{h.product.name}</h2>
-    <p class="body" style="margin-top: 14px">{h.product.spec}</p>
+  {/*
+    8 — The Choice
+
+    기획안 2-2-4 의 메시지 위계는 1차 헤드라인(히어로의 FOR EVERY MOVEMENT)
+    → **2차 근거** → 3차 스펙입니다. 그동안 이 사이트에는 1차와 3차만 있고
+    가운데가 비어 있었습니다. 스펙만으로는 근거가 서지 않습니다 — 눈 시림·
+    백탁·스웨트프루프는 이미 경쟁 브랜드가 수치까지 붙여 선점한 언어라,
+    같은 말을 하면 뒤늦게 따라 하는 쪽으로 읽힙니다(기획안 1-4-5).
+
+    그래서 근거를 제품이 아니라 **고르는 과정** 에 둡니다. 이 두 섹션이
+    그 근거층이고, 스펙(First Product) 바로 위에 있어야 위계가 맞습니다.
+  */}
+  <section class="section section--alt wrap rise">
+    <p class="kicker">{h.choice.kicker}</p>
+    <h2 class="display display--tight">{h.choice.lead}</h2>
+    <p class="body" style="margin-top: 26px">{h.choice.body}</p>
+    <p class="body" style="margin-top: 18px">{h.choice.body2}</p>
+  </section>
+
+  {/*
+    9 — Test Panel
+
+    id 를 두는 이유: 기획안 8-2-1 은 인스타그램 프로필 링크를 "자사몰 출시
+    알림 신청 페이지" 로 고정하라고 합니다. 10월 검증단 모집이 시작되면 그
+    링크를 이 자리로 바로 보낼 수 있어야 합니다.
+  */}
+  <section class="section wrap rise" id="panel">
+    <p class="kicker">{h.panel.kicker}</p>
+    <h2 class="display display--tight">{h.panel.lead}</h2>
+    <p class="body" style="margin-top: 26px">{h.panel.body}</p>
+
+    <h3 class="kicker" style="margin-top: 34px">{h.panel.criteriaHeading}</h3>
+    <dl class="criteria">
+      {
+        h.panel.criteria.map((item) => (
+          <div>
+            <dt>{item.term}</dt>
+            <dd>{item.body}</dd>
+          </div>
+        ))
+      }
+    </dl>
+
+    <p class="body" style="margin-top: 24px">{h.panel.note}</p>
 
     {/*
       두 번째 신청 자리.
 
-      폴드 아래도 열람 시간의 43% 를 받습니다(NN/g 2018). 스토리 일곱
-      섹션에 설득된 사람에게 다시 묻지 않는 것은 그냥 버리는 것입니다.
-      같은 폼이지만 말은 다릅니다 — 앞은 "나오면 알려드릴게요", 여기는
-      "여기까지 읽으셨다면".
+      폴드 아래도 열람 시간의 43% 를 받습니다(NN/g 2018). 스토리를 끝까지
+      읽은 사람에게 다시 묻지 않는 것은 그냥 버리는 것입니다.
 
-      ── 왜 "제품 보기" 보다 위인가 ─────────────────────────────
-      처음에는 "제품 보기" 가 위, 폼이 아래였고 둘의 간격이 64px 였습니다.
-      스토리를 끝까지 읽은 사람에게 두 가지를 동시에 시킨 셈이고, 게다가
-      "제품 보기" 를 누르면 도착한 곳에서 **또 같은 요청** 을 받았습니다.
+      ── 왜 First Product 가 아니라 여기인가 ────────────────────
+      전에는 이 폼이 제품 섹션 안에 있었습니다. 옮긴 이유는 요청할 것이
+      생겼기 때문입니다. 기획안 2-2-2 는 검증단을 "알림 신청자 명단의
+      시작점" 으로 잡고 있습니다. 방금 검증단 이야기를 읽은 사람에게
+      모집 소식을 받겠냐고 묻는 것이, 제품 스펙 옆에서 묻는 것보다
+      맥락이 맞습니다.
 
-      지금 1순위는 명단이므로 폼이 주된 것입니다. 제품 페이지로 가는 길은
-      남기되 보조 형태(cta--ghost)로 내립니다.
+      source 는 home-end 를 그대로 둡니다 — 자리는 바뀌었어도 "홈 하단
+      폼" 이라는 역할은 같고, 값을 바꾸면 이전 신청 건과 끊깁니다.
     */}
     {
       !CAN_ORDER && (
@@ -199,12 +238,22 @@ const h = t.home;
         />
       )
     }
+  </section>
+
+  {/*
+    10 — First Product
+
+    폼이 앞 섹션으로 옮겨가면서 여기는 제품 페이지로 가는 길 하나만
+    남았습니다. 그래서 "제품 보기" 를 보조 형태(cta--ghost)로 내릴 이유가
+    없어졌습니다 — 이 섹션에서 유일하게 할 수 있는 일입니다.
+  */}
+  <section class="section wrap rise">
+    <p class="kicker">{h.product.kicker}</p>
+    <h2 class="display display--tight">{h.product.name}</h2>
+    <p class="body" style="margin-top: 14px">{h.product.spec}</p>
 
     <p style="margin-top: 30px">
-      <a
-        class={`cta${!CAN_ORDER ? ' cta--ghost' : ''}`}
-        href={localePath(locale, 'product')}
-      >
+      <a class="cta" href={localePath(locale, 'product')}>
         {h.product.cta}
       </a>
     </p>
