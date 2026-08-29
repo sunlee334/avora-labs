@@ -735,7 +735,7 @@
   "account": {
     "meta": {
       "title": "My Page — PAROS",
-      "description": "Sign in, account details and enquiries. Orders and addresses join once we start selling."
+      "description": "Sign in, account details and enquiries."
     },
     "heading": "My Page",
     "loginHeading": "Sign in",
@@ -842,7 +842,11 @@
       "body": "Once the product launches, this is where you will manage orders and delivery addresses. Signing in now simply carries over.",
       "cta": "Sign up for launch alerts",
       "loginBody": "Sign in now and your orders and addresses will collect here once we launch.",
-      "guestNote": "Signing in is not required right now. Launch alerts work without an account."
+      "guestNote": "Signing in is not required right now. Launch alerts work without an account.",
+      "elsewhere": {
+        "heading": "Orders do not collect in this account",
+        "body": "Sales run elsewhere for now, so those orders do not appear here. Once we sell directly, orders and addresses will be managed on this page."
+      }
     }
   },
   "inquiry": {

@@ -399,8 +399,10 @@ button {
 .nav__dropdown {
   position: absolute;
   top: 100%;
-  /* right 정박 — 트리거가 최상위 목록의 마지막이라 오른쪽으로 치우쳐 앉습니다.
-     left: 0 이면 5개 언어 전부 넘칩니다(최악 vi 133.7px). */
+  /* 정박 기준은 `.nav__group` 입니다 — 그쪽에 position: relative 가 있어서,
+     여기 right: 0 은 **트리거 묶음의 오른쪽 끝** 에 붙습니다. 헤더나 목록
+     정렬과는 무관합니다. 그 relative 를 지우면 정박 기준이 뷰포트로 올라가
+     패널이 화면 오른쪽 끝으로 날아갑니다. */
   right: 0;
   left: auto;
   z-index: 1;

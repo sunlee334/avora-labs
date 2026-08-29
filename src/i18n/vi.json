@@ -735,7 +735,7 @@
   "account": {
     "meta": {
       "title": "Trang của tôi — PAROS",
-      "description": "Đăng nhập, thông tin tài khoản và câu hỏi. Khi bắt đầu bán, đơn hàng và địa chỉ cũng sẽ được quản lý ở đây."
+      "description": "Đăng nhập, thông tin tài khoản và câu hỏi."
     },
     "heading": "Trang của tôi",
     "loginHeading": "Đăng nhập",
@@ -842,7 +842,11 @@
       "body": "Khi sản phẩm ra mắt, đây là nơi bạn quản lý đơn hàng và địa chỉ giao hàng. Đăng nhập bây giờ thì mọi thứ sẽ tiếp nối sau khi ra mắt.",
       "cta": "Đăng ký nhận thông báo ra mắt",
       "loginBody": "Đăng nhập bây giờ, đơn hàng và địa chỉ sẽ được lưu vào tài khoản này sau khi ra mắt.",
-      "guestNote": "Hiện chưa cần đăng nhập. Bạn vẫn nhận được thông báo ra mắt mà không cần tài khoản."
+      "guestNote": "Hiện chưa cần đăng nhập. Bạn vẫn nhận được thông báo ra mắt mà không cần tài khoản.",
+      "elsewhere": {
+        "heading": "Đơn hàng không được lưu vào tài khoản này",
+        "body": "Hiện sản phẩm được bán ở nơi khác nên đơn hàng từ đó không hiển thị tại đây. Khi chúng tôi bán trực tiếp, đơn hàng và địa chỉ sẽ được quản lý ở trang này."
+      }
     }
   },
   "inquiry": {

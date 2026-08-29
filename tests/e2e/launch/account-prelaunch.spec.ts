@@ -82,6 +82,22 @@ test.describe('출시 전 마이페이지', () => {
     }
   });
 
+  test('안내와 감추기가 같은 조건으로 움직인다', async ({ page }) => {
+    /*
+     * 감싸개가 감춰졌는데 왜 감춰졌는지는 아무 데도 없는 상태가 되면 안
+     * 됩니다 — 이 커밋이 없애려던 화면이 바로 그것입니다. 둘은 같은 조건
+     * (SELLS_DIRECTLY)을 봐야 하고, 무엇을 말할지만 CAN_ORDER 로 갈립니다.
+     */
+    await page.goto('/ko/account');
+    const r = await page.evaluate(() => ({
+      hiddenWraps: [...document.querySelectorAll<HTMLElement>('[data-order-only]')]
+        .filter((w) => w.hidden).length,
+      notice: document.querySelectorAll('.preLaunch').length,
+    }));
+    expect(r.hiddenWraps, '감춰진 감싸개').toBeGreaterThan(0);
+    expect(r.notice, '감췄으면 이유를 말해야 합니다').toBe(1);
+  });
+
   test('5개 언어 모두 안내 문구가 있다', async ({ request }) => {
     for (const lang of ['ko', 'en', 'zh', 'th', 'vi']) {
       const html = await (await request.get(`/${lang}/account`)).text();

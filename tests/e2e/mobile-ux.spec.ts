@@ -59,16 +59,15 @@ const WIDTHS = [320, 360, 390, 430];
  * 첫머리의 설명은 모든 화면을 잰다고 읽히는데 실제로는 네 화면이 빠져
  * 있었고, `noUnusedLocals` 가 없어 아무도 알려주지 않았습니다.
  *
- * 이 스펙 파일은 commerce·launch 양쪽에서 도는데(루트 폴더) 이 네 화면은
- * commerce 에만 있으므로, 없는 빌드에서는 건너뜁니다.
+ * 이름과 달리 **두 모드 모두에 존재합니다.** 장바구니는 "가격이 확정되면
+ * 주문할 수 있습니다", 체크아웃은 "결제 준비가 아직 완료되지 않았습니다" 를
+ * 보여주고, 마이페이지는 출시 전 안내를 냅니다 — 그 화면들이야말로 지금
+ * 손님이 실제로 보는 것이라 검사에서 빠지면 안 됩니다.
  */
 const COMMERCE_PAGES = ['/ko/cart', '/ko/checkout', '/ko/order/lookup', '/ko/account'];
 
-/** commerce 빌드에서만 존재하는 화면인가. */
-const COMMERCE_BUILD = process.env.E2E_MODE !== 'launch';
-
 test.describe('모바일 레이아웃', () => {
-  for (const path of [...PAGES, ...POST_PAGES, ...(COMMERCE_BUILD ? COMMERCE_PAGES : [])]) {
+  for (const path of [...PAGES, ...POST_PAGES, ...COMMERCE_PAGES]) {
     test(`${path} — 320~430px 폭에서 가로 스크롤이 없다`, async ({ page }) => {
       for (const width of WIDTHS) {
         await page.setViewportSize({ width, height: 800 });
@@ -105,7 +104,7 @@ test.describe('모바일 레이아웃', () => {
     return tooSmall;
   }
 
-  for (const path of [...PAGES, ...POST_PAGES, ...(COMMERCE_BUILD ? COMMERCE_PAGES : [])]) {
+  for (const path of [...PAGES, ...POST_PAGES, ...COMMERCE_PAGES]) {
     test(`${path} — 탭 가능한 요소가 최소 44×44px`, async ({ page }) => {
       await page.setViewportSize({ width: 390, height: 844 });
       await page.goto(path);

@@ -38,9 +38,8 @@ const utility = UTILITY_VISIBLE.filter((item) => item.badge !== 'cart');
     화살표를 조건부로 그리지 않습니다 — 화살표 마크업은 kind:'group' 가지
     안에만 존재할 수 있습니다.
 
-    패널은 right: 0 정박입니다. 트리거가 최상위 목록의 마지막이라 오른쪽으로
-    치우쳐 앉고, left: 0 이면 5개 언어 전부 뷰포트를 넘칩니다(최악 vi 133.7px).
-    body{overflow-x:hidden} 때문에 스크롤바 없이 잘립니다.
+    패널은 right: 0 정박이고, 기준은 `.nav__group` 의 position: relative 입니다
+    — 트리거 묶음의 오른쪽 끝에 붙습니다. 목록 정렬과는 무관합니다.
   */}
   <ul class="nav__links">
     {
