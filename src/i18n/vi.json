@@ -17,6 +17,16 @@
     "faq": "Câu hỏi thường gặp",
     "reviews": "Đánh giá"
   },
+  "notify": {
+    "emailLabel": "Địa chỉ email",
+    "emailPlaceholder": "you@example.com",
+    "submit": "Nhận thông báo ra mắt",
+    "sending": "Đang đăng ký…",
+    "done": "Đã đăng ký. Chúng tôi sẽ gửi tin đến địa chỉ này.",
+    "invalid": "Vui lòng kiểm tra lại địa chỉ email.",
+    "error": "Lần này chưa đăng ký được. Vui lòng thử lại sau giây lát.",
+    "consent": "Tôi đồng ý nhận email quảng cáo. Mỗi email đều có liên kết hủy nhận."
+  },
   "home": {
     "meta": {
       "title": "PAROS — For every movement.",
@@ -99,6 +109,16 @@
       "name": "Daily Sunscreen",
       "spec": "SPF50+ / PA++++ · Gel dạng nước · Công thức kháng nước",
       "cta": "Xem sản phẩm"
+    },
+    "notify": {
+      "hero": {
+        "heading": "Bạn sẽ là người biết đầu tiên.",
+        "body": "Chỉ hai lần: khi mở gọi vốn và khi chính thức ra mắt."
+      },
+      "end": {
+        "heading": "Đã đọc đến đây, bạn muốn nhận tin chứ?",
+        "body": "Ngày sản phẩm ra mắt, chúng tôi sẽ gửi tin đến địa chỉ này."
+      }
     }
   },
   "product": {
@@ -118,15 +138,7 @@
       "launchWindow": "Dự kiến ra mắt nửa đầu năm 2027",
       "notify": {
         "heading": "Chúng tôi sẽ báo khi sản phẩm ra mắt",
-        "body": "Chỉ hai lần: khi mở gọi vốn và khi chính thức ra mắt.",
-        "emailLabel": "Địa chỉ email",
-        "emailPlaceholder": "you@example.com",
-        "submit": "Nhận thông báo ra mắt",
-        "sending": "Đang đăng ký…",
-        "done": "Đã đăng ký. Chúng tôi sẽ gửi tin đến địa chỉ này.",
-        "invalid": "Vui lòng kiểm tra lại địa chỉ email.",
-        "error": "Lần này chưa đăng ký được. Vui lòng thử lại sau giây lát.",
-        "consent": "Tôi đồng ý nhận email quảng cáo. Mỗi email đều có liên kết hủy nhận."
+        "body": "Chỉ hai lần: khi mở gọi vốn và khi chính thức ra mắt."
       }
     },
     "principles": {

@@ -27,9 +27,20 @@ async function drain(res: Response): Promise<void> {
   }
 }
 
+/**
+ * 화면에 폼이 여러 개일 수 있습니다.
+ *
+ * 홈은 첫 화면과 스토리 끝, 두 자리에 같은 폼을 둡니다. querySelector 로
+ * 하나만 잡으면 두 번째 폼은 **눌러도 아무 일이 없는 폼** 이 됩니다 —
+ * 화면에는 멀쩡히 보이므로 아무도 알아채지 못합니다.
+ */
 export function mountLaunchNotify(): void {
-  const form = document.querySelector<HTMLFormElement>('[data-launch-notify]');
-  if (!form) return;
+  for (const form of document.querySelectorAll<HTMLFormElement>('[data-launch-notify]')) {
+    mountOne(form);
+  }
+}
+
+function mountOne(form: HTMLFormElement): void {
 
   const copy = JSON.parse(form.dataset.copy ?? '{}') as Copy;
   const input = form.querySelector<HTMLInputElement>('input[name="email"]');

@@ -17,6 +17,16 @@
     "faq": "FAQ",
     "reviews": "Reviews"
   },
+  "notify": {
+    "emailLabel": "Email address",
+    "emailPlaceholder": "you@example.com",
+    "submit": "Notify me at launch",
+    "sending": "Signing up…",
+    "done": "You're on the list. We'll write to this address.",
+    "invalid": "Please check the email address.",
+    "error": "That didn't go through. Please try again in a moment.",
+    "consent": "I agree to receive marketing email. Every message carries an unsubscribe link."
+  },
   "home": {
     "meta": {
       "title": "PAROS — For every movement.",
@@ -99,6 +109,16 @@
       "name": "Daily Sunscreen",
       "spec": "SPF50+ / PA++++ · Watery gel · Water-resistant formula",
       "cta": "View product"
+    },
+    "notify": {
+      "hero": {
+        "heading": "You'll be the first to know.",
+        "body": "Twice only — when the funding opens, and when it launches."
+      },
+      "end": {
+        "heading": "If you read this far, shall we write to you?",
+        "body": "We'll send word to this address the day it launches."
+      }
     }
   },
   "product": {
@@ -118,15 +138,7 @@
       "launchWindow": "Launching in the first half of 2027",
       "notify": {
         "heading": "We'll tell you when it's out",
-        "body": "Twice only — when the funding opens, and when it launches.",
-        "emailLabel": "Email address",
-        "emailPlaceholder": "you@example.com",
-        "submit": "Notify me at launch",
-        "sending": "Signing up…",
-        "done": "You're on the list. We'll write to this address.",
-        "invalid": "Please check the email address.",
-        "error": "That didn't go through. Please try again in a moment.",
-        "consent": "I agree to receive marketing email. Every message carries an unsubscribe link."
+        "body": "Twice only — when the funding opens, and when it launches."
       }
     },
     "principles": {

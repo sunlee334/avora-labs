@@ -17,6 +17,16 @@
     "faq": "자주 묻는 질문",
     "reviews": "리뷰"
   },
+  "notify": {
+    "emailLabel": "이메일 주소",
+    "emailPlaceholder": "you@example.com",
+    "submit": "출시 알림 받기",
+    "sending": "신청하는 중…",
+    "done": "신청되었습니다. 이 주소로 소식을 보내드릴게요.",
+    "invalid": "이메일 주소를 다시 확인해 주세요.",
+    "error": "지금은 신청되지 않았습니다. 잠시 후 다시 시도해 주세요.",
+    "consent": "광고성 정보 수신에 동의합니다. 보내는 메일의 링크로 언제든 해지할 수 있습니다."
+  },
   "home": {
     "meta": {
       "title": "PAROS — For every movement.",
@@ -99,6 +109,16 @@
       "name": "Daily Sunscreen",
       "spec": "SPF50+ / PA++++ · 워터리 젤 · 내수성 처방",
       "cta": "제품 보기"
+    },
+    "notify": {
+      "hero": {
+        "heading": "나오면 가장 먼저 알려드릴게요.",
+        "body": "펀딩이 열릴 때와 정식 출시 때, 두 번만 보냅니다."
+      },
+      "end": {
+        "heading": "여기까지 읽으셨다면, 소식을 받아 보시겠어요?",
+        "body": "제품이 나오는 날 이 주소로 알려드리겠습니다."
+      }
     }
   },
   "product": {
@@ -118,15 +138,7 @@
       "launchWindow": "2027년 상반기 출시 예정",
       "notify": {
         "heading": "나오면 알려드릴게요",
-        "body": "펀딩이 열릴 때와 정식 출시 때, 두 번만 보냅니다.",
-        "emailLabel": "이메일 주소",
-        "emailPlaceholder": "you@example.com",
-        "submit": "출시 알림 받기",
-        "sending": "신청하는 중…",
-        "done": "신청되었습니다. 이 주소로 소식을 보내드릴게요.",
-        "invalid": "이메일 주소를 다시 확인해 주세요.",
-        "error": "지금은 신청되지 않았습니다. 잠시 후 다시 시도해 주세요.",
-        "consent": "광고성 정보 수신에 동의합니다. 보내는 메일의 링크로 언제든 해지할 수 있습니다."
+        "body": "펀딩이 열릴 때와 정식 출시 때, 두 번만 보냅니다."
       }
     },
     "principles": {

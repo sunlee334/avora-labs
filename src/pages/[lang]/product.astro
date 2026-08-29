@@ -157,7 +157,12 @@ const specRows = [
              * 있었습니다. 제품이 2027년 상반기에 나오는데, 그때까지 관심이
              * 생긴 사람이 남길 수 있는 것이 아무것도 없었습니다.
              */
-            <LaunchNotify locale={locale} source="product" />
+            <LaunchNotify
+              locale={locale}
+              source="product"
+              heading={p.hero.notify.heading}
+              body={p.hero.notify.body}
+            />
           )
         }
       </div>

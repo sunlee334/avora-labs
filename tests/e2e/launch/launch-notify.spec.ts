@@ -101,3 +101,67 @@ test.describe('출시 알림 API', () => {
     expect(res.status()).toBe(200);
   });
 });
+
+test.describe('홈 신청 자리', () => {
+  test('첫 화면과 스토리 끝, 두 자리에 있다', async ({ page }) => {
+    await page.goto('/ko/');
+    await expect(page.locator('[data-launch-notify]')).toHaveCount(2);
+    await expect(page.locator('[data-launch-notify][data-source="home-hero"]')).toHaveCount(1);
+    await expect(page.locator('[data-launch-notify][data-source="home-end"]')).toHaveCount(1);
+  });
+
+  test('첫 화면 자리가 사진 바로 다음에 온다', async ({ page }) => {
+    // 스토리를 지나야 나오면 커뮤니티에서 온 사람이 못 보고 떠납니다.
+    await page.goto('/ko/');
+    const y = await page.locator('[data-source="home-hero"]').evaluate(
+      (el) => el.getBoundingClientRect().top + window.scrollY,
+    );
+    const story = await page.locator('#story').evaluate(
+      (el) => el.getBoundingClientRect().top + window.scrollY,
+    );
+    expect(y, '신청 자리가 오리진 섹션보다 위에 있어야 합니다').toBeLessThan(story);
+  });
+
+  test('출시 시기를 제품 페이지와 같은 말로 밝힌다', async ({ page }) => {
+    // 두 화면이 다른 날짜를 말하면 어느 쪽을 믿어야 할지 알 수 없습니다.
+    await page.goto('/ko/');
+    const home = await page.locator('.product-hero__window').innerText();
+    await page.goto('/ko/product');
+    const product = await page.locator('.product-hero__window').innerText();
+    expect(home).toBe(product);
+  });
+
+  test('두 자리가 서로 다른 말을 한다', async ({ page }) => {
+    await page.goto('/ko/');
+    const first = await page.locator('[data-source="home-hero"] .notify__heading').innerText();
+    const second = await page.locator('[data-source="home-end"] .notify__heading').innerText();
+    expect(first).not.toBe(second);
+  });
+
+  test('두 번째 폼도 실제로 동작한다', async ({ page }) => {
+    // querySelector 로 하나만 잡으면 두 번째는 눌러도 아무 일이 없는 폼이
+    // 됩니다 — 화면에는 멀쩡히 보이므로 아무도 알아채지 못합니다.
+    await page.goto('/ko/');
+    const form = page.locator('[data-source="home-end"]');
+    await form.locator('input[name="email"]').fill(freshEmail());
+    await form.locator('[data-notify-submit]').click();
+    await expect(form.locator('[data-notify-state]')).toHaveAttribute('data-tone', 'ok');
+  });
+
+  test('한 쪽에 넣어도 다른 쪽은 그대로다', async ({ page }) => {
+    await page.goto('/ko/');
+    const hero = page.locator('[data-source="home-hero"]');
+    await hero.locator('input[name="email"]').fill(freshEmail());
+    await hero.locator('[data-notify-submit]').click();
+    await expect(hero.locator('[data-notify-state]')).toHaveAttribute('data-tone', 'ok');
+    // 두 번째 폼의 입력칸은 그대로 열려 있어야 합니다.
+    await expect(page.locator('[data-source="home-end"] .notify__row')).toBeVisible();
+  });
+
+  test('5개 언어 모두 두 자리가 있다', async ({ page }) => {
+    for (const lang of ['ko', 'en', 'zh', 'th', 'vi']) {
+      await page.goto(`/${lang}/`);
+      await expect(page.locator('[data-launch-notify]'), lang).toHaveCount(2);
+    }
+  });
+});

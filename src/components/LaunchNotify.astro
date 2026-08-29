@@ -28,10 +28,17 @@ interface Props {
   locale: Locale;
   /** 어느 화면에서 신청했는지 기록합니다 — 어디가 명단을 만드는지 알아야 합니다. */
   source: string;
+  /**
+   * 자리마다 말이 달라야 합니다. 첫 화면에서는 "나오면 알려드릴게요" 지만,
+   * 스토리를 다 읽은 사람에게는 "여기까지 읽으셨다면" 이 맞습니다.
+   * 라벨·버튼·결과 문구는 자리와 무관하므로 공유(`t.notify`)에서 옵니다.
+   */
+  heading: string;
+  body: string;
 }
 
-const { locale, source } = Astro.props;
-const n = dict(locale).product.hero.notify;
+const { locale, source, heading, body } = Astro.props;
+const n = dict(locale).notify;
 ---
 
 <form
@@ -48,8 +55,8 @@ const n = dict(locale).product.hero.notify;
     submit: n.submit,
   })}
 >
-  <p class="notify__heading">{n.heading}</p>
-  <p class="notify__body">{n.body}</p>
+  <p class="notify__heading">{heading}</p>
+  <p class="notify__body">{body}</p>
 
   <div class="notify__row">
     <label class="notify__field">

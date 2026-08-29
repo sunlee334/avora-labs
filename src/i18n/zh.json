@@ -17,6 +17,16 @@
     "faq": "常见问题",
     "reviews": "评价"
   },
+  "notify": {
+    "emailLabel": "电子邮箱",
+    "emailPlaceholder": "you@example.com",
+    "submit": "接收上市通知",
+    "sending": "正在提交…",
+    "done": "已登记。我们会发到这个邮箱。",
+    "invalid": "请再确认一下邮箱地址。",
+    "error": "这次没有提交成功，请稍后再试。",
+    "consent": "我同意接收营销邮件。每封邮件都附有退订链接。"
+  },
   "home": {
     "meta": {
       "title": "PAROS — For every movement.",
@@ -99,6 +109,16 @@
       "name": "Daily Sunscreen",
       "spec": "SPF50+ / PA++++ · 水感凝胶 · 抗水配方",
       "cta": "查看产品"
+    },
+    "notify": {
+      "hero": {
+        "heading": "上市时第一时间通知您。",
+        "body": "只发两次：众筹开始时，以及正式上市时。"
+      },
+      "end": {
+        "heading": "既然读到这里，要不要收个通知？",
+        "body": "产品上市那天，我们会发到这个邮箱。"
+      }
     }
   },
   "product": {
@@ -118,15 +138,7 @@
       "launchWindow": "预计 2027 年上半年上市",
       "notify": {
         "heading": "上市时通知您",
-        "body": "只发两次：众筹开始时，以及正式上市时。",
-        "emailLabel": "电子邮箱",
-        "emailPlaceholder": "you@example.com",
-        "submit": "接收上市通知",
-        "sending": "正在提交…",
-        "done": "已登记。我们会发到这个邮箱。",
-        "invalid": "请再确认一下邮箱地址。",
-        "error": "这次没有提交成功，请稍后再试。",
-        "consent": "我同意接收营销邮件。每封邮件都附有退订链接。"
+        "body": "只发两次：众筹开始时，以及正式上市时。"
       }
     },
     "principles": {
