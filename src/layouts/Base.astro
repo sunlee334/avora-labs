@@ -19,6 +19,7 @@ import { dict, alternates, localePath } from '../i18n';
 // 여기 값을 베껴 적으면 팔레트가 바뀔 때 이 한 줄만 옛 색으로 남습니다.
 import tokens from '../../tokens/design-tokens.json';
 import { PRELOAD } from '../config/fonts';
+import { GA_MEASUREMENT_ID, ANALYTICS_HOST } from '../config/analytics';
 
 interface Props {
   locale: Locale;
@@ -199,6 +200,37 @@ const xDefault = !wanted || wanted.includes(DEFAULT_LOCALE)
       is:inline 인 이유: Astro 가 번들에 넣으면 외부 스크립트가 아니게 되어
       beacon 이 자기 토큰을 읽지 못합니다.
     */}
+    {/*
+      Google Analytics 4.
+
+      ── 왜 인라인 한 덩어리인가 ────────────────────────────────
+      `<script src>` 를 그냥 놓으면 로컬·프리뷰·테스트에서도 요청이 나갑니다.
+      그래서 **주소를 먼저 보고** 운영 도메인일 때만 gtag 를 불러옵니다.
+      판정이 브라우저에 있으므로 빌드 종류와 무관하게 새지 않습니다.
+
+      `is:inline` 인 이유: Astro 가 번들에 넣으면 `gtag` 가 모듈 스코프에
+      갇혀 다른 스크립트에서 부를 수 없게 됩니다.
+
+      ⚠️ 이 태그는 쿠키(`_ga`)를 심습니다. 처리방침의 쿠키 조항
+         (`legal.privacy.cookies`)과 **항상 같이 나가야 합니다.** 태그만 먼저
+         나가면 그 시점부터 법정 기재사항 누락 상태가 됩니다.
+    */}
+    <script is:inline define:vars={{ id: GA_MEASUREMENT_ID, host: ANALYTICS_HOST }}>
+      if (location.hostname === host) {
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function () {
+          window.dataLayer.push(arguments);
+        };
+        window.gtag('js', new Date());
+        window.gtag('config', id);
+
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
+        document.head.appendChild(s);
+      }
+    </script>
+
     {
       WEB_ANALYTICS_TOKEN && (
         <script

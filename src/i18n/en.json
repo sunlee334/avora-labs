@@ -575,6 +575,10 @@
       "analytics": {
         "heading": "Traffic measurement",
         "body": "We count how often each page is opened using Cloudflare Web Analytics. What it records is the page address, where you came from, your browser and operating system, device type, country, and how long the page took to render. It sets no cookies, stores nothing in your browser, and does not use your IP address or browser details to single you out or follow you across other sites. So we cannot tell who visited, and we do not ask for consent."
+      },
+      "cookies": {
+        "heading": "Cookies",
+        "body": "We use Google Analytics to count which screens are opened, how visitors arrived, and whether they went on to sign up. It sets cookies in your browser (values beginning with _ga) so that one visitor’s movements are counted together. What it keeps is the referring path, the screens viewed, the device and browser type, and an approximate region. We do not send names, email addresses or postal addresses to this tool.\n\nYou can turn it off at any time. Block cookies in your browser settings, or install the Google Analytics opt-out add-on that Google publishes. Blocking it does not affect your use of the site in any way."
       }
     },
     "terms": {

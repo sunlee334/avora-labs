@@ -120,6 +120,26 @@ const rows = [
     </h2>
     <p class="body" style="margin-top: 14px">{t.legal.privacy.analytics.body}</p>
 
+    {/*
+      쿠키는 위와 **다른 조항**입니다.
+
+      위 도구(Cloudflare)는 쿠키를 만들지 않아 동의도 거부 절차도 없습니다.
+      Google Analytics 는 쿠키를 심으므로 「개인정보 보호법」상 자동 수집 장치의
+      설치·운영과 **거부 방법**이 법정 기재사항이 됩니다. 둘을 한 문단에 섞으면
+      "쿠키를 안 쓴다" 와 "쿠키를 쓴다" 가 같은 자리에 놓여 어느 쪽도 참이
+      아니게 됩니다.
+
+      문단이 둘로 나뉘어 있어 빈 줄로 끊어 그립니다.
+    */}
+    <h2 class="display display--tight" style="margin-top: 44px">
+      {t.legal.privacy.cookies.heading}
+    </h2>
+    {
+      t.legal.privacy.cookies.body.split('\n\n').map((para) => (
+        <p class="body" style="margin-top: 14px">{para}</p>
+      ))
+    }
+
     <p class="cart__notice" style="margin-top: 36px">{c.pending}</p>
   </section>
 </Base>

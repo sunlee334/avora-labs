@@ -575,6 +575,10 @@
       "analytics": {
         "heading": "Đo lượt truy cập",
         "body": "Chúng tôi dùng Cloudflare Web Analytics để đếm mỗi trang được mở bao nhiêu lần. Những gì được ghi lại là địa chỉ trang, nguồn bạn đến từ đâu, trình duyệt và hệ điều hành, loại thiết bị, quốc gia truy cập, và thời gian trang hiển thị. Công cụ này không tạo cookie, không lưu gì trong trình duyệt của bạn, và không dùng địa chỉ IP hay thông tin trình duyệt để nhận dạng bạn hoặc theo dõi bạn qua các trang khác. Vì vậy chúng tôi không biết ai đã truy cập, và không xin đồng ý riêng."
+      },
+      "cookies": {
+        "heading": "Cookie",
+        "body": "Chúng tôi dùng Google Analytics để đếm những màn hình nào được mở, khách truy cập đến từ đâu, và có đi tiếp đến bước đăng ký hay không. Công cụ này đặt cookie trong trình duyệt (các giá trị bắt đầu bằng _ga) để gộp các lượt xem của cùng một người. Những gì được giữ lại là đường dẫn dẫn vào, các màn hình đã xem, loại thiết bị và trình duyệt, cùng khu vực gần đúng. Chúng tôi không gửi tên, địa chỉ email hay địa chỉ nhà đến công cụ này.\n\nBạn có thể tắt bất cứ lúc nào. Hãy chặn cookie trong cài đặt trình duyệt, hoặc cài tiện ích từ chối Analytics do Google phát hành. Việc tắt không ảnh hưởng gì đến việc bạn sử dụng trang web."
       }
     },
     "terms": {

@@ -34,6 +34,14 @@ async function drain(res: Response): Promise<void> {
  * 하나만 잡으면 두 번째 폼은 **눌러도 아무 일이 없는 폼** 이 됩니다 —
  * 화면에는 멀쩡히 보이므로 아무도 알아채지 못합니다.
  */
+declare global {
+  interface Window {
+    /** Google Analytics 4 가 심는 전역. 계측이 꺼진 환경에서는 없습니다. */
+    gtag?: (command: string, action: string, params?: Record<string, unknown>) => void;
+  }
+}
+
+
 export function mountLaunchNotify(): void {
   for (const form of document.querySelectorAll<HTMLFormElement>('[data-launch-notify]')) {
     mountOne(form);
@@ -88,6 +96,21 @@ function mountOne(form: HTMLFormElement): void {
       await drain(res);
 
       if (res.ok) {
+        /*
+         * 전환 기록은 **응답을 받은 뒤** 입니다.
+         *
+         * 클릭 시점에 심으면 형식 오류와 네트워크 실패까지 전환으로 잡힙니다.
+         * 12월에 명단 800명을 기준으로 판단을 다시 하기로 했는데, 그 수치가
+         * 부풀면 판단이 틀어집니다.
+         *
+         * 이메일은 보내지 않습니다 — GA4 약관 위반이고, 애초에 알 필요가
+         * 없는 값입니다. 어느 자리에서 몇 명이 신청했는지만 남깁니다.
+         */
+        window.gtag?.('event', 'notify_signup', {
+          form_location: form.dataset.source,
+          lang: form.dataset.locale,
+        });
+
         // 이미 신청된 주소여도 서버는 201 을 줍니다. 화면에서 구분하면 그
         // 주소가 명단에 있는지를 아무에게나 알려 주는 것이 됩니다.
         say(copy.done, 'ok');
