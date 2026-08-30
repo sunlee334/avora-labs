@@ -11,6 +11,7 @@ import {
   DEFAULT_LOCALE,
   BUSINESS,
   WEB_ANALYTICS_TOKEN,
+  SITE_VERIFICATION,
   type Locale,
 } from '../config/site';
 import { dict, alternates, localePath } from '../i18n';
@@ -115,6 +116,27 @@ const xDefault = !wanted || wanted.includes(DEFAULT_LOCALE)
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageUrl} />
+
+    {/*
+      검색엔진 사이트 소유권 확인.
+
+      ── 왜 모든 페이지에 나가는가 ──────────────────────────────
+      네이버는 확인 시점에 어느 주소를 볼지 우리가 정하지 않고, 확인이 끝난
+      뒤에도 주기적으로 다시 봅니다. 홈에만 두면 그 재확인이 다른 주소에
+      닿았을 때 소유권이 풀립니다. 레이아웃에 두면 5개 언어 42개 페이지에
+      전부 실립니다.
+
+      값이 없으면 태그 자체가 나가지 않습니다 — 빈 content 는 확인에 실패할
+      뿐 아니라 "뭔가 하려다 만 상태" 라는 신호가 됩니다.
+
+      구글은 여기 없습니다. 도메인 속성을 DNS TXT 로 확인하므로 코드가 아니라
+      Cloudflare DNS 쪽 일입니다.
+    */}
+    {
+      SITE_VERIFICATION.naver && (
+        <meta name="naver-site-verification" content={SITE_VERIFICATION.naver} />
+      )
+    }
 
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png" />
