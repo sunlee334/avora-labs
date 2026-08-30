@@ -47,7 +47,7 @@ test.describe('고르는 과정 — 기획안 2-2 의 근거층', () => {
     const pos = await page.evaluate(() => {
       const y = (el: Element | null | undefined) =>
         el ? el.getBoundingClientRect().top + window.scrollY : -1;
-      const link = document.querySelector('main a.cta[href$="/product"]');
+      const link = document.querySelector('main a.cta[href$="/product/"]');
       return {
         panel: y(document.querySelector('#panel')),
         spec: y(link?.closest('section')),

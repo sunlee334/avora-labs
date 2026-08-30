@@ -17,7 +17,7 @@ test.describe('홈 끝의 요청', () => {
     await page.goto('/ko/');
     const shareSection = await page.evaluate(() => {
       const form = document.querySelector('[data-source="home-end"]');
-      const link = document.querySelector('main a.cta[href$="/product"]');
+      const link = document.querySelector('main a.cta[href$="/product/"]');
       if (!form || !link) return null;
       return form.closest('section') === link.closest('section');
     });
@@ -27,7 +27,7 @@ test.describe('홈 끝의 요청', () => {
 
   test('제품 보기 링크는 홈에 하나뿐이다', async ({ page }) => {
     await page.goto('/ko/');
-    await expect(page.locator('main a.cta[href$="/product"]')).toHaveCount(1);
+    await expect(page.locator('main a.cta[href$="/product/"]')).toHaveCount(1);
   });
 
   test('신청 폼이 제품 보기보다 위에 온다', async ({ page }) => {
@@ -38,7 +38,7 @@ test.describe('홈 끝의 요청', () => {
       const y = (el: Element | null) => (el ? el.getBoundingClientRect().top + window.scrollY : -1);
       return {
         form: y(document.querySelector('[data-source="home-end"]')),
-        link: y(document.querySelector('main a.cta[href$="/product"]')),
+        link: y(document.querySelector('main a.cta[href$="/product/"]')),
       };
     });
     expect(pos.form).toBeGreaterThan(0);

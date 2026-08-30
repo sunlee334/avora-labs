@@ -338,14 +338,14 @@ test.describe('마이페이지로 가는 길', () => {
     await expect(page.locator('[data-nav-account]')).toBeHidden();
 
     await page.locator('[data-menu-open]').click();
-    await expect(page.locator('.menu__item[href="/ko/account"]')).toBeVisible();
+    await expect(page.locator('.menu__item[href="/ko/account/"]')).toBeVisible();
   });
 
   test('푸터에는 폭과 무관하게 있다', async ({ page }) => {
     for (const width of [390, 1280]) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto('/ko/');
-      await expect(page.locator(`footer a[href="/ko/account"]`), `${width}px`).toBeVisible();
+      await expect(page.locator(`footer a[href="/ko/account/"]`), `${width}px`).toBeVisible();
     }
   });
 
@@ -356,7 +356,7 @@ test.describe('마이페이지로 가는 길', () => {
       await page.setViewportSize({ width, height: 900 });
       await page.goto('/ko/');
       const visible = await page
-        .locator('a[href="/ko/account"], [data-menu-open]')
+        .locator('a[href="/ko/account/"], [data-menu-open]')
         .evaluateAll((els) => els.filter((el) => (el as HTMLElement).offsetParent !== null).length);
       expect(visible, `${width}px 에서 마이페이지로 갈 길이 없습니다`).toBeGreaterThan(0);
     }

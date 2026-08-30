@@ -30,9 +30,25 @@ const FLAGS = {
   accounts: MODE === 'commerce' ? true : commerce.accounts.enabled,
 };
 
-/** localePath 규칙(`i18n/index.ts:32`)을 여기서 재현합니다 — 그 모듈은 스펙에서 로드되지 않습니다. */
+/*
+ * `localePath`(`src/i18n/index.ts`)의 규칙을 여기서 재현합니다.
+ *
+ * 그 모듈을 직접 부르면 좋겠지만 부를 수 없습니다 — 5개 언어 JSON 을
+ * `with { type: 'json' }` 없이 불러서, Playwright 의 로더가 거부합니다.
+ *
+ * ⚠️ 그래서 규칙이 두 곳에 있습니다. 실제로 한 번 어긋난 적이 있습니다 —
+ *    localePath 가 끝에 슬래시를 붙이도록 바뀌었을 때 이쪽만 옛 규칙으로
+ *    남아, 화면은 멀쩡한데 이 파일의 검사 열여덟 개가 한꺼번에 깨졌습니다.
+ *    **localePath 를 고치면 여기도 같이 고쳐야 합니다.**
+ */
 function href(lang: string, path: string): string {
-  return `/${lang}/${path.replace(/^\//, '')}`.replace(/\/$/, '') || `/${lang}`;
+  const clean = path.replace(/^\/+/, '');
+  if (!clean) return `/${lang}/`;
+  const cut = clean.search(/[#?]/);
+  if (cut === 0) return `/${lang}/${clean}`;
+  const route = cut === -1 ? clean : clean.slice(0, cut);
+  const tail = cut === -1 ? '' : clean.slice(cut);
+  return `/${lang}/${route}/${tail}`;
 }
 
 async function desktop(page: Page): Promise<void> {
@@ -101,7 +117,7 @@ test.describe('한 항목 규칙', () => {
     const li = page.locator('.nav__links > li', { hasText: '제품' });
     // 이동 **전** 에 봅니다 — 이동 후에는 문서가 새로 그려져 자명하게 0 입니다.
     await expect(li.locator('[data-nav-drop]')).toHaveCount(0);
-    await expect(li.locator('a[href="/ko/product"]')).toHaveCount(1);
+    await expect(li.locator(`a[href="${href('ko', 'product')}"]`)).toHaveCount(1);
     await li.locator('a').click();
     await expect(page).toHaveURL(/\/ko\/product\/?$/);
   });
@@ -260,7 +276,7 @@ test.describe('유틸리티 줄', () => {
 
   test('주문조회는 자사 결제일 때만 나온다', async ({ page }) => {
     await page.goto('/ko/');
-    const lookup = page.locator('.nav__utility a[href="/ko/order/lookup"]');
+    const lookup = page.locator(`.nav__utility a[href="${href('ko', 'order/lookup')}"]`);
     await expect(lookup).toHaveCount(FLAGS.checkout ? 1 : 0);
   });
 

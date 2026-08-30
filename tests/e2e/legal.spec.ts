@@ -38,7 +38,7 @@ test.describe('법적 고지 페이지', () => {
   test('푸터에서 세 페이지 모두로 갈 수 있다', async ({ page }) => {
     await page.goto('/ko/');
     for (const path of LEGAL_PAGES) {
-      await expect(page.locator(`footer a[href="/ko/${path}"]`)).toHaveCount(1);
+      await expect(page.locator(`footer a[href="/ko/${path}/"]`)).toHaveCount(1);
     }
   });
 
@@ -87,7 +87,7 @@ test.describe('배송 안내는 설정과 어긋나지 않는다', () => {
 
   test('주문 조회 화면으로 이어진다', async ({ page }) => {
     await page.goto('/ko/legal/shipping');
-    await expect(page.locator('main a[href="/ko/order/lookup"]')).toHaveCount(1);
+    await expect(page.locator('main a[href="/ko/order/lookup/"]')).toHaveCount(1);
   });
 });
 

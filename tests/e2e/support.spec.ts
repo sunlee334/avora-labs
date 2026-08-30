@@ -163,7 +163,7 @@ test.describe('찾아갈 수 있는가', () => {
     // 헤더 링크는 900px 미만에서 숨겨집니다. 모바일에서 유일한 통로는 푸터입니다.
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/ko/');
-    const link = page.locator('footer a[href="/ko/support"]');
+    const link = page.locator('footer a[href="/ko/support/"]');
     await expect(link).toBeVisible();
     await link.click();
     await expect(page).toHaveURL(/\/ko\/support\/?$/);

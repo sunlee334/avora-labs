@@ -36,10 +36,33 @@ export function dict(locale: string): Dict {
   return isLocale(locale) ? DICTS[locale] : DICTS[DEFAULT_LOCALE];
 }
 
-/** 언어 접두어를 붙인 경로. 모든 내부 링크가 이 함수를 지납니다. */
+/**
+ * 언어 접두어를 붙인 경로. 모든 내부 링크가 이 함수를 지납니다.
+ *
+ * ── 왜 끝에 슬래시를 붙이는가 ──────────────────────────────
+ * 빌드 결과물은 디렉터리(`build.format: 'directory'`)라 실제로 서빙되는 주소는
+ * `/ko/product/` 입니다. Cloudflare 는 `/ko/product` 로 들어오면 307 로 그쪽에
+ * 넘깁니다. 그래서 슬래시를 빼면 canonical·hreflang·og:url·내부 링크가 전부
+ * **리다이렉트되는 주소** 를 가리키게 됩니다. 사이트맵(@astrojs/sitemap)은
+ * 슬래시를 붙이므로 서로 다른 주소를 신고하는 상태가 됩니다.
+ *
+ * `trailingSlash: 'ignore'` 라서 빌드는 이것을 잡아 주지 않습니다. 실제 서빙에서만
+ * 드러나므로 여기서 형태를 하나로 고정합니다.
+ *
+ * ⚠️ 프래그먼트와 질의는 경로가 아닙니다. `#story` 뒤에 슬래시를 붙이면
+ *    `/ko/#story/` 가 되어 앵커가 죽습니다. 내비게이션의 브랜드 항목이 실제로
+ *    이 형태를 씁니다(`src/config/nav.ts`).
+ */
 export function localePath(locale: string, path = ''): string {
   const clean = path.replace(/^\/+/, '');
-  return clean ? `/${locale}/${clean}` : `/${locale}/`;
+  if (!clean) return `/${locale}/`;
+
+  const cut = clean.search(/[#?]/);
+  if (cut === 0) return `/${locale}/${clean}`;
+
+  const route = cut === -1 ? clean : clean.slice(0, cut);
+  const tail = cut === -1 ? '' : clean.slice(cut);
+  return `/${locale}/${route}/${tail}`;
 }
 
 /** 같은 페이지의 모든 언어 URL — hreflang alternates 에 씁니다. */

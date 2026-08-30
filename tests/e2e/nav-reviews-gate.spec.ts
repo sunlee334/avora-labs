@@ -44,7 +44,7 @@ test.describe('리뷰 항목 게이트', () => {
     // 탐색 영역만 봅니다 — 본문의 링크는 게이트와 무관합니다.
     for (const scope of ['.nav__links', '.menu__sheet', '[data-footer-menu]']) {
       await expect(
-        page.locator(`${scope} a[href="/ko/reviews"]`),
+        page.locator(`${scope} a[href="/ko/reviews/"]`),
         `${scope} 가 정의와 어긋납니다`,
       ).toHaveCount(shown ? 1 : 0);
     }
@@ -53,7 +53,7 @@ test.describe('리뷰 항목 게이트', () => {
   test('감춰도 제품 페이지 본문에서는 갈 수 있다', async ({ page }) => {
     // 길을 감추는 것이지 페이지를 없애는 것이 아닙니다.
     await page.goto('/ko/product');
-    await expect(page.locator('main a[href="/ko/reviews"]')).toHaveCount(1);
+    await expect(page.locator('main a[href="/ko/reviews/"]')).toHaveCount(1);
   });
 
   test('감춰도 페이지 자체는 열린다', async ({ page }) => {

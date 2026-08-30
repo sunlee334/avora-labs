@@ -21,7 +21,7 @@ test.describe('알림 신청 폼이 무엇을 받는지 밝힌다', () => {
       // 나오지 않아 따로 뗐습니다.
       await expect(form.locator('.notify__privacy'), lang).toHaveCount(2);
       await expect(
-        form.locator(`.notify__privacy a[href="/${lang}/legal/privacy"]`),
+        form.locator(`.notify__privacy a[href="/${lang}/legal/privacy/"]`),
         lang,
       ).toHaveCount(1);
     }

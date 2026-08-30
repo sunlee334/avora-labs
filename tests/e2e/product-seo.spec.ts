@@ -113,11 +113,23 @@ test.describe('사이트 전역 SEO', () => {
     const sitemap = await (await request.get('/sitemap-0.xml')).text();
     expect(sitemap).toContain(`${ORIGIN}/ko/`);
 
-    await page.goto('/ko/product');
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
-      'href',
-      `${ORIGIN}/ko/product`,
-    );
+    /*
+     * 사이트맵에 적은 주소와 페이지가 선언한 canonical 이 **같은 문자열** 이어야
+     * 합니다. 여기서 문자열로 못 박지 않고 사이트맵에서 읽어 와 대조하는 이유는,
+     * 예전에 이 검사가 canonical 을 문자열로 박아 두는 바람에 둘이 어긋난 채로
+     * 통과했기 때문입니다.
+     *
+     * 어긋나면 이렇게 됩니다 — 사이트맵은 `/ko/product/` 를 신고하는데 페이지는
+     * `/ko/product` 를 canonical 로 선언하고, 그 주소는 307 로 다시 앞의 주소에
+     * 넘어갑니다. 즉 우리가 "이 페이지의 대표 주소" 라고 알린 곳이 리다이렉트
+     * 입니다. 화면에는 아무 흔적도 남지 않습니다.
+     */
+    const urls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
+    const target = urls.find((u) => u.endsWith('/ko/product/'));
+    expect(target, '사이트맵에 /ko/product/ 가 없습니다').toBeTruthy();
+
+    await page.goto('/ko/product/');
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', target!);
   });
 
   test('sitemap 에 5개 언어 홈이 모두 있다', async ({ request }) => {

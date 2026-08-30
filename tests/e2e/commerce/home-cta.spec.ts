@@ -15,7 +15,7 @@ test.describe('홈 끝의 요청', () => {
 
   test('제품 보기가 유일한 요청으로 남는다', async ({ page }) => {
     await page.goto('/ko/');
-    const link = page.locator('main a.cta[href$="/product"]');
+    const link = page.locator('main a.cta[href$="/product/"]');
     await expect(link).toHaveCount(1);
     // 겨룰 상대가 없으므로 보조 형태로 내려갈 이유도 없습니다.
     await expect(link).not.toHaveClass(/cta--ghost/);
