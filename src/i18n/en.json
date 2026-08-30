@@ -574,7 +574,7 @@
       },
       "analytics": {
         "heading": "Traffic measurement",
-        "body": "We count how often each page is opened using Cloudflare Web Analytics. It sets no cookies, stores nothing in your browser, and does not identify you as an individual or follow you across other sites. That is why we do not ask for consent. While the tool is switched off, the script is not served at all."
+        "body": "We count how often each page is opened using Cloudflare Web Analytics. It sets no cookies, stores nothing in your browser, and does not identify you as an individual or follow you across other sites. What it records is roughly the page address, device type and country — never who you are. That is why we do not ask for consent."
       }
     },
     "terms": {
