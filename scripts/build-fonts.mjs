@@ -16,8 +16,14 @@
  *   node scripts/build-fonts.mjs --check   현재 서브셋이 모든 글자를 담는지 검사 (빌드에서 자동 실행)
  *
  * 준비물 (생성할 때만):
- *   mkdir -p .fontsrc && curl -L -o .fontsrc/NotoSerifKR.ttf \
- *     "https://raw.githubusercontent.com/google/fonts/main/ofl/notoserifkr/NotoSerifKR%5Bwght%5D.ttf"
+ *   mkdir -p .fontsrc && base=https://raw.githubusercontent.com/google/fonts/main/ofl
+ *   curl -L -o '.fontsrc/SpaceGrotesk[wght].ttf'      "$base/spacegrotesk/SpaceGrotesk%5Bwght%5D.ttf"
+ *   curl -L -o  .fontsrc/IBMPlexSansKR-Regular.ttf    "$base/ibmplexsanskr/IBMPlexSansKR-Regular.ttf"
+ *   curl -L -o  .fontsrc/IBMPlexSansThai-Regular.ttf  "$base/ibmplexsansthai/IBMPlexSansThai-Regular.ttf"
+ *   curl -L -o  .fontsrc/IBMPlexSansThai-SemiBold.ttf "$base/ibmplexsansthai/IBMPlexSansThai-SemiBold.ttf"
+ *   curl -L -o  .fontsrc/IBMPlexMono-Regular.ttf      "$base/ibmplexmono/IBMPlexMono-Regular.ttf"
+ *   curl -L -o  .fontsrc/IBMPlexMono-Medium.ttf       "$base/ibmplexmono/IBMPlexMono-Medium.ttf"
+ *   curl -L -o '.fontsrc/NotoSansSC[wght].ttf'        "$base/notosanssc/NotoSansSC%5Bwght%5D.ttf"
  *
  *   ⚠️ main 브랜치라 시점에 따라 파일이 다를 수 있습니다. 커버리지 파일의
  *      머리글에 원본의 SHA-256 을 적어 두므로, 다른 파일을 받으면
@@ -47,10 +53,210 @@ const LOCALES = ['ko', 'en', 'zh', 'th', 'vi'];
 /** body 서브셋이 이보다 커지면 경고합니다. 지금(95KB)의 약 두 배. */
 const BODY_WARN_KB = 200;
 
-const SOURCES = {
-  body: resolve(root, 'node_modules/pretendard/dist/web/variable/woff2/PretendardVariable.woff2'),
-  display: resolve(root, '.fontsrc/NotoSerifKR.ttf'),
+/**
+ * 실을 서체들.
+ *
+ * ── 왜 한 벌이 아니라 여러 벌인가 ────────────────────────────
+ * 한글·한자·태국어·베트남어를 **모두** 담은 기하학적 산세리프는 없습니다.
+ * 그래서 문자마다 짝을 맞춥니다. 다행히 히어로(`For every movement.` /
+ * `MOVE. SWEAT. REAPPLY.`)는 5개 언어 어디서나 라틴이라, 브랜드 첫인상을
+ * 만드는 자리는 한 서체가 책임집니다.
+ *
+ * ── 왜 제목의 문자별 짝은 굵기가 하나인가 ────────────────────
+ * 제목 자리에서 300 을 넘는 곳은 `.hero__bold`(600)와 `.nav__wordmark`(500)
+ * 둘뿐이고, 그 둘은 **항상 라틴**입니다. 한글·태국어·한자가 들어가는 자리는
+ * 전부 300~400 이라 Regular 하나로 충분합니다 — 가짜 굵게가 생길 일이 없습니다.
+ *
+ * ── unicode-range 가 없는 이유 ───────────────────────────────
+ * 같은 family 안의 페이스들이 **서로 겹치지 않는 글자**만 담습니다. 브라우저는
+ * 글자마다 family 안에서 그 글자를 가진 페이스를 찾으므로, 범위를 적지 않아도
+ * 한글은 한글 페이스로, 라틴은 라틴 페이스로 갑니다.
+ */
+const FACES = {
+  body: {
+    file: resolve(root, 'node_modules/pretendard/dist/web/variable/woff2/PretendardVariable.woff2'),
+    family: 'AVORA Body',
+    weight: '100 900',
+    variations: true,
+    out: 'body.woff2',
+    chars: 'body',
+    locales: LOCALES,
+  },
+  /*
+   * 본문의 문자별 짝.
+   *
+   * Pretendard 에는 **한자가 0자, 태국 문자가 1자** 있습니다. 그래서 태국어
+   * 본문 133자 중 60자(45%)가 여태 기기 기본 서체로 그려지고 있었습니다.
+   * 검사는 "모두 포함" 이라고 했습니다 — 원본에 없는 글자는 요구 목록에서
+   * 빼기 때문입니다. 제목에서 드러난 것과 같은 사각지대입니다.
+   */
+  'body-th': {
+    file: resolve(root, '.fontsrc/IBMPlexSansThai-Regular.ttf'),
+    family: 'AVORA Body',
+    weight: '100 500',
+    out: 'body-th.woff2',
+    chars: 'body',
+    locales: ['th'],
+  },
+  'body-th-bold': {
+    file: resolve(root, '.fontsrc/IBMPlexSansThai-SemiBold.ttf'),
+    family: 'AVORA Body',
+    weight: '600 900',
+    out: 'body-th-bold.woff2',
+    chars: 'body',
+    locales: ['th'],
+  },
+  /*
+   * 중국어 **본문** 은 일부러 싣지 않습니다.
+   *
+   * 본문 720자를 Noto Sans SC 로 서브셋하면 186KB 입니다. 중국어 페이지
+   * 전부가 받아야 하는 양이고, 이 사이트는 모바일이 우선입니다. 반면 얻는
+   * 것은 크지 않습니다 — 중국어를 읽는 기기에는 대개 좋은 본문 서체가
+   * 이미 있습니다(PingFang SC / 微软雅黑 / Source Han).
+   *
+   * 그래서 **제목만** 브랜드 서체로 두고(`display-sc`, 27KB) 본문은 기기에
+   * 맡깁니다. `src/styles/tokens.css` 의 `--font-body` 에 그 이름들을 적어 두어
+   * 폴백이 우연이 아니라 고른 결과가 되게 했습니다.
+   *
+   * 바꾸려면 여기에 face 를 되살리고 `src/config/fonts.ts` 의 preload 와
+   * `tests/e2e/fonts-coverage.spec.ts` 의 BY_DESIGN 을 함께 보세요.
+   */
+  display: {
+    file: resolve(root, '.fontsrc/SpaceGrotesk[wght].ttf'),
+    family: 'AVORA Display',
+    weight: '300 700',
+    variations: true,
+    out: 'display.woff2',
+    chars: 'display',
+    locales: LOCALES,
+  },
+  'display-kr': {
+    file: resolve(root, '.fontsrc/IBMPlexSansKR-Regular.ttf'),
+    family: 'AVORA Display',
+    weight: '300 400',
+    out: 'display-kr.woff2',
+    chars: 'display',
+    locales: ['ko'],
+  },
+  'display-th': {
+    file: resolve(root, '.fontsrc/IBMPlexSansThai-Regular.ttf'),
+    family: 'AVORA Display',
+    weight: '300 400',
+    out: 'display-th.woff2',
+    chars: 'display',
+    locales: ['th'],
+  },
+  'display-sc': {
+    file: resolve(root, '.fontsrc/NotoSansSC[wght].ttf'),
+    family: 'AVORA Display',
+    weight: '300 400',
+    variations: true,
+    out: 'display-sc.woff2',
+    chars: 'display',
+    locales: ['zh'],
+  },
+  mono: {
+    file: resolve(root, '.fontsrc/IBMPlexMono-Regular.ttf'),
+    family: 'AVORA Mono',
+    weight: '400',
+    out: 'mono.woff2',
+    chars: 'mono',
+    locales: LOCALES,
+  },
+  'mono-medium': {
+    file: resolve(root, '.fontsrc/IBMPlexMono-Medium.ttf'),
+    family: 'AVORA Mono',
+    weight: '500',
+    out: 'mono-medium.woff2',
+    chars: 'mono',
+    locales: LOCALES,
+  },
 };
+
+/** 이 언어가 싣는 페이스. 순서가 곧 fonts.css 의 순서입니다. */
+export function facesFor(locale) {
+  return Object.entries(FACES)
+    .filter(([, f]) => f.locales.includes(locale))
+    .map(([id]) => id);
+}
+
+const cp = (ch) => ch.codePointAt(0);
+const isHangul = (ch) => {
+  const c = cp(ch);
+  return (c >= 0xac00 && c <= 0xd7a3) || (c >= 0x1100 && c <= 0x11ff) || (c >= 0x3130 && c <= 0x318f);
+};
+const isThai = (ch) => cp(ch) >= 0x0e00 && cp(ch) <= 0x0e7f;
+/** 한자와 **중국어 문장부호**. `，` `。` 를 빠뜨리면 문장 끝이 시스템 서체로 튑니다. */
+const isHan = (ch) => {
+  const c = cp(ch);
+  return (
+    (c >= 0x4e00 && c <= 0x9fff) ||
+    (c >= 0x3400 && c <= 0x4dbf) ||
+    (c >= 0xf900 && c <= 0xfaff) ||
+    (c >= 0x3000 && c <= 0x303f) ||
+    (c >= 0xff00 && c <= 0xffef)
+  );
+};
+
+/** 문자별 짝이 맡는 글자인가 */
+const SCRIPT_OF = {
+  'display-kr': isHangul,
+  'display-th': isThai,
+  'display-sc': isHan,
+  'body-th': isThai,
+  'body-th-bold': isThai,
+};
+
+/**
+ * 타이 SARA AM(`ำ`, U+0E33)을 쓰려면 U+0E4D 도 있어야 합니다.
+ *
+ * 브라우저의 타이 셰이퍼는 `ำ` 를 U+0E4D(nikhahit) + U+0E32(sara aa)로 **분해한 뒤**
+ * cmap 에서 찾습니다. 서브셋에 U+0E4D 이 없으면 조합이 실패해 `กันน้ำ` 가
+ * `กันน ้ำ` 처럼 부호가 옆으로 떨어져 나옵니다. 문구에는 U+0E4D 이 한 번도
+ * 나오지 않으므로 글자를 모으는 것만으로는 절대 들어오지 않습니다.
+ */
+const THAI_SARA_AM = '\u0E33';
+const THAI_NIKHAHIT = '\u0E4D';
+
+/**
+ * 이 언어에서 **각 페이스가 담아야 할 글자**.
+ *
+ * 원본을 읽지 않고 문자 종류만으로 가릅니다. 그래야 생성과 검사가 같은 답을
+ * 냅니다 — 검사는 CI 에서 원본 없이 돌기 때문입니다.
+ */
+export function charsPerFace(locale, need) {
+  const src = need ?? charsFor(locale);
+  const ids = facesFor(locale);
+  const out = new Map(ids.map((id) => [id, new Set()]));
+
+  const bodyScripts = ids.filter((id) => id.startsWith('body-'));
+  for (const ch of src.body) {
+    const owners = bodyScripts.filter((id) => SCRIPT_OF[id](ch));
+    if (owners.length) for (const id of owners) out.get(id).add(ch);
+    else out.get('body').add(ch);
+  }
+
+  // 라벨용 고정폭은 라틴과 숫자만. 한글은 이 서체에 없고, 토큰이 본문 서체로
+  // 넘깁니다 — 지금처럼 기기별 시스템 고정폭으로 흩어지지 않게.
+  for (const ch of src.body) {
+    if (isHangul(ch) || isThai(ch) || isHan(ch)) continue;
+    out.get('mono').add(ch);
+    out.get('mono-medium').add(ch);
+  }
+
+  const displayScripts = ids.filter((id) => id.startsWith('display-'));
+  for (const ch of src.display) {
+    const owner = displayScripts.find((id) => SCRIPT_OF[id](ch));
+    out.get(owner ?? 'display').add(ch);
+  }
+
+  // 타이 셰이퍼가 필요로 하는 글자를 채웁니다. 문구에는 나오지 않습니다.
+  for (const [id, chars] of out) {
+    if (SCRIPT_OF[id] === isThai && chars.has(THAI_SARA_AM)) chars.add(THAI_NIKHAHIT);
+  }
+
+  return out;
+}
 
 /**
  * 서브셋을 만들고 읽을 파이썬.
@@ -228,7 +434,18 @@ function subset(sourceFile, outFile, chars, extraArgs = []) {
       `--text-file=${listFile}`,
       '--output-file=' + outFile,
       '--flavor=woff2',
-      '--layout-features=kern,liga,calt',
+      /*
+       * 남길 레이아웃 기능.
+       *
+       * ⚠️ `mark`·`mkmk`·`ccmp` 를 빼면 **태국어와 베트남어의 부호가 어긋납니다.**
+       *    성조·모음 부호가 글자 위 어디에 얹히는지를 이 기능들이 정합니다.
+       *
+       *    한동안 `kern,liga,calt` 만 남겼는데, 그때 제목 서체에는 태국 문자가
+       *    아예 없어(폴백) 아무도 몰랐습니다. 문자별 짝을 붙이면서 드러났습니다.
+       *
+       * `rvrn` 은 가변 폰트가 굵기에 따라 글자꼴을 바꾸는 데 씁니다.
+       */
+      '--layout-features=kern,liga,calt,ccmp,mark,mkmk,locl,rlig,rvrn',
       '--no-hinting',
       '--desubroutinize',
       '--name-IDs=1,2,3,4,6',
@@ -257,24 +474,28 @@ sys.stdout.write(''.join(chr(c) for c in sorted(codes)))
   );
 }
 
-const css = (locale) => `/* 자동 생성 — scripts/build-fonts.mjs (${locale})
+const css = (locale) =>
+  `/* 자동 생성 — scripts/build-fonts.mjs (${locale})
    이 언어 페이지에 실제로 쓰이는 글자만 담은 서브셋입니다.
-   문구를 바꾸면 npm run fonts 로 다시 만드세요. */
-@font-face {
-  font-family: 'AVORA Body';
-  src: url('/fonts/${locale}/body.woff2') format('woff2-variations');
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'AVORA Display';
-  src: url('/fonts/${locale}/display.woff2') format('woff2-variations');
-  font-weight: 300 600;
+   문구를 바꾸면 npm run fonts 로 다시 만드세요.
+
+   같은 family 가 여러 번 나오는 것은 의도된 것입니다 — 문자마다 짝이
+   다릅니다. 페이스끼리 담은 글자가 겹치지 않아 unicode-range 가 필요 없습니다. */
+` +
+  facesFor(locale)
+    .map((id) => {
+      const f = FACES[id];
+      const fmt = f.variations ? 'woff2-variations' : 'woff2';
+      return `@font-face {
+  font-family: '${f.family}';
+  src: url('/fonts/${locale}/${f.out}') format('${fmt}');
+  font-weight: ${f.weight};
   font-style: normal;
   font-display: swap;
 }
 `;
+    })
+    .join('');
 
 /**
  * 원본 서체가 가진 글자의 목록.
@@ -293,9 +514,12 @@ const css = (locale) => `/* 자동 생성 — scripts/build-fonts.mjs (${locale}
  *
  * body 원본은 npm 의존성이라 어디에나 있어 이 장치가 필요 없습니다.
  */
-const COVERAGE_FILES = {
-  display: resolve(root, 'scripts/display-source-coverage.txt'),
-};
+const COVERAGE_FILES = Object.fromEntries(
+  Object.keys(FACES)
+    // body 원본은 npm 의존성이라 어디에나 있어 이 장치가 필요 없습니다.
+    .filter((id) => id !== 'body')
+    .map((id) => [id, resolve(root, `scripts/${id}-source-coverage.txt`)]),
+);
 
 /** 연속 구간으로 접습니다. 23,124자가 4,676구간이 됩니다. */
 export function packCoverage(chars, sourceTag = '') {
@@ -409,7 +633,7 @@ const sourceGlyphCache = new Map();
 function sourceGlyphs(kind, { write = false } = {}) {
   if (sourceGlyphCache.has(kind)) return sourceGlyphCache.get(kind);
 
-  const src = SOURCES[kind];
+  const src = FACES[kind].file;
   const coverageFile = Object.hasOwn(COVERAGE_FILES, kind) ? COVERAGE_FILES[kind] : null;
   let result = null;
 
@@ -448,8 +672,8 @@ function sourceGlyphs(kind, { write = false } = {}) {
  */
 function checkCoverageFresh() {
   for (const [kind, file] of Object.entries(COVERAGE_FILES)) {
-    if (!existsSync(SOURCES[kind]) || !existsSync(file)) continue;
-    const digest = createHash('sha256').update(readFileSync(SOURCES[kind])).digest('hex').slice(0, 16);
+    if (!existsSync(FACES[kind].file) || !existsSync(file)) continue;
+    const digest = createHash('sha256').update(readFileSync(FACES[kind].file)).digest('hex').slice(0, 16);
     const current = packCoverage(sourceGlyphs(kind), `sha256:${digest}`);
     if (current.trim() !== readFileSync(file, 'utf8').trim()) {
       console.error(`\n${file} 이 원본과 다릅니다.`);
@@ -530,8 +754,8 @@ const checkOnly = process.argv.includes('--check');
   if (checkOnly) {
     // 원본이 없는 것과 도구가 없는 것은 다른 문제입니다. 섞으면
     // "pip install 하세요" 라는 처방이 이미 설치된 환경에 나가 시간을 버립니다.
-    if (!existsSync(SOURCES.body)) {
-      console.error(`원본 폰트가 없습니다: ${SOURCES.body}`);
+    if (!existsSync(FACES.body.file)) {
+      console.error(`원본 폰트가 없습니다: ${FACES.body.file}`);
       console.error('  npm ci 로 의존성을 다시 설치하세요.');
       process.exit(1);
     }
@@ -573,13 +797,14 @@ const checkOnly = process.argv.includes('--check');
   for (const locale of LOCALES) {
     const outDir = resolve(OUT_ROOT, locale);
     const need = charsFor(locale);
+    const perFace = charsPerFace(locale, need);
 
     if (checkOnly) {
       let ok = true;
-      for (const kind of ['body', 'display']) {
-        const file = resolve(outDir, `${kind}.woff2`);
+      for (const kind of facesFor(locale)) {
+        const file = resolve(outDir, FACES[kind].out);
         if (!existsSync(file)) {
-          console.error(`${locale}/${kind}.woff2 가 없습니다 — npm run fonts 를 실행하세요.`);
+          console.error(`${locale}/${FACES[kind].out} 가 없습니다 — npm run fonts 를 실행하세요.`);
           failed = true;
           ok = false;
           continue;
@@ -616,9 +841,10 @@ const checkOnly = process.argv.includes('--check');
           continue;
         }
 
+        const want = perFace.get(kind);
         const missing = source
-          ? [...need[kind]].filter((ch) => source.has(ch) && !have.has(ch))
-          : [...need[kind]].filter((ch) => !have.has(ch) && /[ -ɏ가-힣]/.test(ch));
+          ? [...want].filter((ch) => source.has(ch) && !have.has(ch))
+          : [...want].filter((ch) => !have.has(ch) && /[ -ɏ가-힣]/.test(ch));
         if (missing.length) {
           console.error(`${locale}/${kind}: 서브셋에 없는 글자 ${missing.length}자 → ${missing.join('')}`);
           failed = true;
@@ -630,7 +856,10 @@ const checkOnly = process.argv.includes('--check');
         // 위의 "생략" 한 줄을 덮습니다.
         console.log(`- ${locale} — 파일 존재만 확인 (글자 검사 생략)`);
       } else if (ok) {
-        console.log(`✓ ${locale} — body ${need.body.size}자 / display ${need.display.size}자 모두 포함`);
+        const shown = facesFor(locale)
+          .map((id) => `${id} ${perFace.get(id).size}자`)
+          .join(' / ');
+        console.log(`✓ ${locale} — ${shown} 모두 포함`);
       }
 
       /*
@@ -654,26 +883,37 @@ const checkOnly = process.argv.includes('--check');
       continue;
     }
 
-    for (const [kind, src] of Object.entries(SOURCES)) {
-      if (!existsSync(src)) {
-        console.error(`원본 폰트가 없습니다: ${src}\n파일 상단 주석의 준비물 명령을 참고하세요.`);
+    for (const id of facesFor(locale)) {
+      if (!existsSync(FACES[id].file)) {
+        console.error(
+          `원본 폰트가 없습니다: ${FACES[id].file}\n파일 상단 주석의 준비물 명령을 참고하세요.`,
+        );
         process.exit(1);
       }
     }
 
     mkdirSync(outDir, { recursive: true });
-    // 커버리지 파일은 여기서만 씁니다. 검사(--check)가 자기 근거를 갱신하면
-    // "낡았다" 는 상태가 존재할 수 없어져 검증이 무의미해집니다.
-    sourceGlyphs('display', { write: true });
 
-    const bodySize = subset(SOURCES.body, resolve(outDir, 'body.woff2'), need.body);
-    const displaySize = subset(SOURCES.display, resolve(outDir, 'display.woff2'), need.display);
+    // 이 언어에 필요 없는 파일이 남아 있으면 지웁니다. 서체를 갈아입고도 옛
+    // 파일이 남으면, 어느 것이 실제로 실리는지 디렉터리만 봐서는 모릅니다.
+    const keep = new Set([...facesFor(locale).map((id) => FACES[id].out), 'fonts.css']);
+    for (const f of readdirSync(outDir)) {
+      if (!keep.has(f)) rmSync(resolve(outDir, f), { force: true });
+    }
+
+    const sizes = [];
+    for (const id of facesFor(locale)) {
+      // 커버리지 파일은 여기서만 씁니다. 검사(--check)가 자기 근거를 갱신하면
+      // "낡았다" 는 상태가 존재할 수 없어져 검증이 무의미해집니다.
+      if (Object.hasOwn(COVERAGE_FILES, id)) sourceGlyphs(id, { write: true });
+
+      const want = perFace.get(id);
+      const size = subset(FACES[id].file, resolve(outDir, FACES[id].out), want);
+      sizes.push(`${id} ${String(Math.round(size / 1024)).padStart(3)}KB (${want.size}자)`);
+    }
     writeFileSync(resolve(outDir, 'fonts.css'), css(locale), 'utf8');
 
-    console.log(
-      `${locale}  body ${String(Math.round(bodySize / 1024)).padStart(3)}KB (${need.body.size}자)` +
-        `  display ${String(Math.round(displaySize / 1024)).padStart(3)}KB (${need.display.size}자)`,
-    );
+    console.log(`${locale}  ${sizes.join('  ')}`);
   }
 
   // 원본이 있는 곳(개발자 기계)에서만 볼 수 있습니다. 여기서 안 잡으면

@@ -18,9 +18,9 @@
   --color-line: rgba(37, 43, 49, 0.14);
   --color-line-inverse: rgba(175, 200, 216, 0.20);
 
-  --font-display: 'AVORA Display', 'Noto Serif KR', 'Apple SD Gothic Neo', serif;
-  --font-body: 'AVORA Body', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+  --font-display: 'AVORA Display', 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+  --font-body: 'AVORA Body', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+  --font-mono: 'AVORA Mono', 'AVORA Body', ui-monospace, SFMono-Regular, monospace;
 
   --size-tap-min: 44px;
   --size-measure: 65ch;

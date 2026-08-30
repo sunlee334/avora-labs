@@ -1,5 +1,13 @@
 import { test, expect } from '@playwright/test';
-import { readFileSync, writeFileSync, mkdirSync, mkdtempSync, rmSync, existsSync } from 'node:fs';
+import {
+  readFileSync,
+  writeFileSync,
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  existsSync,
+  readdirSync,
+} from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -277,22 +285,42 @@ test.describe('폰트 검사가 실제로 도는가', () => {
 
   test('커버리지 파일이 왕복 무손실이고 깨지지 않았다', () => {
     /*
-     * 이 파일이 CI 에서 display 검사의 **유일한 근거**입니다.
+     * 이 파일들이 CI 에서 서브셋 검사의 **유일한 근거**입니다.
      * 깨지거나 잘리면 예전에는 빈 Set 이 되어 조용히 전부 통과시켰습니다 —
      * 옛 정규식의 54% 실명보다 나쁜 100% 실명이었습니다.
+     *
+     * 제목이 문자별로 갈리면서 근거도 여러 개가 됐습니다. 하나라도 빠지면
+     * 그 문자만 조용히 검사에서 빠지므로 전부 봅니다.
      */
-    const file = fileURLToPath(new URL('scripts/display-source-coverage.txt', root));
-    const text = readFileSync(file, 'utf8');
-    const set = unpackCoverage(text) as Set<string>;
+    const dir = fileURLToPath(new URL('scripts/', root));
+    const files = readdirSync(dir).filter((f) => f.endsWith('-source-coverage.txt'));
+    expect(files.length, '커버리지 파일이 없습니다').toBeGreaterThanOrEqual(6);
 
-    expect(set.size, '커버리지가 너무 작습니다').toBeGreaterThan(20000);
-    expect(packCoverage(set, text.match(/— (\S+)/)?.[1] ?? ''), '왕복이 무손실이 아닙니다').toBe(text);
+    for (const name of files) {
+      const text = readFileSync(join(dir, name), 'utf8');
+      const set = unpackCoverage(text) as Set<string>;
+      expect(set.size, `${name} 이 비어 있습니다`).toBeGreaterThan(80);
+      expect(packCoverage(set, text.match(/— (\S+)/)?.[1] ?? ''), `${name} 왕복 손실`).toBe(text);
+    }
 
-    // 옛 규칙이 못 보던 한자가 실제로 들어 있어야 이 파일이 값을 합니다.
-    for (const ch of ['龍', '韓', '漢']) expect(set.has(ch), ch).toBe(true);
+    const load = (id: string) =>
+      unpackCoverage(readFileSync(join(dir, `${id}-source-coverage.txt`), 'utf8')) as Set<string>;
+
+    // 옛 규칙이 못 보던 글자를, 그것을 맡은 면이 실제로 담고 있어야
+    // 이 장치가 값을 합니다.
+    const sc = load('display-sc');
+    for (const ch of ['龍', '韓', '漢']) expect(sc.has(ch), `display-sc 에 ${ch}`).toBe(true);
+    expect(sc.size, 'display-sc 가 한자를 담고 있어야 합니다').toBeGreaterThan(20000);
+
+    const kr = load('display-kr');
+    expect(kr.has('한'), 'display-kr 에 한글').toBe(true);
+    expect(kr.size).toBeGreaterThan(10000);
+
+    const th = load('display-th');
+    expect(th.has('ก'), 'display-th 에 태국 문자').toBe(true);
 
     // BMP 밖 글자도 손실 없이 왕복해야 합니다.
-    expect([...set].some((ch) => ch.codePointAt(0)! > 0xffff)).toBe(true);
+    expect([...sc].some((ch) => ch.codePointAt(0)! > 0xffff)).toBe(true);
   });
 
   test('깨진 커버리지는 조용히 통과시키지 않는다', () => {
@@ -319,14 +347,26 @@ test.describe('폰트 검사가 실제로 도는가', () => {
      * 그래서 cmap 을 33KB 로 접어 커밋합니다. 이 파일이 사라지거나
      * .gitignore 에 들어가면 그 구멍이 조용히 되돌아옵니다.
      */
-    const coverage = fileURLToPath(new URL('scripts/display-source-coverage.txt', root));
-    expect(existsSync(coverage), 'display 커버리지 파일이 없습니다').toBe(true);
+    const dir = fileURLToPath(new URL('scripts/', root));
+    const files = readdirSync(dir).filter((f) => f.endsWith('-source-coverage.txt'));
+    expect(files.length, '커버리지 파일이 없습니다').toBeGreaterThanOrEqual(6);
 
-    const tracked = execFileSync('git', ['ls-files', 'scripts/display-source-coverage.txt'], {
-      cwd: fileURLToPath(root),
-      encoding: 'utf8',
-    }).trim();
-    expect(tracked, '커버리지 파일이 저장소에 추적되지 않습니다 — CI 에서 사라집니다').not.toBe('');
+    /*
+     * 새 서체를 더하면 커버리지 파일도 하나 늘어납니다. 그것을 커밋하지 않으면
+     * CI 에는 근거가 없는 면이 생기고, 그 면만 조용히 검사에서 빠집니다.
+     * 그래서 **전부** 추적되고 있는지 봅니다.
+     */
+    const tracked = new Set(
+      execFileSync('git', ['ls-files', 'scripts/'], { cwd: fileURLToPath(root), encoding: 'utf8' })
+        .split('\n')
+        .map((l) => l.replace(/^scripts\//, '').trim()),
+    );
+    for (const name of files) {
+      expect(
+        tracked.has(name),
+        `${name} 이 저장소에 추적되지 않습니다 — CI 에서 사라집니다`,
+      ).toBe(true);
+    }
 
     // 옛 규칙이 못 보는 글자가 실제로 많다는 것을 숫자로 고정합니다.
     const OLD_RULE = /[ -ɏ가-힣]/;

@@ -18,6 +18,7 @@ import { dict, alternates, localePath } from '../i18n';
 // 모바일 브라우저의 주소창 색입니다. 브랜드 색이므로 토큰에서 읽습니다 —
 // 여기 값을 베껴 적으면 팔레트가 바뀔 때 이 한 줄만 옛 색으로 남습니다.
 import tokens from '../../tokens/design-tokens.json';
+import { PRELOAD } from '../config/fonts';
 
 interface Props {
   locale: Locale;
@@ -153,12 +154,19 @@ const xDefault = !wanted || wanted.includes(DEFAULT_LOCALE)
 
     {/*
       폰트는 언어별 서브셋입니다. 이 페이지 언어에 실제로 쓰이는 글자만 담겨 있어
-      한국어 129KB, 영어 39KB 로 끝납니다. Google Fonts 를 쓰던 초기 구현에서는
+      한 언어가 받는 양이 수십 KB 로 끝납니다. Google Fonts 를 쓰던 초기 구현에서는
       외부 호스트에서 210KB 를 받아 모바일 LCP 가 7.5초였습니다.
+
+      제목은 문자마다 짝이 다릅니다(라틴 Space Grotesk / 한글·태국어 IBM Plex /
+      한자 Noto Sans SC). 그래서 preload 목록도 언어마다 다릅니다 —
+      `src/config/fonts.ts` 를 보세요.
     */}
     <link rel="stylesheet" href={`/fonts/${locale}/fonts.css`} />
-    <link rel="preload" href={`/fonts/${locale}/body.woff2`} as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href={`/fonts/${locale}/display.woff2`} as="font" type="font/woff2" crossorigin />
+    {
+      PRELOAD[locale].map((file) => (
+        <link rel="preload" href={`/fonts/${locale}/${file}`} as="font" type="font/woff2" crossorigin />
+      ))
+    }
 
     {
       jsonLd.map((schema) => (

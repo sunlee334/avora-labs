@@ -1,6 +1,9 @@
 /* 자동 생성 — scripts/build-fonts.mjs (th)
    이 언어 페이지에 실제로 쓰이는 글자만 담은 서브셋입니다.
-   문구를 바꾸면 npm run fonts 로 다시 만드세요. */
+   문구를 바꾸면 npm run fonts 로 다시 만드세요.
+
+   같은 family 가 여러 번 나오는 것은 의도된 것입니다 — 문자마다 짝이
+   다릅니다. 페이스끼리 담은 글자가 겹치지 않아 unicode-range 가 필요 없습니다. */
 @font-face {
   font-family: 'AVORA Body';
   src: url('/fonts/th/body.woff2') format('woff2-variations');
@@ -9,9 +12,44 @@
   font-display: swap;
 }
 @font-face {
+  font-family: 'AVORA Body';
+  src: url('/fonts/th/body-th.woff2') format('woff2');
+  font-weight: 100 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'AVORA Body';
+  src: url('/fonts/th/body-th-bold.woff2') format('woff2');
+  font-weight: 600 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
   font-family: 'AVORA Display';
   src: url('/fonts/th/display.woff2') format('woff2-variations');
-  font-weight: 300 600;
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'AVORA Display';
+  src: url('/fonts/th/display-th.woff2') format('woff2');
+  font-weight: 300 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'AVORA Mono';
+  src: url('/fonts/th/mono.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'AVORA Mono';
+  src: url('/fonts/th/mono-medium.woff2') format('woff2');
+  font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
