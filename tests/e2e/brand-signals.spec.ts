@@ -35,13 +35,24 @@ test.describe('여정은 한 가지만 말한다', () => {
     ).toEqual(product.map((w) => w.trim().toUpperCase()));
   });
 
-  test('여정의 끝과 브랜드 약속의 끝이 같은 말이다', async ({ page }) => {
-    // 여정이 RESET 으로 끝나야 Brand Promise 의 RESET 과 이어집니다.
-    // 예전 홈은 Reapply 로 끝나서 같은 화면 안에서 두 서사가 따로 놀았습니다.
+  test('여정의 끝과 네 감각의 끝이 같은 말이다', async ({ page }) => {
+    /*
+     * 여정이 RESET 으로 끝나야 네 감각의 RESET 과 이어집니다. 예전 홈은
+     * Reapply 로 끝나서 같은 화면 안에서 두 서사가 따로 놀았습니다.
+     *
+     * 두 프레임워크는 이제 **다른 화면**에 있습니다. 홈에 4개짜리와 5개짜리가
+     * 연달아 나오면 어느 쪽도 기억에 남지 않아, 네 감각을 제품 페이지로
+     * 옮겼습니다(지시 문서 C2). 화면이 갈렸어도 끝말은 이어져야 합니다.
+     */
     await page.goto('/ko/');
     const journey = await page.locator('.journey__word').allInnerTexts();
-    const promise = await page.locator('.promise h3').allInnerTexts();
-    expect(journey.at(-1)?.trim().toUpperCase()).toBe(promise.at(-1)?.trim().toUpperCase());
+
+    await page.goto('/ko/product/');
+    const senses = await page.locator('.principles__term').allInnerTexts();
+
+    expect(journey.length, '홈 여정이 비어 있습니다').toBeGreaterThan(0);
+    expect(senses.length, '제품 페이지의 네 감각이 비어 있습니다').toBeGreaterThan(0);
+    expect(journey.at(-1)?.trim().toUpperCase()).toBe(senses.at(-1)?.trim().toUpperCase());
   });
 
   test('5개 언어 모두 다섯 단계다', async ({ page }) => {

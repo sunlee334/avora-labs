@@ -279,7 +279,6 @@ const PY = process.env.AVORA_FONT_PY || (existsSync(VENV_PY) ? VENV_PY : 'python
  */
 const DISPLAY_PATHS = [
   'home.journey.lead',
-  'home.promise.lead',
   'home.product.name',
   'home.question.quote',
   'home.philosophy.quote',
@@ -289,6 +288,11 @@ const DISPLAY_PATHS = [
   'product.hero.headline',
   'footer.tagline',
   'legal.privacy.heading',
+  // /panel 의 제목 둘. 빠뜨리면 그 화면의 h1 이 글자 단위로 다른 서체로
+  // 그려집니다 — 서브셋에 없는 글자만 시스템 서체로 떨어지기 때문입니다.
+  'panel.heading',
+  'panel.form.heading',
+  'panel.rejected.heading',
   'notFound.heading',
 ];
 

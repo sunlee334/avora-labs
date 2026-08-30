@@ -21,6 +21,19 @@ const t = dict(locale);
   <section class="section wrap notfound">
     <h1 class="display display--tight">{t.notFound.heading}</h1>
     <p class="body">{t.notFound.body}</p>
-    <p><a class="cta" href={localePath(locale)}>{t.notFound.cta}</a></p>
+    {/*
+      길이 둘입니다.
+
+      10월에 크루 단톡방으로 링크가 잘못 공유되는 상황을 염두에 둔 것입니다.
+      주소를 잘못 받은 사람이 404 에서 홈으로만 갈 수 있으면, 애초에 무엇을
+      보러 왔는지 다시 찾아야 합니다. 검증단 모집으로 가는 길을 함께 둡니다.
+
+      순서는 홈이 먼저입니다 — 검증단은 기간이 있는 페이지이고, 모집이
+      끝나면 홈 쪽이 더 맞는 목적지가 됩니다.
+    */}
+    <p class="notfound__paths">
+      <a class="cta" href={localePath(locale)}>{t.notFound.cta}</a>
+      <a class="btn btn--tertiary" href={localePath(locale, 'panel')}>{t.notFound.panelCta}</a>
+    </p>
   </section>
 </Base>

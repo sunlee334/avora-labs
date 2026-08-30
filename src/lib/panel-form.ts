@@ -28,6 +28,23 @@ function copyFrom(form: HTMLFormElement) {
   return { state };
 }
 
+/* 화면이 뜬 시각. worker/spam.ts 의 2초 문턱에 쓰입니다. */
+const shownAt = Date.now();
+
+/**
+ * 지금까지 걸린 시간.
+ *
+ * 폼의 `data-elapsed-offset`(밀리초)을 더합니다. **검사가 문턱을 넘기려고
+ * 쓰는 통로입니다** — 검사는 폼을 1초 만에 채우므로 그대로 두면 봇으로
+ * 판정되어 지원서가 버려지는데, 화면에는 "접수되었습니다" 가 떠서 아무도
+ * 눈치채지 못합니다. 실제로 그 상태로 통과하던 검사가 있었습니다.
+ *
+ * 운영 화면에는 이 속성이 없으므로 0 입니다.
+ */
+function elapsed(form: HTMLFormElement): number {
+  return Date.now() - shownAt + Number(form.dataset.elapsedOffset ?? 0);
+}
+
 export function mountPanelForm(): void {
   const form = document.querySelector<HTMLFormElement>('[data-panel-form]');
   if (!form) return;
@@ -78,6 +95,9 @@ export function mountPanelForm(): void {
       consent: data.get('consent') === 'on',
       marketing: data.get('marketing') === 'on',
       locale: el.dataset.locale,
+      // 봇 판별용 — 화면에 없는 칸과 화면이 뜬 시각(worker/spam.ts).
+      website: String(data.get('website') ?? ''),
+      elapsedMs: elapsed(el),
     };
 
     /*
@@ -88,19 +108,30 @@ export function mountPanelForm(): void {
     const missing = (['name', 'email', 'activity', 'frequency', 'region'] as const).filter(
       (k) => !payload[k],
     );
-    if (!payload.consent) {
-      // 동의는 칸 아래가 아니라 그 줄에서 말해야 합니다.
-      say(copy.consent ?? copy.invalid ?? '', 'bad');
-    }
     if (missing.length || !payload.consent) {
       for (const k of missing) markField(k, copy.required ?? '');
-      if (missing.length) say(copy.invalid ?? '', 'bad');
+      /*
+       * 무엇이 문제인지에 맞는 말을 합니다.
+       *
+       * 동의만 빠졌을 때 "비어 있거나 형식이 맞지 않는 칸이 있습니다" 라고
+       * 하면 지원자는 없는 빈 칸을 찾아 헤맵니다. 실제로 그랬습니다.
+       */
+      say(missing.length ? (copy.invalid ?? '') : (copy.consentRequired ?? ''), 'bad');
       el.querySelector<HTMLElement>(`[name="${missing[0] ?? 'consent'}"]`)?.focus();
       return;
     }
 
     // 로딩은 라벨 교체로 알립니다 — 스크린리더는 도는 그림을 읽지 못합니다.
     const label = submit.textContent;
+    /*
+     * 제출 중에는 버튼을 잠급니다.
+     *
+     * 느린 회선에서 두 번 누르면 같은 지원서가 두 요청으로 동시에 들어갑니다.
+     * 저장 쪽은 ON CONFLICT 로 안전하지만, 두 번째 응답이 첫 번째의 성공
+     * 화면을 오류 문구로 덮어 쓸 수 있습니다. 저장소의 다른 폼들도 같은
+     * 방식입니다(inquiry.ts · launch-notify.ts · my-reviews.ts).
+     */
+    submit.disabled = true;
     submit.setAttribute('aria-busy', 'true');
     submit.textContent = submit.dataset.loadingLabel ?? label;
 
@@ -123,9 +154,23 @@ export function mountPanelForm(): void {
           region: payload.region,
           lang: payload.locale,
         });
-        say(copy.done ?? '', 'ok');
+        /*
+         * 순서가 중요합니다.
+         *
+         * 폼을 먼저 감추면 위 내용이 1,000px 넘게 사라지면서 확인 문구가
+         * 뷰포트 **위로** 밀려납니다. 스크롤 위치는 그대로라 지원자가 실제로
+         * 보는 것은 푸터입니다 — 접수됐는지 알 수 없습니다. 두 엔진 모두에서
+         * 실측된 문제입니다.
+         *
+         * 게다가 포커스가 있던 제출 버튼이 사라지면 포커스가 <body> 로
+         * 떨어져 키보드·스크린리더 사용자는 맥락을 통째로 잃습니다.
+         */
         el.querySelectorAll<HTMLElement>('.field, fieldset, .agree, button[type="submit"]')
-          .forEach((el) => el.setAttribute('hidden', ''));
+          .forEach((node) => node.setAttribute('hidden', ''));
+        say(copy.done ?? '', 'ok');
+        state.setAttribute('tabindex', '-1');
+        state.focus();
+        state.scrollIntoView({ block: 'center' });
         return;
       }
 
@@ -139,6 +184,7 @@ export function mountPanelForm(): void {
     } catch {
       say(copy.error ?? '', 'bad');
     } finally {
+      submit.disabled = false;
       submit.removeAttribute('aria-busy');
       submit.textContent = label ?? '';
     }

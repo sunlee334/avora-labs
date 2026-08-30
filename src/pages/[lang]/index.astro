@@ -36,7 +36,7 @@ const h = t.home;
     breadcrumb([{ name: BUSINESS.brandName, path: localePath(locale) }]),
   ]}
 >
-  {/* 1 — Hero */}
+  {/* Hero */}
   <section class="hero">
     <div class="hero__media">
       <Picture
@@ -99,87 +99,22 @@ const h = t.home;
     )
   }
 
-  {/* 2 — Origin */}
-  <section class="section wrap rise" id="story">
-    <p class="kicker">{h.origin.kicker}</p>
-    <p class="display">
-      {h.origin.statementBefore}<span class="mark">{h.origin.statementEmphasis}</span>{
-        h.origin.statementAfter
-      }
-    </p>
-  </section>
-
-  {/* 3 — The Question */}
-  <section class="section section--alt wrap rise">
-    <p class="kicker">{h.question.kicker}</p>
-    <blockquote class="quote">{h.question.quote}</blockquote>
-    <p class="body" style="margin-top: 28px">{h.question.body}</p>
-    <p class="body" style="margin-top: 18px">{h.question.naming}</p>
-  </section>
-
-  {/* 4 — The Journey */}
-  <section class="section wrap rise">
-    <p class="kicker">{h.journey.kicker}</p>
-    <h2 class="display display--tight">{h.journey.lead}</h2>
-    <ol class="journey">
-      {
-        h.journey.steps.map((step, i) => (
-          <li>
-            <span class="journey__step">{String(i + 1).padStart(2, '0')}</span>
-            <div>
-              <strong class="journey__word">{step.word}</strong>
-              <span class="journey__body">{step.body}</span>
-            </div>
-          </li>
-        ))
-      }
-    </ol>
-  </section>
-
-  {/* 5 — Visual break */}
-  <figure class="figure rise">
-    <Picture
-      src={skinImage}
-      alt={h.break.imageAlt}
-      formats={['avif', 'webp']}
-      widths={[390, 780]}
-      sizes="100vw"
-      quality={52}
-      loading="lazy"
-      decoding="async"
-    />
-    <figcaption>SKIN</figcaption>
-  </figure>
-
-  {/* 6 — Brand Promise */}
-  <section class="section wrap rise">
-    <p class="kicker">{h.promise.kicker}</p>
-    <h2 class="display display--tight">{h.promise.lead}</h2>
-    <div class="promise">
-      {
-        h.promise.items.map((item) => (
-          <div>
-            <h3>{item.code}</h3>
-            <p>{item.body}</p>
-          </div>
-        ))
-      }
-    </div>
-  </section>
-
   {/*
-    7 — Philosophy
-    팔레트 A 에는 캠페인 컬러가 없습니다. 밝은 지반이 여섯 섹션 이어지다
-    여기 한 곳만 뒤집히는 대비가 "브랜드의 에너지 버튼" 역할을 대신합니다.
+    ── 섹션 순서에 대하여 ─────────────────────────────────────
+    기획안 2-2-4 의 메시지 위계는 1차(히어로 태그라인) → **2차 근거** →
+    3차 스펙입니다. 예전에는 브랜드 서사(Origin·Question·Philosophy)가
+    앞에 있고 근거(The Choice)가 여덟 번째였습니다. 모바일에서 40% 지점에
+    이탈하는 방문자는 PAROS 가 왜 다른지 모른 채 떠났습니다.
+
+    **서사를 지운 것이 아닙니다.** 잘 쓰인 글이지만 *이미 관심이 생긴
+    사람이 읽는 것* 이라 뒤로 보냈습니다.
+
+    Brand Promise(4가지 감각)는 제품 페이지로 옮겼습니다. 홈에 4개짜리와
+    5개짜리 프레임워크가 연달아 나오면 어느 쪽도 기억에 남지 않습니다.
   */}
-  <section class="section section--dark wrap rise">
-    <p class="kicker">{h.philosophy.kicker}</p>
-    <blockquote class="quote">{h.philosophy.quote}</blockquote>
-    <p class="body" style="margin-top: 28px">{h.philosophy.body}</p>
-  </section>
 
   {/*
-    8 — The Choice
+    The Choice — 2차 근거
 
     기획안 2-2-4 의 메시지 위계는 1차 헤드라인(히어로의 FOR EVERY MOVEMENT)
     → **2차 근거** → 3차 스펙입니다. 그동안 이 사이트에는 1차와 3차만 있고
@@ -198,7 +133,7 @@ const h = t.home;
   </section>
 
   {/*
-    9 — Test Panel
+    Test Panel — 검증단
 
     id 를 두는 이유: 기획안 8-2-1 은 인스타그램 프로필 링크를 "자사몰 출시
     알림 신청 페이지" 로 고정하라고 합니다. 10월 검증단 모집이 시작되면 그
@@ -224,10 +159,23 @@ const h = t.home;
     <p class="body" style="margin-top: 24px">{h.panel.note}</p>
 
     {/*
+      검증단 모집 페이지로 가는 길.
+
+      **이 링크가 없으면 /panel 에 아무도 들어가지 못합니다.** 10월에 크루
+      단톡방으로 뿌릴 주소는 그쪽이지만, 사이트를 둘러보다 관심이 생긴
+      사람에게도 길이 있어야 합니다.
+
+      알림 신청 폼보다 위에 둡니다 — 방금 검증단 이야기를 읽은 사람에게
+      "지원하기" 가 "소식 받기" 보다 앞선 행동입니다.
+    */}
+    <p style="margin-top: 26px">
+      <a class="cta" href={localePath(locale, 'panel')}>{h.panel.cta}</a>
+    </p>
+
+    {/*
       두 번째 신청 자리.
 
-      폴드 아래도 열람 시간의 43% 를 받습니다(NN/g 2018). 스토리를 끝까지
-      읽은 사람에게 다시 묻지 않는 것은 그냥 버리는 것입니다.
+      폴드 아래도 열람 시간의 43% 를 받습니다(NN/g 2018). 검증단 이야기를 읽은 사람에게 다시 묻지 않는 것은 그냥 버리는 것입니다.
 
       ── 왜 First Product 가 아니라 여기인가 ────────────────────
       전에는 이 폼이 제품 섹션 안에 있었습니다. 옮긴 이유는 요청할 것이
@@ -236,8 +184,7 @@ const h = t.home;
       모집 소식을 받겠냐고 묻는 것이, 제품 스펙 옆에서 묻는 것보다
       맥락이 맞습니다.
 
-      source 는 home-end 를 그대로 둡니다 — 자리는 바뀌었어도 "홈 하단
-      폼" 이라는 역할은 같고, 값을 바꾸면 이전 신청 건과 끊깁니다.
+      source 는 home-end 를 그대로 둡니다 — 자리는 바뀌었어도 "홈의 두 번째 폼" 이라는 역할은 같고, 값을 바꾸면 이전 신청 건과 끊깁니다.
     */}
     {
       !CAN_ORDER && (
@@ -252,13 +199,13 @@ const h = t.home;
   </section>
 
   {/*
-    10 — First Product
+    First Product — 3차 스펙
 
     폼이 앞 섹션으로 옮겨가면서 여기는 제품 페이지로 가는 길 하나만
     남았습니다. 그래서 "제품 보기" 를 보조 형태(cta--ghost)로 내릴 이유가
     없어졌습니다 — 이 섹션에서 유일하게 할 수 있는 일입니다.
   */}
-  <section class="section wrap rise">
+  <section class="section section--alt wrap rise">
     <p class="kicker">{h.product.kicker}</p>
     <h2 class="display display--tight">{h.product.name}</h2>
     <p class="body" style="margin-top: 14px">{h.product.spec}</p>
@@ -269,12 +216,75 @@ const h = t.home;
       </a>
     </p>
   </section>
+  {/* 시각적 쉼표 */}
+  <figure class="figure rise">
+    <Picture
+      src={skinImage}
+      alt={h.break.imageAlt}
+      formats={['avif', 'webp']}
+      widths={[390, 780]}
+      sizes="100vw"
+      quality={52}
+      loading="lazy"
+      decoding="async"
+    />
+    <figcaption>SKIN</figcaption>
+  </figure>
+
+  {/* The Journey — 5단계 여정 */}
+  <section class="section wrap rise">
+    <p class="kicker">{h.journey.kicker}</p>
+    <h2 class="display display--tight">{h.journey.lead}</h2>
+    <ol class="journey">
+      {
+        h.journey.steps.map((step, i) => (
+          <li>
+            <span class="journey__step">{String(i + 1).padStart(2, '0')}</span>
+            <div>
+              <strong class="journey__word">{step.word}</strong>
+              <span class="journey__body">{step.body}</span>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  {/* Origin — 여기부터 브랜드 서사입니다 */}
+  <section class="section section--alt wrap rise" id="story">
+    <p class="kicker">{h.origin.kicker}</p>
+    <p class="display">
+      {h.origin.statementBefore}<span class="mark">{h.origin.statementEmphasis}</span>{
+        h.origin.statementAfter
+      }
+    </p>
+  </section>
+
+  {/* The Question */}
+  <section class="section wrap rise">
+    <p class="kicker">{h.question.kicker}</p>
+    <blockquote class="quote">{h.question.quote}</blockquote>
+    <p class="body" style="margin-top: 28px">{h.question.body}</p>
+    <p class="body" style="margin-top: 18px">{h.question.naming}</p>
+  </section>
+
+  {/*
+    Philosophy
+    팔레트 A 에는 캠페인 컬러가 없습니다. 밝은 지반이 여섯 섹션 이어지다
+    여기 한 곳만 뒤집히는 대비가 "브랜드의 에너지 버튼" 역할을 대신합니다.
+  */}
+  <section class="section section--dark wrap rise">
+    <p class="kicker">{h.philosophy.kicker}</p>
+    <blockquote class="quote">{h.philosophy.quote}</blockquote>
+    <p class="body" style="margin-top: 28px">{h.philosophy.body}</p>
+  </section>
+
 </Base>
 
 <script>
   import { mountLaunchNotify } from '../../lib/launch-notify';
 
-  // 홈에는 폼이 둘입니다 — 첫 화면과 스토리 끝. mountLaunchNotify 가
+  // 홈에는 폼이 둘입니다 — 첫 화면과 검증단 섹션. mountLaunchNotify 가
   // querySelectorAll 로 둘 다 연결합니다.
   mountLaunchNotify();
 </script>

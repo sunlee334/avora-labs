@@ -23,6 +23,7 @@
  */
 import type { Locale } from '../config/site';
 import { dict, localePath } from '../i18n';
+import { BUSINESS } from '../config/site';
 
 interface Props {
   locale: Locale;
@@ -39,6 +40,14 @@ interface Props {
 
 const { locale, source, heading, body } = Astro.props;
 const n = dict(locale).notify;
+
+/*
+ * 덫 칸의 id.
+ *
+ * 홈에는 이 폼이 둘 있습니다(첫 화면·스토리 끝). id 가 겹치면 `<label for>`
+ * 가 첫 번째 것만 가리키고, 그건 검사에서도 화면에서도 드러나지 않습니다.
+ */
+const trapId = `trap-${source}`;
 ---
 
 <form
@@ -52,9 +61,29 @@ const n = dict(locale).notify;
     done: n.done,
     invalid: n.invalid,
     error: n.error,
+    // 연속 실패했을 때 덧붙일 안내. 주소는 설정에서 읽습니다 — 문구에
+    // 박아 두면 연락처가 바뀔 때 5개 언어를 다 고쳐야 합니다.
+    fallback: n.fallback.replace('{email}', BUSINESS.email),
     submit: n.submit,
   })}
 >
+  {/*
+    봇 덫.
+
+    사람에게는 보이지도, 탭으로 닿지도, 스크린리더에 읽히지도 않습니다.
+    값이 차 있으면 폼을 기계가 채웠다는 뜻이라 워커가 조용히 버립니다.
+
+    `display: none` 을 쓰지 않는 이유: 요즘 봇은 숨겨진 칸을 건너뜁니다.
+    화면 밖으로 밀어내는 편이 더 오래 갑니다.
+
+    이름이 `website` 인 이유는 봇이 흔한 이름을 채우기 때문입니다 —
+    `honeypot` 이라고 적으면 건너뜁니다(worker/spam.ts).
+  */}
+  <div class="honeypot" aria-hidden="true">
+    <label for={`${trapId}`}>Website</label>
+    <input id={trapId} type="text" name="website" tabindex="-1" autocomplete="off" />
+  </div>
+
   <p class="notify__heading">{heading}</p>
   <p class="notify__body">{body}</p>
 

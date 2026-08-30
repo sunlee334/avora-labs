@@ -127,11 +127,30 @@ const indexable = locale === 'ko';
       data-copy={JSON.stringify({
         required: f.required,
         invalid: f.invalid,
+        // 동의만 빠졌을 때는 다른 말이 필요합니다 — 빈 칸은 하나도 없습니다.
+        consentRequired: f.consentRequired,
         error: f.error,
         done: f.done,
       })}
       novalidate
     >
+  {/*
+    봇 덫.
+
+    사람에게는 보이지도, 탭으로 닿지도, 스크린리더에 읽히지도 않습니다.
+    값이 차 있으면 폼을 기계가 채웠다는 뜻이라 워커가 조용히 버립니다.
+
+    `display: none` 을 쓰지 않는 이유: 요즘 봇은 숨겨진 칸을 건너뜁니다.
+    화면 밖으로 밀어내는 편이 더 오래 갑니다.
+
+    이름이 `website` 인 이유는 봇이 흔한 이름을 채우기 때문입니다 —
+    `honeypot` 이라고 적으면 건너뜁니다(worker/spam.ts).
+  */}
+  <div class="honeypot" aria-hidden="true">
+    <label for={"trap-panel"}>Website</label>
+    <input id="trap-panel" type="text" name="website" tabindex="-1" autocomplete="off" />
+  </div>
+
       <Field
         id="name"
         label={f.name.label}
@@ -184,11 +203,16 @@ const indexable = locale === 'ko';
 
       <div class="field">
         <label for="region">{f.region.label}</label>
-        <select id="region" name="region" required>
+        {/*
+          힌트와 오류를 입력에 묶습니다. 없으면 스크린리더 사용자에게는
+          "샘플 발송 권역을 가늠하는 데만 씁니다" 도, 오류 문구도 존재하지
+          않는 것과 같습니다. Field.astro 는 이미 이렇게 합니다.
+        */}
+        <select id="region" name="region" required aria-describedby="region-hint region-error">
           <option value="">{f.region.placeholder}</option>
           {f.region.options.map((o) => <option value={o.value}>{o.label}</option>)}
         </select>
-        <p class="field__hint">{f.region.hint}</p>
+        <p class="field__hint" id="region-hint">{f.region.hint}</p>
         <p class="field__error" id="region-error" role="alert" aria-live="polite" hidden></p>
       </div>
 

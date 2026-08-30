@@ -246,7 +246,17 @@ const xDefault = !wanted || wanted.includes(DEFAULT_LOCALE)
   <body>
     <a class="skip-link" href="#main">{t.a11y.skipToContent}</a>
     <Nav locale={locale} path={path} />
-    <main id="main">
+    {/*
+      건너뛰기 링크의 착지점.
+
+      `tabindex="-1"` 이 없으면 링크를 눌러도 포커스가 <body> 에 남습니다 —
+      주소는 #main 으로 바뀌지만 다음 Tab 은 다시 헤더부터 시작합니다.
+      키보드 사용자에게는 건너뛴 것이 아닙니다.
+
+      `scroll-margin-top` 은 스티키 헤더 때문입니다. 없으면 착지한 h1 이
+      헤더 뒤에 가립니다 — `#story` 가 같은 이유로 이미 갖고 있습니다.
+    */}
+    <main id="main" tabindex="-1">
       <slot />
     </main>
     <Footer locale={locale} />

@@ -25,6 +25,7 @@
     "done": "You're on the list. We'll write to this address.",
     "invalid": "Please check the email address.",
     "error": "That didn't go through. Please try again in a moment.",
+    "fallback": "If it keeps failing, write to {email} and we will add you by hand.",
     "consent": "I agree to receive marketing email. Every message carries an unsubscribe link.",
     "activities": {
       "heading": "What do you mostly do? (optional)",
@@ -57,7 +58,7 @@
       ]
     },
     "privacy": {
-      "summary": "We ask for your email address and nothing else. It is used only to tell you when the funding opens and when the product launches. Unsubscribe and you are removed from the send list immediately; the address itself is kept so we do not write to you again.",
+      "summary": "We ask for your email address, and the activity you mostly do if you choose to tell us. We use them only to send the news, and if you unsubscribe you come off the list at once. We keep the address so that we do not write to it again.",
       "link": "Read the privacy policy"
     }
   },
@@ -112,28 +113,6 @@
     "break": {
       "imageAlt": "Close-up of sweat beading on skin right after activity"
     },
-    "promise": {
-      "kicker": "Brand Promise",
-      "lead": "What you should feel when you use it",
-      "items": [
-        {
-          "code": "LIGHT",
-          "body": "Never heavy on the skin"
-        },
-        {
-          "code": "COMFORT",
-          "body": "Comfortable however you move"
-        },
-        {
-          "code": "PROTECTION",
-          "body": "Guarding skin from sun and daily exposure"
-        },
-        {
-          "code": "RESET",
-          "body": "Skin settled again after activity"
-        }
-      ]
-    },
     "philosophy": {
       "kicker": "Philosophy",
       "quote": "Movement is the purest, most powerful expression of being alive. From an easy walk at dawn to the moment you take hold of the day, PAROS stays out of the way and lets skin find its own texture.",
@@ -176,7 +155,8 @@
           "body": "Until it has fully sunk in"
         }
       ],
-      "note": "We publish the tally as it comes out. We use the formula with the highest score, not the one we like. Recruiting opens in October 2026."
+      "note": "We publish the tally as it comes out. We use the formula with the highest score, not the one we like. Recruiting opens in October 2026.",
+      "cta": "Apply to the test panel"
     },
     "product": {
       "kicker": "First Product",
@@ -187,7 +167,7 @@
     "notify": {
       "hero": {
         "heading": "You'll be the first to know.",
-        "body": "Twice only — when the funding opens, and when it launches."
+        "body": "We don't write often. What's planned: the panel results, the funding launch, and the release."
       },
       "end": {
         "heading": "Shall we send you the panel recruitment news too?",
@@ -212,7 +192,7 @@
       "launchWindow": "Launching in the first half of 2027",
       "notify": {
         "heading": "We'll tell you when it's out",
-        "body": "Twice only — when the funding opens, and when it launches."
+        "body": "We don't write often. What's planned: the panel results, the funding launch, and the release."
       }
     },
     "principles": {
@@ -569,6 +549,23 @@
             "item": "Email address",
             "purpose": "Launch and funding announcements",
             "when": "When signing up for launch alerts (required)"
+          },
+          {
+            "item": "Main activity",
+            "purpose": "Telling you first when the test panel opens",
+            "when": "When signing up for launch news (optional)"
+          }
+        ],
+        "panelRows": [
+          {
+            "item": "Name or nickname · email",
+            "purpose": "Telling you the outcome and sending samples",
+            "when": "When applying to the test panel (required)"
+          },
+          {
+            "item": "Main activity · frequency · region",
+            "purpose": "Assigning a sport and gauging shipping areas",
+            "when": "When applying to the test panel (required)"
           }
         ],
         "notifyNote": "Launch alerts are marketing email you opted into. Every message carries an unsubscribe link that takes effect immediately."
@@ -696,7 +693,8 @@
     },
     "heading": "This path does not exist yet.",
     "body": "The address may have changed, or the page may have been removed.",
-    "cta": "Back to home"
+    "cta": "Back to home",
+    "panelCta": "See the test panel"
   },
   "a11y": {
     "skipToContent": "Skip to content",
@@ -1176,6 +1174,7 @@
       "done": "Your application has been received. We will let you know the outcome at this address during October.",
       "error": "It did not go through just now. Please try again in a moment.",
       "invalid": "Some fields are empty or in the wrong format.",
+      "consentRequired": "We need your consent to the collection and use of your personal information.",
       "required": "Required."
     },
     "pending": {

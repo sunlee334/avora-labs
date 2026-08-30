@@ -181,10 +181,53 @@ test.describe('수집 항목 표가 코드와 어긋나지 않는다', () => {
     // 이름이 아니라 값의 모양으로 찾습니다.
     const rowGroups = Object.keys(collect).filter((key) => Array.isArray(collect[key]));
 
-    // 주문·계정·리뷰·문의·출시알림 다섯 갈래가 전부 있어야 합니다.
-    expect(rowGroups.sort()).toEqual(
-      ['accountRows', 'inquiryRows', 'notifyRows', 'reviewRows', 'rows'].sort(),
-    );
+    /*
+     * 갈래 목록을 **마이그레이션에서 유도합니다.**
+     *
+     * 예전에는 다섯 갈래를 문자열로 박아 두고 비교했습니다. 그러니 새 표가
+     * 생겨도 목록이 그대로라 통과했고, 실제로 `panel_applications` 가
+     * 추가됐을 때 이 검사가 아무 말도 하지 않았습니다 — 이 파일이 막겠다고
+     * 적어 둔 바로 그 사고입니다.
+     *
+     * 이제 개인정보를 담은 표를 찾아, 각 표에 대응하는 행 묶음이 있는지
+     * 봅니다. 표가 늘면 여기 지도에 한 줄을 더해야 하고, 더하지 않으면
+     * 검사가 멈춥니다.
+     */
+    const TABLE_TO_GROUP: Record<string, string> = {
+      orders: 'rows',
+      users: 'accountRows',
+      reviews: 'reviewRows',
+      inquiries: 'inquiryRows',
+      launch_notify: 'notifyRows',
+      panel_applications: 'panelRows',
+      // 사람을 가리키지 않는 표는 여기 없습니다. identities·sessions 는
+      // 계정 표(users)에 딸린 것이라 accountRows 가 함께 설명합니다.
+      identities: 'accountRows',
+      sessions: 'accountRows',
+      // 표를 다시 만드는 마이그레이션의 중간 이름입니다. 실제로 남는 표가
+      // 아니지만 CREATE TABLE 로 나타나므로 여기 적어 둡니다.
+      users_rebuilt: 'accountRows',
+    };
+
+    const tables = [...migrations.matchAll(/CREATE TABLE(?: IF NOT EXISTS)? (\w+)\s*\(([^;]*)\)/g)]
+      .map((m) => ({ name: m[1], body: m[2] }))
+      .filter((t) => PII.some((col) => t.body.includes(col)));
+
+    expect(tables.length, '개인정보를 담은 표를 하나도 못 찾았습니다 — 검사가 고장났습니다')
+      .toBeGreaterThan(3);
+
+    for (const table of tables) {
+      const group = TABLE_TO_GROUP[table.name];
+      expect(
+        group,
+        `${table.name} 표가 개인정보를 담는데 처리방침의 어느 갈래에 해당하는지 정해지지 않았습니다 — ` +
+          '이 지도에 한 줄을 더하고, 필요하면 문구도 함께 추가하세요',
+      ).toBeTruthy();
+      expect(
+        rowGroups,
+        `${table.name} 에 해당하는 ${group} 가 처리방침에 없습니다`,
+      ).toContain(group);
+    }
   });
 
   test('문의 수집 항목이 5개 언어에 모두 있다', () => {

@@ -42,6 +42,7 @@ import {
 } from './inquiries';
 import { canonicalHostRedirect } from './canonical-host';
 import { overWriteLimit, tooManyRequests, type RateLimitEnv } from './rate-limit';
+import { looksAutomated, tooFast } from './spam';
 import { jsonOnError } from './errors';
 import {
   normalizeActivities,
@@ -53,6 +54,7 @@ import {
 } from './launch-notify';
 import {
   apply as applyPanel,
+  unsubscribe as unsubscribePanel,
   listApplications,
   countByActivity,
   normalizeName,
@@ -174,6 +176,7 @@ const WRITE_ROUTES: Record<string, string> = {
   '/api/reviews': 'reviews',
   '/api/inquiries': 'inquiries',
   '/api/launch-notify': 'launch-notify',
+  '/api/panel': 'panel',
 };
 
 function json(body: unknown, status = 200): Response {
@@ -739,11 +742,24 @@ async function handleLaunchNotify(request: Request, env: Env): Promise<Response>
     locale?: unknown;
     source?: unknown;
     activities?: unknown;
+    // 봇 판별용. 화면에는 없는 칸과 화면이 뜬 뒤 걸린 시간입니다(worker/spam.ts).
+    website?: unknown;
+    elapsedMs?: unknown;
   };
   try {
     body = (await request.json()) as typeof body;
   } catch {
     return json({ error: 'INVALID_JSON' }, 400);
+  }
+
+  /*
+   * 봇이면 **성공한 척하고 버립니다.**
+   *
+   * 400 을 돌려주면 봇 운영자가 무엇에 걸렸는지 알아내고 우회합니다.
+   * 사람에게는 어차피 일어나지 않는 경로라 화면이 달라지지 않습니다.
+   */
+  if (looksAutomated(body as Record<string, unknown>) || tooFast(body as Record<string, unknown>, new Date())) {
+    return json({ ok: true }, 201);
   }
 
   const email = normalizeEmail(body.email);
@@ -782,6 +798,11 @@ async function handlePanelApply(request: Request, env: Env): Promise<Response> {
     body = (await request.json()) as Record<string, unknown>;
   } catch {
     return json({ error: 'INVALID_JSON' }, 400);
+  }
+
+  // 봇이면 성공한 척하고 버립니다 — 위 알림 폼과 같은 이유입니다.
+  if (looksAutomated(body) || tooFast(body, new Date())) {
+    return json({ ok: true }, 201);
   }
 
   const name = normalizeName(body.name);
@@ -996,6 +1017,20 @@ async function handleAdminInquiryList(env: Env, url: URL, who: string): Promise<
  * 유입 화면별 집계를 냅니다 — 어디가 명단을 만드는지 모르면 다음에 무엇을
  * 고칠지 고를 수 없습니다.
  */
+/**
+ * 검증단 지원자의 수신 거부.
+ *
+ * 메일 안의 링크로 들어오므로 GET 입니다. 없는 토큰이어도 성공처럼
+ * 응답합니다 — 토큰을 찍어 보며 어떤 것이 살아 있는지 알아낼 이유를
+ * 없앱니다. `/api/launch-notify/unsubscribe` 와 같은 방식입니다.
+ */
+async function handlePanelUnsubscribe(request: Request, env: Env): Promise<Response> {
+  if (!env.DB) return json({ error: 'PANEL_NOT_CONFIGURED' }, 503);
+  const token = new URL(request.url).searchParams.get('t') ?? '';
+  if (token) await unsubscribePanel(env.DB, token, new Date());
+  return json({ ok: true });
+}
+
 /**
  * 검증단 지원자 목록 — 관리자 전용.
  *
@@ -1475,8 +1510,8 @@ async function route(request: Request, env: Env, ctx: ExecutionContext): Promise
   /*
    * 2 — 공개 쓰기의 문턱.
    *
-   * 로그인 없이 우리 DB 에 행을 만드는 네 자리입니다. 라우팅 앞에 한 번 두는
-   * 편이 네 핸들러에 각각 넣는 것보다 안전합니다 — 다섯 번째 공개 쓰기가
+   * 로그인 없이 우리 DB 에 행을 만드는 다섯 자리입니다. 라우팅 앞에 한 번 두는
+   * 편이 핸들러마다 넣는 것보다 안전합니다 — 여섯 번째 공개 쓰기가
    * 생겼을 때 여기 한 줄을 빠뜨리면 눈에 띄지만, 핸들러 안이면 안 띕니다.
    *
    * 문턱을 라우팅보다 앞에 두는 대신, 막을 길만 골라 적습니다. 조회(GET)와
@@ -1517,6 +1552,9 @@ async function route(request: Request, env: Env, ctx: ExecutionContext): Promise
   // 검증단 지원 — 10월 크루 접촉 때 링크를 걸 자리(/panel)가 여기로 보냅니다.
   if (pathname === '/api/panel' && request.method === 'POST') {
     return handlePanelApply(request, env);
+  }
+  if (pathname === '/api/panel/unsubscribe' && request.method === 'GET') {
+    return handlePanelUnsubscribe(request, env);
   }
 
   // 문의 — 공개 게시판이 아닙니다. 조회는 본인 확인을 지납니다.

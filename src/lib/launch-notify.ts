@@ -10,6 +10,8 @@ interface Copy {
   done: string;
   invalid: string;
   error: string;
+  /** 두 번 연속 실패했을 때 덧붙이는 안내. 연락처가 이미 채워져 옵니다. */
+  fallback: string;
   submit: string;
 }
 
@@ -30,7 +32,7 @@ async function drain(res: Response): Promise<void> {
 /**
  * 화면에 폼이 여러 개일 수 있습니다.
  *
- * 홈은 첫 화면과 스토리 끝, 두 자리에 같은 폼을 둡니다. querySelector 로
+ * 홈은 첫 화면과 검증단 섹션, 두 자리에 같은 폼을 둡니다. querySelector 로
  * 하나만 잡으면 두 번째 폼은 **눌러도 아무 일이 없는 폼** 이 됩니다 —
  * 화면에는 멀쩡히 보이므로 아무도 알아채지 못합니다.
  */
@@ -41,6 +43,14 @@ declare global {
   }
 }
 
+
+/*
+ * 이 스크립트가 실행된 시각.
+ *
+ * 모듈이 한 번만 평가되므로 폼 여럿이 같은 값을 공유합니다 — 화면이 뜬
+ * 시각이라는 뜻이고, 그게 우리가 재려는 것입니다.
+ */
+const shownAt = Date.now();
 
 export function mountLaunchNotify(): void {
   for (const form of document.querySelectorAll<HTMLFormElement>('[data-launch-notify]')) {
@@ -60,6 +70,21 @@ function mountOne(form: HTMLFormElement): void {
     state!.textContent = message;
     state!.dataset.tone = tone;
     state!.hidden = false;
+  }
+
+  /*
+   * 연속 실패를 셉니다.
+   *
+   * 한 번 실패는 흔합니다 — 지하철에서 신호가 끊기는 것 같은 일입니다. 그때
+   * 바로 "메일로 보내세요" 를 띄우면 사이트가 고장 난 것처럼 보입니다.
+   * **두 번째부터** 사람이 개입할 길을 함께 보여줍니다.
+   */
+  let failures = 0;
+
+  function fail(message: string) {
+    failures += 1;
+    const extra = failures >= 2 && copy.fallback ? ` ${copy.fallback}` : '';
+    say(message + extra, 'bad');
   }
 
   form.addEventListener('submit', async (event) => {
@@ -84,6 +109,13 @@ function mountOne(form: HTMLFormElement): void {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: input.value.trim(),
+          /*
+           * 화면이 뜬 시각. 제출까지 2초가 안 걸렸으면 워커가 봇으로 봅니다.
+           * 값을 못 읽는 상황에서는 통과시키므로, 여기서 실패해도 사람을
+           * 막지 않습니다(worker/spam.ts).
+           */
+          elapsedMs: Date.now() - shownAt,
+          website: (form.querySelector<HTMLInputElement>('input[name="website"]')?.value ?? ''),
           locale: form.dataset.locale,
           source: form.dataset.source,
           // 선택 항목입니다. 아무것도 안 고르면 빈 배열이 가고, 서버는
@@ -119,10 +151,10 @@ function mountOne(form: HTMLFormElement): void {
         // 아직 뭔가 더 해야 하는 화면처럼 보입니다.
         form.querySelector('.notify__acts')?.setAttribute('hidden', '');
       } else {
-        say(res.status === 400 ? copy.invalid : copy.error, 'bad');
+        fail(res.status === 400 ? copy.invalid : copy.error);
       }
     } catch {
-      say(copy.error, 'bad');
+      fail(copy.error);
     } finally {
       submit.disabled = false;
       submit.textContent = label ?? copy.submit;

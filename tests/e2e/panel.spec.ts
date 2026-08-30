@@ -175,6 +175,17 @@ test.describe('지원 폼', () => {
 
   test('정상 지원이 접수된다', async ({ page }) => {
     await page.goto('/ko/panel/');
+    /*
+     * 검사는 폼을 1초 안에 채웁니다. 그대로 두면 봇 문턱(2초)에 걸려
+     * 지원서가 **버려지는데** 화면에는 "접수되었습니다" 가 뜹니다 — 응답이
+     * 201 로 같기 때문입니다(봇에게 단서를 주지 않으려는 설계).
+     *
+     * 실제로 이 검사가 그 상태로 통과하고 있었습니다. 실측 1,774ms.
+     * 저장까지 확인하는 것은 commerce 쪽 spam-store.spec.ts 가 합니다.
+     */
+    await page.locator('[data-panel-form]').evaluate((el) => {
+      (el as HTMLElement).dataset.elapsedOffset = '5000';
+    });
     await page.fill('#name', '테스트러너');
     await page.fill('#email', `ok-${Date.now()}@example.com`);
     await page.check('input[name="activity"][value="running"]');
@@ -196,6 +207,9 @@ test.describe('지원 폼', () => {
      * 보조기기 사용자에게는 지원 자체가 불가능합니다.
      */
     await page.goto('/ko/panel/');
+    await page.locator('[data-panel-form]').evaluate((el) => {
+      (el as HTMLElement).dataset.elapsedOffset = '5000';
+    });
     await page.locator('#name').focus();
     await page.keyboard.type('키보드');
     await page.keyboard.press('Tab');
@@ -218,7 +232,8 @@ test.describe('지원 폼', () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/ko/panel/');
     const sizes = await page.evaluate(() =>
-      [...document.querySelectorAll('.panelForm input[type="text"], .panelForm input[type="email"], .panelForm select')]
+      // 덫 칸(.honeypot)은 일부러 화면 밖에 있는 1px 입니다 — 사람이 쓰는 칸만 봅니다.
+      [...document.querySelectorAll('.panelForm .field input, .panelForm select')]
         .map((el) => parseFloat(getComputedStyle(el).fontSize)),
     );
     expect(sizes.length).toBeGreaterThan(0);
@@ -230,7 +245,8 @@ test.describe('지원 폼', () => {
     await page.goto('/ko/panel/');
     const small = await page.evaluate(() => {
       const out: string[] = [];
-      for (const el of document.querySelectorAll<HTMLElement>('.panelForm .choice, .panelForm button, .panelForm select, .panelForm input[type="text"], .panelForm input[type="email"]')) {
+      // 덫 칸은 제외합니다 — 사람은 닿을 수 없는 칸입니다.
+      for (const el of document.querySelectorAll<HTMLElement>('.panelForm .choice, .panelForm button, .panelForm select, .panelForm .field input')) {
         const b = el.getBoundingClientRect();
         if (b.width && b.height < 44) out.push(`${el.className || el.tagName} h=${b.height}`);
       }

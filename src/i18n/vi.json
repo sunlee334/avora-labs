@@ -25,6 +25,7 @@
     "done": "Đã đăng ký. Chúng tôi sẽ gửi tin đến địa chỉ này.",
     "invalid": "Vui lòng kiểm tra lại địa chỉ email.",
     "error": "Lần này chưa đăng ký được. Vui lòng thử lại sau giây lát.",
+    "fallback": "Nếu vẫn không được, hãy gửi thư tới {email} và chúng tôi sẽ đăng ký giúp bạn.",
     "consent": "Tôi đồng ý nhận email quảng cáo. Mỗi email đều có liên kết hủy nhận.",
     "activities": {
       "heading": "Bạn chủ yếu vận động thế nào? (không bắt buộc)",
@@ -57,7 +58,7 @@
       ]
     },
     "privacy": {
-      "summary": "Chúng tôi chỉ xin địa chỉ email, và chỉ dùng để báo ngày mở gọi vốn và ngày ra mắt sản phẩm. Khi bạn hủy nhận tin, bạn được loại khỏi danh sách gửi ngay lập tức; địa chỉ được giữ lại chỉ để chúng tôi không gửi lại lần nữa.",
+      "summary": "Chúng tôi xin địa chỉ email của bạn, và hoạt động bạn thường làm nếu bạn chọn cho biết. Chỉ dùng để gửi tin; nếu bạn hủy nhận, bạn sẽ được đưa khỏi danh sách ngay. Chúng tôi giữ lại địa chỉ để không gửi trùng lần nữa.",
       "link": "Xem chính sách quyền riêng tư"
     }
   },
@@ -112,28 +113,6 @@
     "break": {
       "imageAlt": "Cận cảnh những giọt mồ hôi đọng trên da ngay sau khi vận động"
     },
-    "promise": {
-      "kicker": "Brand Promise",
-      "lead": "Điều bạn nên cảm nhận khi dùng",
-      "items": [
-        {
-          "code": "LIGHT",
-          "body": "Cảm giác không hề nặng mặt"
-        },
-        {
-          "code": "COMFORT",
-          "body": "Da vẫn dễ chịu dù bạn chuyển động thế nào"
-        },
-        {
-          "code": "PROTECTION",
-          "body": "Bảo vệ da khỏi nắng và tác động thường ngày"
-        },
-        {
-          "code": "RESET",
-          "body": "Cảm giác da được sắp xếp lại sau khi vận động"
-        }
-      ]
-    },
     "philosophy": {
       "kicker": "Philosophy",
       "quote": "Chuyển động là biểu hiện thuần khiết và mạnh mẽ nhất của sự sống. Từ một buổi đi bộ nhẹ lúc sáng sớm đến khoảnh khắc bạn nắm lấy nhịp sống của mình, PAROS không cắt ngang dòng chảy ấy, chỉ để làn da trở về đúng kết cấu của nó.",
@@ -176,7 +155,8 @@
           "body": "Cho đến khi thấm hoàn toàn"
         }
       ],
-      "note": "Chúng tôi công bố nguyên kết quả tổng hợp. Chúng tôi dùng công thức có điểm cao nhất, không phải công thức mình thích. Việc tuyển chọn bắt đầu vào tháng 10 năm 2026."
+      "note": "Chúng tôi công bố nguyên kết quả tổng hợp. Chúng tôi dùng công thức có điểm cao nhất, không phải công thức mình thích. Việc tuyển chọn bắt đầu vào tháng 10 năm 2026.",
+      "cta": "Đăng ký nhóm thử nghiệm"
     },
     "product": {
       "kicker": "First Product",
@@ -187,7 +167,7 @@
     "notify": {
       "hero": {
         "heading": "Bạn sẽ là người biết đầu tiên.",
-        "body": "Chỉ hai lần: khi mở gọi vốn và khi chính thức ra mắt."
+        "body": "Chúng tôi không gửi thường xuyên. Những tin đã lên kế hoạch: kết quả thử nghiệm, mở gọi vốn, và ra mắt chính thức."
       },
       "end": {
         "heading": "Bạn có muốn nhận cả tin tuyển nhóm thử nghiệm không?",
@@ -212,7 +192,7 @@
       "launchWindow": "Dự kiến ra mắt nửa đầu năm 2027",
       "notify": {
         "heading": "Chúng tôi sẽ báo khi sản phẩm ra mắt",
-        "body": "Chỉ hai lần: khi mở gọi vốn và khi chính thức ra mắt."
+        "body": "Chúng tôi không gửi thường xuyên. Những tin đã lên kế hoạch: kết quả thử nghiệm, mở gọi vốn, và ra mắt chính thức."
       }
     },
     "principles": {
@@ -569,6 +549,23 @@
             "item": "Địa chỉ email",
             "purpose": "Thông báo ra mắt và mở gọi vốn",
             "when": "Khi đăng ký nhận thông báo ra mắt (bắt buộc)"
+          },
+          {
+            "item": "Hoạt động chính",
+            "purpose": "Báo trước khi mở tuyển nhóm thử nghiệm",
+            "when": "Khi đăng ký nhận tin ra mắt (tùy chọn)"
+          }
+        ],
+        "panelRows": [
+          {
+            "item": "Tên hoặc biệt danh · email",
+            "purpose": "Báo kết quả tuyển chọn và gửi mẫu",
+            "when": "Khi đăng ký nhóm thử nghiệm (bắt buộc)"
+          },
+          {
+            "item": "Hoạt động chính · tần suất · nơi ở",
+            "purpose": "Phân loại môn và ước lượng khu vực gửi",
+            "when": "Khi đăng ký nhóm thử nghiệm (bắt buộc)"
           }
         ],
         "notifyNote": "Thông báo ra mắt là email quảng cáo mà bạn đã đồng ý nhận. Mỗi email đều có liên kết hủy nhận, có hiệu lực ngay lập tức."
@@ -696,7 +693,8 @@
     },
     "heading": "Đường dẫn này chưa tồn tại.",
     "body": "Địa chỉ có thể đã thay đổi, hoặc trang đã bị xoá.",
-    "cta": "Về trang chủ"
+    "cta": "Về trang chủ",
+    "panelCta": "Xem tuyển nhóm thử nghiệm"
   },
   "a11y": {
     "skipToContent": "Chuyển đến nội dung",
@@ -1176,6 +1174,7 @@
       "done": "Đã nhận đăng ký của bạn. Chúng tôi sẽ báo kết quả tới địa chỉ này trong tháng 10.",
       "error": "Hiện chưa gửi được. Vui lòng thử lại sau giây lát.",
       "invalid": "Có ô còn trống hoặc sai định dạng.",
+      "consentRequired": "Chúng tôi cần bạn đồng ý cho thu thập và sử dụng thông tin cá nhân để tiếp nhận.",
       "required": "Bắt buộc."
     },
     "pending": {
