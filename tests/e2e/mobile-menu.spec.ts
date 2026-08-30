@@ -119,6 +119,39 @@ test.describe('모바일 기준을 지킨다', () => {
     }
   });
 
+  test('펼침 항목이 브라우저 기본 버튼으로 보이지 않는다', async ({ page }) => {
+    /*
+     * `.menu__item--group`(고객센터처럼 하위를 여는 항목)은 `<button>` 입니다.
+     * 그 기본 모양을 지우는 규칙이 한동안 `min-width: 900px` 안에 갇혀 있어서,
+     * **휴대폰에서만** 회색 배경에 네모 테두리가 둘린 버튼으로 보였습니다.
+     * 목록의 다른 항목은 전부 전체 폭인데 이것 하나만 글자 폭이었습니다.
+     *
+     * 데스크톱에서는 멀쩡했기 때문에 오래 남아 있었습니다. 그래서 이 검사는
+     * 반드시 모바일 폭에서 봅니다.
+     */
+    await page.setViewportSize(MOBILE);
+    await page.goto('/ko/');
+    await openMenu(page);
+
+    const group = page.locator('.menu__item--group').first();
+    await expect(group, '펼침 항목이 없습니다').toBeVisible();
+
+    const seen = await group.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      const list = el.closest('.menu__list, .menu__sheet') as HTMLElement;
+      return {
+        배경: cs.backgroundColor,
+        폭: el.getBoundingClientRect().width,
+        목록폭: list.getBoundingClientRect().width,
+      };
+    });
+
+    // 기본 버튼은 불투명한 회색 면을 깔고 옵니다. 투명해야 목록의 다른 줄과 같습니다.
+    expect(seen.배경, `버튼 배경이 ${seen.배경} 입니다`).toMatch(/rgba\(0, 0, 0, 0\)|transparent/);
+    // 글자 폭이 아니라 줄 전체를 차지해야 옆의 여백을 눌러도 열립니다.
+    expect(seen.폭, '펼침 항목이 줄 전체를 차지하지 않습니다').toBeGreaterThan(seen.목록폭 * 0.9);
+  });
+
   test('메뉴 안의 탭 영역이 44px 이상이다', async ({ page }) => {
     await page.setViewportSize(MOBILE);
     await page.goto('/ko/');
@@ -171,7 +204,7 @@ test.describe('JS 가 없어도 갈 곳을 잃지 않는다', () => {
     // 그 경우의 통로가 푸터입니다 — 여기가 비면 메뉴가 유일한 길이 됩니다.
     await page.setViewportSize(MOBILE);
     await page.goto('/ko/');
-    for (const href of ['/ko/', '/ko/product', '/ko/support']) {
+    for (const href of ['/ko/', '/ko/product/', '/ko/support/']) {
       await expect(
         page.locator(`footer a[href="${href}"]`).first(),
         `푸터에 ${href} 링크가 없습니다`,
