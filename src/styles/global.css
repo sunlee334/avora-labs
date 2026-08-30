@@ -384,6 +384,226 @@ button {
   display: none;
 }
 
+
+/* ── 검증단 모집 (/panel) ─────────────────────────────────── */
+
+/* 문단 안의 줄바꿈이 문구에 있습니다. 문서가 준 카피의 행갈이가 의미를
+   나누므로 그대로 살립니다. */
+.panel__lead {
+  white-space: pre-line;
+  margin-top: 18px;
+}
+
+/*
+ * 배점표.
+ *
+ * 375px 에서 4열은 들어가지 않습니다. 가로 스크롤 상자로 감싸면 오른쪽 두 열
+ * (배점·커트라인)이 화면 밖에 남는데, **그 두 열이 이 표의 요점입니다.**
+ * 그래서 좁은 화면에서는 행마다 카드로 쌓고, 각 칸 앞에 열 이름을 붙입니다.
+ *
+ * `<table>` 마크업은 유지합니다 — 스크린리더가 표로 읽고, 답변 엔진이 숫자를
+ * 꺼낼 수 있어야 합니다(지시 문서 G4-2).
+ */
+.criteriaTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+.criteriaTable thead {
+  /* 좁은 화면에서는 열 이름을 각 칸 앞에 붙이므로 머리행이 필요 없습니다.
+     `display: none` 대신 화면에서만 감춰 스크린리더에는 남깁니다. */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.criteriaTable tr {
+  display: block;
+  padding: 16px 0;
+  border-top: 1px solid var(--color-border);
+}
+.criteriaTable tbody tr:last-child {
+  border-bottom: 1px solid var(--color-border);
+}
+.criteriaTable th[scope='row'] {
+  display: block;
+  text-align: left;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 400;
+  margin-bottom: 6px;
+}
+.criteriaTable td {
+  display: block;
+  font-size: 14px;
+  color: var(--color-text-muted);
+  padding: 2px 0;
+}
+/* 열 이름은 한글이 섞입니다. 고정폭 서체에는 한글이 없어 대체 글꼴로
+   떨어지면서 자간이 벌어지므로 본문 서체로 둡니다. */
+.criteriaTable td::before {
+  content: attr(data-label) ' ';
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin-right: 6px;
+}
+/* 배점은 숫자입니다. 자릿수가 흔들리지 않게 고정폭으로 둡니다. */
+.criteriaTable__num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+}
+
+@media (min-width: 760px) {
+  .criteriaTable thead {
+    position: static;
+    width: auto;
+    height: auto;
+    clip-path: none;
+  }
+  .criteriaTable thead th {
+    text-align: left;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--color-text-muted);
+    padding: 0 12px 10px 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .criteriaTable tr {
+    display: table-row;
+    padding: 0;
+    border: 0;
+  }
+  .criteriaTable tbody tr {
+    border-top: 1px solid var(--color-border);
+  }
+  .criteriaTable th[scope='row'],
+  .criteriaTable td {
+    display: table-cell;
+    padding: 14px 12px 14px 0;
+    vertical-align: baseline;
+  }
+  .criteriaTable th[scope='row'] {
+    margin: 0;
+    width: 22%;
+  }
+  .criteriaTable td::before {
+    content: none;
+  }
+  .criteriaTable__num {
+    text-align: right;
+    padding-right: 24px;
+  }
+}
+
+/* 커트라인 문장은 표의 결론입니다. 표와 붙여 두고 무게를 올립니다. */
+.panel__cut {
+  margin-top: 18px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.panelForm {
+  margin-top: 26px;
+  max-width: 520px;
+}
+.panelForm__group {
+  border: 0;
+  padding: 0;
+  margin: 0 0 22px;
+}
+.panelForm__group legend {
+  padding: 0;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.panelForm__choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+/* 실제 <input> 위에 라벨을 씌웁니다 — div 로 흉내 내면 키보드로 고를 수
+   없고 스크린리더가 선택지를 읽지 못합니다. */
+.choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--size-tap-min);
+  padding-inline: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  font-size: 14px;
+  cursor: pointer;
+}
+.choice input {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  accent-color: var(--color-text);
+}
+/* 고른 것이 한눈에 보여야 합니다 — 16px 표시만으로는 훑기 어렵습니다. */
+.choice:has(input:checked) {
+  border-color: var(--color-text);
+}
+
+/*
+ * `<select>` 는 기본 모양을 끄지 않으면 **WebKit 이 padding 과 height 를
+ * 무시합니다.** 실측하면 높이가 24px 로 남아 탭 영역 44px 기준에 미달합니다.
+ * 데스크톱 크로뮴에서는 정상이라 모바일에서만 드러납니다.
+ *
+ * 모양을 끄면 화살표도 사라지므로 배경 이미지로 직접 그립니다. 색은 토큰에서
+ * 읽을 수 없어(배경 이미지 안이라) 잉크색을 그대로 인코딩했습니다 —
+ * 팔레트가 바뀌면 이 줄도 함께 봐야 합니다.
+ */
+.panelForm select {
+  font: inherit;
+  font-size: var(--size-text-input);
+  min-height: var(--size-tap-min);
+  padding: 10px 40px 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-bg);
+  color: var(--color-text);
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%23485058' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 12px 8px;
+}
+.panelForm select[aria-invalid='true'] {
+  border-color: var(--color-text);
+}
+
+/*
+ * 접수된 뒤 폼을 감춥니다.
+ *
+ * 브라우저 기본 `[hidden]{display:none}` 은 **우리가 display 를 지정한 요소에
+ * 집니다.** `.btn` 은 inline-flex, `.field` 는 grid 라, hidden 을 붙여도
+ * 그대로 보입니다. 그래서 여기서 다시 적습니다.
+ */
+.panelForm .field[hidden],
+.panelForm fieldset[hidden],
+.panelForm .agree[hidden],
+.panelForm .btn[hidden] {
+  display: none;
+}
+
+.panelForm__state {
+  margin-top: 14px;
+  font-size: 14px;
+}
+.panelForm__state[data-kind='bad'] {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
 /* ── 네비게이션 ───────────────────────────────────────────── */
 /* 헤더 높이를 토큰으로 둡니다.
    :root 에 선언해야 합니다 — .nav 에 두면 #story 가 <main> 안이라 상속받지

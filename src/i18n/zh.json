@@ -961,5 +961,226 @@
       "failed": "未能提交咨询，请稍后再试。"
     },
     "note": "回复会显示在此页面。我们不会另外发送通知。"
+  },
+  "panel": {
+    "meta": {
+      "title": "PAROS 测评团招募 — 挑选配方的人",
+      "description": "收到隐去厂商名称的样品，按既定标准比较。统计结果决定配方，落选配方的分数也一并公开。"
+    },
+    "heading": "配方不由我们挑选。",
+    "lead": [
+      "很多品牌把做好的产品寄给跑者，再问感受。\n我们把顺序反了过来。",
+      "在什么都还没定下来的阶段，我们直接寄出候选配方。\n把「哪一款做成产品」的决定交出去。"
+    ],
+    "what": {
+      "heading": "您需要做什么",
+      "body": "您会收到两三款隐去厂商名称的样品。\n照常做您平时的运动，按下面六项标准比较。\n评测于 2026 年 10 月至 11 月进行。"
+    },
+    "criteria": {
+      "heading": "比较的标准",
+      "columns": {
+        "item": "项目",
+        "how": "确认方式",
+        "score": "分值",
+        "cut": "淘汰线"
+      },
+      "rows": [
+        {
+          "item": "不刺眼",
+          "how": "运动 30 分钟以上、正在出汗的状态下涂抹额头与太阳穴",
+          "score": "30",
+          "cut": "低于 18 分淘汰"
+        },
+        {
+          "item": "不泛白",
+          "how": "涂抹后立即与 30 秒后，在相同光线下拍摄",
+          "score": "25",
+          "cut": "低于 15 分淘汰"
+        },
+        {
+          "item": "不黏腻",
+          "how": "涂抹 1 分钟后按压手背确认",
+          "score": "15",
+          "cut": "—"
+        },
+        {
+          "item": "贴合 · 耐水",
+          "how": "涂抹 20 分钟后接触水并用毛巾擦拭，确认残留",
+          "score": "15",
+          "cut": "—"
+        },
+        {
+          "item": "可补涂性",
+          "how": "30 分钟后叠涂，确认搓泥与结块",
+          "score": "10",
+          "cut": "—"
+        },
+        {
+          "item": "吸收速度",
+          "how": "测量完全吸收所需时间",
+          "score": "5",
+          "cut": "—"
+        }
+      ],
+      "note": "无论总分多高，刺眼与泛白两项达不到淘汰线的配方都不会采用。"
+    },
+    "rejected": {
+      "heading": "落选的也会公开",
+      "body": "统计结束后，我们不只公开选中的配方，也一并公开落选配方的分数。\n\n只说选了什么却不说淘汰了什么，\n那不是挑选，是看起来像在挑选。"
+    },
+    "form": {
+      "heading": "报名",
+      "name": {
+        "label": "姓名或昵称",
+        "hint": "不必是真名。写您在跑团里被称呼的名字即可。"
+      },
+      "email": {
+        "label": "邮箱",
+        "placeholder": "you@example.com"
+      },
+      "activity": {
+        "label": "主要运动",
+        "options": [
+          {
+            "value": "running",
+            "label": "跑步"
+          },
+          {
+            "value": "hiking",
+            "label": "登山·徒步"
+          },
+          {
+            "value": "golf",
+            "label": "高尔夫"
+          },
+          {
+            "value": "water",
+            "label": "冲浪·游泳"
+          },
+          {
+            "value": "gym",
+            "label": "健身"
+          },
+          {
+            "value": "other",
+            "label": "其他"
+          }
+        ]
+      },
+      "frequency": {
+        "label": "运动频率",
+        "options": [
+          {
+            "value": "weekly_1",
+            "label": "每周 1 次以下"
+          },
+          {
+            "value": "weekly_2_3",
+            "label": "每周 2~3 次"
+          },
+          {
+            "value": "weekly_4_plus",
+            "label": "每周 4 次以上"
+          }
+        ]
+      },
+      "region": {
+        "label": "居住地区",
+        "hint": "仅用于估算寄送区域。详细地址会在入选后另行询问。",
+        "placeholder": "请选择",
+        "options": [
+          {
+            "value": "seoul",
+            "label": "首尔"
+          },
+          {
+            "value": "busan",
+            "label": "釜山"
+          },
+          {
+            "value": "daegu",
+            "label": "大邱"
+          },
+          {
+            "value": "incheon",
+            "label": "仁川"
+          },
+          {
+            "value": "gwangju",
+            "label": "光州"
+          },
+          {
+            "value": "daejeon",
+            "label": "大田"
+          },
+          {
+            "value": "ulsan",
+            "label": "蔚山"
+          },
+          {
+            "value": "sejong",
+            "label": "世宗"
+          },
+          {
+            "value": "gyeonggi",
+            "label": "京畿"
+          },
+          {
+            "value": "gangwon",
+            "label": "江原"
+          },
+          {
+            "value": "chungbuk",
+            "label": "忠北"
+          },
+          {
+            "value": "chungnam",
+            "label": "忠南"
+          },
+          {
+            "value": "jeonbuk",
+            "label": "全北"
+          },
+          {
+            "value": "jeonnam",
+            "label": "全南"
+          },
+          {
+            "value": "gyeongbuk",
+            "label": "庆北"
+          },
+          {
+            "value": "gyeongnam",
+            "label": "庆南"
+          },
+          {
+            "value": "jeju",
+            "label": "济州"
+          },
+          {
+            "value": "overseas",
+            "label": "海外"
+          }
+        ]
+      },
+      "consent": {
+        "label": "我同意收集与使用个人信息。（必填）",
+        "body": "为运营测评团，我们收集您的姓名（或昵称）、邮箱地址、运动信息与居住地区。仅用于寄送样品与告知评测流程，评测结束三个月后销毁。您可以不同意，但那样将无法受理报名。"
+      },
+      "marketing": {
+        "label": "我同意接收营销信息。（选填）",
+        "body": "可随时通过邮件中的链接取消订阅。"
+      },
+      "submit": "提交报名",
+      "sending": "提交中…",
+      "done": "报名已受理。我们会在 10 月内把结果发到这个邮箱。",
+      "error": "暂时未能提交。请稍后再试。",
+      "invalid": "有空白或格式不正确的项目。",
+      "required": "必填项。"
+    },
+    "pending": {
+      "heading": "还没定下来的事",
+      "body": "参与的朋友能得到什么，我们还没有决定。\n一旦定下来，会先告诉报名的各位。"
+    }
   }
 }

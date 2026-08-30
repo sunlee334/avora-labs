@@ -156,10 +156,19 @@ test.describe('글 주소 검사', () => {
   });
 
   test('금칙어 목록이 사이트맵 filter 와 같은 곳에서 온다', () => {
-    // 두 곳에 각자 적어 두면 시간이 지나며 벌어지고, 그때 생기는 사고는 조용합니다.
+    /*
+     * 두 곳에 각자 적어 두면 시간이 지나며 벌어지고, 그때 생기는 사고는
+     * 조용합니다 — 글 하나가 사이트맵에서 소리 없이 빠지는 식입니다.
+     *
+     * 판정 자체는 `reserved-paths.ts` 의 `inSitemap()` 이 합니다. 설정 파일은
+     * 그것을 부르기만 해야 하고, 목록을 다시 적으면 안 됩니다.
+     */
     const config = readFileSync(fileURLToPath(new URL('astro.config.ts', root)), 'utf-8');
-    expect(config).toContain('SITEMAP_EXCLUDED');
+    expect(config, '사이트맵 판정을 설정 파일에서 직접 하고 있습니다').toContain('inSitemap');
+    expect(config).toContain("from './src/config/reserved-paths'");
+    // 목록을 설정 파일에 베껴 적었는지.
     expect(config).not.toMatch(/\['\/404',[\s\S]*'\/order\/',?\s*\]/);
+    expect(config).not.toContain("'/panel'");
     expect(RESERVED_SLUG_PREFIXES).toContain('checkout');
     expect(RESERVED_SLUG_PREFIXES).toContain('order');
   });

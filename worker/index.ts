@@ -51,6 +51,15 @@ import {
   listSignups,
   signupsBySource,
 } from './launch-notify';
+import {
+  apply as applyPanel,
+  listApplications,
+  countByActivity,
+  normalizeName,
+  normalizeActivity,
+  normalizeFrequency,
+  normalizeRegion,
+} from './panel';
 import { renderReviewsPage } from './reviews-page';
 import { handleKakaoWebhook } from './auth/kakao-webhook';
 import {
@@ -755,6 +764,74 @@ async function handleLaunchNotify(request: Request, env: Env): Promise<Response>
 }
 
 /**
+ * 검증단 지원.
+ *
+ * ── 왜 알림 신청과 검증이 다른가 ────────────────────────────
+ * 알림 신청은 이메일 하나만 받고 형식이 틀려야 거절합니다. 지원서는 다섯
+ * 항목이 전부 필요합니다 — 이름 없이 샘플을 보낼 수 없고, 종목을 모르면
+ * 어느 평가를 부탁할지 정할 수 없습니다.
+ *
+ * 그래서 여기서는 빠진 항목마다 무엇이 문제인지 돌려줍니다. "지원되지
+ * 않았습니다" 만 보여주면 지원자는 어느 칸을 고쳐야 할지 모릅니다.
+ */
+async function handlePanelApply(request: Request, env: Env): Promise<Response> {
+  if (!env.DB) return json({ error: 'PANEL_NOT_CONFIGURED' }, 503);
+
+  let body: Record<string, unknown>;
+  try {
+    body = (await request.json()) as Record<string, unknown>;
+  } catch {
+    return json({ error: 'INVALID_JSON' }, 400);
+  }
+
+  const name = normalizeName(body.name);
+  const email = normalizeEmail(body.email);
+  const activity = normalizeActivity(body.activity);
+  const frequency = normalizeFrequency(body.frequency);
+  const region = normalizeRegion(body.region);
+
+  /*
+   * 어느 칸이 문제인지 **전부** 돌려줍니다. 하나씩 알려 주면 다섯 번 제출해야
+   * 다섯 번째 오류를 알게 됩니다.
+   */
+  const invalid: string[] = [];
+  if (!name) invalid.push('name');
+  if (!email) invalid.push('email');
+  if (!activity) invalid.push('activity');
+  if (!frequency) invalid.push('frequency');
+  if (!region) invalid.push('region');
+  if (invalid.length) return json({ error: 'INVALID_FIELDS', fields: invalid }, 400);
+
+  /*
+   * 개인정보 수집·이용 동의는 **필수**입니다. 없으면 지원을 받을 수 없습니다 —
+   * 이름과 지역을 받는 이상 동의 없이 저장하면 그 자체가 위반입니다.
+   * 화면에서 required 로 막지만, 화면을 거치지 않고 들어오는 요청도 있습니다.
+   */
+  if (body.consent !== true) return json({ error: 'CONSENT_REQUIRED' }, 400);
+
+  const locale = typeof body.locale === 'string' ? body.locale.slice(0, 8) : 'ko';
+
+  await applyPanel(
+    env.DB,
+    {
+      name: name!,
+      email: email!,
+      activity: activity!,
+      frequency: frequency!,
+      region: region!,
+      locale,
+      // 선택 항목입니다. true 가 아니면 전부 미동의로 봅니다 — 'true' 문자열이나
+      // 1 을 동의로 읽으면 의도치 않은 값 하나가 광고 수신 동의로 둔갑합니다.
+      marketing: body.marketing === true,
+    },
+    new Date(),
+  );
+
+  // 다시 낸 경우에도 201 입니다 — 지원자 입장에서는 성공했습니다.
+  return json({ ok: true }, 201);
+}
+
+/**
  * 수신 거부.
  *
  * 메일 안의 링크로 들어오므로 GET 입니다. 없는 토큰이어도 성공처럼 응답합니다 —
@@ -919,6 +996,28 @@ async function handleAdminInquiryList(env: Env, url: URL, who: string): Promise<
  * 유입 화면별 집계를 냅니다 — 어디가 명단을 만드는지 모르면 다음에 무엇을
  * 고칠지 고를 수 없습니다.
  */
+/**
+ * 검증단 지원자 목록 — 관리자 전용.
+ *
+ * 이메일을 가리지 않고 그대로 냅니다. 선정 연락을 하려면 주소가 필요하고,
+ * 이 경로는 관리자 인증을 지나야 열립니다.
+ */
+async function handleAdminPanelList(env: Env, url: URL, who: string): Promise<Response> {
+  if (!env.DB) return json({ error: 'DB_NOT_CONFIGURED' }, 503);
+
+  const limit = clampInt(url.searchParams.get('limit'), 20, 1, ADMIN_MAX_LIMIT);
+  const offset = clampInt(url.searchParams.get('offset'), 0, 0, 100000);
+  const activity = url.searchParams.get('activity') || undefined;
+
+  return json({
+    ok: true,
+    who,
+    // 종목별 집계를 함께 냅니다 — 모집 기간에 가장 자주 보는 숫자입니다.
+    byActivity: await countByActivity(env.DB),
+    rows: await listApplications(env.DB, { limit, offset, activity }),
+  });
+}
+
 async function handleAdminSignupList(env: Env, url: URL, who: string): Promise<Response> {
   if (!env.DB) return json({ error: 'DB_NOT_CONFIGURED' }, 503);
 
@@ -1415,6 +1514,11 @@ async function route(request: Request, env: Env, ctx: ExecutionContext): Promise
     return handleLaunchUnsubscribe(request, env);
   }
 
+  // 검증단 지원 — 10월 크루 접촉 때 링크를 걸 자리(/panel)가 여기로 보냅니다.
+  if (pathname === '/api/panel' && request.method === 'POST') {
+    return handlePanelApply(request, env);
+  }
+
   // 문의 — 공개 게시판이 아닙니다. 조회는 본인 확인을 지납니다.
   if (pathname === '/api/inquiries' && request.method === 'POST') {
     return handleInquiryCreate(request, env, ctx);
@@ -1515,6 +1619,9 @@ async function route(request: Request, env: Env, ctx: ExecutionContext): Promise
 
     if (pathname === '/api/admin/launch-notify' && request.method === 'GET') {
       return handleAdminSignupList(env, url, auth.who);
+    }
+    if (pathname === '/api/admin/panel' && request.method === 'GET') {
+      return handleAdminPanelList(env, url, auth.who);
     }
     if (pathname === '/api/admin/users' && request.method === 'GET') {
       return handleAdminUserList(env, url, auth.who);

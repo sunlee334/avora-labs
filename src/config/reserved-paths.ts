@@ -38,6 +38,37 @@ export const SITEMAP_EXCLUDED = [
 ] as const;
 
 /**
+ * **한국어판만** 사이트맵에 넣는 경로.
+ *
+ * `SITEMAP_EXCLUDED` 와 다릅니다 — 저쪽은 어느 언어에서도 색인하지 않는
+ * 경로이고, 이쪽은 한국어에서는 색인하되 나머지 언어에서는 빼는 경로입니다.
+ *
+ * ── 왜 이런 것이 필요한가 ──────────────────────────────────
+ * `/panel`(검증단 모집)은 국내 러닝 크루 대상입니다. 페이지 자체는 5개 언어로
+ * 만들지만(이 저장소는 `[lang]` 동적 라우트라 한 언어만 만드는 쪽이 예외
+ * 처리입니다), 팔지도 않는 시장에서 유입을 받아 봐야 전환되지 않고 얇은
+ * 페이지가 사이트 품질 신호를 끌어내립니다.
+ *
+ * 페이지에는 `noindex` 가 붙습니다. 사이트맵에서도 빼야 신호가 어긋나지
+ * 않습니다 — `tests/e2e/product-seo.spec.ts` 가 그 어긋남을 잡습니다.
+ */
+export const SITEMAP_KO_ONLY = ['/panel'] as const;
+
+/**
+ * 이 주소를 사이트맵에 넣을 것인가.
+ *
+ * `astro.config.ts` 의 filter 가 이것을 씁니다. 판정을 설정 파일이 아니라
+ * 여기 두는 이유는 위 두 배열과 규칙이 한 파일에 모여 있어야 나중에 셋이
+ * 따로 놀지 않기 때문입니다.
+ */
+export function inSitemap(url: string): boolean {
+  if (SITEMAP_EXCLUDED.some((excluded) => url.includes(excluded))) return false;
+  // 한국어판만 넣는 경로는 `/ko/` 를 지나야 통과합니다.
+  if (SITEMAP_KO_ONLY.some((path) => url.includes(path))) return url.includes('/ko/');
+  return true;
+}
+
+/**
  * slug 검사가 쓰는 형태. 앞뒤 슬래시를 떼어 낸 낱말입니다.
  *
  * `checkSlug()` 가 **접두 일치**로 봅니다 — 완전 일치로 하면 `checkout-tips` 가

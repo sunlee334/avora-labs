@@ -961,5 +961,226 @@
       "failed": "We could not send your question. Please try again."
     },
     "note": "Answers appear on this page. We do not send a separate notification."
+  },
+  "panel": {
+    "meta": {
+      "title": "PAROS Test Panel — the people who choose the formula",
+      "description": "You receive samples with the manufacturer’s name hidden and compare them against set criteria. The tally decides the formula, and the scores of the ones that did not make it are published too."
+    },
+    "heading": "We are not the ones who choose the formula.",
+    "lead": [
+      "Many brands send a finished product to runners and ask what they thought.\nWe reversed the order.",
+      "Nothing has been decided yet. We send the candidate formulas as they are,\nand hand over the decision of which one becomes the product."
+    ],
+    "what": {
+      "heading": "What you would be doing",
+      "body": "You receive two or three samples with the manufacturer’s name hidden.\nYou keep doing the activity you already do, and compare them against the six criteria below.\nThe evaluation runs from October to November 2026."
+    },
+    "criteria": {
+      "heading": "The criteria",
+      "columns": {
+        "item": "Criterion",
+        "how": "How it is checked",
+        "score": "Points",
+        "cut": "Cut-off"
+      },
+      "rows": [
+        {
+          "item": "No stinging",
+          "how": "Applied to the forehead and temples after 30+ minutes of activity, with sweat running",
+          "score": "30",
+          "cut": "Out below 18"
+        },
+        {
+          "item": "No white cast",
+          "how": "Photographed right after applying and 30 seconds later, under the same light",
+          "score": "25",
+          "cut": "Out below 15"
+        },
+        {
+          "item": "No stickiness",
+          "how": "Pressing the back of the hand one minute after applying",
+          "score": "15",
+          "cut": "—"
+        },
+        {
+          "item": "Adhesion · water resistance",
+          "how": "Wet 20 minutes after applying, then wiped with a towel; residue checked",
+          "score": "15",
+          "cut": "—"
+        },
+        {
+          "item": "Reapplication",
+          "how": "Layered again after 30 minutes; checked for pilling and patchiness",
+          "score": "10",
+          "cut": "—"
+        },
+        {
+          "item": "Absorption speed",
+          "how": "Timed until it sinks in completely",
+          "score": "5",
+          "cut": "—"
+        }
+      ],
+      "note": "However high the total, a formula that fails the cut-off on stinging or white cast is not used."
+    },
+    "rejected": {
+      "heading": "We publish the ones that did not make it",
+      "body": "When the tally is done we publish not only the chosen formula but the scores of the rejected ones.\n\nSaying what you chose without saying what you turned down\nis not choosing. It is looking like you chose."
+    },
+    "form": {
+      "heading": "Apply",
+      "name": {
+        "label": "Name or nickname",
+        "hint": "It does not have to be your legal name. Use what your crew calls you."
+      },
+      "email": {
+        "label": "Email",
+        "placeholder": "you@example.com"
+      },
+      "activity": {
+        "label": "Main activity",
+        "options": [
+          {
+            "value": "running",
+            "label": "Running"
+          },
+          {
+            "value": "hiking",
+            "label": "Hiking · trekking"
+          },
+          {
+            "value": "golf",
+            "label": "Golf"
+          },
+          {
+            "value": "water",
+            "label": "Surfing · swimming"
+          },
+          {
+            "value": "gym",
+            "label": "Gym"
+          },
+          {
+            "value": "other",
+            "label": "Other"
+          }
+        ]
+      },
+      "frequency": {
+        "label": "How often",
+        "options": [
+          {
+            "value": "weekly_1",
+            "label": "Once a week or less"
+          },
+          {
+            "value": "weekly_2_3",
+            "label": "Two or three times a week"
+          },
+          {
+            "value": "weekly_4_plus",
+            "label": "Four times a week or more"
+          }
+        ]
+      },
+      "region": {
+        "label": "Where you live",
+        "hint": "Used only to gauge shipping regions. We ask for a full address after selection.",
+        "placeholder": "Please choose",
+        "options": [
+          {
+            "value": "seoul",
+            "label": "Seoul"
+          },
+          {
+            "value": "busan",
+            "label": "Busan"
+          },
+          {
+            "value": "daegu",
+            "label": "Daegu"
+          },
+          {
+            "value": "incheon",
+            "label": "Incheon"
+          },
+          {
+            "value": "gwangju",
+            "label": "Gwangju"
+          },
+          {
+            "value": "daejeon",
+            "label": "Daejeon"
+          },
+          {
+            "value": "ulsan",
+            "label": "Ulsan"
+          },
+          {
+            "value": "sejong",
+            "label": "Sejong"
+          },
+          {
+            "value": "gyeonggi",
+            "label": "Gyeonggi"
+          },
+          {
+            "value": "gangwon",
+            "label": "Gangwon"
+          },
+          {
+            "value": "chungbuk",
+            "label": "Chungbuk"
+          },
+          {
+            "value": "chungnam",
+            "label": "Chungnam"
+          },
+          {
+            "value": "jeonbuk",
+            "label": "Jeonbuk"
+          },
+          {
+            "value": "jeonnam",
+            "label": "Jeonnam"
+          },
+          {
+            "value": "gyeongbuk",
+            "label": "Gyeongbuk"
+          },
+          {
+            "value": "gyeongnam",
+            "label": "Gyeongnam"
+          },
+          {
+            "value": "jeju",
+            "label": "Jeju"
+          },
+          {
+            "value": "overseas",
+            "label": "Outside Korea"
+          }
+        ]
+      },
+      "consent": {
+        "label": "I agree to the collection and use of my personal information. (required)",
+        "body": "To run the test panel we collect your name (or nickname), email address, activity details and region. We use them only to send samples and to guide the evaluation, and we destroy them three months after the evaluation ends. You do not have to agree, but we cannot accept an application without it."
+      },
+      "marketing": {
+        "label": "I agree to receive marketing messages. (optional)",
+        "body": "You can unsubscribe at any time using the link in the emails we send."
+      },
+      "submit": "Send application",
+      "sending": "Sending…",
+      "done": "Your application has been received. We will let you know the outcome at this address during October.",
+      "error": "It did not go through just now. Please try again in a moment.",
+      "invalid": "Some fields are empty or in the wrong format.",
+      "required": "Required."
+    },
+    "pending": {
+      "heading": "What we have not decided yet",
+      "body": "We have not yet decided what to give those who take part.\nAs soon as we do, the people who applied will hear first."
+    }
   }
 }

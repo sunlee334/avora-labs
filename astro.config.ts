@@ -3,7 +3,7 @@ import sitemap from '@astrojs/sitemap';
 import { satteri } from '@astrojs/markdown-satteri';
 import { hastTableScroll } from './src/hast/table-scroll';
 import { ORIGIN, LOCALES, DEFAULT_LOCALE, LOCALE_TAGS } from './src/config/site';
-import { SITEMAP_EXCLUDED } from './src/config/reserved-paths';
+import { inSitemap } from './src/config/reserved-paths';
 
 /**
  * 언어별 라우팅은 `src/pages/[lang]/` 동적 라우트가 담당합니다.
@@ -64,7 +64,7 @@ export default defineConfig({
        *    (`posts/checkout-tips` → `/checkout`), 같은 배열을
        *    `scripts/check-slugs.mjs` 가 접두 일치로 미리 막습니다.
        */
-      filter: (page) => !SITEMAP_EXCLUDED.some((excluded) => page.includes(excluded)),
+      filter: inSitemap,
     }),
   ],
   vite: {

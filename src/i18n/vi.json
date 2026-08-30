@@ -961,5 +961,226 @@
       "failed": "Không gửi được câu hỏi. Vui lòng thử lại sau."
     },
     "note": "Câu trả lời sẽ hiện ở trang này. Chúng tôi không gửi thông báo riêng."
+  },
+  "panel": {
+    "meta": {
+      "title": "PAROS tuyển nhóm thử nghiệm — những người chọn công thức",
+      "description": "Bạn nhận các mẫu đã ẩn tên nhà sản xuất và so sánh theo bộ tiêu chí định sẵn. Kết quả tổng hợp quyết định công thức, và điểm của những công thức bị loại cũng được công bố."
+    },
+    "heading": "Công thức không do chúng tôi chọn.",
+    "lead": [
+      "Nhiều thương hiệu gửi sản phẩm đã hoàn thiện cho người chạy bộ rồi hỏi cảm nhận.\nChúng tôi đảo ngược thứ tự.",
+      "Khi chưa có gì được quyết định, chúng tôi gửi thẳng các công thức ứng viên,\nvà trao lại quyết định xem công thức nào sẽ thành sản phẩm."
+    ],
+    "what": {
+      "heading": "Bạn sẽ làm gì",
+      "body": "Bạn nhận hai đến ba mẫu đã ẩn tên nhà sản xuất.\nCứ tập luyện như thường lệ, rồi so sánh theo sáu tiêu chí dưới đây.\nViệc đánh giá diễn ra từ tháng 10 đến tháng 11 năm 2026."
+    },
+    "criteria": {
+      "heading": "Các tiêu chí so sánh",
+      "columns": {
+        "item": "Tiêu chí",
+        "how": "Cách kiểm tra",
+        "score": "Điểm",
+        "cut": "Ngưỡng loại"
+      },
+      "rows": [
+        {
+          "item": "Không cay mắt",
+          "how": "Thoa lên trán và thái dương khi mồ hôi đang chảy, sau hơn 30 phút vận động",
+          "score": "30",
+          "cut": "Dưới 18 điểm bị loại"
+        },
+        {
+          "item": "Không vệt trắng",
+          "how": "Chụp ngay sau khi thoa và sau 30 giây, dưới cùng một ánh sáng",
+          "score": "25",
+          "cut": "Dưới 15 điểm bị loại"
+        },
+        {
+          "item": "Không nhờn dính",
+          "how": "Ấn lên mu bàn tay sau khi thoa 1 phút",
+          "score": "15",
+          "cut": "—"
+        },
+        {
+          "item": "Bám dính · kháng nước",
+          "how": "Sau 20 phút thì tiếp xúc nước rồi lau bằng khăn, kiểm tra phần còn lại",
+          "score": "15",
+          "cut": "—"
+        },
+        {
+          "item": "Thoa lại",
+          "how": "Thoa chồng sau 30 phút, kiểm tra vón và bết",
+          "score": "10",
+          "cut": "—"
+        },
+        {
+          "item": "Tốc độ thẩm thấu",
+          "how": "Đo thời gian đến khi thấm hoàn toàn",
+          "score": "5",
+          "cut": "—"
+        }
+      ],
+      "note": "Dù tổng điểm cao đến đâu, công thức không vượt ngưỡng ở mục cay mắt và vệt trắng sẽ không được dùng."
+    },
+    "rejected": {
+      "heading": "Chúng tôi công bố cả những công thức bị loại",
+      "body": "Khi tổng hợp xong, chúng tôi công bố không chỉ công thức được chọn mà cả điểm của những công thức bị loại.\n\nChỉ nói đã chọn gì mà không nói đã loại gì\nthì đó không phải là chọn, mà là làm ra vẻ đã chọn."
+    },
+    "form": {
+      "heading": "Đăng ký",
+      "name": {
+        "label": "Tên hoặc biệt danh",
+        "hint": "Không nhất thiết là tên thật. Hãy dùng tên mà nhóm của bạn vẫn gọi."
+      },
+      "email": {
+        "label": "Email",
+        "placeholder": "you@example.com"
+      },
+      "activity": {
+        "label": "Hoạt động chính",
+        "options": [
+          {
+            "value": "running",
+            "label": "Chạy bộ"
+          },
+          {
+            "value": "hiking",
+            "label": "Leo núi·đi rừng"
+          },
+          {
+            "value": "golf",
+            "label": "Golf"
+          },
+          {
+            "value": "water",
+            "label": "Lướt sóng·bơi"
+          },
+          {
+            "value": "gym",
+            "label": "Gym"
+          },
+          {
+            "value": "other",
+            "label": "Khác"
+          }
+        ]
+      },
+      "frequency": {
+        "label": "Tần suất",
+        "options": [
+          {
+            "value": "weekly_1",
+            "label": "Một lần một tuần trở xuống"
+          },
+          {
+            "value": "weekly_2_3",
+            "label": "Hai đến ba lần một tuần"
+          },
+          {
+            "value": "weekly_4_plus",
+            "label": "Bốn lần một tuần trở lên"
+          }
+        ]
+      },
+      "region": {
+        "label": "Nơi ở",
+        "hint": "Chỉ dùng để ước lượng khu vực gửi mẫu. Địa chỉ chi tiết sẽ hỏi sau khi được chọn.",
+        "placeholder": "Vui lòng chọn",
+        "options": [
+          {
+            "value": "seoul",
+            "label": "Seoul"
+          },
+          {
+            "value": "busan",
+            "label": "Busan"
+          },
+          {
+            "value": "daegu",
+            "label": "Daegu"
+          },
+          {
+            "value": "incheon",
+            "label": "Incheon"
+          },
+          {
+            "value": "gwangju",
+            "label": "Gwangju"
+          },
+          {
+            "value": "daejeon",
+            "label": "Daejeon"
+          },
+          {
+            "value": "ulsan",
+            "label": "Ulsan"
+          },
+          {
+            "value": "sejong",
+            "label": "Sejong"
+          },
+          {
+            "value": "gyeonggi",
+            "label": "Gyeonggi"
+          },
+          {
+            "value": "gangwon",
+            "label": "Gangwon"
+          },
+          {
+            "value": "chungbuk",
+            "label": "Chungbuk"
+          },
+          {
+            "value": "chungnam",
+            "label": "Chungnam"
+          },
+          {
+            "value": "jeonbuk",
+            "label": "Jeonbuk"
+          },
+          {
+            "value": "jeonnam",
+            "label": "Jeonnam"
+          },
+          {
+            "value": "gyeongbuk",
+            "label": "Gyeongbuk"
+          },
+          {
+            "value": "gyeongnam",
+            "label": "Gyeongnam"
+          },
+          {
+            "value": "jeju",
+            "label": "Jeju"
+          },
+          {
+            "value": "overseas",
+            "label": "Ngoài Hàn Quốc"
+          }
+        ]
+      },
+      "consent": {
+        "label": "Tôi đồng ý cho thu thập và sử dụng thông tin cá nhân. (bắt buộc)",
+        "body": "Để vận hành nhóm thử nghiệm, chúng tôi thu thập tên (hoặc biệt danh), địa chỉ email, thông tin hoạt động và nơi ở. Chỉ dùng để gửi mẫu và hướng dẫn quá trình đánh giá, và sẽ hủy sau ba tháng kể từ khi đánh giá kết thúc. Bạn có thể không đồng ý, nhưng khi đó chúng tôi không thể tiếp nhận đăng ký."
+      },
+      "marketing": {
+        "label": "Tôi đồng ý nhận thông tin quảng cáo. (tùy chọn)",
+        "body": "Bạn có thể hủy bất cứ lúc nào bằng liên kết trong email chúng tôi gửi."
+      },
+      "submit": "Gửi đăng ký",
+      "sending": "Đang gửi…",
+      "done": "Đã nhận đăng ký của bạn. Chúng tôi sẽ báo kết quả tới địa chỉ này trong tháng 10.",
+      "error": "Hiện chưa gửi được. Vui lòng thử lại sau giây lát.",
+      "invalid": "Có ô còn trống hoặc sai định dạng.",
+      "required": "Bắt buộc."
+    },
+    "pending": {
+      "heading": "Điều chúng tôi chưa quyết định",
+      "body": "Chúng tôi chưa quyết định sẽ tặng gì cho những người tham gia.\nNgay khi có, những người đã đăng ký sẽ được báo trước tiên."
+    }
   }
 }

@@ -1,0 +1,240 @@
+---
+/**
+ * 검증단 모집.
+ *
+ * ── 이 페이지가 존재하는 이유 ───────────────────────────────
+ * 2026년 10월에 러닝 크루 담당자에게 DM 을 보낼 때 **링크 하나만 던지면
+ * 지원이 완결되어야** 합니다. 홈의 알림 폼은 "출시하면 알려 주세요" 이지
+ * "저를 뽑아 주세요" 가 아니라, 단톡방에 걸 링크로는 쓸 수 없습니다.
+ *
+ * 이 사이트에서 날짜가 걸린 유일한 페이지입니다.
+ *
+ * ── 왜 한국어 말고도 만드는가 ───────────────────────────────
+ * 모집은 국내 러닝 크루 대상이라 한국어판만 있으면 됩니다. 그런데 이
+ * 저장소는 `[lang]` 동적 라우트라 한 언어만 만드는 쪽이 오히려 예외 처리이고,
+ * 5개 언어 문구가 어긋나면 `check-i18n` 이 빌드를 막습니다.
+ *
+ * 그래서 다섯 벌을 다 만들되 **한국어판만 색인**합니다. 나머지는 noindex 이고
+ * 사이트맵에도 들어가지 않습니다 — 팔지도 않는 시장에서 유입을 받아 봐야
+ * 전환되지 않고, 얇은 페이지가 사이트 품질 신호를 끌어내립니다.
+ */
+import Base from '../../layouts/Base.astro';
+import Button from '../../components/Button.astro';
+import Field from '../../components/Field.astro';
+import { BUSINESS, LOCALES, DEFAULT_LOCALE, type Locale } from '../../config/site';
+import { dict, localePath } from '../../i18n';
+import { breadcrumb } from '../../lib/jsonld';
+
+export function getStaticPaths() {
+  return LOCALES.map((lang) => ({ params: { lang } }));
+}
+
+const locale = Astro.params.lang as Locale;
+const t = dict(locale);
+const p = t.panel;
+const f = p.form;
+
+/** 국내 모집이라 한국어판만 검색에 내보냅니다. */
+const indexable = locale === 'ko';
+---
+
+<Base
+  locale={locale}
+  path="panel"
+  title={p.meta.title}
+  description={p.meta.description}
+  noindex={!indexable}
+  jsonLd={[
+    breadcrumb([
+      { name: BUSINESS.brandName, path: localePath(locale) },
+      { name: p.heading, path: localePath(locale, 'panel') },
+    ]),
+  ]}
+>
+  <section class="section wrap">
+    <h1 class="display display--tight">{p.heading}</h1>
+    {p.lead.map((para) => <p class="body panel__lead">{para}</p>)}
+  </section>
+
+  <section class="section section--alt wrap">
+    <h2 class="kicker">{p.what.heading}</h2>
+    <p class="body panel__lead">{p.what.body}</p>
+  </section>
+
+  {/*
+    배점표.
+
+    ── 왜 이미지가 아니라 표인가 ──────────────────────────────
+    답변 엔진은 이미지에서 숫자를 꺼내지 못합니다. "눈 시림 30점, 백탁 25점,
+    커트라인 미만은 총점과 무관하게 탈락" 은 이 브랜드가 가진 가장 인용되기
+    쉬운 문장이라, 마크업으로 두어야 합니다(지시 문서 G4-2).
+
+    ── 왜 가로 스크롤이 아닌가 ────────────────────────────────
+    375px 에서 4열은 들어가지 않습니다. 스크롤 상자로 감싸면 오른쪽 두 열
+    (배점·커트라인)이 화면 밖에 남는데, 그 두 열이 이 표의 요점입니다.
+    그래서 좁은 화면에서는 행마다 카드로 쌓습니다(global.css).
+  */}
+  <section class="section wrap">
+    <h2 class="kicker">{p.criteria.heading}</h2>
+    <table class="criteriaTable">
+      <thead>
+        <tr>
+          <th scope="col">{p.criteria.columns.item}</th>
+          <th scope="col">{p.criteria.columns.how}</th>
+          <th scope="col">{p.criteria.columns.score}</th>
+          <th scope="col">{p.criteria.columns.cut}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          p.criteria.rows.map((row) => (
+            <tr>
+              <th scope="row" data-label={p.criteria.columns.item}>{row.item}</th>
+              <td data-label={p.criteria.columns.how}>{row.how}</td>
+              <td class="criteriaTable__num" data-label={p.criteria.columns.score}>{row.score}</td>
+              <td data-label={p.criteria.columns.cut}>{row.cut}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+    <p class="panel__cut">{p.criteria.note}</p>
+  </section>
+
+  {/*
+    탈락 공개.
+
+    **이 섹션을 빼지 마세요.** 경쟁 브랜드도 러너 만족도 조사를 하고 수치를
+    게시합니다. 만족도 조사에는 실패가 없습니다 — 떨어진 처방의 점수까지
+    공개하는 것이 이 브랜드가 다른 지점입니다.
+  */}
+  <section class="section section--dark wrap">
+    <h2 class="kicker">{p.rejected.heading}</h2>
+    {p.rejected.body.split('\n\n').map((para) => <p class="body panel__lead">{para}</p>)}
+  </section>
+
+  <section class="section wrap" id="apply">
+    <h2 class="display display--tight">{f.heading}</h2>
+
+    <form
+      class="panelForm"
+      data-panel-form
+      data-locale={locale}
+      {/*
+        문구는 화면이 이미 갖고 있습니다. 스크립트에 다시 적으면 5개 언어가
+        어긋나므로 여기서 넘깁니다.
+      */}
+      data-copy={JSON.stringify({
+        required: f.required,
+        invalid: f.invalid,
+        error: f.error,
+        done: f.done,
+      })}
+      novalidate
+    >
+      <Field
+        id="name"
+        label={f.name.label}
+        hint={f.name.hint}
+        autocomplete="name"
+        required
+      />
+      <Field
+        id="email"
+        label={f.email.label}
+        type="email"
+        inputmode="email"
+        autocomplete="email"
+        placeholder={f.email.placeholder}
+        required
+      />
+
+      {/*
+        단일 선택은 라디오입니다. `<select>` 로 하면 여섯 개를 보려고 한 번 더
+        눌러야 하고, 모바일에서는 화면 절반을 덮는 목록이 뜹니다.
+        지역은 열여덟 개라 반대로 `<select>` 가 맞습니다.
+      */}
+      <fieldset class="panelForm__group">
+        <legend>{f.activity.label}</legend>
+        <div class="panelForm__choices">
+          {
+            f.activity.options.map((o) => (
+              <label class="choice">
+                <input type="radio" name="activity" value={o.value} required />
+                <span>{o.label}</span>
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+
+      <fieldset class="panelForm__group">
+        <legend>{f.frequency.label}</legend>
+        <div class="panelForm__choices">
+          {
+            f.frequency.options.map((o) => (
+              <label class="choice">
+                <input type="radio" name="frequency" value={o.value} required />
+                <span>{o.label}</span>
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+
+      <div class="field">
+        <label for="region">{f.region.label}</label>
+        <select id="region" name="region" required>
+          <option value="">{f.region.placeholder}</option>
+          {f.region.options.map((o) => <option value={o.value}>{o.label}</option>)}
+        </select>
+        <p class="field__hint">{f.region.hint}</p>
+        <p class="field__error" id="region-error" role="alert" aria-live="polite" hidden></p>
+      </div>
+
+      {/*
+        동의는 **두 갈래**입니다. 필수와 선택을 한 칸으로 묶으면 "지원하려면
+        광고도 받아야 한다" 가 되고, 그건 동의를 받은 것이 아닙니다.
+        홈 폼의 문구를 그대로 쓰지 않는 이유: 이 폼은 이름과 지역까지 받으므로
+        고지 내용이 달라야 합니다.
+      */}
+      <div class="agree">
+        <label class="agree__row">
+          <input type="checkbox" name="consent" required />
+          <span>{f.consent.label}</span>
+        </label>
+        <p class="agree__body">{f.consent.body}</p>
+      </div>
+
+      <div class="agree agree--optional">
+        <label class="agree__row">
+          <input type="checkbox" name="marketing" />
+          <span>{f.marketing.label}</span>
+        </label>
+        <p class="agree__body">{f.marketing.body}</p>
+      </div>
+
+      <Button variant="primary" type="submit" block loadingLabel={f.sending}>
+        {f.submit}
+      </Button>
+
+      <p class="panelForm__state" data-panel-state role="status" aria-live="polite" hidden></p>
+    </form>
+  </section>
+
+  {/*
+    아직 정하지 못한 것.
+
+    참여 보상은 기획안에 확정되어 있지 않습니다. **임의로 만들어 넣지 마세요** —
+    "굿즈 증정" 같은 문구 하나가 확정되지 않은 약속이 됩니다.
+  */}
+  <section class="section section--alt wrap">
+    <h2 class="kicker">{p.pending.heading}</h2>
+    <p class="body panel__lead">{p.pending.body}</p>
+  </section>
+</Base>
+
+<script>
+  import { mountPanelForm } from '../../lib/panel-form';
+  mountPanelForm();
+</script>
