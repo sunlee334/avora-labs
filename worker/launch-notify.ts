@@ -134,7 +134,32 @@ export async function signup(
     )
     .run();
 
-  return (inserted.meta?.changes ?? 0) > 0 ? 'ok' : 'already';
+  if ((inserted.meta?.changes ?? 0) > 0) return 'ok';
+
+  /*
+   * 이미 명단에 있는 사람이 다시 신청했습니다.
+   *
+   * 이 경우에도 **활동은 갱신합니다.** 처음 신청할 때는 이메일만 남기고 갔다가,
+   * 10월 검증단 모집 소식을 보고 돌아와 러닝을 고르는 흐름이 그대로 이
+   * 기능의 목적입니다. 그런데 위 INSERT 는 DO NOTHING 이라 그 사람의 두 번째
+   * 제출은 아무 일도 일으키지 않았고, 화면에는 "신청되었습니다" 가 떴습니다.
+   * 조용히 버려지는 쪽이 최악입니다.
+   *
+   * 안 골랐으면(null) 손대지 않습니다 — 이메일만 다시 넣은 사람의 예전
+   * 선택까지 지울 이유가 없습니다. 되살리는 경로의 COALESCE 와 같은 규칙입니다.
+   *
+   * 고른 경우에는 합치지 않고 **덮어씁니다.** 화면의 체크박스는 늘 빈 상태로
+   * 보이므로, 보낸 것이 곧 지금 원하는 것입니다. 합치면 한 번 고른 활동을
+   * 영영 뺄 수 없습니다.
+   */
+  if (activities !== null) {
+    await db
+      .prepare(`UPDATE launch_notify SET activities = ? WHERE email = ?`)
+      .bind(activities, email)
+      .run();
+  }
+
+  return 'already';
 }
 
 /** 수신 거부. 토큰으로만 받습니다 — 이메일 주소를 링크에 싣지 않기 위해서입니다. */

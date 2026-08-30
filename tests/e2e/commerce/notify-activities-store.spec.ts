@@ -61,6 +61,49 @@ test.describe('활동 선택 — 저장', () => {
     expect(row.activities).toEqual([]);
   });
 
+  test('나중에 다시 신청하면 활동이 갱신된다', async ({ request }) => {
+    /*
+     * 이 흐름이 이 기능의 목적 그 자체입니다 — 처음에는 이메일만 남기고
+     * 갔다가, 10월 검증단 모집 소식을 보고 돌아와 러닝을 고르는 것.
+     *
+     * 처음에는 INSERT 가 ON CONFLICT DO NOTHING 이라 두 번째 제출이 아무
+     * 일도 하지 않았습니다. 화면에는 "신청되었습니다" 가 뜨는데 실제로는
+     * 버려지는, 아무도 모르는 실패였습니다.
+     */
+    const email = freshEmail('update');
+    expect(
+      (await post(request, { email, locale: 'ko', source: 'home-hero', activities: ['hiking'] }))
+        .status(),
+    ).toBe(201);
+    expect((await findSignup(request, email)).activities).toEqual(['hiking']);
+
+    expect(
+      (await post(request, { email, locale: 'ko', source: 'home-end', activities: ['running'] }))
+        .status(),
+    ).toBe(201);
+    expect(
+      (await findSignup(request, email)).activities,
+      '두 번째 선택이 반영되지 않았습니다',
+    ).toEqual(['running']);
+  });
+
+  test('다시 신청하며 안 고르면 예전 선택이 남는다', async ({ request }) => {
+    // 이메일만 다시 넣은 사람의 예전 선택까지 지울 이유가 없습니다.
+    const email = freshEmail('keep');
+    await post(request, { email, locale: 'ko', source: 'home-hero', activities: ['golf'] });
+    await post(request, { email, locale: 'ko', source: 'home-hero' });
+    expect((await findSignup(request, email)).activities).toEqual(['golf']);
+  });
+
+  test('고른 것을 덮어쓰지 합치지 않는다', async ({ request }) => {
+    // 합치면 한 번 고른 활동을 영영 뺄 수 없습니다. 화면의 체크박스는 늘
+    // 빈 상태로 보이므로, 보낸 것이 곧 지금 원하는 것입니다.
+    const email = freshEmail('replace');
+    await post(request, { email, locale: 'ko', source: 'home-hero', activities: ['running', 'gym'] });
+    await post(request, { email, locale: 'ko', source: 'home-hero', activities: ['golf'] });
+    expect((await findSignup(request, email)).activities).toEqual(['golf']);
+  });
+
   test('아무것도 안 골라도 신청은 성사된다', async ({ request }) => {
     // 여기서 막으면 명단을 한 줄 잃습니다. 1순위는 이메일입니다.
     for (const activities of [[], undefined, null, 'running']) {
