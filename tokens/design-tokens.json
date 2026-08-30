@@ -111,6 +111,10 @@
       "actionPress": {
         "ref": "color.palette.uvPress"
       },
+      "textOnAction": {
+        "ref": "color.palette.white",
+        "note": "캠페인 채움 버튼 위의 글자. action(#C4501C) 위에서 4.65:1 입니다."
+      },
       "border": {
         "value": "rgba(37, 43, 49, 0.14)",
         "note": "Charcoal(#252B31) 의 rgb. 팔레트가 바뀌면 이 값도 함께 바꿔야 합니다 — 참조가 아니라 직접 값입니다."

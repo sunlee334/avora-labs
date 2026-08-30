@@ -1,0 +1,86 @@
+---
+/**
+ * 라벨 + 입력 + 에러 한 벌.
+ *
+ * ── 라벨을 항상 보여주는 이유 ───────────────────────────────
+ * 플레이스홀더를 라벨로 쓰면 입력을 시작하는 순간 무엇을 적는 칸인지 사라집니다.
+ * 5개 언어를 운영하는 사이트에서는 문제가 하나 더 있습니다 — 번역이 길어지면
+ * 플레이스홀더가 잘리는데, 잘렸다는 사실이 화면에 드러나지 않습니다.
+ *
+ * ── 16px 은 취향이 아닙니다 ─────────────────────────────────
+ * iOS 사파리는 16px 미만 입력창에 포커스가 가면 페이지를 확대합니다. 확대된
+ * 화면은 사용자가 직접 되돌려야 합니다. `--size-text-input` 이 그 하한입니다.
+ *
+ * ── 에러는 색만으로 말하지 않습니다 ─────────────────────────
+ * 색각 이상이 있는 사용자에게 빨간 테두리는 아무 정보가 아닙니다. 글로 적고
+ * `aria-describedby` 로 입력창에 묶어, 스크린리더가 입력칸을 읽을 때 함께
+ * 읽히게 합니다.
+ */
+interface Props {
+  id: string;
+  label: string;
+  type?: 'text' | 'email' | 'tel';
+  /** 브라우저가 채워 줄 수 있게 합니다. 모바일에서 특히 큽니다. */
+  autocomplete?: string;
+  inputmode?: 'text' | 'email' | 'tel' | 'numeric';
+  required?: boolean;
+  /** 선택 항목임을 라벨 옆에 작게 적습니다. */
+  optionalLabel?: string;
+  placeholder?: string;
+  /** 입력 아래에 항상 보이는 도움말. 에러와 자리를 나눠 씁니다. */
+  hint?: string;
+  value?: string;
+}
+
+const {
+  id,
+  label,
+  type = 'text',
+  autocomplete,
+  inputmode,
+  required = false,
+  optionalLabel,
+  placeholder,
+  hint,
+  value,
+} = Astro.props;
+
+const hintId = hint ? `${id}-hint` : undefined;
+const errorId = `${id}-error`;
+/*
+ * 도움말과 에러를 **둘 다** 묶습니다. 에러가 없을 때 빈 요소를 가리켜도
+ * 스크린리더는 아무것도 읽지 않으므로 해가 없고, 에러가 생기는 순간
+ * 속성을 고쳐 쓸 필요가 없습니다.
+ */
+const describedBy = [hintId, errorId].filter(Boolean).join(' ');
+---
+
+<div class="field">
+  <label for={id}>
+    {label}
+    {optionalLabel && <span class="field__optional">{optionalLabel}</span>}
+  </label>
+
+  <input
+    id={id}
+    name={id}
+    type={type}
+    inputmode={inputmode}
+    autocomplete={autocomplete}
+    required={required}
+    placeholder={placeholder}
+    value={value}
+    aria-describedby={describedBy}
+  />
+
+  {hint && <p class="field__hint" id={hintId}>{hint}</p>}
+
+  {/*
+    에러 자리는 **비어 있어도 미리 만들어 둡니다.**
+
+    나중에 만들면 에러가 뜨는 순간 아래 내용이 밀려 내려가고, 손가락이
+    이미 다음 칸으로 가 있던 사용자는 엉뚱한 곳을 누릅니다.
+    `aria-live` 로 스크린리더에도 알립니다.
+  */}
+  <p class="field__error" id={errorId} role="alert" aria-live="polite" hidden></p>
+</div>

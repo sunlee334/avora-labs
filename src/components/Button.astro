@@ -1,0 +1,72 @@
+---
+/**
+ * 버튼 하나.
+ *
+ * ── 왜 컴포넌트로 두는가 ────────────────────────────────────
+ * `.cta` 클래스만으로도 화면은 그려집니다. 컴포넌트가 필요한 이유는 **상태**
+ * 때문입니다 — 로딩 중에 라벨을 무엇으로 바꿀지, 이중 제출을 어떻게 막을지가
+ * 폼마다 따로 구현되면 어딘가는 반드시 빠집니다.
+ *
+ * ── 세 계층 ─────────────────────────────────────────────────
+ *   primary    캠페인 오렌지 채움. **한 화면에 하나만.**
+ *              오렌지가 흩어지면 브랜드 시그널이 아니라 배경색이 됩니다
+ *   secondary  잉크 아웃라인
+ *   tertiary   텍스트만
+ *
+ * ── 하지 않는 것 ────────────────────────────────────────────
+ * **비활성 상태를 만들지 않습니다.** 이메일이 비었다고 버튼을 죽이면 사용자는
+ * 왜 안 눌리는지 모릅니다. 항상 누를 수 있게 두고, 누른 뒤 검증해서 인라인
+ * 에러를 보여주는 편이 낫습니다(지시 문서 B1).
+ *
+ * **알약형으로 만들지 않습니다.** 기획안 5장의 "무광 매트 소프트터치" 와
+ * 어긋납니다(지시 문서 2-3).
+ */
+interface Props {
+  /** 시각 계층. 한 화면에 primary 는 하나만. */
+  variant?: 'primary' | 'secondary' | 'tertiary';
+  /** 있으면 `<a>`, 없으면 `<button>` 이 됩니다. */
+  href?: string;
+  type?: 'button' | 'submit';
+  /**
+   * 제출 중에 보여줄 라벨.
+   *
+   * 스피너만 쓰지 않는 이유: 스크린리더는 도는 그림을 읽지 못합니다. 라벨이
+   * 바뀌면 그대로 읽힙니다.
+   */
+  loadingLabel?: string;
+  /** 가로를 꽉 채울지. 모바일 폼에서는 대개 참입니다. */
+  block?: boolean;
+  class?: string;
+}
+
+const {
+  variant = 'secondary',
+  href,
+  type = 'button',
+  loadingLabel,
+  block = false,
+  class: extra,
+  ...rest
+} = Astro.props;
+
+const cls = [
+  'btn',
+  `btn--${variant}`,
+  block && 'btn--block',
+  extra,
+]
+  .filter(Boolean)
+  .join(' ');
+---
+
+{
+  href ? (
+    <a class={cls} href={href} data-loading-label={loadingLabel} {...rest}>
+      <slot />
+    </a>
+  ) : (
+    <button class={cls} type={type} data-loading-label={loadingLabel} {...rest}>
+      <slot />
+    </button>
+  )
+}

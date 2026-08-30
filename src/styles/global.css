@@ -261,7 +261,7 @@ button {
   justify-content: center;
   min-height: var(--size-tap-min);
   padding-inline: 28px;
-  border-radius: 999px;
+  border-radius: var(--radius-control);
   border: 1px solid transparent;
   background: var(--color-bg-inverse);
   color: var(--color-accent);
@@ -279,6 +279,109 @@ button {
   background: transparent;
   color: var(--color-text);
   border-color: var(--color-border);
+}
+
+/* ── 버튼 (Button.astro) ──────────────────────────────────── */
+/*
+ * `.cta` 와 함께 삽니다. `.cta` 는 기존 화면이 쓰고 있고, 새 화면은 이쪽을
+ * 씁니다. 둘을 한 번에 합치지 않는 이유는 시각이 바뀌는 변경을 페이지마다
+ * 확인하면서 옮기기 위해서입니다.
+ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--size-control-height);
+  padding-inline: 24px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--motion-dur-fast) var(--motion-ease-out),
+    border-color var(--motion-dur-fast) var(--motion-ease-out);
+}
+.btn--block {
+  width: 100%;
+}
+
+/*
+ * primary — 캠페인 오렌지 채움.
+ *
+ * `--color-action`(#C4501C)은 흰 글자 대비 4.65:1 입니다. 한 단계 밝은
+ * `--paros-uv`(#E8622A)는 3.38:1 이라 글자가 올라가는 자리에 쓸 수 없습니다.
+ * tests/e2e/tokens-contrast.spec.ts 가 그 구분을 지킵니다.
+ */
+.btn--primary {
+  background: var(--color-action);
+  color: var(--color-text-on-action);
+}
+.btn--secondary {
+  background: transparent;
+  color: var(--color-text);
+  border-color: var(--color-text);
+}
+.btn--tertiary {
+  background: transparent;
+  color: var(--color-text);
+  padding-inline: 4px;
+  min-height: var(--size-tap-min);
+  text-decoration: underline;
+  text-underline-offset: 0.22em;
+}
+
+/* 모바일에는 호버가 없습니다. :active 를 따로 정의하지 않으면 눌러도
+   아무 반응이 없어 먹통처럼 느껴집니다. */
+.btn--primary:active {
+  background: var(--color-action-press);
+}
+.btn--secondary:active,
+.btn--tertiary:active {
+  background: color-mix(in srgb, var(--color-text) 8%, transparent);
+}
+
+@media (hover: hover) {
+  .btn--primary:hover {
+    background: var(--color-action-press);
+  }
+  .btn--secondary:hover {
+    background: color-mix(in srgb, var(--color-text) 6%, transparent);
+  }
+}
+
+/*
+ * 제출 중.
+ *
+ * 라벨을 바꾸는 것은 스크립트가 하고, 여기서는 다시 눌리지 않게만 합니다.
+ * `disabled` 를 쓰지 않는 이유: 비활성 버튼은 포커스를 잃어 키보드 사용자가
+ * 자리를 놓칩니다.
+ */
+.btn[aria-busy='true'] {
+  pointer-events: none;
+  opacity: 0.72;
+}
+
+@media (min-width: 768px) {
+  .btn {
+    min-height: var(--size-tap-min);
+  }
+}
+
+/* ── 입력 (Field.astro) ───────────────────────────────────── */
+
+.field__hint {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+/* 비어 있을 때 자리만 차지하지 않도록 hidden 을 존중합니다. */
+.field__error[hidden] {
+  display: none;
 }
 
 /* ── 네비게이션 ───────────────────────────────────────────── */
@@ -1087,14 +1190,14 @@ button {
   gap: 2px;
   margin-top: 14px;
   border: 1px solid var(--color-border);
-  border-radius: 999px;
+  border-radius: var(--radius-control);
 }
 .cart__qty button {
   min-width: var(--size-tap-min);
   min-height: var(--size-tap-min);
   background: transparent;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-control);
   font-size: 17px;
   line-height: 1;
   cursor: pointer;
@@ -1204,7 +1307,7 @@ button {
   align-items: center;
   gap: 14px;
   padding: 12px 14px 12px 18px;
-  border-radius: 999px;
+  border-radius: var(--radius-control);
   background: var(--color-bg-inverse);
   color: var(--color-accent);
   font-size: 14px;
@@ -1222,7 +1325,7 @@ button {
      검사 목록에 없어서 오래 드러나지 않았습니다. */
   min-height: var(--size-tap-min);
   padding-inline: 14px;
-  border-radius: 999px;
+  border-radius: var(--radius-control);
   background: var(--color-accent);
   color: var(--color-text);
   font-size: 13px;
@@ -2777,7 +2880,7 @@ button {
   min-height: var(--size-tap-min);
   padding-inline: 14px;
   border: 1px solid var(--color-border);
-  border-radius: 999px;
+  border-radius: var(--radius-control);
   font-size: 13.5px;
   cursor: pointer;
 }

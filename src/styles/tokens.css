@@ -34,6 +34,7 @@
   --color-focus: var(--paros-ink);
   --color-action: var(--paros-uv-fill);
   --color-action-press: var(--paros-uv-press);
+  --color-text-on-action: var(--paros-white);
   --color-border: rgba(37, 43, 49, 0.14);
   --color-border-inverse: rgba(175, 200, 216, 0.20);
 
