@@ -574,7 +574,7 @@
       },
       "analytics": {
         "heading": "Đo lượt truy cập",
-        "body": "Chúng tôi dùng Cloudflare Web Analytics để đếm mỗi trang được mở bao nhiêu lần. Công cụ này không tạo cookie, không lưu gì trong trình duyệt của bạn, và không nhận dạng bạn như một cá nhân hay theo dõi bạn qua các trang khác. Những gì được ghi lại chỉ là địa chỉ trang, loại thiết bị và quốc gia truy cập — không thể biết bạn là ai. Vì vậy chúng tôi không xin đồng ý riêng."
+        "body": "Chúng tôi dùng Cloudflare Web Analytics để đếm mỗi trang được mở bao nhiêu lần. Những gì được ghi lại là địa chỉ trang, nguồn bạn đến từ đâu, trình duyệt và hệ điều hành, loại thiết bị, quốc gia truy cập, và thời gian trang hiển thị. Công cụ này không tạo cookie, không lưu gì trong trình duyệt của bạn, và không dùng địa chỉ IP hay thông tin trình duyệt để nhận dạng bạn hoặc theo dõi bạn qua các trang khác. Vì vậy chúng tôi không biết ai đã truy cập, và không xin đồng ý riêng."
       }
     },
     "terms": {
