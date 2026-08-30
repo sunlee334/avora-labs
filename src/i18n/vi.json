@@ -68,7 +68,8 @@
       "ogAlt": "Bóng người chạy in trên nền mặt trời thấp"
     },
     "hero": {
-      "imageAlt": "Bóng một người đang chạy trên đường mòn đá dưới ánh mặt trời thấp"
+      "imageAlt": "Bóng một người đang chạy trên đường mòn đá dưới ánh mặt trời thấp",
+      "promise": "Công thức do chính những người chạy bộ chọn."
     },
     "origin": {
       "kicker": "Origin",
@@ -147,7 +148,7 @@
     "panel": {
       "kicker": "Test Panel",
       "lead": "Người chọn chính là người chạy.",
-      "body": "Chúng tôi mời ba mươi đến năm mươi người từ các nhóm chạy bộ, phòng leo núi và cộng đồng lướt sóng. Họ nhận hai đến ba mẫu đã ẩn tên nhà sản xuất và so sánh theo cùng một bộ tiêu chí trong tình huống vận động thật.",
+      "body": "Chúng tôi mời nhóm thử nghiệm từ các nhóm chạy bộ, phòng leo núi và cộng đồng lướt sóng. Họ nhận hai đến ba mẫu đã ẩn tên nhà sản xuất và so sánh theo cùng một bộ tiêu chí trong tình huống vận động thật.",
       "criteriaHeading": "Những gì được so sánh",
       "criteria": [
         {
@@ -296,7 +297,7 @@
         },
         {
           "q": "Công thức do các bạn tự phát triển phải không?",
-          "a": "Không. Chúng tôi chọn từ những công thức nhà máy đã có sẵn và đã qua kiểm nghiệm, thẩm định. Thay vì phát triển công thức mới, chúng tôi giao việc chọn cho những người thật sự tập luyện. Ba mươi đến năm mươi người so sánh các mẫu đã ẩn tên nhà sản xuất theo cùng một bộ tiêu chí, và chúng tôi công bố nguyên kết quả tổng hợp."
+          "a": "Không. Chúng tôi chọn từ những công thức nhà máy đã có sẵn và đã qua kiểm nghiệm, thẩm định. Thay vì phát triển công thức mới, chúng tôi giao việc chọn cho những người thật sự tập luyện. Nhóm thử nghiệm so sánh các mẫu đã ẩn tên nhà sản xuất theo cùng một bộ tiêu chí, và chúng tôi công bố nguyên kết quả tổng hợp."
         },
         {
           "q": "Daily Sunscreen có chỉ số chống nắng bao nhiêu?",

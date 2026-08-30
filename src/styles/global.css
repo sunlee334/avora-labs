@@ -678,6 +678,20 @@ button {
   font-size: clamp(13px, 3.4vw, 17px);
   letter-spacing: 0.18em;
 }
+/*
+  2차 메시지. 태그라인보다 작고 출시 예정 문구(12px)보다 큽니다 —
+  위계가 셋이라는 것이 크기로도 읽혀야 합니다.
+
+  본문 서체를 쓰는 이유: 위의 둘은 브랜드가 외치는 말이고 이 줄은 그 근거라,
+  같은 서체로 세 줄이 이어지면 근거가 구호처럼 읽힙니다.
+*/
+.hero__promise {
+  margin-top: 14px;
+  font-size: clamp(14px, 3.6vw, 16px);
+  line-height: 1.5;
+  color: var(--color-accent);
+  max-width: 22ch;
+}
 
 @media (min-width: 900px) {
   .hero {

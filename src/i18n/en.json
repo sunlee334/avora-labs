@@ -68,7 +68,8 @@
       "ogAlt": "Silhouette of a runner against a low sun"
     },
     "hero": {
-      "imageAlt": "Silhouette of a runner on a rocky trail against a low sun"
+      "imageAlt": "Silhouette of a runner on a rocky trail against a low sun",
+      "promise": "The formula is chosen by the people who run."
     },
     "origin": {
       "kicker": "Origin",
@@ -147,7 +148,7 @@
     "panel": {
       "kicker": "Test Panel",
       "lead": "The people choosing are the people running.",
-      "body": "We are inviting thirty to fifty people from running crews, climbing gyms and surf communities. They receive two or three samples with the manufacturer's name hidden, and compare them against the same criteria during real activity.",
+      "body": "We are inviting a test panel from running crews, climbing gyms and surf communities. They receive two or three samples with the manufacturer's name hidden, and compare them against the same criteria during real activity.",
       "criteriaHeading": "What they compare",
       "criteria": [
         {
@@ -296,7 +297,7 @@
         },
         {
           "q": "Did you develop the formula yourselves?",
-          "a": "No. We are choosing from formulas the manufacturer already holds, ones that have passed testing and review. Instead of developing a new one, we handed the choosing over to people who actually train. Thirty to fifty of them compare samples with the manufacturer's name hidden, against the same criteria, and we publish the tally as it comes out."
+          "a": "No. We are choosing from formulas the manufacturer already holds, ones that have passed testing and review. Instead of developing a new one, we handed the choosing over to people who actually train. The panel compares samples with the manufacturer's name hidden, against the same criteria, and we publish the tally as it comes out."
         },
         {
           "q": "What is the SPF rating of Daily Sunscreen?",
