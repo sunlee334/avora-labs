@@ -26,6 +26,36 @@
     "invalid": "Vui lòng kiểm tra lại địa chỉ email.",
     "error": "Lần này chưa đăng ký được. Vui lòng thử lại sau giây lát.",
     "consent": "Tôi đồng ý nhận email quảng cáo. Mỗi email đều có liên kết hủy nhận.",
+    "activities": {
+      "heading": "Bạn chủ yếu vận động thế nào? (không bắt buộc)",
+      "why": "Để khi tuyển nhóm thử nghiệm vào tháng 10 năm 2026, chúng tôi báo trước cho những người thật sự làm việc đó.",
+      "options": [
+        {
+          "value": "running",
+          "label": "Chạy bộ"
+        },
+        {
+          "value": "hiking",
+          "label": "Leo núi·đi bộ đường dài"
+        },
+        {
+          "value": "golf",
+          "label": "Golf"
+        },
+        {
+          "value": "water",
+          "label": "Lướt sóng·bơi"
+        },
+        {
+          "value": "gym",
+          "label": "Tập gym"
+        },
+        {
+          "value": "other",
+          "label": "Khác"
+        }
+      ]
+    },
     "privacy": {
       "summary": "Chúng tôi chỉ xin địa chỉ email, và chỉ dùng để báo ngày mở gọi vốn và ngày ra mắt sản phẩm. Khi bạn hủy nhận tin, bạn được loại khỏi danh sách gửi ngay lập tức; địa chỉ được giữ lại chỉ để chúng tôi không gửi lại lần nữa.",
       "link": "Xem chính sách quyền riêng tư"
@@ -733,6 +763,10 @@
       "label": "Tôi đồng ý cho thu thập và sử dụng thông tin cá nhân để xử lý đơn hàng này.",
       "detail": "Thông tin thu thập: người nhận, số điện thoại, địa chỉ, email (không bắt buộc) · Mục đích: xử lý đơn hàng và giao hàng · Thời gian lưu: theo quy định pháp luật",
       "link": "Xem chính sách bảo mật"
+    },
+    "marketingSms": {
+      "label": "Gửi tin cho tôi qua SMS nữa. (không bắt buộc)",
+      "detail": "Các tin quảng cáo như nhắc khi đến lúc đặt lại. Mục này tách khỏi phần đồng ý ở trên, và đơn hàng vẫn được xử lý dù bạn không chọn. Bạn có thể ngừng nhận từ bất kỳ tin nhắn nào."
     },
     "pay": "Thanh toán",
     "paying": "Đang mở cửa sổ thanh toán…",

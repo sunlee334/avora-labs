@@ -78,6 +78,11 @@ function mountOne(form: HTMLFormElement): void {
           email: input.value.trim(),
           locale: form.dataset.locale,
           source: form.dataset.source,
+          // 선택 항목입니다. 아무것도 안 고르면 빈 배열이 가고, 서버는
+          // 그것을 null 로 저장합니다 — 신청 자체는 그대로 성사됩니다.
+          activities: [...form.querySelectorAll<HTMLInputElement>(
+            'input[name="activities"]:checked',
+          )].map((el) => el.value),
         }),
       });
       await drain(res);
@@ -87,6 +92,9 @@ function mountOne(form: HTMLFormElement): void {
         // 주소가 명단에 있는지를 아무에게나 알려 주는 것이 됩니다.
         say(copy.done, 'ok');
         form.querySelector('.notify__row')?.setAttribute('hidden', '');
+        // 입력칸을 감췄으면 활동 선택도 함께 감춥니다 — 한쪽만 남으면
+        // 아직 뭔가 더 해야 하는 화면처럼 보입니다.
+        form.querySelector('.notify__acts')?.setAttribute('hidden', '');
       } else {
         say(res.status === 400 ? copy.invalid : copy.error, 'bad');
       }

@@ -74,6 +74,37 @@ const n = dict(locale).notify;
     <button class="cta" type="submit" data-notify-submit>{n.submit}</button>
   </div>
 
+  {/*
+    활동 선택 — **선택입니다.**
+
+    ── 왜 폼 뒤인가 ───────────────────────────────────────────
+    이메일 칸과 버튼을 먼저 지나게 둡니다. 여기서 1순위는 명단을 만드는 것이고
+    (기획안 13-1, 2027년 1월 500명), 칸이 늘어날수록 제출률은 떨어집니다.
+    체크박스를 앞에 두면 "다 채워야 하나" 싶어 멈추는 사람이 생깁니다.
+
+    ── 왜 묻는지 적습니다 ─────────────────────────────────────
+    이유 없이 칸만 늘리면 그냥 귀찮은 질문입니다. 10월 검증단 모집 때
+    그 활동을 하는 분께 먼저 알리려는 것이라고 한 줄로 밝힙니다.
+
+    값(value)은 언어와 무관한 슬러그입니다 — 태국어 화면에서 신청한 사람과
+    한국어 화면에서 신청한 사람을 같은 조건으로 뽑아야 모집이 성립합니다.
+    정의처는 worker/launch-notify.ts 의 ACTIVITIES 입니다.
+  */}
+  <fieldset class="notify__acts">
+    <legend>{n.activities.heading}</legend>
+    <p class="notify__acts-why">{n.activities.why}</p>
+    <div class="notify__acts-list">
+      {
+        n.activities.options.map((opt) => (
+          <label class="notify__act">
+            <input type="checkbox" name="activities" value={opt.value} />
+            <span>{opt.label}</span>
+          </label>
+        ))
+      }
+    </div>
+  </fieldset>
+
   {/* 결과는 폼 위가 아니라 아래에 둡니다 — 제출 버튼을 누른 손가락 근처입니다. */}
   <p class="notify__state" data-notify-state role="status" aria-live="polite" hidden></p>
 

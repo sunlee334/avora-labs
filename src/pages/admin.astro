@@ -257,6 +257,7 @@ const FULFILLMENT_LABEL: Record<string, string> = {
                 <th scope="col">이메일</th>
                 <th scope="col">언어</th>
                 <th scope="col">유입 화면</th>
+                <th scope="col">활동</th>
                 <th scope="col">신청</th>
                 <th scope="col">상태</th>
               </tr>
@@ -1282,6 +1283,21 @@ const FULFILLMENT_LABEL: Record<string, string> = {
         product: '제품 페이지',
       };
 
+      /*
+       * 활동 슬러그 → 한국어. 정의처는 worker/launch-notify.ts 의 ACTIVITIES 이고
+       * 여기는 관리자가 읽을 이름만 답니다(관리 화면은 한국어 전용입니다).
+       * 모르는 값은 그대로 보여줍니다 — 목록이 늘었는데 여기만 안 고쳤을 때
+       * 조용히 사라지는 것보다 낫습니다.
+       */
+      const SU_ACTIVITY: Record<string, string> = {
+        running: '러닝',
+        hiking: '등산·트레킹',
+        golf: '골프',
+        water: '서핑·수영',
+        gym: '헬스',
+        other: '그 외',
+      };
+
       async function loadSignups() {
         suState.hidden = false;
         suState.textContent = '불러오는 중…';
@@ -1355,6 +1371,9 @@ const FULFILLMENT_LABEL: Record<string, string> = {
                 row.email,
                 row.locale,
                 SU_SOURCE[row.source ?? ''] ?? row.source ?? '—',
+                ((row.activities ?? []) as string[])
+                  .map((a) => SU_ACTIVITY[a] ?? a)
+                  .join(', ') || '—',
                 String(row.createdAt).slice(0, 10),
                 row.unsubscribedAt ? '수신 거부' : '수신 중',
               ];

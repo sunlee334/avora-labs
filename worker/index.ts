@@ -44,6 +44,7 @@ import { canonicalHostRedirect } from './canonical-host';
 import { overWriteLimit, tooManyRequests, type RateLimitEnv } from './rate-limit';
 import { jsonOnError } from './errors';
 import {
+  normalizeActivities,
   normalizeEmail,
   signup,
   unsubscribe,
@@ -263,6 +264,14 @@ async function handleCreateOrder(request: Request, env: Env): Promise<Response> 
       address2: text(body.address2, 200) ?? undefined,
       memo: text(body.memo, 300) ?? undefined,
       email: text(body.email, 160) ?? undefined,
+      /*
+       * 문자·알림톡 동의는 **선택** 이라 없어도 주문은 진행됩니다.
+       *
+       * 시각은 손님이 보낸 값을 쓰지 않고 서버가 찍습니다 — 동의 시각은
+       * 나중에 "언제 받았는가" 를 증명하는 자료인데, 브라우저가 준 값을
+       * 그대로 남기면 증명이 되지 않습니다.
+       */
+      marketingSmsAt: body.marketingSms === true ? new Date().toISOString() : undefined,
     };
   })();
 
@@ -716,7 +725,12 @@ const INQUIRY_BODY_MAX = 2000;
 async function handleLaunchNotify(request: Request, env: Env): Promise<Response> {
   if (!env.DB) return json({ error: 'NOTIFY_NOT_CONFIGURED' }, 503);
 
-  let body: { email?: unknown; locale?: unknown; source?: unknown };
+  let body: {
+    email?: unknown;
+    locale?: unknown;
+    source?: unknown;
+    activities?: unknown;
+  };
   try {
     body = (await request.json()) as typeof body;
   } catch {
@@ -728,8 +742,14 @@ async function handleLaunchNotify(request: Request, env: Env): Promise<Response>
 
   const locale = typeof body.locale === 'string' ? body.locale.slice(0, 8) : 'ko';
   const source = typeof body.source === 'string' ? body.source.slice(0, 32) : null;
+  /*
+   * 활동은 선택입니다. 아무것도 고르지 않았거나 목록에 없는 값만 보냈으면
+   * null 이 되고, 그래도 신청은 성사됩니다 — 여기서 400 을 내면 명단을 한 줄
+   * 잃습니다. 1순위는 이메일을 받는 것입니다.
+   */
+  const activities = normalizeActivities(body.activities);
 
-  await signup(env.DB, { email, locale, source }, new Date());
+  await signup(env.DB, { email, locale, source, activities }, new Date());
   // 중복이어도 201 입니다 — 신청한 사람 입장에서는 성공했습니다.
   return json({ ok: true }, 201);
 }

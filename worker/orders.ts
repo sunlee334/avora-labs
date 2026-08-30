@@ -46,6 +46,14 @@ export interface OrderDraft {
   address2?: string;
   memo?: string;
   email?: string;
+  /**
+   * 문자·알림톡 수신 동의 시각. 동의하지 않았으면 없습니다.
+   *
+   * 이메일 동의와 **별개 항목** 입니다. 기획안 9-5 가 그렇게 적어 두었고,
+   * 실제로도 이메일만 받겠다는 사람에게 문자를 보내면 동의를 받은 것이
+   * 아닙니다. 불리언이 아니라 시각인 이유는 마이그레이션 0008 에 있습니다.
+   */
+  marketingSmsAt?: string;
 }
 
 export interface OrderRecord extends OrderDraft {
@@ -83,6 +91,7 @@ export function rowToOrder(row: Record<string, unknown>): OrderRecord {
     address2: (row.address2 as string) ?? undefined,
     memo: (row.memo as string) ?? undefined,
     email: (row.email as string) ?? undefined,
+    marketingSmsAt: (row.marketing_sms_at as string) ?? undefined,
     fulfillment: ((row.fulfillment as Fulfillment) ?? 'unfulfilled'),
     carrier: (row.carrier as string) ?? null,
     trackingNumber: (row.tracking_number as string) ?? null,
@@ -109,8 +118,8 @@ export async function createOrder(
       `INSERT INTO orders (
          id, status, amount, currency, items, locale,
          recipient_name, recipient_phone, postal_code, address1, address2, memo, email,
-         created_at, updated_at, user_id
-       ) VALUES (?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         marketing_sms_at, created_at, updated_at, user_id
+       ) VALUES (?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .bind(
       id,
@@ -125,6 +134,7 @@ export async function createOrder(
       draft.address2 ?? null,
       draft.memo ?? null,
       draft.email ?? null,
+      draft.marketingSmsAt ?? null,
       now,
       now,
       userId,

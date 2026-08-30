@@ -26,6 +26,36 @@
     "invalid": "Please check the email address.",
     "error": "That didn't go through. Please try again in a moment.",
     "consent": "I agree to receive marketing email. Every message carries an unsubscribe link.",
+    "activities": {
+      "heading": "What do you mostly do? (optional)",
+      "why": "So that when we recruit the test panel in October 2026, we can write to the people who actually do it first.",
+      "options": [
+        {
+          "value": "running",
+          "label": "Running"
+        },
+        {
+          "value": "hiking",
+          "label": "Hiking & trekking"
+        },
+        {
+          "value": "golf",
+          "label": "Golf"
+        },
+        {
+          "value": "water",
+          "label": "Surfing & swimming"
+        },
+        {
+          "value": "gym",
+          "label": "Gym"
+        },
+        {
+          "value": "other",
+          "label": "Something else"
+        }
+      ]
+    },
     "privacy": {
       "summary": "We ask for your email address and nothing else. It is used only to tell you when the funding opens and when the product launches. Unsubscribe and you are removed from the send list immediately; the address itself is kept so we do not write to you again.",
       "link": "Read the privacy policy"
@@ -733,6 +763,10 @@
       "label": "I agree to the collection and use of my details for this order.",
       "detail": "Collected: recipient, phone, address, email (optional) · Purpose: order processing and delivery · Retention: as required by applicable law",
       "link": "Read the privacy policy"
+    },
+    "marketingSms": {
+      "label": "Also send me news by SMS. (optional)",
+      "detail": "Marketing messages such as a reminder when it is time to reorder. This is separate from the consent above, and your order goes through either way. You can stop them from any message you receive."
     },
     "pay": "Pay",
     "paying": "Opening the payment window…",

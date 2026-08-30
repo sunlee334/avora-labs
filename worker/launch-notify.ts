@@ -13,10 +13,50 @@ const ALPHABET = 'ABCDEFGHIJKLMNPQRSTUVWXYZ23456789';
 
 export type SignupResult = 'ok' | 'already' | 'revived';
 
+/**
+ * 고를 수 있는 활동. **이 배열이 정의처입니다.**
+ *
+ * 화면의 문구는 언어마다 다르지만 저장되는 값은 여기 슬러그 하나로 통일합니다 —
+ * 태국어 화면에서 신청한 사람과 한국어 화면에서 신청한 사람을 같은 조건으로
+ * 뽑을 수 있어야 검증단 모집이 성립합니다.
+ *
+ * 목록에 없는 값은 조용히 버립니다. 이 열은 우리가 명단을 추리는 데만 쓰므로,
+ * 손님이 보낸 임의의 문자열을 그대로 담아 둘 이유가 없습니다.
+ */
+export const ACTIVITIES = [
+  'running',
+  'hiking',
+  'golf',
+  'water',
+  'gym',
+  'other',
+] as const;
+export type Activity = (typeof ACTIVITIES)[number];
+
 export interface NotifySignup {
   email: string;
   locale: string;
   source: string | null;
+  activities: string | null;
+}
+
+/**
+ * 활동 선택을 저장 형태로 바꿉니다.
+ *
+ * 받는 것: 슬러그 배열. 돌려주는 것: 쉼표로 이은 문자열, 또는 아무것도 고르지
+ * 않았으면 null.
+ *
+ * 순서를 ACTIVITIES 순으로 다시 세웁니다 — 화면에서 누른 순서대로 담으면
+ * 같은 조합이 'gym,running' 과 'running,gym' 두 형태로 저장되어, 나중에
+ * 눈으로 훑을 때 같은 것이 달라 보입니다.
+ */
+export function normalizeActivities(raw: unknown): string | null {
+  if (!Array.isArray(raw)) return null;
+  const picked = new Set(
+    raw.filter((v): v is Activity => ACTIVITIES.includes(v as Activity)),
+  );
+  if (picked.size === 0) return null;
+  return ACTIVITIES.filter((a) => picked.has(a)).join(',');
 }
 
 function newId(now: Date, prefix: string): string {
@@ -59,7 +99,7 @@ export function normalizeEmail(raw: unknown): string | null {
  */
 export async function signup(
   db: D1Database,
-  { email, locale, source }: NotifySignup,
+  { email, locale, source, activities }: NotifySignup,
   now: Date,
 ): Promise<SignupResult> {
   const iso = now.toISOString();
@@ -67,18 +107,19 @@ export async function signup(
   const revived = await db
     .prepare(
       `UPDATE launch_notify
-          SET unsubscribed_at = NULL, consented_at = ?, locale = ?, source = ?
+          SET unsubscribed_at = NULL, consented_at = ?, locale = ?, source = ?,
+              activities = COALESCE(?, activities)
         WHERE email = ? AND unsubscribed_at IS NOT NULL`,
     )
-    .bind(iso, locale, source, email)
+    .bind(iso, locale, source, activities, email)
     .run();
   if ((revived.meta?.changes ?? 0) > 0) return 'revived';
 
   const inserted = await db
     .prepare(
       `INSERT INTO launch_notify
-         (id, email, locale, source, created_at, consented_at, unsubscribe_token)
-       VALUES (?, ?, ?, ?, ?, ?, ?)
+         (id, email, locale, source, activities, created_at, consented_at, unsubscribe_token)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(email) DO NOTHING`,
     )
     .bind(
@@ -86,6 +127,7 @@ export async function signup(
       email,
       locale,
       source,
+      activities,
       iso,
       iso,
       newId(now, 'UNSUB'),
@@ -127,6 +169,7 @@ export interface NotifyRow {
   createdAt: string;
   consentedAt: string;
   unsubscribedAt: string | null;
+  activities: string[];
 }
 
 /**
@@ -170,7 +213,7 @@ export async function listSignups(
 
   const { results } = await db
     .prepare(
-      `SELECT id, email, locale, source, created_at, consented_at, unsubscribed_at
+      `SELECT id, email, locale, source, activities, created_at, consented_at, unsubscribed_at
          FROM launch_notify ${clause}
         ORDER BY created_at DESC
         LIMIT ? OFFSET ?`,
@@ -187,6 +230,8 @@ export async function listSignups(
       createdAt: String(r.created_at),
       consentedAt: String(r.consented_at),
       unsubscribedAt: r.unsubscribed_at === null ? null : String(r.unsubscribed_at),
+      // 빈 문자열로 split 하면 [''] 이 나와 "하나 골랐다" 처럼 보입니다.
+      activities: r.activities ? String(r.activities).split(',') : [],
     })),
     matched: matchedRow?.n ?? 0,
     total: totalRow?.n ?? 0,

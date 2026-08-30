@@ -171,6 +171,23 @@ const methods = country.methods.filter((m) => m.enabled);
               <p class="field__error" data-error-for="agree" hidden></p>
             </div>
 
+            {/*
+              문자·알림톡 동의는 **위 필수 동의와 다른 칸** 입니다.
+
+              하나로 묶으면 "주문하려면 광고도 받아야 한다" 가 되어 동의를
+              받은 것이 아니게 됩니다. 기획안 9-5 가 두 동의를 나눠 받으라고
+              적은 이유이기도 합니다. required 를 붙이지 않고, 위 칸과 시각적
+              무게도 다르게 둡니다 — 필수 옆에 똑같이 생긴 칸이 있으면
+              그것도 필수로 읽힙니다.
+            */}
+            <div class="agree agree--optional">
+              <label class="agree__row">
+                <input type="checkbox" name="marketingSms" />
+                <span>{c.marketingSms.label}</span>
+              </label>
+              <p class="agree__detail">{c.marketingSms.detail}</p>
+            </div>
+
             <p class="checkout__error" data-form-error hidden></p>
 
             <button class="cta checkout__pay" type="submit" data-pay>{c.pay}</button>
@@ -347,6 +364,8 @@ const methods = country.methods.filter((m) => m.enabled);
             address2: get('address2') || undefined,
             memo: get('memo') || undefined,
             email: get('email') || undefined,
+            // 동의 시각은 서버가 찍습니다 — 여기서는 눌렀는지만 보냅니다.
+            marketingSms: data.get('marketingSms') === 'on',
           }),
         });
 
