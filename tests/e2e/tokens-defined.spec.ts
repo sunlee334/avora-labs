@@ -32,7 +32,7 @@ function brandInkRgb(): string {
   const json = JSON.parse(
     readFileSync(new URL('../../tokens/design-tokens.json', import.meta.url), 'utf-8'),
   );
-  const hex: string = json.color.brand.primary.value.replace('#', '');
+  const hex: string = json.color.palette.ink.value.replace('#', '');
   const [r, g, b] = [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16));
   return `rgb(${r}, ${g}, ${b})`;
 }
@@ -108,7 +108,7 @@ test.describe('디자인 토큰', () => {
     // 이 검사 자체가 고장 나 항상 통과하면, 위 테스트는 아무것도 지키지 않습니다.
     const defined = definedNames();
     expect(defined.has('--brand-ink-does-not-exist')).toBe(false);
-    expect(defined.has('--color-ink'), '--color-ink 는 있어야 합니다').toBe(true);
+    expect(defined.has('--color-text'), '--color-text 는 있어야 합니다').toBe(true);
     // 넓힌 쪽이 토큰 파일을 대체하지 않았는지 — tokens.css 가 비면 위
     // 검사가 global.css 만으로 통과해 버립니다.
     expect(tokenNames().size, 'tokens.css 가 비었습니다').toBeGreaterThan(10);

@@ -28,6 +28,25 @@
 
 고친 뒤에는 항상 `npm run build` 를 실행하세요.
 
+### 색을 쓸 때의 규칙
+
+**색 값(`#252B31`, `rgba(...)`)은 `tokens/design-tokens.json` 에만 적습니다.**
+화면 코드(`global.css`, `*.astro`)는 **역할 토큰**만 참조합니다.
+
+```
+tokens/design-tokens.json
+  color.palette   원시 팔레트 — 색은 여기서만 정의합니다   --paros-ink, --paros-wash …
+  color.role      역할 — 화면은 이것만 씁니다              --color-text, --color-bg …
+```
+
+역할 이름을 쓰는 이유는 값이 바뀌어도 이름이 참말로 남기 때문입니다.
+`--paros-ink` 는 색이 바뀌면 이름이 거짓말이 되지만 `--color-text` 는 그렇지 않습니다.
+화면이 역할만 참조하면 팔레트 교체가 JSON 한 곳 수정으로 끝납니다.
+
+새 색이 필요하면 **먼저 팔레트에 추가하고, 역할을 붙인 뒤** 화면에서 씁니다.
+`tests/e2e/tokens-discipline.spec.ts` 가 이 규칙을 지킵니다 — 화면 코드에 색을
+직접 적거나 `--paros-*` 를 직접 참조하면 검사가 실패합니다.
+
 ### 컬러를 바꾸는 예시
 
 `tokens/design-tokens.json` 을 열면 이렇게 생겼습니다.

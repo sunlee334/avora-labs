@@ -24,8 +24,8 @@ html {
 
 body {
   margin: 0;
-  background: var(--brand-surface);
-  color: var(--color-ink);
+  background: var(--color-bg);
+  color: var(--color-text);
   font-family: var(--font-body);
   font-size: 16px;
   font-weight: 400;
@@ -89,7 +89,7 @@ button {
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-ink);
+  outline: 2px solid var(--color-text);
   outline-offset: 3px;
   border-radius: 2px;
 }
@@ -114,8 +114,8 @@ button {
   display: inline-flex;
   align-items: center;
   min-height: var(--size-tap-min);
-  background: var(--brand-primary);
-  color: var(--brand-surface-alt);
+  background: var(--color-bg-inverse);
+  color: var(--color-accent);
   padding: 0 18px;
   border-radius: 4px;
   transition: top 0.15s ease;
@@ -141,16 +141,16 @@ button {
  * 진한 Mist Blue 는 어두운 면 위 글자색과 포인트에 그대로 남아 있습니다.
  */
 .section--alt {
-  background: var(--brand-surface-tint);
+  background: var(--color-accent-soft);
 }
 
 .section--dark {
-  background: var(--brand-primary);
-  color: var(--brand-surface-alt);
+  background: var(--color-bg-inverse);
+  color: var(--color-accent);
 }
 .section--dark .kicker,
 .section--dark .body {
-  color: var(--brand-muted-on-dark);
+  color: var(--color-text-muted-inverse);
 }
 
 @media (min-width: 900px) {
@@ -168,7 +168,7 @@ button {
   font-size: 11px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   margin-bottom: 18px;
 }
 
@@ -186,7 +186,7 @@ button {
 }
 
 .body {
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   font-size: 15px;
   line-height: 1.85;
   max-width: var(--size-measure);
@@ -221,7 +221,7 @@ button {
   right: 0;
   bottom: -0.12em;
   height: 2px;
-  background: var(--brand-accent-campaign);
+  background: var(--color-campaign);
   transform: scaleX(0);
   transform-origin: left;
   transition: transform var(--motion-rule-duration) var(--motion-rise-easing) 0.25s;
@@ -238,7 +238,7 @@ button {
  * 않았고, 그래서 이 규칙이 `:not(.section--dark)` 로 훨씬 넓었습니다.
  */
 .section--alt .mark::after {
-  background: var(--color-ink);
+  background: var(--color-bg-inverse);
 }
 
 /* ── 스크롤 등장 ──────────────────────────────────────────── */
@@ -263,8 +263,8 @@ button {
   padding-inline: 28px;
   border-radius: 999px;
   border: 1px solid transparent;
-  background: var(--brand-primary);
-  color: var(--brand-surface-alt);
+  background: var(--color-bg-inverse);
+  color: var(--color-accent);
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -277,8 +277,8 @@ button {
 }
 .cta--ghost {
   background: transparent;
-  color: var(--color-ink);
-  border-color: var(--color-line);
+  color: var(--color-text);
+  border-color: var(--color-border);
 }
 
 /* ── 네비게이션 ───────────────────────────────────────────── */
@@ -306,9 +306,9 @@ button {
   justify-content: space-between;
   gap: 16px;
   padding: 12px var(--space-gutter-mobile);
-  background: color-mix(in srgb, var(--brand-surface) 88%, transparent);
+  background: color-mix(in srgb, var(--color-bg) 88%, transparent);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .nav__wordmark {
@@ -327,7 +327,7 @@ button {
   font-weight: 500;
   letter-spacing: 0.14em;
   text-decoration: none;
-  color: var(--color-ink);
+  color: var(--color-text);
 }
 
 .nav__links {
@@ -410,10 +410,10 @@ button {
   margin: 0;
   padding: 6px;
   list-style: none;
-  background: var(--brand-surface);
-  border: 1px solid var(--color-line);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
   border-radius: 10px;
-  box-shadow: 0 18px 40px -18px color-mix(in srgb, var(--color-ink) 30%, transparent);
+  box-shadow: 0 18px 40px -18px color-mix(in srgb, var(--color-text) 30%, transparent);
 }
 .nav__dropdown[hidden] {
   display: none;
@@ -453,7 +453,7 @@ button {
     display: flex;
     align-items: center;
     gap: 4px;
-    border-bottom: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-border);
   }
 }
 
@@ -515,7 +515,7 @@ button {
   min-width: var(--size-tap-min);
   padding-inline: 12px;
   background: transparent;
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-border);
   border-radius: 999px;
   font-family: var(--font-mono);
   font-size: 12px;
@@ -532,14 +532,14 @@ button {
   margin: 0;
   padding: 4px var(--space-gutter-mobile) calc(14px + env(safe-area-inset-bottom));
   border: 0;
-  border-top: 1px solid var(--color-line);
+  border-top: 1px solid var(--color-border);
   border-radius: 18px 18px 0 0;
-  background: var(--brand-surface);
-  color: var(--color-ink);
+  background: var(--color-bg);
+  color: var(--color-text);
   overflow-y: auto;
 }
 .lang__sheet::backdrop {
-  background: color-mix(in srgb, var(--color-ink) 38%, transparent);
+  background: color-mix(in srgb, var(--color-bg-inverse) 38%, transparent);
 }
 
 .lang__head {
@@ -553,7 +553,7 @@ button {
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   padding-block: 14px 6px;
 }
 .lang__close {
@@ -566,7 +566,7 @@ button {
   border: 0;
   border-radius: 999px;
   font-size: 15px;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   cursor: pointer;
 }
 
@@ -579,7 +579,7 @@ button {
   justify-content: space-between;
   min-height: 54px;
   padding-inline: 2px;
-  border-top: 1px solid var(--color-line);
+  border-top: 1px solid var(--color-border);
   text-decoration: none;
   font-size: 15.5px;
 }
@@ -589,7 +589,7 @@ button {
 .lang__item span {
   font-family: var(--font-mono);
   font-size: 11px;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   letter-spacing: 0.08em;
 }
 
@@ -600,13 +600,13 @@ button {
        관계를 그대로 보존하기 위한 것입니다. */
     inset: calc(var(--nav-height) + 1px) var(--space-gutter-desktop) auto auto;
     width: 260px;
-    border: 1px solid var(--color-line);
+    border: 1px solid var(--color-border);
     border-radius: 12px;
     padding: 4px 16px 12px;
-    box-shadow: 0 20px 50px -20px color-mix(in srgb, var(--color-ink) 35%, transparent);
+    box-shadow: 0 20px 50px -20px color-mix(in srgb, var(--color-text) 35%, transparent);
   }
   .lang__sheet::backdrop {
-    background: color-mix(in srgb, var(--color-ink) 12%, transparent);
+    background: color-mix(in srgb, var(--color-bg-inverse) 12%, transparent);
   }
 }
 
@@ -653,14 +653,14 @@ button {
   inset: 0;
   background: linear-gradient(
     to top,
-    color-mix(in srgb, var(--brand-primary) 82%, transparent) 0%,
-    color-mix(in srgb, var(--brand-primary) 42%, transparent) 42%,
+    color-mix(in srgb, var(--color-text) 82%, transparent) 0%,
+    color-mix(in srgb, var(--color-text) 42%, transparent) 42%,
     transparent 72%
   );
 }
 .hero__copy {
   position: relative;
-  color: var(--brand-surface-alt);
+  color: var(--color-accent);
   padding: 0 var(--space-gutter-mobile) 44px;
   max-width: 40ch;
 }
@@ -706,16 +706,16 @@ button {
   gap: 14px;
   align-items: baseline;
   padding-block: 18px;
-  border-top: 1px solid var(--color-line);
+  border-top: 1px solid var(--color-border);
 }
 .journey li:last-child {
-  border-bottom: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-border);
 }
 .journey__step {
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.1em;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
 }
 .journey__word {
   font-family: var(--font-display);
@@ -724,7 +724,7 @@ button {
   display: block;
 }
 .journey__body {
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   font-size: 13.5px;
   line-height: 1.7;
 }
@@ -748,17 +748,17 @@ button {
 .promise {
   display: grid;
   gap: 1px;
-  background: var(--color-line);
-  border: 1px solid var(--color-line);
+  background: var(--color-border);
+  border: 1px solid var(--color-border);
   margin-top: 26px;
 }
 .promise > div {
-  background: var(--brand-surface);
+  background: var(--color-bg);
   padding: 26px 22px;
 }
 /* 카드는 놓인 지반과 같아집니다 — 칸을 가르는 것은 1px 선이지 색이 아닙니다. */
 .section--alt .promise > div {
-  background: var(--brand-surface-tint);
+  background: var(--color-accent-soft);
 }
 .promise h3 {
   font-family: var(--font-mono);
@@ -768,7 +768,7 @@ button {
   margin-bottom: 8px;
 }
 .promise p {
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   font-size: 13.5px;
   line-height: 1.7;
 }
@@ -797,10 +797,10 @@ button {
 }
 .criteria > div {
   padding-block: 15px;
-  border-top: 1px solid var(--color-line);
+  border-top: 1px solid var(--color-border);
 }
 .criteria > div:last-child {
-  border-bottom: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-border);
 }
 .criteria dt {
   font-family: var(--font-display);
@@ -811,7 +811,7 @@ button {
   /* dd 의 브라우저 기본값은 margin-inline-start: 40px 입니다. 남겨 두면
      확인 방법만 혼자 들여쓰여 실수처럼 보입니다. */
   margin: 4px 0 0;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   font-size: 13.5px;
   line-height: 1.7;
 }
@@ -848,7 +848,7 @@ button {
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.1em;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   padding: 12px var(--space-gutter-mobile) 0;
 }
 @media (min-width: 900px) {
@@ -876,7 +876,7 @@ button {
   font-variant-numeric: tabular-nums;
 }
 .product-hero__price small {
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   font-size: 12px;
   letter-spacing: 0.04em;
 }
@@ -891,11 +891,11 @@ button {
 .principles {
   display: grid;
   gap: 1px;
-  background: var(--color-line);
-  border-block: 1px solid var(--color-line);
+  background: var(--color-border);
+  border-block: 1px solid var(--color-border);
 }
 .principles > div {
-  background: var(--brand-surface);
+  background: var(--color-bg);
   padding: 28px 22px;
 }
 .principles__term {
@@ -911,7 +911,7 @@ button {
   margin-bottom: 8px;
 }
 .principles p {
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   font-size: 13.5px;
   line-height: 1.75;
 }
@@ -943,7 +943,7 @@ button {
   gap: 16px;
   align-items: baseline;
   padding-block: 14px;
-  border-bottom: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-border);
 }
 .spec__key {
   font-size: 14.5px;
@@ -951,7 +951,7 @@ button {
 .spec__value {
   font-family: var(--font-mono);
   font-size: 13px;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
@@ -959,12 +959,12 @@ button {
   /* opacity 로 흐리게 만들면 배경과 섞인 실제 색이 대비 기준을 밑돕니다
      (0.72 일 때 2.99:1, 기준 4.5:1). "확정 예정" 이라는 글자가 이미 상태를
      말해 주므로, 옅기 대신 대비가 보장된 토큰 색을 씁니다. */
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
 }
 .spec__note {
   margin-top: 16px;
   font-size: 12.5px;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
 }
 
 .steps {
@@ -975,13 +975,13 @@ button {
 }
 .steps li {
   counter-increment: step;
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 20px;
-  background: var(--brand-surface);
+  background: var(--color-bg);
 }
 .section--alt .steps li {
-  background: var(--brand-surface-tint);
+  background: var(--color-accent-soft);
 }
 .steps li::before {
   content: counter(step, decimal-leading-zero);
@@ -989,7 +989,7 @@ button {
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.1em;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   margin-bottom: 10px;
 }
 .steps strong {
@@ -999,7 +999,7 @@ button {
   margin-bottom: 4px;
 }
 .steps p {
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   font-size: 13.5px;
   line-height: 1.7;
 }
@@ -1013,11 +1013,11 @@ button {
    접어두면 초기 HTML 에는 있지만 답변엔진이 본문으로 보지 않을 수 있습니다. */
 .faq {
   margin-top: 24px;
-  border-top: 1px solid var(--color-line);
+  border-top: 1px solid var(--color-border);
 }
 .faq > div {
   padding-block: 22px;
-  border-bottom: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-border);
 }
 .faq h3 {
   font-size: 15.5px;
@@ -1025,7 +1025,7 @@ button {
   margin-bottom: 8px;
 }
 .faq p {
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   font-size: 14px;
   line-height: 1.85;
   max-width: var(--size-measure);
@@ -1039,14 +1039,14 @@ button {
 }
 .cart__lines {
   display: grid;
-  border-top: 1px solid var(--color-line);
+  border-top: 1px solid var(--color-border);
 }
 .cart__line {
   display: grid;
   grid-template-columns: 88px 1fr auto;
   gap: 16px;
   padding-block: 20px;
-  border-bottom: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-border);
   align-items: start;
 }
 .cart__thumb {
@@ -1063,7 +1063,7 @@ button {
 .cart__line-price {
   font-family: var(--font-mono);
   font-size: 13px;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   margin-top: 4px;
   font-variant-numeric: tabular-nums;
 }
@@ -1072,7 +1072,7 @@ button {
   align-items: center;
   gap: 2px;
   margin-top: 14px;
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-border);
   border-radius: 999px;
 }
 .cart__qty button {
@@ -1112,7 +1112,7 @@ button {
   background: transparent;
   border: 0;
   font-size: 13px;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   text-decoration: underline;
   text-underline-offset: 3px;
   cursor: pointer;
@@ -1133,7 +1133,7 @@ button {
   padding-block: 10px;
 }
 .cart__totals dt {
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   font-size: 14px;
 }
 .cart__totals dd {
@@ -1143,12 +1143,12 @@ button {
   font-variant-numeric: tabular-nums;
 }
 .cart__totals-grand {
-  border-top: 1px solid var(--color-line);
+  border-top: 1px solid var(--color-border);
   margin-top: 6px;
   padding-top: 14px !important;
 }
 .cart__totals-grand dt {
-  color: var(--color-ink);
+  color: var(--color-text);
   font-weight: 600;
   font-size: 15px;
 }
@@ -1165,9 +1165,9 @@ button {
 .cart__notice {
   margin-top: 24px;
   padding: 16px 18px;
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   font-size: 14px;
 }
 
@@ -1191,10 +1191,10 @@ button {
   gap: 14px;
   padding: 12px 14px 12px 18px;
   border-radius: 999px;
-  background: var(--brand-primary);
-  color: var(--brand-surface-alt);
+  background: var(--color-bg-inverse);
+  color: var(--color-accent);
   font-size: 14px;
-  box-shadow: 0 16px 40px -16px color-mix(in srgb, var(--color-ink) 50%, transparent);
+  box-shadow: 0 16px 40px -16px color-mix(in srgb, var(--color-text) 50%, transparent);
   transition: transform 0.3s var(--motion-rise-easing);
   max-width: calc(100vw - 32px);
 }
@@ -1209,8 +1209,8 @@ button {
   min-height: var(--size-tap-min);
   padding-inline: 14px;
   border-radius: 999px;
-  background: var(--brand-surface-alt);
-  color: var(--brand-primary);
+  background: var(--color-accent);
+  color: var(--color-text);
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
@@ -1228,7 +1228,7 @@ button {
   min-height: var(--size-tap-min);
   min-width: var(--size-tap-min);
   padding-inline: 12px;
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-border);
   border-radius: 999px;
   font-family: var(--font-mono);
   font-size: 12px;
@@ -1241,8 +1241,8 @@ button {
   height: 18px;
   padding-inline: 5px;
   border-radius: 999px;
-  background: var(--brand-primary);
-  color: var(--brand-surface-alt);
+  background: var(--color-bg-inverse);
+  color: var(--color-accent);
   font-size: 10.5px;
   line-height: 18px;
   text-align: center;
@@ -1290,7 +1290,7 @@ button {
 .field__optional {
   font-weight: 400;
   font-size: 12px;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   margin-left: 4px;
 }
 .field input {
@@ -1299,22 +1299,22 @@ button {
   font-size: 16px;
   min-height: var(--size-tap-min);
   padding: 10px 14px;
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  background: var(--brand-surface);
-  color: var(--color-ink);
+  background: var(--color-bg);
+  color: var(--color-text);
   width: 100%;
 }
 .field input::placeholder {
-  color: color-mix(in srgb, var(--brand-muted) 70%, transparent);
+  color: color-mix(in srgb, var(--color-text-muted) 70%, transparent);
 }
 .field input[aria-invalid='true'] {
-  border-color: var(--color-ink);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-ink) 14%, transparent);
+  border-color: var(--color-text);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-text) 14%, transparent);
 }
 .field__error {
   font-size: 13px;
-  color: var(--color-ink);
+  color: var(--color-text);
   font-weight: 500;
 }
 .field--postal {
@@ -1340,19 +1340,19 @@ button {
   gap: 12px;
   min-height: 54px;
   padding-inline: 16px;
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   cursor: pointer;
   font-size: 15px;
 }
 .method:has(input:checked) {
-  border-color: var(--color-ink);
-  box-shadow: inset 0 0 0 1px var(--color-ink);
+  border-color: var(--color-text);
+  box-shadow: inset 0 0 0 1px var(--color-text);
 }
 .method input {
   width: 18px;
   height: 18px;
-  accent-color: var(--brand-primary);
+  accent-color: var(--color-text);
 }
 
 .checkout__lines {
@@ -1360,7 +1360,7 @@ button {
   gap: 10px;
   margin-top: 18px;
   padding-bottom: 16px;
-  border-bottom: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-border);
 }
 .checkout__lines li {
   display: flex;
@@ -1375,7 +1375,7 @@ button {
 
 .agree {
   padding: 18px;
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-border);
   border-radius: 10px;
   margin-bottom: 24px;
 }
@@ -1392,7 +1392,7 @@ button {
   height: 20px;
   margin-top: 2px;
   flex: none;
-  accent-color: var(--brand-primary);
+  accent-color: var(--color-text);
 }
 /*
  * 선택 동의는 필수 동의와 다르게 보여야 합니다. 테두리를 지우고 지반만
@@ -1401,18 +1401,18 @@ button {
  */
 .agree--optional {
   border-color: transparent;
-  background: var(--brand-surface-tint);
+  background: var(--color-accent-soft);
 }
 
 .agree__detail {
   margin-top: 10px;
   font-size: 12.5px;
   line-height: 1.8;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
 }
 .agree a {
   font-size: 13px;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   display: inline-flex;
   align-items: center;
   min-height: var(--size-tap-min);
@@ -1421,7 +1421,7 @@ button {
 .checkout__error {
   padding: 14px 16px;
   margin-bottom: 18px;
-  border: 1px solid var(--color-ink);
+  border: 1px solid var(--color-text);
   border-radius: 8px;
   font-size: 14px;
 }
@@ -1432,20 +1432,20 @@ button {
 
 /* ── 주문 결과 ────────────────────────────────────────────── */
 .orderResult__pending {
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   font-size: 15px;
   padding-block: 40px;
 }
 .orderResult__facts {
   margin-top: 30px;
-  border-top: 1px solid var(--color-line);
+  border-top: 1px solid var(--color-border);
   max-width: 620px;
 }
 .orderResult__facts > div {
   display: grid;
   gap: 4px;
   padding-block: 16px;
-  border-bottom: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-border);
 }
 @media (min-width: 560px) {
   .orderResult__facts > div {
@@ -1462,7 +1462,7 @@ button {
 }
 .orderResult__facts dt {
   font-size: 13px;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
 }
 .orderResult__facts dd {
   margin: 0;
@@ -1482,12 +1482,12 @@ button {
   /* 좁은 화면에서 표가 페이지를 밀지 않고 자기 안에서만 스크롤합니다. */
   overflow-x: auto;
   margin-top: 22px;
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-border);
   border-radius: 10px;
 }
 .tableScroll:focus-visible {
   /* 초점이 갔다는 것이 보여야 스크롤할 수 있다는 것도 알 수 있습니다. */
-  outline: 2px solid var(--brand-primary);
+  outline: 2px solid var(--color-text);
   outline-offset: 2px;
 }
 /* 마크다운이 만드는 표에는 클래스가 없습니다(src/hast/table-scroll.ts 가
@@ -1506,7 +1506,7 @@ button {
 .tableScroll > table td {
   text-align: left;
   padding: 14px 16px;
-  border-bottom: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-border);
   vertical-align: top;
   line-height: 1.7;
 }
@@ -1516,7 +1516,7 @@ button {
   font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   font-weight: 500;
   white-space: nowrap;
 }
@@ -1551,12 +1551,12 @@ button {
   background: none;
   border: 0;
   font: inherit;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   text-decoration: underline;
   cursor: pointer;
 }
 .linkButton:hover {
-  color: var(--brand-primary);
+  color: var(--color-text);
 }
 
 /* 본문 안의 단독 링크. 글자만 두면 세로가 18px 이라 누르기 어렵습니다. */
@@ -1583,7 +1583,7 @@ button {
   min-width: 0;
   position: relative;
   padding-inline-start: 22px;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   font-size: 15px;
   line-height: 1.7;
 }
@@ -1594,7 +1594,7 @@ button {
   top: 0.7em;
   width: 5px;
   height: 5px;
-  background: var(--brand-muted);
+  background: var(--color-text-muted);
   border-radius: 50%;
 }
 
@@ -1612,7 +1612,7 @@ button {
   min-width: 0;
   position: relative;
   padding-inline-start: 22px;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   font-size: 15px;
   line-height: 1.7;
 }
@@ -1623,14 +1623,14 @@ button {
   top: 0.62em;
   width: 8px;
   height: 8px;
-  border: 1px solid var(--brand-muted);
+  border: 1px solid var(--color-text-muted);
   border-radius: 2px;
 }
 
 /* ── 푸터 ─────────────────────────────────────────────────── */
 .footer {
-  background: var(--brand-primary);
-  color: var(--brand-surface-alt);
+  background: var(--color-bg-inverse);
+  color: var(--color-accent);
   padding-block: 48px 40px;
 }
 .footer__wordmark {
@@ -1640,7 +1640,7 @@ button {
   letter-spacing: 0.1em;
   line-height: 1;
   margin: 0 0 32px;
-  color: var(--brand-surface-alt);
+  color: var(--color-accent);
 }
 .footer__tagline {
   font-family: var(--font-display);
@@ -1652,7 +1652,7 @@ button {
   display: grid;
   gap: 26px;
   padding-top: 26px;
-  border-top: 1px solid var(--color-line-inverse);
+  border-top: 1px solid var(--color-border-inverse);
 }
 .footer__col h2 {
   font-family: var(--font-mono);
@@ -1660,7 +1660,7 @@ button {
   font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--brand-muted-on-dark);
+  color: var(--color-text-muted-inverse);
   margin-bottom: 12px;
 }
 .footer__col li a,
@@ -1681,8 +1681,8 @@ button {
 .footer__meta {
   margin-top: 30px;
   padding-top: 22px;
-  border-top: 1px solid var(--color-line-inverse);
-  color: var(--brand-muted-on-dark);
+  border-top: 1px solid var(--color-border-inverse);
+  color: var(--color-text-muted-inverse);
   font-size: 12.5px;
   line-height: 1.9;
 }
@@ -1735,7 +1735,7 @@ button {
 .faq .support__note {
   margin-top: 10px;
   padding-inline-start: 12px;
-  border-inline-start: 2px solid var(--color-line);
+  border-inline-start: 2px solid var(--color-border);
   font-size: 13px;
 }
 
@@ -1744,7 +1744,7 @@ button {
   gap: 10px;
   margin-top: 44px;
   padding: 22px;
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-border);
   border-radius: 10px;
 }
 .support__card h2 {
@@ -1753,7 +1753,7 @@ button {
 }
 .support__card p {
   max-width: var(--size-measure);
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   font-size: 14px;
   line-height: 1.85;
 }
@@ -1769,10 +1769,10 @@ button {
   display: grid;
   gap: 4px;
   padding-block: 12px;
-  border-bottom: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-border);
 }
 .support__contact dt {
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   font-size: 13px;
 }
 .support__contact dd {
@@ -1798,7 +1798,7 @@ button {
   min-width: var(--size-tap-min);
   min-height: var(--size-tap-min);
   padding-inline: 12px;
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-border);
   border-radius: 999px;
   background: none;
   cursor: pointer;
@@ -1815,7 +1815,7 @@ button {
   width: 16px;
   height: 1.5px;
   border-radius: 1px;
-  background: var(--brand-primary);
+  background: var(--color-bg-inverse);
 }
 .menu__bars::before,
 .menu__bars::after {
@@ -1843,13 +1843,13 @@ button {
   margin: 0;
   padding: 4px var(--space-gutter-mobile) calc(14px + env(safe-area-inset-bottom));
   border: 0;
-  border-top: 1px solid var(--color-line);
+  border-top: 1px solid var(--color-border);
   border-radius: 18px 18px 0 0;
-  background: var(--brand-surface);
+  background: var(--color-bg);
   overflow-y: auto;
 }
 .menu__sheet::backdrop {
-  background: color-mix(in srgb, var(--color-ink) 38%, transparent);
+  background: color-mix(in srgb, var(--color-bg-inverse) 38%, transparent);
 }
 .menu__head {
   display: flex;
@@ -1863,7 +1863,7 @@ button {
   font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
 }
 .menu__close {
   display: inline-flex;
@@ -1874,7 +1874,7 @@ button {
   border: 0;
   border-radius: 999px;
   background: none;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   font-size: 15px;
   cursor: pointer;
 }
@@ -1888,7 +1888,7 @@ button {
   gap: 12px;
   min-height: 54px;
   padding-inline: 2px;
-  border-top: 1px solid var(--color-line);
+  border-top: 1px solid var(--color-border);
   font-size: 15.5px;
   text-decoration: none;
 }
@@ -1901,7 +1901,7 @@ button {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: var(--color-ink);
+  background: var(--color-bg-inverse);
 }
 
 /*
@@ -1925,7 +1925,7 @@ button {
   text-align: left;
   background: none;
   border: 0;
-  border-top: 1px solid var(--color-line);
+  border-top: 1px solid var(--color-border);
   cursor: pointer;
 }
 .menu__caret {
@@ -1953,7 +1953,7 @@ button {
    a·button 을 44px 로 재고, 펼친 뒤에는 이것들도 그 대상이 됩니다. */
 .menu__item--sub {
   padding-left: 32px;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
 }
 /* 유틸리티 구획. 소제목을 두지 않고 굵은 선으로 가릅니다 — .menu__item 이
    이미 1px 을 가지므로 2px 이 구획 경계로 읽힙니다. */
@@ -1961,7 +1961,7 @@ button {
   list-style: none;
   margin: 20px 0 0;
   padding: 0;
-  border-top: 2px solid var(--color-line);
+  border-top: 2px solid var(--color-border);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1986,7 +1986,7 @@ button {
   display: grid;
   gap: 10px;
   padding: 32px 22px;
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-border);
   border-radius: 10px;
   text-align: center;
 }
@@ -1997,7 +1997,7 @@ button {
 .reviews__empty p {
   max-width: var(--size-measure);
   margin-inline: auto;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   font-size: 14px;
   line-height: 1.85;
 }
@@ -2006,7 +2006,7 @@ button {
   display: grid;
   gap: 6px;
   padding-bottom: 24px;
-  border-bottom: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-border);
 }
 .reviews__average {
   display: flex;
@@ -2021,7 +2021,7 @@ button {
 }
 .reviews__average span,
 .reviews__count {
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   font-size: 13px;
 }
 .reviews__bars {
@@ -2036,19 +2036,19 @@ button {
   align-items: center;
   gap: 10px;
   font-size: 12px;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   font-variant-numeric: tabular-nums;
 }
 .reviews__bar-track {
   height: 5px;
   border-radius: 999px;
-  background: var(--color-line);
+  background: var(--color-border);
   overflow: hidden;
 }
 .reviews__bar-fill {
   display: block;
   height: 100%;
-  background: var(--color-ink);
+  background: var(--color-bg-inverse);
 }
 .reviews__bar-n {
   text-align: right;
@@ -2062,7 +2062,7 @@ button {
   /* 그리드 칸은 기본이 min-width:auto 라, 공백 없는 긴 글이 칸을 밀어냅니다. */
   min-width: 0;
   padding-block: 24px;
-  border-bottom: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-border);
 }
 .reviews__head {
   display: flex;
@@ -2072,22 +2072,22 @@ button {
   margin-bottom: 10px;
 }
 .stars {
-  color: var(--color-ink);
+  color: var(--color-text);
   font-size: 14px;
   letter-spacing: 0.1em;
 }
 .reviews__badge {
   padding: 3px 9px;
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-border);
   border-radius: 999px;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   font-size: 11px;
   white-space: nowrap;
 }
 /* 대가성 표시는 눈에 띄어야 합니다 — 가려 두면 표시한 의미가 없습니다. */
 .reviews__badge--sponsored {
-  border-color: var(--color-ink);
-  color: var(--color-ink);
+  border-color: var(--color-text);
+  color: var(--color-text);
   font-weight: 600;
 }
 .reviews__body {
@@ -2099,7 +2099,7 @@ button {
 }
 .reviews__meta {
   margin-top: 10px;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   font-size: 12.5px;
 }
 
@@ -2114,10 +2114,10 @@ button {
   font-size: 16px; /* iOS 는 16px 미만 입력칸을 누르면 화면을 확대합니다 */
   width: 100%;
   padding: 12px 14px;
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  background: var(--brand-surface);
-  color: var(--color-ink);
+  background: var(--color-bg);
+  color: var(--color-text);
   line-height: 1.8;
   resize: vertical;
 }
@@ -2144,7 +2144,7 @@ button {
   min-width: var(--size-tap-min);
   min-height: var(--size-tap-min);
   border-radius: 8px;
-  color: var(--color-line);
+  color: var(--color-border);
   font-size: 26px;
   cursor: pointer;
 }
@@ -2157,10 +2157,10 @@ button {
 .rating__star:has(input:checked),
 /* 고른 별의 왼쪽도 함께 채웁니다 — 별점은 누적으로 읽히기 때문입니다. */
 .rating__star:has(~ .rating__star input:checked) {
-  color: var(--color-ink);
+  color: var(--color-text);
 }
 .rating__star:has(input:focus-visible) {
-  outline: 2px solid var(--color-ink);
+  outline: 2px solid var(--color-text);
   outline-offset: 2px;
 }
 
@@ -2189,7 +2189,7 @@ button {
   gap: 10px;
   min-height: var(--size-tap-min);
   padding-block: 12px;
-  border-bottom: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-border);
   font-size: 15px;
 }
 .identityList li > span {
@@ -2241,19 +2241,19 @@ button {
   margin: 30px 0 0;
   padding: 0;
   max-width: 620px;
-  border-top: 1px solid var(--color-line);
+  border-top: 1px solid var(--color-border);
 }
 
 .orderCard {
   /* 그리드 칸은 기본이 min-width:auto 라, 긴 주문번호가 칸을 밀어냅니다. */
   min-width: 0;
   padding-block: 20px;
-  border-bottom: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-border);
 }
 .orderCard__head {
   font-family: var(--font-mono);
   font-size: 12.5px;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   /* 주문번호는 공백이 없어 좁은 화면에서 끊을 곳이 없습니다. */
   overflow-wrap: anywhere;
 }
@@ -2280,13 +2280,13 @@ button {
   gap: 12px;
   margin-top: 10px;
   font-size: 13.5px;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   overflow-wrap: anywhere;
 }
 .orderCard__note {
   margin-top: 10px;
   font-size: 13px;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
 }
 
 .addressForm {
@@ -2309,7 +2309,7 @@ button {
   list-style: none;
   margin: 16px 0 40px;
   padding: 0;
-  border-top: 1px solid var(--color-line);
+  border-top: 1px solid var(--color-border);
 }
 .postList__item {
   display: flex;
@@ -2317,7 +2317,7 @@ button {
   align-items: baseline;
   gap: 4px 16px;
   padding-block: 20px;
-  border-bottom: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-border);
 }
 .postList__item > a {
   flex: 1 1 260px;
@@ -2342,13 +2342,13 @@ button {
 }
 .postList__summary {
   display: block;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   font-size: 14px;
   line-height: 1.7;
   max-width: var(--size-measure);
 }
 .postList__date {
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   font-family: var(--font-mono);
   font-size: 12.5px;
   /* 숫자 폭을 맞춰 날짜가 세로로 정렬됩니다. */
@@ -2358,9 +2358,9 @@ button {
 .postList__empty {
   margin-top: 24px;
   padding: 28px 0;
-  border-top: 1px solid var(--color-line);
-  border-bottom: 1px solid var(--color-line);
-  color: var(--brand-muted);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-muted);
   font-size: 14px;
 }
 .postList__back {
@@ -2370,7 +2370,7 @@ button {
 /* 글 본문 ─ 마크다운이 만드는 태그를 여기서 받습니다. */
 .post__meta {
   margin-top: 12px;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   font-family: var(--font-mono);
   font-size: 12.5px;
   font-variant-numeric: tabular-nums;
@@ -2398,7 +2398,7 @@ button {
 }
 .post__body p,
 .post__body li {
-  color: var(--color-ink);
+  color: var(--color-text);
   font-size: 15px;
   line-height: 1.9;
 }
@@ -2415,14 +2415,14 @@ button {
 }
 .post__body hr {
   border: 0;
-  border-top: 1px solid var(--color-line);
+  border-top: 1px solid var(--color-border);
   margin-block: 32px;
 }
 .post__body blockquote {
   margin-inline: 0;
   padding-inline-start: 16px;
-  border-inline-start: 2px solid var(--color-line);
-  color: var(--brand-muted);
+  border-inline-start: 2px solid var(--color-border);
+  color: var(--color-text-muted);
 }
 .post__body code {
   font-family: var(--font-mono);
@@ -2453,7 +2453,7 @@ button {
 }
 .myReviews__item {
   padding: 16px 0;
-  border-top: 1px solid var(--color-line);
+  border-top: 1px solid var(--color-border);
 }
 .myReviews__item--pending {
   display: flex;
@@ -2476,7 +2476,7 @@ button {
 .myReviews__order {
   font-family: var(--font-mono);
   font-size: 12px;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   margin: 0;
 }
 .myReviews__order {
@@ -2488,8 +2488,8 @@ button {
   letter-spacing: 0.04em;
   padding: 2px 8px;
   border-radius: 999px;
-  border: 1px solid var(--color-line);
-  color: var(--brand-muted);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
 }
 .myReviews__body {
   margin: 8px 0 0;
@@ -2499,7 +2499,7 @@ button {
   font-size: 12px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   margin: 28px 0 0;
 }
 .myReviews__acts {
@@ -2508,13 +2508,13 @@ button {
   margin-top: 10px;
 }
 .myReviews__danger {
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
 }
 /* 관리자가 내린 후기의 설명. 버튼 대신 이것이 놓입니다. */
 .myReviews__locked {
   margin: 10px 0 0;
   font-size: 13px;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
 }
 .myReviews__form {
   margin-top: 14px;
@@ -2534,7 +2534,7 @@ button {
 .myReviews__ratings legend {
   font-family: var(--font-mono);
   font-size: 12px;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   padding: 0;
 }
 .myReviews__ratings label {
@@ -2558,10 +2558,10 @@ button {
 }
 .inquiryList__item {
   padding: 20px 0;
-  border-top: 1px solid var(--color-line);
+  border-top: 1px solid var(--color-border);
 }
 .inquiryList__item:last-child {
-  border-bottom: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-border);
 }
 .inquiryList__head {
   display: flex;
@@ -2581,19 +2581,19 @@ button {
   letter-spacing: 0.08em;
   padding: 3px 8px;
   border-radius: 999px;
-  border: 1px solid var(--color-line);
-  color: var(--brand-muted);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
   white-space: nowrap;
 }
 .inquiryList__badge[data-status='answered'] {
   /* 답이 달린 것이 한눈에 보여야 합니다 — 기다리는 쪽이 손님입니다. */
-  border-color: var(--brand-primary);
-  color: var(--brand-primary);
+  border-color: var(--color-text);
+  color: var(--color-text);
 }
 .inquiryList__date {
   display: block;
   margin-top: 6px;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   font-family: var(--font-mono);
   font-size: 12.5px;
   font-variant-numeric: tabular-nums;
@@ -2611,14 +2611,14 @@ button {
   margin-top: 14px;
   padding: 14px 16px;
   border-radius: 10px;
-  background: var(--brand-surface-alt);
+  background: var(--color-accent);
 }
 .inquiryList__answerLabel {
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   margin-bottom: 6px;
 }
 .inquiryList__answer p:last-child {
@@ -2635,10 +2635,10 @@ button {
 .inquiryForm textarea {
   width: 100%;
   padding: 12px 14px;
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-border);
   border-radius: 10px;
   background: transparent;
-  color: var(--color-ink);
+  color: var(--color-text);
   font-family: inherit;
   /* 16px 미만이면 iOS 가 초점을 받을 때 화면을 확대합니다. */
   font-size: 16px;
@@ -2646,7 +2646,7 @@ button {
   resize: vertical;
 }
 .inquiryForm textarea:focus-visible {
-  outline: 2px solid var(--brand-primary);
+  outline: 2px solid var(--color-text);
   outline-offset: 2px;
 }
 
@@ -2667,7 +2667,7 @@ button {
 .notify__body {
   margin-top: 6px;
   font-size: 14px;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
 }
 .notify__row {
   display: grid;
@@ -2695,13 +2695,13 @@ button {
   min-height: var(--size-tap-min);
   width: 100%;
   padding: 10px 14px;
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  background: var(--brand-surface);
-  color: var(--color-ink);
+  background: var(--color-bg);
+  color: var(--color-text);
 }
 .notify__field input::placeholder {
-  color: color-mix(in srgb, var(--brand-muted) 70%, transparent);
+  color: color-mix(in srgb, var(--color-text-muted) 70%, transparent);
 }
 .notify .cta {
   min-height: var(--size-tap-min);
@@ -2712,13 +2712,13 @@ button {
   font-weight: 500;
 }
 .notify__state[data-tone='bad'] {
-  color: var(--color-ink);
+  color: var(--color-text);
 }
 .notify__consent {
   margin-top: 12px;
   font-size: 12px;
   line-height: 1.6;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
 }
 /* ── 알림 신청의 활동 선택 ────────────────────────────────── */
 /*
@@ -2743,7 +2743,7 @@ button {
   margin-top: 4px;
   font-size: 12px;
   line-height: 1.6;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
 }
 .notify__acts-list {
   display: flex;
@@ -2762,7 +2762,7 @@ button {
   gap: 8px;
   min-height: var(--size-tap-min);
   padding-inline: 14px;
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-border);
   border-radius: 999px;
   font-size: 13.5px;
   cursor: pointer;
@@ -2771,11 +2771,11 @@ button {
   width: 16px;
   height: 16px;
   flex: none;
-  accent-color: var(--brand-primary);
+  accent-color: var(--color-text);
 }
 /* 고른 것이 한눈에 보여야 합니다 — 16px 체크 표시만으로는 훑기 어렵습니다. */
 .notify__act:has(input:checked) {
-  border-color: var(--color-ink);
+  border-color: var(--color-text);
 }
 
 /*
@@ -2786,7 +2786,7 @@ button {
   margin-top: 8px;
   font-size: 12px;
   line-height: 1.6;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
 }
 .notify__privacy--link {
   margin-top: 0;
@@ -2812,7 +2812,7 @@ button {
   /* 부모(.footer__col li a)가 flex 라 사이의 공백 텍스트 노드가 버려집니다 —
      그대로 두면 "Instagram@avora_labs" 로 붙어 나옵니다. */
   margin-inline-start: 6px;
-  color: var(--brand-muted-on-dark);
+  color: var(--color-text-muted-inverse);
 }
 
 /* 라벨은 placeholder 와 겹쳐 보이지만, 화면 낭독기에는 남아 있어야 합니다. */
@@ -2839,9 +2839,9 @@ button {
   margin-top: 14px;
   padding: 5px 12px;
   border-radius: 2px;
-  border-left: 3px solid var(--brand-accent-campaign);
-  background: var(--brand-primary);
-  color: var(--brand-surface);
+  border-left: 3px solid var(--color-campaign);
+  background: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -2866,7 +2866,7 @@ button {
   min-width: 64px;
   text-align: center;
   padding: 8px 6px;
-  border: 1px solid var(--color-line);
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   font-family: var(--font-mono);
   font-size: 11px;
@@ -2880,7 +2880,7 @@ button {
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.06em;
-  color: var(--brand-muted);
+  color: var(--color-text-muted);
   white-space: nowrap;
 }
 

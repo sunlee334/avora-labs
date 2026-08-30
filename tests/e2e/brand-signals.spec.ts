@@ -85,7 +85,7 @@ test.describe('브랜드 색', () => {
     await page.goto('/ko/');
     await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute(
       'content',
-      tokens.color.brand.surfaceAlt.value,
+      tokens.color.palette.aegean.value,
     );
   });
 });

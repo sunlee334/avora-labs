@@ -14,7 +14,7 @@ const OUT = resolve(root, 'src/styles/tokens.css');
 
 const tokens = JSON.parse(readFileSync(SRC, 'utf8'));
 
-/** "color.brand.primary" 같은 ref를 실제 값으로 풀어냅니다. */
+/** "color.palette.ink" 같은 ref를 실제 값으로 풀어냅니다. */
 function resolveRef(path) {
   const node = path.split('.').reduce((acc, key) => acc?.[key], tokens);
   if (!node) throw new Error(`토큰 참조를 찾을 수 없습니다: ${path}`);
@@ -25,12 +25,24 @@ const lines = [];
 const push = (name, value, comment) =>
   lines.push(`  --${name}: ${value};${comment ? ` /* ${comment} */` : ''}`);
 
-for (const [key, t] of Object.entries(tokens.color.brand)) {
-  push(`brand-${kebab(key)}`, t.value, `${t.name} — ${t.use}`);
+/*
+ * 두 계층으로 냅니다.
+ *
+ *   --paros-*   원시 팔레트. **색은 여기서만 정의됩니다.**
+ *   --color-*   역할. 화면 코드는 이것만 참조합니다.
+ *
+ * 왜 나누는가: `--paros-ink` 는 값 이름이라 색이 바뀌면 이름이 거짓말이 됩니다.
+ * `--color-text` 는 역할 이름이라 값이 바뀌어도 의미가 유지됩니다. 화면이
+ * 역할만 참조하면 팔레트 교체가 이 JSON 한 곳 수정으로 끝납니다.
+ */
+lines.push('  /* ── 원시 팔레트 — 색은 여기서만 정의합니다 ──────────────── */');
+for (const [key, t] of Object.entries(tokens.color.palette)) {
+  push(`paros-${kebab(key)}`, t.value, t.name);
 }
 lines.push('');
-for (const [key, t] of Object.entries(tokens.color.semantic)) {
-  push(`color-${kebab(key)}`, t.ref ? resolveRef(t.ref) : t.value);
+lines.push('  /* ── 역할 — 화면 코드는 이것만 참조합니다 ────────────────── */');
+for (const [key, t] of Object.entries(tokens.color.role)) {
+  push(`color-${kebab(key)}`, t.ref ? `var(--paros-${kebab(t.ref.split('.').pop())})` : t.value);
 }
 lines.push('');
 for (const [key, t] of Object.entries(tokens.font)) push(`font-${kebab(key)}`, t.value);
@@ -38,6 +50,8 @@ lines.push('');
 for (const [key, t] of Object.entries(tokens.size)) push(`size-${kebab(key)}`, t.value);
 lines.push('');
 for (const [key, t] of Object.entries(tokens.space)) push(`space-${kebab(key)}`, t.value);
+lines.push('');
+for (const [key, t] of Object.entries(tokens.radius)) push(`radius-${kebab(key)}`, t.value);
 lines.push('');
 for (const [key, t] of Object.entries(tokens.motion)) push(`motion-${kebab(key)}`, t.value);
 
@@ -58,4 +72,4 @@ ${lines.join('\n')}
 
 mkdirSync(dirname(OUT), { recursive: true });
 writeFileSync(OUT, css, 'utf8');
-console.log(`tokens → ${OUT.replace(root + '/', '')} (${Object.keys(tokens.color.brand).length} brand colors)`);
+console.log(`tokens → ${OUT.replace(root + '/', '')} (팔레트 ${Object.keys(tokens.color.palette).length} · 역할 ${Object.keys(tokens.color.role).length})`);

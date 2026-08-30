@@ -459,7 +459,7 @@ const FULFILLMENT_LABEL: Record<string, string> = {
        */
       body.admin, .admin *, .admin *::before, .admin *::after { box-sizing: border-box; }
       .admin h1, .admin h2, .admin h3, .admin p, .admin dl, .admin dd { margin: 0; }
-      .admin :focus-visible { outline: 2px solid var(--color-ink); outline-offset: 2px; }
+      .admin :focus-visible { outline: 2px solid var(--color-text); outline-offset: 2px; }
 
       .admin .sr-only {
         position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
@@ -471,7 +471,7 @@ const FULFILLMENT_LABEL: Record<string, string> = {
         /* 탭이 다섯입니다 — 좁은 화면에서는 줄을 바꿔야 헤더가 옆으로 밀지 않습니다. */
         flex-wrap: wrap;
         padding: 14px 20px;
-        background: var(--brand-primary); color: var(--brand-surface-alt);
+        background: var(--color-bg-inverse); color: var(--color-accent);
         position: sticky; top: 0; z-index: 5;
       }
       .admin .bar h1 { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
@@ -501,7 +501,7 @@ const FULFILLMENT_LABEL: Record<string, string> = {
         border: 0;
         border-radius: 8px;
         background: transparent;
-        color: var(--brand-muted);
+        color: var(--color-text-muted);
         font: inherit;
         font-size: 13.5px;
         cursor: pointer;
@@ -509,11 +509,11 @@ const FULFILLMENT_LABEL: Record<string, string> = {
         min-height: 40px;
       }
       .admin .tabs button:hover {
-        color: var(--brand-primary);
+        color: var(--color-text);
       }
       .admin .tabs button[aria-current='true'] {
-        background: var(--brand-surface-alt);
-        color: var(--brand-primary);
+        background: var(--color-accent);
+        color: var(--color-text);
         font-weight: 600;
       }
       .admin .tabs__count {
@@ -521,18 +521,18 @@ const FULFILLMENT_LABEL: Record<string, string> = {
         margin-inline-start: 6px;
         padding: 1px 7px;
         border-radius: 999px;
-        background: var(--brand-primary);
-        color: var(--brand-surface);
+        background: var(--color-bg-inverse);
+        color: var(--color-text-inverse);
         font-family: var(--font-mono);
         font-size: 11px;
       }
       .admin .detail__form textarea {
         width: 100%;
         padding: 10px 12px;
-        border: 1px solid var(--color-line);
+        border: 1px solid var(--color-border);
         border-radius: 8px;
         background: transparent;
-        color: var(--color-ink);
+        color: var(--color-text);
         font: inherit;
         font-size: 14px;
         line-height: 1.7;
@@ -544,10 +544,10 @@ const FULFILLMENT_LABEL: Record<string, string> = {
         overflow-wrap: anywhere;
       }
 
-      .admin .who { font-family: var(--font-mono); font-size: 12px; color: var(--brand-muted-on-dark); }
+      .admin .who { font-family: var(--font-mono); font-size: 12px; color: var(--color-text-muted-inverse); }
       .admin .bar button {
         min-height: 40px; padding-inline: 14px; border-radius: 999px;
-        border: 1px solid var(--color-line-inverse); background: transparent;
+        border: 1px solid var(--color-border-inverse); background: transparent;
         color: inherit; font: inherit; font-size: 13px; cursor: pointer;
       }
 
@@ -556,53 +556,53 @@ const FULFILLMENT_LABEL: Record<string, string> = {
       .admin .summary {
         margin: 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); margin-bottom: 22px; }
       .admin .summary div {
-        border: 1px solid var(--color-line); border-radius: 10px; padding: 14px 16px;
+        border: 1px solid var(--color-border); border-radius: 10px; padding: 14px 16px;
       }
-      .admin .summary dt { font-size: 12px; color: var(--brand-muted); }
+      .admin .summary dt { font-size: 12px; color: var(--color-text-muted); }
       .admin .summary dd { font-family: var(--font-mono); font-size: 22px; font-variant-numeric: tabular-nums; }
-      .admin .summary div[data-attention='true'] { border-color: var(--color-ink); border-width: 2px; }
+      .admin .summary div[data-attention='true'] { border-color: var(--color-text); border-width: 2px; }
 
       .admin .filters { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
       .admin .filters__search { flex: 1 1 240px; }
       .admin .filters input, .admin .filters select {
         font: inherit; font-size: 16px; min-height: 44px; width: 100%;
-        padding: 8px 12px; border: 1px solid var(--color-line); border-radius: 8px;
-        background: var(--brand-surface); color: var(--color-ink);
+        padding: 8px 12px; border: 1px solid var(--color-border); border-radius: 8px;
+        background: var(--color-bg); color: var(--color-text);
       }
       .admin .filters button {
         min-height: 44px; padding-inline: 22px; border: 0; border-radius: 8px;
-        background: var(--brand-primary); color: var(--brand-surface-alt);
+        background: var(--color-bg-inverse); color: var(--color-accent);
         font: inherit; font-weight: 600; cursor: pointer;
       }
 
-      .admin .state { color: var(--brand-muted); padding-block: 30px; font-size: 14px; }
+      .admin .state { color: var(--color-text-muted); padding-block: 30px; font-size: 14px; }
 
-      .admin .tableWrap { overflow-x: auto; border: 1px solid var(--color-line); border-radius: 10px; }
+      .admin .tableWrap { overflow-x: auto; border: 1px solid var(--color-border); border-radius: 10px; }
       .admin table { border-collapse: collapse; width: 100%; min-width: 760px; font-size: 14px; }
-      .admin th, .admin td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--color-line); }
+      .admin th, .admin td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--color-border); }
       .admin th {
         font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em;
-        text-transform: uppercase; color: var(--brand-muted); font-weight: 500; white-space: nowrap;
+        text-transform: uppercase; color: var(--color-text-muted); font-weight: 500; white-space: nowrap;
       }
       .admin .num { text-align: right; }
       .admin td.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; }
       .admin tbody tr { cursor: pointer; }
-      .admin tbody tr:hover { background: var(--brand-surface-alt); }
+      .admin tbody tr:hover { background: var(--color-accent); }
       .admin tbody tr:last-child td { border-bottom: 0; }
       .admin .oid { font-family: var(--font-mono); font-size: 12px; white-space: nowrap; }
-      .admin .when { font-family: var(--font-mono); font-size: 12px; color: var(--brand-muted); white-space: nowrap; }
+      .admin .when { font-family: var(--font-mono); font-size: 12px; color: var(--color-text-muted); white-space: nowrap; }
 
       .admin .pill {
         display: inline-block; padding: 3px 10px; border-radius: 999px;
-        font-size: 12px; border: 1px solid var(--color-line); white-space: nowrap;
+        font-size: 12px; border: 1px solid var(--color-border); white-space: nowrap;
       }
-      .admin .pill[data-tone='ok'] { background: var(--brand-primary); color: var(--brand-surface-alt); border-color: var(--brand-primary); }
-      .admin .pill[data-tone='warn'] { border-color: var(--color-ink); font-weight: 600; }
-      .admin .pill[data-tone='dim'] { color: var(--brand-muted); }
+      .admin .pill[data-tone='ok'] { background: var(--color-text); color: var(--color-accent); border-color: var(--color-text); }
+      .admin .pill[data-tone='warn'] { border-color: var(--color-text); font-weight: 600; }
+      .admin .pill[data-tone='dim'] { color: var(--color-text-muted); }
       .admin .detail__notice {
         margin: 0 0 12px;
         padding: 10px 12px;
-        border: 1px solid var(--color-ink);
+        border: 1px solid var(--color-text);
         border-radius: 6px;
         font-size: 13px;
         line-height: 1.6;
@@ -610,33 +610,33 @@ const FULFILLMENT_LABEL: Record<string, string> = {
 
       .admin .pager { display: flex; align-items: center; gap: 14px; justify-content: center; padding-block: 24px; }
       .admin .pager button {
-        min-height: 44px; padding-inline: 18px; border: 1px solid var(--color-line);
+        min-height: 44px; padding-inline: 18px; border: 1px solid var(--color-border);
         border-radius: 999px; background: transparent; font: inherit; cursor: pointer;
       }
       .admin .pager button:disabled { opacity: 0.4; cursor: default; }
-      .admin .pager span { font-family: var(--font-mono); font-size: 13px; color: var(--brand-muted); }
+      .admin .pager span { font-family: var(--font-mono); font-size: 13px; color: var(--color-text-muted); }
 
       .admin .detail {
         border: 0; border-radius: 14px; padding: 0; width: min(680px, 94vw);
-        max-height: 88svh; background: var(--brand-surface); color: var(--color-ink);
+        max-height: 88svh; background: var(--color-bg); color: var(--color-text);
       }
-      .admin .detail::backdrop { background: color-mix(in srgb, var(--color-ink) 40%, transparent); }
+      .admin .detail::backdrop { background: color-mix(in srgb, var(--color-text) 40%, transparent); }
       .admin .detail__head {
         display: flex; align-items: center; justify-content: space-between; gap: 12px;
-        padding: 16px 20px; border-bottom: 1px solid var(--color-line);
-        position: sticky; top: 0; background: var(--brand-surface);
+        padding: 16px 20px; border-bottom: 1px solid var(--color-border);
+        position: sticky; top: 0; background: var(--color-bg);
       }
       .admin .detail__head h2 { font-family: var(--font-mono); font-size: 14px; }
       .admin .detail__head button {
         min-width: 44px; min-height: 44px; border: 0; background: transparent;
-        font-size: 16px; cursor: pointer; color: var(--brand-muted);
+        font-size: 16px; cursor: pointer; color: var(--color-text-muted);
       }
       .admin .detail__facts { padding: 6px 20px; }
       .admin .detail__facts > div {
         display: grid; grid-template-columns: 92px 1fr; gap: 16px;
-        padding-block: 11px; border-bottom: 1px solid var(--color-line);
+        padding-block: 11px; border-bottom: 1px solid var(--color-border);
       }
-      .admin .detail__facts dt { font-size: 13px; color: var(--brand-muted); }
+      .admin .detail__facts dt { font-size: 13px; color: var(--color-text-muted); }
       .admin .detail__facts dd { font-size: 14px; }
       .admin .detail__form { padding: 20px; display: grid; gap: 14px; }
       /* display 를 지정한 요소는 hidden 속성(display:none)을 이깁니다.
@@ -645,19 +645,19 @@ const FULFILLMENT_LABEL: Record<string, string> = {
       .admin [hidden] { display: none !important; }
       .admin .detail__form h3 { font-size: 14px; font-weight: 600; }
       .admin .detail__form .row { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
-      .admin .detail__form label { display: grid; gap: 6px; font-size: 13px; color: var(--brand-muted); }
+      .admin .detail__form label { display: grid; gap: 6px; font-size: 13px; color: var(--color-text-muted); }
       .admin .detail__form input, .admin .detail__form select {
         font: inherit; font-size: 16px; min-height: 44px; padding: 8px 12px;
-        border: 1px solid var(--color-line); border-radius: 8px;
-        background: var(--brand-surface); color: var(--color-ink); width: 100%;
+        border: 1px solid var(--color-border); border-radius: 8px;
+        background: var(--color-bg); color: var(--color-text); width: 100%;
       }
       .admin .detail__form button[type='submit'] {
         min-height: 48px; border: 0; border-radius: 999px; margin-top: 4px;
-        background: var(--brand-primary); color: var(--brand-surface-alt);
+        background: var(--color-bg-inverse); color: var(--color-accent);
         font: inherit; font-weight: 600; cursor: pointer;
       }
       .admin .detail__error {
-        padding: 12px 14px; border: 1px solid var(--color-ink); border-radius: 8px; font-size: 13.5px;
+        padding: 12px 14px; border: 1px solid var(--color-text); border-radius: 8px; font-size: 13.5px;
       }
 
       @media (max-width: 560px) {
