@@ -103,14 +103,20 @@ test.describe('묶음 제목도 갈 수 있는 곳이다', () => {
     await expect(page).toHaveURL(/\/ko\/$/);
   });
 
-  test('자바스크립트가 없어도 링크는 살아 있다', async ({ browser }) => {
-    const ctx = await browser.newContext({ javaScriptEnabled: false });
-    const page = await ctx.newPage();
-    await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto('/ko/');
-    const href = await page.locator('.nav__group .nav__group-link').first().getAttribute('href');
-    expect(href, 'JS 없이는 갈 길이 없습니다').toMatch(/support/);
-    await ctx.close();
+  test('서버가 내려준 HTML 에 이미 링크가 있다', async ({ request }) => {
+    /*
+     * 브라우저를 띄우지 않고 HTML 을 직접 봅니다. "자바스크립트 없이도
+     * 동작한다" 는 결국 **서버가 내려준 마크업에 href 가 있는가** 이고,
+     * 그건 문자열로 확인하는 것이 가장 정확합니다.
+     *
+     * 처음에는 `javaScriptEnabled: false` 인 브라우저 컨텍스트를 따로 열었는데,
+     * 그 방식은 설정의 baseURL 을 물려받지 않아 CI 에서 위태롭습니다.
+     */
+    const html = await (await request.get('/ko/')).text();
+    const nav = html.slice(html.indexOf('nav__links'), html.indexOf('nav__right'));
+    expect(nav, '묶음 제목에 href 가 없습니다').toMatch(
+      /class="nav__group-link"[^>]*href="\/ko\/support\/"/,
+    );
   });
 });
 
