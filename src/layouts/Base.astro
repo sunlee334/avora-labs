@@ -9,6 +9,7 @@ import Footer from '../components/Footer.astro';
 import {
   ORIGIN,
   LOCALE_TAGS,
+  OG_LOCALES,
   DEFAULT_LOCALE,
   BUSINESS,
   WEB_ANALYTICS_TOKEN,
@@ -109,7 +110,8 @@ const xDefault = !wanted || wanted.includes(DEFAULT_LOCALE)
     {/* SNS 공유 */}
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={BUSINESS.brandName} />
-    <meta property="og:locale" content={LOCALE_TAGS[locale].replace('-', '_')} />
+    {/* hreflang 태그를 그대로 쓰면 안 됩니다 — site.ts 의 OG_LOCALES 주석 참조. */}
+    <meta property="og:locale" content={OG_LOCALES[locale]} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
