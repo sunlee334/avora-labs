@@ -190,6 +190,34 @@ function mountOne(form: HTMLFormElement): void {
         // 입력칸을 감췄으면 활동 선택도 함께 감춥니다 — 한쪽만 남으면
         // 아직 뭔가 더 해야 하는 화면처럼 보입니다.
         form.querySelector('.notify__acts')?.setAttribute('hidden', '');
+
+        /*
+         * 완료 문구로 초점을 옮깁니다.
+         *
+         * 방금 누른 제출 버튼이 `.notify__row` **안에** 있어서, 위에서 그것을
+         * 감추는 순간 초점이 갈 곳을 잃고 `<body>` 로 떨어집니다. 키보드만
+         * 쓰는 사람은 다음 Tab 에서 화면 맨 위 건너뛰기 링크로 돌아가게 되고,
+         * 방금 무슨 일이 일어났는지도 알 수 없습니다.
+         *
+         * 완료 문구에 초점을 두면 화면 낭독기가 그 문장을 읽고, 이어지는
+         * Tab 도 그 자리에서 계속됩니다. `tabindex="-1"` 은 초점을 받되
+         * Tab 순서에는 끼지 않게 합니다.
+         */
+        state.setAttribute('tabindex', '-1');
+        state.focus({ preventScroll: true });
+
+        /*
+         * 첫 화면의 버튼도 함께 거둡니다.
+         *
+         * 그 버튼의 문구는 폼의 제출 버튼과 같은 "출시 알림 받기" 입니다.
+         * 이미 신청한 사람에게 같은 말을 계속 권하면, 안 된 줄 알고 다시
+         * 누르게 됩니다 — 눌러도 완료 문구가 뜬 폼으로 갈 뿐입니다.
+         *
+         * 문구를 바꾸는 대신 거두는 이유: 새 문구는 5개 언어에 검수받지 않은
+         * 줄을 다섯 개 만듭니다. 그리고 할 일이 끝났으면 버튼도 할 일이
+         * 끝난 것입니다.
+         */
+        document.querySelector('[data-hero-cta]')?.setAttribute('hidden', '');
       } else {
         fail(res.status === 400 ? copy.invalid : copy.error);
       }

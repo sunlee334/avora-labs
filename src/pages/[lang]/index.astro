@@ -86,6 +86,51 @@ const h = t.home;
         크기로도 읽혀야 합니다.
       */}
       <p class="hero__promise">{h.hero.promise}</p>
+
+      {/*
+        첫 화면의 행동 지점.
+
+        ── 왜 필요한가 ──────────────────────────────────────────
+        폼은 히어로 바로 아래에 있지만, 실측하면 **iPhone 14(390×844)에서
+        제출 버튼이 884px** 입니다. 폴드가 844px 이므로 첫 화면에는 입력칸
+        테두리 한 줄만 걸칩니다. 데스크톱에서는 폼이 폴드 위에 들어오지만
+        세로로 긴 휴대폰에서는 그렇지 않았습니다.
+
+        ── 왜 바텀시트가 아닌가 ────────────────────────────────
+        지시서 B2 는 폼을 시트로 올리라고 했습니다. 그러면 첫 화면은
+        깨끗해지지만 **탭이 하나 늘어납니다** — 버튼을 누르고, 그다음
+        입력칸을 눌러야 합니다. 이 사이트의 유일한 목표가 이메일 한 줄을
+        받는 것이라 그 한 번이 비쌉니다. 자바스크립트가 없으면 폼에 닿을
+        수 없다는 것도 문제고, 시트 안의 문구는 답변엔진이 본문으로 보지
+        않을 수 있습니다.
+
+        여기서는 **이득만** 가져옵니다. 버튼은 첫 화면에 있고, 폼은 있던
+        자리에 그대로 있습니다.
+
+        ── 왜 링크인가 ─────────────────────────────────────────
+        `<a href="#notify">` 는 자바스크립트가 없어도 그 자리로 데려갑니다.
+        스크립트는 부드럽게 움직이고 입력칸에 초점을 잡아 주는 것까지만
+        얹습니다(src/lib/hero-cta.ts).
+
+        문구는 폼의 제출 버튼과 **같은 문자열**(notify.submit)을 씁니다.
+        같은 약속이므로 둘이 갈라지면 안 되고, 새 문구를 만들면 5개 언어에
+        검수받지 않은 줄이 다섯 개 생깁니다.
+
+        **다만 이 화면에는 같은 이름을 가진 조작점이 셋입니다** — 이 링크와,
+        폼이 둘(첫 화면·검증단 섹션)이라 제출 버튼도 둘입니다. 스크린리더는
+        링크와 버튼을 역할로 가르지만, 두 제출 버튼끼리는 그것으로 갈리지
+        않습니다. 음성으로 조작하는 사람에게는 후보가 셋으로 잡힙니다.
+
+        지금은 그대로 둡니다. 문구를 새로 만들면 검수받지 않은 번역이 늘고,
+        `aria-label` 로 덧붙이면 화면에 보이는 글자와 읽히는 이름이 달라져
+        음성 조작이 오히려 어려워집니다(WCAG 2.5.3). 폼을 하나로 줄이는 것이
+        올바른 해결이고, 그건 이 변경의 범위 밖입니다.
+      */}
+      {!CAN_ORDER && (
+        <a class="btn hero__cta" href="#notify" data-hero-cta>
+          {t.notify.submit}
+        </a>
+      )}
     </div>
   </section>
 
@@ -107,7 +152,7 @@ const h = t.home;
   */}
   {
     !CAN_ORDER && (
-      <section class="section wrap heroNotify" data-section="hero_notify">
+      <section class="section wrap heroNotify" id="notify" data-section="hero_notify">
         <p class="product-hero__window">{t.product.hero.launchWindow}</p>
         <LaunchNotify
           locale={locale}
@@ -329,6 +374,7 @@ const h = t.home;
 <script>
   import { mountLaunchNotify } from '../../lib/launch-notify';
   import { mountSectionView } from '../../lib/section-view';
+  import { mountHeroCta } from '../../lib/hero-cta';
 
   // 홈에는 폼이 둘입니다 — 첫 화면과 검증단 섹션. mountLaunchNotify 가
   // querySelectorAll 로 둘 다 연결합니다.
@@ -336,4 +382,7 @@ const h = t.home;
 
   // 어느 섹션까지 읽히는가. 계측이 꺼져 있으면 아무것도 하지 않습니다.
   mountSectionView();
+
+  // 첫 화면의 버튼 → 폼. 없으면 링크가 그대로 동작합니다.
+  mountHeroCta();
 </script>

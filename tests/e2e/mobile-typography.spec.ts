@@ -135,3 +135,30 @@ test.describe('타임라인', () => {
     expect(text, '아직 없는 집계 수치가 적혀 있습니다').not.toMatch(/\d+점|\d+명/);
   });
 });
+
+test.describe('첫 화면의 버튼', () => {
+  test('갈 곳이 없으면 버튼도 없다', async ({ page }) => {
+    /*
+     * 버튼은 신청 폼으로 데려가는 일만 합니다. 판매가 시작되면 홈에서 폼이
+     * 사라지는데, 그때 버튼이 남아 있으면 **아무 데도 가지 않는 버튼** 이
+     * 첫 화면 한가운데에 놓입니다. 이 기능의 가장 나쁜 실패 방식입니다.
+     *
+     * 두 모드에서 함께 도는 검사라, 폼이 있으면 버튼도 있고 없으면 없다는
+     * 관계만 봅니다.
+     */
+    await page.goto('/ko/');
+    const form = await page.locator('#notify').count();
+    const cta = await page.locator('.hero__cta').count();
+    expect(cta, form ? '폼은 있는데 버튼이 없습니다' : '폼이 없는데 버튼이 있습니다').toBe(form);
+  });
+
+  test('버튼이 있으면 가리키는 곳이 실제로 있다', async ({ page }) => {
+    await page.goto('/ko/');
+    const cta = page.locator('.hero__cta');
+    if ((await cta.count()) === 0) return;
+
+    const href = await cta.getAttribute('href');
+    expect(href, 'href 가 조각 링크가 아닙니다').toMatch(/^#/);
+    await expect(page.locator(href!), `${href} 가 화면에 없습니다`).toHaveCount(1);
+  });
+});
