@@ -23,6 +23,7 @@
     "submit": "Notify me at launch",
     "sending": "Signing up…",
     "done": "You're on the list. We'll write to this address.",
+    "waiting": "{n} people are waiting so far.",
     "invalid": "Please check the email address.",
     "error": "That didn't go through. Please try again in a moment.",
     "fallback": "If it keeps failing, write to {email} and we will add you by hand.",
@@ -60,13 +61,21 @@
     "privacy": {
       "summary": "We ask for your email address, and the activity you mostly do if you choose to tell us. We use them only to tell you about the panel results, the funding launch and the release, and if you unsubscribe you come off the list at once. We keep the address so that we do not write to it again.",
       "link": "Read the privacy policy"
+    },
+    "night": {
+      "label": "I also agree to receive messages at night, 21:00–08:00. (optional)",
+      "body": "So we can tell you at the moment something opens — a funding launch at midnight, for instance."
     }
   },
   "home": {
     "meta": {
-      "title": "PAROS — For every movement.",
+      "title": "PAROS — active lifestyle sun care | AVORA LABS",
       "description": "PAROS is an active lifestyle skincare brand where athletic energy meets gentle care. The formula for our first product, Daily Sunscreen SPF50+ / PA++++, is chosen by dozens of runners in a blind comparison. Launching in the first half of 2027.",
       "ogAlt": "Silhouette of a runner against a low sun"
+    },
+    "notice": {
+      "label": "Get notified when funding opens",
+      "body": "We'll tell you the moment it starts."
     },
     "hero": {
       "imageAlt": "Silhouette of a runner on a rocky trail against a low sun",
@@ -158,6 +167,36 @@
       "note": "We publish the tally as it comes out. We use the formula with the highest score, not the one we like. Recruiting opens in October 2026.",
       "cta": "Apply to the test panel"
     },
+    "timeline": {
+      "kicker": "What comes next",
+      "steps": [
+        {
+          "when": "Oct 2026",
+          "what": "Test panel recruiting",
+          "state": "in progress"
+        },
+        {
+          "when": "Nov 2026",
+          "what": "Blind evaluation",
+          "state": "planned"
+        },
+        {
+          "when": "Dec 2026",
+          "what": "Tally published · formula fixed",
+          "state": "planned"
+        },
+        {
+          "when": "Feb 2027",
+          "what": "Funding opens",
+          "state": "planned"
+        },
+        {
+          "when": "H1 2027",
+          "what": "Launch",
+          "state": "planned"
+        }
+      ]
+    },
     "product": {
       "kicker": "First Product",
       "name": "Daily Sunscreen",
@@ -177,7 +216,7 @@
   },
   "product": {
     "meta": {
-      "title": "Daily Sunscreen SPF50+ / PA++++ — PAROS",
+      "title": "PAROS Daily Sunscreen SPF50+ / PA++++ — active lifestyle sun care",
       "description": "PAROS Daily Sunscreen. SPF50+ / PA++++ UV protection, a functional cosmetic. The formula is chosen by people who actually run, comparing samples blind with the manufacturer hidden. Launching in the first half of 2027.",
       "ogAlt": "PAROS Daily Sunscreen on a bright surface"
     },
@@ -457,6 +496,7 @@
       "heading": "Policies"
     },
     "business": {
+      "summary": "Business details",
       "registrationNumber": "Business registration no.",
       "mailOrderNumber": "Mail-order sales no.",
       "email": "Email",
@@ -577,6 +617,91 @@
       "cookies": {
         "heading": "Cookies",
         "body": "We use Google Analytics to count which screens are opened, how visitors arrived, and whether they went on to sign up. It sets cookies in your browser (values beginning with _ga) so that one visitor’s movements are counted together. What it keeps is the referring path, the screens viewed, the device and browser type, and an approximate region. We do not send names, email addresses or postal addresses to this tool.\n\nYou can turn it off at any time. Block cookies in your browser settings, or install the Google Analytics opt-out add-on that Google publishes. Blocking it does not affect your use of the site in any way."
+      },
+      "rights": {
+        "heading": "Your rights and how to exercise them",
+        "body": "You may ask us at any time to show, correct, delete, or stop processing your personal data. Tell us at the contact below and we will act without delay and let you know the result.\n\nEvery launch-notification and test-panel email carries an unsubscribe link that works immediately. We do not ask you to identify yourself for that.\n\nIf a legal representative or an authorised person asks on your behalf, we need a document showing that authority."
+      },
+      "entrust": {
+        "heading": "Processing entrusted to others, and transfer abroad",
+        "body": "We entrust processing to the companies below. Our contracts with them require that personal data be handled safely.",
+        "columns": {
+          "company": "Company",
+          "work": "What they do",
+          "country": "Country",
+          "retention": "Kept for"
+        },
+        "rows": [
+          {
+            "company": "Cloudflare, Inc.",
+            "work": "Running the site and storing sign-up lists",
+            "country": "United States",
+            "retention": "Until you close your account or unsubscribe"
+          },
+          {
+            "company": "Google LLC",
+            "work": "Visit statistics (Google Analytics)",
+            "country": "United States",
+            "retention": "14 months"
+          }
+        ],
+        "note": "These companies keep their servers outside Korea, so your data moves to those countries the moment you use the site. You may decline by not using the service, though that means you cannot sign up or send an enquiry. Blocking cookies in your browser stops the visit statistics."
+      },
+      "destroy": {
+        "heading": "How we destroy personal data",
+        "body": "Once the retention period ends or the purpose is finished, we destroy the data without delay.\n\nElectronic files are erased permanently by a method that cannot be reversed. Anything printed on paper is shredded or incinerated.\n\nWhere another law requires us to keep something, we store it separately for that period and destroy it afterwards."
+      },
+      "safety": {
+        "heading": "How we keep it safe",
+        "body": "As few people as possible handle personal data, and access is limited to what the work requires.\n\nEverything sent between you and us is encrypted (HTTPS). The key used for unsubscribing is a random value that cannot be guessed.\n\nThis site neither receives nor stores payment details. They are handled only inside the payment provider’s own screens."
+      },
+      "officer": {
+        "heading": "Data protection officer",
+        "body": "For questions, complaints, or help with harm relating to personal data, contact us below. We will answer without delay.",
+        "columns": {
+          "role": "Item",
+          "value": "Detail"
+        },
+        "rows": [
+          {
+            "role": "Officer",
+            "value": "{representative}"
+          },
+          {
+            "role": "Contact",
+            "value": "{email}"
+          }
+        ]
+      },
+      "remedy": {
+        "heading": "Where to go if your rights are harmed",
+        "body": "If you need help with a privacy matter — including when our answer did not satisfy you — these Korean bodies can advise you.",
+        "columns": {
+          "org": "Body",
+          "contact": "Contact"
+        },
+        "rows": [
+          {
+            "org": "Personal Information Dispute Mediation Committee",
+            "contact": "+82-1833-6972 · www.kopico.go.kr"
+          },
+          {
+            "org": "Privacy Infringement Report Centre",
+            "contact": "+82-118 · privacy.kisa.or.kr"
+          },
+          {
+            "org": "Supreme Prosecutors’ Office, Cybercrime",
+            "contact": "+82-1301 · www.spo.go.kr"
+          },
+          {
+            "org": "National Police Agency, Cyber Bureau",
+            "contact": "+82-182 · ecrm.police.go.kr"
+          }
+        ]
+      },
+      "changes": {
+        "heading": "Changes to this policy",
+        "body": "When this policy changes, we post what changes and when it takes effect on this page beforehand.\n\nFor an important change — such as collecting something new — we give notice 30 days before it takes effect, and ask for your consent again where that is needed."
       }
     },
     "terms": {
@@ -1168,6 +1293,10 @@
       "marketing": {
         "label": "I agree to receive marketing messages. (optional)",
         "body": "You can unsubscribe at any time using the link in the emails we send."
+      },
+      "night": {
+        "label": "I also agree to receive messages at night, 21:00–08:00. (optional)",
+        "body": "So we can tell you at the moment something opens — a funding launch at midnight, for instance."
       },
       "submit": "Send application",
       "sending": "Sending…",

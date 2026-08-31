@@ -37,14 +37,34 @@ const h = t.home;
   ]}
 >
   {/* Hero */}
-  <section class="hero">
+  <section class="hero" data-section="hero">
     <div class="hero__media">
+      {/*
+        `sizes` 가 `100vw` 가 아닌 이유.
+
+        이 사진은 가로 1600×1049(비율 1.53)인데, 휴대폰에서 히어로는 세로로
+        깁니다(390×579, 비율 0.67). `object-fit: cover` 는 **높이를 채우려고**
+        사진을 키우므로, 화면에 390px 만 보여도 브라우저가 그려야 하는 사진의
+        실제 폭은 1600 × (579/1049) ≈ 883px 입니다. 화면 폭의 2.3배입니다.
+
+        `100vw` 라고 적으면 브라우저는 390px 만 있으면 된다고 믿고 780w 를
+        받아 2.3배로 늘려 그립니다. **첫 화면에서 가장 큰 이미지가 모든
+        휴대폰에서 뭉개져 보입니다.**
+
+        아래 값은 각 구간에서 필요한 배율입니다:
+          390×579  → 1.53 × (579/390) = 2.27  →  240vw
+          700×635  → 1.53 × (635/700) = 1.38  →  150vw
+          970px 부터는 폭이 높이를 덮으므로 100vw 가 맞습니다.
+
+        휴대폰이 780w(AVIF 11KB) 대신 1600w(32KB)를 받게 됩니다. 21KB 를 더
+        쓰고 첫 화면을 선명하게 가져가는 쪽을 택했습니다.
+      */}
       <Picture
         src={heroImage}
         alt={h.hero.imageAlt}
         formats={['avif', 'webp']}
         widths={[390, 780, 1200, 1600]}
-        sizes="100vw"
+        sizes="(max-width: 700px) 240vw, (max-width: 970px) 150vw, 100vw"
         quality={70}
         loading="eager"
         fetchpriority="high"
@@ -87,7 +107,7 @@ const h = t.home;
   */}
   {
     !CAN_ORDER && (
-      <section class="section wrap heroNotify">
+      <section class="section wrap heroNotify" data-section="hero_notify">
         <p class="product-hero__window">{t.product.hero.launchWindow}</p>
         <LaunchNotify
           locale={locale}
@@ -125,7 +145,7 @@ const h = t.home;
     그래서 근거를 제품이 아니라 **고르는 과정** 에 둡니다. 이 두 섹션이
     그 근거층이고, 스펙(First Product) 바로 위에 있어야 위계가 맞습니다.
   */}
-  <section class="section section--alt wrap rise">
+  <section class="section section--alt wrap rise" data-section="the_choice">
     <p class="kicker">{h.choice.kicker}</p>
     <h2 class="display display--tight">{h.choice.lead}</h2>
     <p class="body" style="margin-top: 26px">{h.choice.body}</p>
@@ -139,7 +159,7 @@ const h = t.home;
     알림 신청 페이지" 로 고정하라고 합니다. 10월 검증단 모집이 시작되면 그
     링크를 이 자리로 바로 보낼 수 있어야 합니다.
   */}
-  <section class="section wrap rise" id="panel">
+  <section class="section wrap rise" id="panel" data-section="test_panel">
     <p class="kicker">{h.panel.kicker}</p>
     <h2 class="display display--tight">{h.panel.lead}</h2>
     <p class="body" style="margin-top: 26px">{h.panel.body}</p>
@@ -199,13 +219,38 @@ const h = t.home;
   </section>
 
   {/*
+    타임라인.
+
+    이 브랜드의 자산은 시간에 따라 쌓이는 집계입니다. 그런데 한 번 읽고
+    이메일을 남기면 끝이라 다시 올 이유가 없었습니다. 무엇이 언제 일어나는지
+    적어 두면, 12월 집계 공개를 기다릴 이유가 생깁니다.
+
+    **숫자를 지어내지 않습니다.** 여기 있는 것은 일정뿐이고, 집계 결과는
+    실제 데이터가 나온 뒤에 붙습니다(C4 의 집계판).
+  */}
+  <section class="section wrap rise" data-section="timeline">
+    <p class="kicker">{h.timeline.kicker}</p>
+    <ol class="timeline">
+      {
+        h.timeline.steps.map((step, i) => (
+          <li class={i === 0 ? 'timeline__now' : undefined}>
+            <span class="timeline__when">{step.when}</span>
+            <span class="timeline__what">{step.what}</span>
+            <span class="timeline__state">{step.state}</span>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  {/*
     First Product — 3차 스펙
 
     폼이 앞 섹션으로 옮겨가면서 여기는 제품 페이지로 가는 길 하나만
     남았습니다. 그래서 "제품 보기" 를 보조 형태(cta--ghost)로 내릴 이유가
     없어졌습니다 — 이 섹션에서 유일하게 할 수 있는 일입니다.
   */}
-  <section class="section section--alt wrap rise">
+  <section class="section section--alt wrap rise" data-section="first_product">
     <p class="kicker">{h.product.kicker}</p>
     <h2 class="display display--tight">{h.product.name}</h2>
     <p class="body" style="margin-top: 14px">{h.product.spec}</p>
@@ -232,7 +277,7 @@ const h = t.home;
   </figure>
 
   {/* The Journey — 5단계 여정 */}
-  <section class="section wrap rise">
+  <section class="section wrap rise" data-section="the_journey">
     <p class="kicker">{h.journey.kicker}</p>
     <h2 class="display display--tight">{h.journey.lead}</h2>
     <ol class="journey">
@@ -251,7 +296,7 @@ const h = t.home;
   </section>
 
   {/* Origin — 여기부터 브랜드 서사입니다 */}
-  <section class="section section--alt wrap rise" id="story">
+  <section class="section section--alt wrap rise" id="story" data-section="origin">
     <p class="kicker">{h.origin.kicker}</p>
     <p class="display">
       {h.origin.statementBefore}<span class="mark">{h.origin.statementEmphasis}</span>{
@@ -261,7 +306,7 @@ const h = t.home;
   </section>
 
   {/* The Question */}
-  <section class="section wrap rise">
+  <section class="section wrap rise" data-section="the_question">
     <p class="kicker">{h.question.kicker}</p>
     <blockquote class="quote">{h.question.quote}</blockquote>
     <p class="body" style="margin-top: 28px">{h.question.body}</p>
@@ -273,7 +318,7 @@ const h = t.home;
     팔레트 A 에는 캠페인 컬러가 없습니다. 밝은 지반이 여섯 섹션 이어지다
     여기 한 곳만 뒤집히는 대비가 "브랜드의 에너지 버튼" 역할을 대신합니다.
   */}
-  <section class="section section--dark wrap rise">
+  <section class="section section--dark wrap rise" data-section="philosophy">
     <p class="kicker">{h.philosophy.kicker}</p>
     <blockquote class="quote">{h.philosophy.quote}</blockquote>
     <p class="body" style="margin-top: 28px">{h.philosophy.body}</p>
@@ -283,8 +328,12 @@ const h = t.home;
 
 <script>
   import { mountLaunchNotify } from '../../lib/launch-notify';
+  import { mountSectionView } from '../../lib/section-view';
 
   // 홈에는 폼이 둘입니다 — 첫 화면과 검증단 섹션. mountLaunchNotify 가
   // querySelectorAll 로 둘 다 연결합니다.
   mountLaunchNotify();
+
+  // 어느 섹션까지 읽히는가. 계측이 꺼져 있으면 아무것도 하지 않습니다.
+  mountSectionView();
 </script>

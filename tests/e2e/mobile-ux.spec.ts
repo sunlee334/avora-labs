@@ -84,28 +84,49 @@ test.describe('모바일 레이아웃', () => {
     });
   }
 
-  /** 화면 하나의 탭 영역을 모두 재서 44px 미만인 것을 모읍니다. */
+  /**
+   * 화면 하나의 탭 영역을 모두 재서 44px 미만인 것을 모읍니다.
+   *
+   * ── 왜 움직임을 끄고 재는가 ─────────────────────────────────
+   * `.rise` 는 `translateY(16px)` 로 떠오릅니다. 그 변형이 걸려 있는 동안
+   * 사각형은 행렬 계산을 거쳐 나오는데, 거기서 소수점 오차가 생깁니다 —
+   * `min-height: 44px` 인 버튼이 **43.99993896484375** 로 나왔습니다.
+   *
+   * 화면은 멀쩡한데 검사만 실패하고, 어느 언어·어느 페이지가 걸릴지 매번
+   * 달라져서 진짜 결함처럼 보입니다. 애니메이션이 멈추기를 기다리는 것으로는
+   * 안 됐습니다 — 그 뒤에 새로 시작하는 것이 있습니다.
+   *
+   * `prefers-reduced-motion` 을 켜면 이 사이트는 `.rise` 의 변형을 아예
+   * 걸지 않습니다(global.css). 실제 사용자 중에도 이 설정을 켠 사람이 있고,
+   * 그 사람이 보는 화면이 바로 이 레이아웃입니다.
+   *
+   * 요소마다 왕복하지 않고 페이지 안에서 한 번에 훑습니다.
+   */
   async function tooSmallTargets(page: import('@playwright/test').Page): Promise<string[]> {
-    const targets = page.locator('a[href], button');
-    const count = await targets.count();
-    expect(count).toBeGreaterThan(0);
-
-    const tooSmall: string[] = [];
-    for (let i = 0; i < count; i++) {
-      const el = targets.nth(i);
-      if (!(await el.isVisible())) continue;
-      const box = await el.boundingBox();
-      if (!box) continue;
-      if (box.height < 44 || box.width < 44) {
-        const text = ((await el.textContent()) || '').trim().slice(0, 24);
-        tooSmall.push(`"${text}" ${Math.round(box.width)}×${Math.round(box.height)}`);
+    const result = await page.evaluate(() => {
+      const out: string[] = [];
+      const all = document.querySelectorAll<HTMLElement>('a[href], button');
+      for (const el of all) {
+        const cs = getComputedStyle(el);
+        // 숨은 것은 손가락이 닿지 않습니다. 투명도는 등장 연출이라 제외하지 않습니다.
+        if (cs.display === 'none' || cs.visibility === 'hidden') continue;
+        const r = el.getBoundingClientRect();
+        if (r.width === 0 && r.height === 0) continue;
+        if (r.height < 44 || r.width < 44) {
+          const text = (el.textContent ?? '').trim().slice(0, 24);
+          out.push(`"${text}" ${Math.round(r.width)}×${Math.round(r.height)}`);
+        }
       }
-    }
-    return tooSmall;
+      return { count: all.length, out };
+    });
+    expect(result.count).toBeGreaterThan(0);
+    return result.out;
   }
 
   for (const path of [...PAGES, ...POST_PAGES, ...COMMERCE_PAGES]) {
     test(`${path} — 탭 가능한 요소가 최소 44×44px`, async ({ page }) => {
+      // 등장 변형을 끕니다 — tooSmallTargets 의 주석을 보세요.
+      await page.emulateMedia({ reducedMotion: 'reduce' });
       await page.setViewportSize({ width: 390, height: 844 });
       await page.goto(path);
       const tooSmall = await tooSmallTargets(page);

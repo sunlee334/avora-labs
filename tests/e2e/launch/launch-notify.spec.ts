@@ -52,9 +52,17 @@ test.describe('출시 알림 신청', () => {
   });
 
   test('잘못된 주소는 서버까지 가지 않는다', async ({ page }) => {
+    /*
+     * 보내는 요청만 셉니다.
+     *
+     * 처음에는 `/api/launch-notify` 로 시작하는 요청을 전부 셌는데, 같은
+     * 화면이 신청자 수를 읽으려고 `/api/launch-notify/count` 를 **GET** 으로
+     * 부릅니다. 그건 이 검사가 막으려는 것이 아닙니다 — 여기서 지키는 것은
+     * "형식이 틀린 주소를 서버로 **제출** 하지 않는다" 입니다.
+     */
     const calls: string[] = [];
     page.on('request', (r) => {
-      if (r.url().includes('/api/launch-notify')) calls.push(r.url());
+      if (r.method() === 'POST' && r.url().includes('/api/launch-notify')) calls.push(r.url());
     });
     await page.goto('/ko/product');
     await fill(page, 'not-an-email');

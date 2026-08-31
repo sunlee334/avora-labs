@@ -94,6 +94,7 @@ export function mountPanelForm(): void {
       region: data.get('region'),
       consent: data.get('consent') === 'on',
       marketing: data.get('marketing') === 'on',
+      night: data.get('night') === 'on',
       locale: el.dataset.locale,
       // 봇 판별용 — 화면에 없는 칸과 화면이 뜬 시각(worker/spam.ts).
       website: String(data.get('website') ?? ''),

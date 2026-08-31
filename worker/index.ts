@@ -43,12 +43,14 @@ import {
 import { canonicalHostRedirect } from './canonical-host';
 import { overWriteLimit, tooManyRequests, type RateLimitEnv } from './rate-limit';
 import { looksAutomated, tooFast } from './spam';
+import commerceConfig from '../src/config/commerce.json';
 import { jsonOnError } from './errors';
 import {
   normalizeActivities,
   normalizeEmail,
   signup,
   unsubscribe,
+  activeCount,
   listSignups,
   signupsBySource,
 } from './launch-notify';
@@ -179,13 +181,15 @@ const WRITE_ROUTES: Record<string, string> = {
   '/api/panel': 'panel',
 };
 
-function json(body: unknown, status = 200): Response {
+function json(body: unknown, status = 200, extra?: Record<string, string>): Response {
   return new Response(JSON.stringify(body), {
     status,
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
-      // 주문 정보는 절대 캐시하지 않습니다.
+      // 주문 정보는 절대 캐시하지 않습니다. 캐시해도 되는 응답만
+      // extra 로 덮어씁니다 — 기본이 안전한 쪽입니다.
       'Cache-Control': 'no-store',
+      ...extra,
     },
   });
 }
@@ -745,6 +749,7 @@ async function handleLaunchNotify(request: Request, env: Env): Promise<Response>
     // 봇 판별용. 화면에는 없는 칸과 화면이 뜬 뒤 걸린 시간입니다(worker/spam.ts).
     website?: unknown;
     elapsedMs?: unknown;
+    night?: unknown;
   };
   try {
     body = (await request.json()) as typeof body;
@@ -774,7 +779,12 @@ async function handleLaunchNotify(request: Request, env: Env): Promise<Response>
    */
   const activities = normalizeActivities(body.activities);
 
-  await signup(env.DB, { email, locale, source, activities }, new Date());
+  /*
+   * 야간 수신 동의는 **별도 항목** 입니다. 참이 아닌 값은 전부 미동의로
+   * 봅니다 — 'true' 문자열이나 1 을 동의로 읽으면 의도치 않은 값 하나가
+   * 야간 광고 수신 동의로 둔갑합니다.
+   */
+  await signup(env.DB, { email, locale, source, activities, night: body.night === true }, new Date());
   // 중복이어도 201 입니다 — 신청한 사람 입장에서는 성공했습니다.
   return json({ ok: true }, 201);
 }
@@ -844,12 +854,41 @@ async function handlePanelApply(request: Request, env: Env): Promise<Response> {
       // 선택 항목입니다. true 가 아니면 전부 미동의로 봅니다 — 'true' 문자열이나
       // 1 을 동의로 읽으면 의도치 않은 값 하나가 광고 수신 동의로 둔갑합니다.
       marketing: body.marketing === true,
+      night: body.night === true,
     },
     new Date(),
   );
 
   // 다시 낸 경우에도 201 입니다 — 지원자 입장에서는 성공했습니다.
   return json({ ok: true }, 201);
+}
+
+/**
+ * 지금까지 몇 명이 신청했는가 — 공개.
+ *
+ * ── 왜 임계값이 있는가 ──────────────────────────────────────
+ * 숫자가 적을 때는 오히려 역효과입니다. "12명이 신청했습니다" 는 아무도
+ * 관심이 없다는 뜻으로 읽힙니다. 그래서 설정한 인원을 넘기 전까지는 숫자를
+ * 내보내지 않습니다 — `count: null` 을 주고 화면은 아무것도 그리지 않습니다.
+ *
+ * **숫자를 지어내지 않습니다.** 실제 명단에서 셉니다. 임계값만 설정이고
+ * 값은 언제나 사실입니다.
+ *
+ * 해지한 사람은 빼고 셉니다. 그 사람은 더 이상 기다리는 사람이 아닙니다.
+ */
+async function handleSignupCount(env: Env): Promise<Response> {
+  if (!env.DB) return json({ count: null });
+
+  const n = await activeCount(env.DB);
+  const minimum = commerceConfig.signupCounter.minimum;
+
+  return json(
+    { count: n >= minimum ? n : null },
+    200,
+    // 매 요청마다 세면 D1 을 헛되이 두드립니다. 5분이면 화면에 보이는
+    // 숫자가 크게 뒤처지지 않으면서 부하도 없습니다.
+    { 'Cache-Control': 'public, max-age=300' },
+  );
 }
 
 /**
@@ -1547,6 +1586,9 @@ async function route(request: Request, env: Env, ctx: ExecutionContext): Promise
   }
   if (pathname === '/api/launch-notify/unsubscribe' && request.method === 'GET') {
     return handleLaunchUnsubscribe(request, env);
+  }
+  if (pathname === '/api/launch-notify/count' && request.method === 'GET') {
+    return handleSignupCount(env);
   }
 
   // 검증단 지원 — 10월 크루 접촉 때 링크를 걸 자리(/panel)가 여기로 보냅니다.

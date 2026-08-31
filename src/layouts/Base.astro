@@ -4,6 +4,7 @@
  */
 import '../styles/global.css';
 import Nav from '../components/Nav.astro';
+import NoticeBanner from '../components/NoticeBanner.astro';
 import Footer from '../components/Footer.astro';
 import {
   ORIGIN,
@@ -245,6 +246,8 @@ const xDefault = !wanted || wanted.includes(DEFAULT_LOCALE)
 
   <body>
     <a class="skip-link" href="#main">{t.a11y.skipToContent}</a>
+    {/* 공지 배너는 헤더 위입니다 — 설정이 꺼져 있으면 아무것도 그리지 않습니다. */}
+    <NoticeBanner locale={locale} />
     <Nav locale={locale} path={path} />
     {/*
       건너뛰기 링크의 착지점.

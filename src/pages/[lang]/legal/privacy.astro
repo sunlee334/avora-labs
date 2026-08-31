@@ -2,10 +2,17 @@
 /**
  * 개인정보처리방침.
  *
- * 수집 항목 표는 코드가 실제로 받는 것을 적었으므로 제가 채웠습니다.
- * 반면 고지 사항 전문은 사업자 정보와 법적 판단이 필요한 문서라 비워 둡니다 —
- * 그럴듯한 문구를 채워 넣으면 확인되지 않은 약속이 게시되는 셈입니다.
- * 문안이 확정되면 src/i18n/{언어}.json 의 legal.privacy 아래에 넣으면 됩니다.
+ * 수집 항목 표는 코드가 실제로 받는 것을 적었으므로 코드에서 만듭니다.
+ *
+ * 법정 기재사항(「개인정보 보호법」 제30조 1항)은 아래 절들이 채웁니다. 문구는
+ * src/i18n/{언어}.json 의 legal.privacy 아래에 있습니다.
+ *
+ * **Google Analytics 를 붙인 순간 위탁과 국외 이전이 선택이 아니라 필수가
+ * 됐습니다.** 데이터가 Google LLC(미국)로 나가기 때문입니다. 측정 도구를 빼면
+ * 그 절도 함께 지워야 합니다 — 하지 않는 위탁을 적어 두는 것도 틀린 고지입니다.
+ *
+ * 보호책임자는 지금 대표자로 두었습니다. 따로 지정하시면 BUSINESS 가 아니라
+ * 그 사람의 이름과 연락처로 바꾸세요.
  */
 import Base from '../../../layouts/Base.astro';
 import { BUSINESS, LOCALES, type Locale } from '../../../config/site';
@@ -153,6 +160,118 @@ const rows = [
       ))
     }
 
-    <p class="cart__notice" style="margin-top: 36px">{c.pending}</p>
+    {/*
+      여기부터 법정 기재사항입니다(「개인정보 보호법」 제30조 1항).
+
+      순서는 법이 정한 순서가 아니라 **읽는 사람에게 쓸모 있는 순서** 입니다 —
+      내가 무엇을 할 수 있는가(권리) → 내 정보가 어디까지 가는가(위탁·국외
+      이전) → 언제 사라지는가(파기) → 그동안 어떻게 지키는가(안전성) →
+      누구에게 말하면 되는가(보호책임자) → 그래도 안 되면(구제) →
+      이 문서가 바뀌면(변경).
+    */}
+    <h2 class="display display--tight" style="margin-top: 44px">{page.rights.heading}</h2>
+    {
+      page.rights.body.split('\n\n').map((para) => (
+        <p class="body" style="margin-top: 14px">{para}</p>
+      ))
+    }
+
+    <h2 class="display display--tight" style="margin-top: 44px">{page.entrust.heading}</h2>
+    <p class="body" style="margin-top: 14px">{page.entrust.body}</p>
+    <div class="tableScroll" tabindex="0" role="group" aria-label={page.entrust.heading}>
+      <table class="dataTable dataTable--stack">
+        <thead>
+          <tr>
+            <th scope="col">{page.entrust.columns.company}</th>
+            <th scope="col">{page.entrust.columns.work}</th>
+            <th scope="col">{page.entrust.columns.country}</th>
+            <th scope="col">{page.entrust.columns.retention}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            page.entrust.rows.map((row) => (
+              <tr>
+                <th scope="row">{row.company}</th>
+                <td>{row.work}</td>
+                <td>{row.country}</td>
+                <td>{row.retention}</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="body" style="margin-top: 14px">{page.entrust.note}</p>
+
+    <h2 class="display display--tight" style="margin-top: 44px">{page.destroy.heading}</h2>
+    {
+      page.destroy.body.split('\n\n').map((para) => (
+        <p class="body" style="margin-top: 14px">{para}</p>
+      ))
+    }
+
+    <h2 class="display display--tight" style="margin-top: 44px">{page.safety.heading}</h2>
+    {
+      page.safety.body.split('\n\n').map((para) => (
+        <p class="body" style="margin-top: 14px">{para}</p>
+      ))
+    }
+
+    <h2 class="display display--tight" style="margin-top: 44px">{page.officer.heading}</h2>
+    <p class="body" style="margin-top: 14px">{page.officer.body}</p>
+    <table class="dataTable dataTable--stack" style="margin-top: 18px">
+      <thead>
+        <tr>
+          <th scope="col">{page.officer.columns.role}</th>
+          <th scope="col">{page.officer.columns.value}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          /* 이름과 연락처를 문구에 박아 두면 바뀔 때 5개 언어를 다 고쳐야 합니다. */
+          page.officer.rows.map((row) => (
+            <tr>
+              <th scope="row">{row.role}</th>
+              <td>
+                {row.value === '{email}' ? (
+                  <a href={`mailto:${BUSINESS.email}`}>{BUSINESS.email}</a>
+                ) : (
+                  row.value.replace('{representative}', BUSINESS.representative)
+                )}
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+
+    <h2 class="display display--tight" style="margin-top: 44px">{page.remedy.heading}</h2>
+    <p class="body" style="margin-top: 14px">{page.remedy.body}</p>
+    <table class="dataTable dataTable--stack" style="margin-top: 18px">
+      <thead>
+        <tr>
+          <th scope="col">{page.remedy.columns.org}</th>
+          <th scope="col">{page.remedy.columns.contact}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          page.remedy.rows.map((row) => (
+            <tr>
+              <th scope="row">{row.org}</th>
+              <td>{row.contact}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+
+    <h2 class="display display--tight" style="margin-top: 44px">{page.changes.heading}</h2>
+    {
+      page.changes.body.split('\n\n').map((para) => (
+        <p class="body" style="margin-top: 14px">{para}</p>
+      ))
+    }
   </section>
 </Base>

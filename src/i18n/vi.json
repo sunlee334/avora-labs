@@ -23,6 +23,7 @@
     "submit": "Nhận thông báo ra mắt",
     "sending": "Đang đăng ký…",
     "done": "Đã đăng ký. Chúng tôi sẽ gửi tin đến địa chỉ này.",
+    "waiting": "Đến nay có {n} người đang chờ.",
     "invalid": "Vui lòng kiểm tra lại địa chỉ email.",
     "error": "Lần này chưa đăng ký được. Vui lòng thử lại sau giây lát.",
     "fallback": "Nếu vẫn không được, hãy gửi thư tới {email} và chúng tôi sẽ đăng ký giúp bạn.",
@@ -60,13 +61,21 @@
     "privacy": {
       "summary": "Chúng tôi xin địa chỉ email của bạn, và hoạt động bạn thường làm nếu bạn chọn cho biết. Chỉ dùng để báo kết quả thử nghiệm, mở gọi vốn và ra mắt chính thức; nếu bạn hủy nhận, bạn sẽ được đưa khỏi danh sách ngay. Chúng tôi giữ lại địa chỉ để không gửi trùng lần nữa.",
       "link": "Xem chính sách quyền riêng tư"
+    },
+    "night": {
+      "label": "Tôi cũng đồng ý nhận tin vào ban đêm (21:00–08:00). (tùy chọn)",
+      "body": "Để chúng tôi có thể báo ngay khi có gì đó mở — ví dụ gọi vốn mở lúc nửa đêm."
     }
   },
   "home": {
     "meta": {
-      "title": "PAROS — For every movement.",
+      "title": "PAROS — chống nắng cho lối sống năng động | AVORA LABS",
       "description": "PAROS là thương hiệu chăm sóc da theo phong cách sống năng động, kết hợp sức sống của vận động với sự chăm sóc dịu nhẹ. Công thức của sản phẩm đầu tiên Daily Sunscreen SPF50+ / PA++++ do hàng chục người chạy bộ chọn ra qua so sánh ẩn danh. Dự kiến ra mắt nửa đầu năm 2027.",
       "ogAlt": "Bóng người chạy in trên nền mặt trời thấp"
+    },
+    "notice": {
+      "label": "Nhận thông báo khi mở gọi vốn",
+      "body": "Chúng tôi sẽ báo ngay khi bắt đầu."
     },
     "hero": {
       "imageAlt": "Bóng một người đang chạy trên đường mòn đá dưới ánh mặt trời thấp",
@@ -158,6 +167,36 @@
       "note": "Chúng tôi công bố nguyên kết quả tổng hợp. Chúng tôi dùng công thức có điểm cao nhất, không phải công thức mình thích. Việc tuyển chọn bắt đầu vào tháng 10 năm 2026.",
       "cta": "Đăng ký nhóm thử nghiệm"
     },
+    "timeline": {
+      "kicker": "Tiếp theo",
+      "steps": [
+        {
+          "when": "10/2026",
+          "what": "Bắt đầu tuyển nhóm thử nghiệm",
+          "state": "đang diễn ra"
+        },
+        {
+          "when": "11/2026",
+          "what": "Đánh giá ẩn danh",
+          "state": "dự kiến"
+        },
+        {
+          "when": "12/2026",
+          "what": "Công bố tổng hợp · chốt công thức",
+          "state": "dự kiến"
+        },
+        {
+          "when": "02/2027",
+          "what": "Mở gọi vốn",
+          "state": "dự kiến"
+        },
+        {
+          "when": "Nửa đầu 2027",
+          "what": "Ra mắt",
+          "state": "dự kiến"
+        }
+      ]
+    },
     "product": {
       "kicker": "First Product",
       "name": "Daily Sunscreen",
@@ -177,7 +216,7 @@
   },
   "product": {
     "meta": {
-      "title": "Daily Sunscreen SPF50+ / PA++++ — PAROS",
+      "title": "PAROS Daily Sunscreen SPF50+ / PA++++ — chống nắng cho lối sống năng động",
       "description": "Daily Sunscreen — sản phẩm đầu tiên của PAROS. Chống nắng SPF50+ / PA++++, mỹ phẩm chức năng. Công thức do những người thật sự chạy bộ chọn ra qua so sánh ẩn tên nhà sản xuất. Dự kiến ra mắt nửa đầu năm 2027.",
       "ogAlt": "PAROS Daily Sunscreen đặt trên bề mặt sáng"
     },
@@ -457,6 +496,7 @@
       "heading": "Điều khoản & chính sách"
     },
     "business": {
+      "summary": "Thông tin doanh nghiệp",
       "registrationNumber": "Số đăng ký kinh doanh",
       "mailOrderNumber": "Số khai báo bán hàng qua bưu chính",
       "email": "Email",
@@ -577,6 +617,91 @@
       "cookies": {
         "heading": "Cookie",
         "body": "Chúng tôi dùng Google Analytics để đếm những màn hình nào được mở, khách truy cập đến từ đâu, và có đi tiếp đến bước đăng ký hay không. Công cụ này đặt cookie trong trình duyệt (các giá trị bắt đầu bằng _ga) để gộp các lượt xem của cùng một người. Những gì được giữ lại là đường dẫn dẫn vào, các màn hình đã xem, loại thiết bị và trình duyệt, cùng khu vực gần đúng. Chúng tôi không gửi tên, địa chỉ email hay địa chỉ nhà đến công cụ này.\n\nBạn có thể tắt bất cứ lúc nào. Hãy chặn cookie trong cài đặt trình duyệt, hoặc cài tiện ích từ chối Analytics do Google phát hành. Việc tắt không ảnh hưởng gì đến việc bạn sử dụng trang web."
+      },
+      "rights": {
+        "heading": "Quyền của chủ thể dữ liệu và cách thực hiện",
+        "body": "Bạn có thể yêu cầu xem, sửa, xoá hoặc dừng xử lý dữ liệu cá nhân của mình bất cứ lúc nào. Hãy báo cho chúng tôi theo liên hệ bên dưới; chúng tôi sẽ xử lý ngay và thông báo kết quả.\n\nMỗi email thông báo ra mắt và email nhóm thử nghiệm đều có liên kết huỷ nhận, có hiệu lực ngay và không cần xác minh danh tính.\n\nNếu người đại diện theo pháp luật hoặc người được uỷ quyền yêu cầu thay bạn, cần có giấy tờ chứng minh việc uỷ quyền."
+      },
+      "entrust": {
+        "heading": "Uỷ thác xử lý và chuyển dữ liệu ra nước ngoài",
+        "body": "Chúng tôi uỷ thác một phần việc xử lý cho các công ty dưới đây. Hợp đồng uỷ thác quy định nghĩa vụ bảo vệ an toàn dữ liệu cá nhân.",
+        "columns": {
+          "company": "Bên nhận uỷ thác",
+          "work": "Công việc uỷ thác",
+          "country": "Quốc gia lưu trữ",
+          "retention": "Thời gian lưu"
+        },
+        "rows": [
+          {
+            "company": "Cloudflare, Inc.",
+            "work": "Vận hành website và lưu danh sách đăng ký",
+            "country": "Hoa Kỳ",
+            "retention": "Đến khi đóng tài khoản hoặc huỷ nhận"
+          },
+          {
+            "company": "Google LLC",
+            "work": "Thống kê lượt truy cập (Google Analytics)",
+            "country": "Hoa Kỳ",
+            "retention": "14 tháng"
+          }
+        ],
+        "note": "Các công ty trên đặt máy chủ ngoài Hàn Quốc, nên dữ liệu được chuyển sang quốc gia đó ngay khi bạn sử dụng. Nếu không muốn, bạn có thể không dùng dịch vụ, nhưng khi đó không thể đăng ký hay gửi câu hỏi. Chặn cookie trong trình duyệt sẽ dừng việc thu thập thống kê truy cập."
+      },
+      "destroy": {
+        "heading": "Tiêu huỷ dữ liệu cá nhân",
+        "body": "Khi hết thời gian lưu hoặc đạt xong mục đích, chúng tôi tiêu huỷ ngay.\n\nTệp điện tử được xoá vĩnh viễn bằng cách không thể khôi phục. Bản in trên giấy, nếu có, được huỷ bằng máy cắt hoặc đốt.\n\nDữ liệu mà luật khác yêu cầu lưu giữ sẽ được lưu riêng trong thời hạn đó rồi mới tiêu huỷ."
+      },
+      "safety": {
+        "heading": "Biện pháp bảo đảm an toàn",
+        "body": "Số người tiếp xúc dữ liệu cá nhân được giữ ở mức tối thiểu, quyền truy cập chỉ trong phạm vi công việc cần.\n\nMọi trao đổi đều được mã hoá (HTTPS). Khoá dùng để huỷ nhận là giá trị ngẫu nhiên không thể đoán.\n\nTrang này không nhận và không lưu thông tin phương thức thanh toán. Thông tin đó chỉ được xử lý trong màn hình của đơn vị thanh toán."
+      },
+      "officer": {
+        "heading": "Người phụ trách bảo vệ dữ liệu cá nhân",
+        "body": "Mọi câu hỏi, khiếu nại hoặc yêu cầu khắc phục liên quan đến dữ liệu cá nhân, xin liên hệ bên dưới. Chúng tôi sẽ trả lời ngay.",
+        "columns": {
+          "role": "Mục",
+          "value": "Nội dung"
+        },
+        "rows": [
+          {
+            "role": "Người phụ trách",
+            "value": "{representative}"
+          },
+          {
+            "role": "Liên hệ",
+            "value": "{email}"
+          }
+        ]
+      },
+      "remedy": {
+        "heading": "Nơi khiếu nại khi quyền lợi bị xâm phạm",
+        "body": "Nếu bạn cần trợ giúp về dữ liệu cá nhân — kể cả khi chưa hài lòng với câu trả lời của chúng tôi — có thể liên hệ các cơ quan Hàn Quốc sau.",
+        "columns": {
+          "org": "Cơ quan",
+          "contact": "Liên hệ"
+        },
+        "rows": [
+          {
+            "org": "Uỷ ban Hoà giải Tranh chấp Dữ liệu Cá nhân",
+            "contact": "+82-1833-6972 · www.kopico.go.kr"
+          },
+          {
+            "org": "Trung tâm Tiếp nhận Xâm phạm Dữ liệu Cá nhân",
+            "contact": "+82-118 · privacy.kisa.or.kr"
+          },
+          {
+            "org": "Viện Kiểm sát Tối cao, Ban Tội phạm mạng",
+            "contact": "+82-1301 · www.spo.go.kr"
+          },
+          {
+            "org": "Cục Điều tra mạng, Tổng cục Cảnh sát",
+            "contact": "+82-182 · ecrm.police.go.kr"
+          }
+        ]
+      },
+      "changes": {
+        "heading": "Thay đổi chính sách này",
+        "body": "Khi chính sách này thay đổi, chúng tôi đăng trước nội dung thay đổi và ngày hiệu lực trên trang này.\n\nVới thay đổi quan trọng — như thu thập thêm mục mới — chúng tôi báo trước 30 ngày và xin lại sự đồng ý khi cần."
       }
     },
     "terms": {
@@ -1168,6 +1293,10 @@
       "marketing": {
         "label": "Tôi đồng ý nhận thông tin quảng cáo. (tùy chọn)",
         "body": "Bạn có thể hủy bất cứ lúc nào bằng liên kết trong email chúng tôi gửi."
+      },
+      "night": {
+        "label": "Tôi cũng đồng ý nhận tin vào ban đêm (21:00–08:00). (tùy chọn)",
+        "body": "Để chúng tôi có thể báo ngay khi có gì đó mở — ví dụ gọi vốn mở lúc nửa đêm."
       },
       "submit": "Gửi đăng ký",
       "sending": "Đang gửi…",

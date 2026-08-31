@@ -12,6 +12,8 @@ interface Copy {
   error: string;
   /** 두 번 연속 실패했을 때 덧붙이는 안내. 연락처가 이미 채워져 옵니다. */
   fallback: string;
+  /** 지금까지 몇 명이 기다리는지. `{n}` 자리에 숫자가 들어갑니다. */
+  waiting: string;
   submit: string;
 }
 
@@ -52,7 +54,43 @@ declare global {
  */
 const shownAt = Date.now();
 
+/**
+ * 지금까지 몇 명이 기다리는가.
+ *
+ * 서버가 임계값 미만이면 `null` 을 줍니다. 그때는 아무것도 그리지 않습니다 —
+ * 숫자가 적을 때 보여주면 "아무도 관심이 없다" 로 읽힙니다.
+ *
+ * 실패하면 조용히 넘어갑니다. 이 줄이 없다고 신청을 못 하는 것은 아니고,
+ * 오류 문구를 띄우면 폼이 고장 난 것처럼 보입니다.
+ */
+async function showWaiting(): Promise<void> {
+  const slots = document.querySelectorAll<HTMLElement>('[data-notify-count]');
+  if (slots.length === 0) return;
+
+  let count: number | null = null;
+  try {
+    const res = await fetch('/api/launch-notify/count');
+    if (!res.ok) return;
+    ({ count } = (await res.json()) as { count: number | null });
+  } catch {
+    return;
+  }
+  if (count == null) return;
+
+  for (const slot of slots) {
+    const form = slot.closest<HTMLFormElement>('[data-launch-notify]');
+    const copy = JSON.parse(form?.dataset.copy ?? '{}') as Partial<Copy>;
+    if (!copy.waiting) continue;
+    // 자릿수가 큰 숫자는 언어권 관습대로 끊어 읽는 편이 낫습니다.
+    slot.textContent = copy.waiting.replace('{n}', count.toLocaleString(form?.dataset.locale));
+    slot.hidden = false;
+  }
+}
+
 export function mountLaunchNotify(): void {
+  // 첫 화면을 그리는 데 필요한 값이 아니므로 기다리지 않습니다.
+  void showWaiting();
+
   for (const form of document.querySelectorAll<HTMLFormElement>('[data-launch-notify]')) {
     mountOne(form);
   }
@@ -115,6 +153,8 @@ function mountOne(form: HTMLFormElement): void {
            * 막지 않습니다(worker/spam.ts).
            */
           elapsedMs: Date.now() - shownAt,
+          // 야간 수신은 별도 동의입니다(정보통신망법 제50조 3항).
+          night: form.querySelector<HTMLInputElement>('input[name="night"]')?.checked === true,
           website: (form.querySelector<HTMLInputElement>('input[name="website"]')?.value ?? ''),
           locale: form.dataset.locale,
           source: form.dataset.source,

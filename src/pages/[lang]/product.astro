@@ -310,9 +310,38 @@ const specRows = [
   <section class="section section--alt wrap rise" id="disclosure">
     <p class="kicker">{p.disclosure.kicker}</p>
 
-    {/* 가로로 스크롤되는 영역은 키보드로도 스크롤할 수 있어야 합니다. */}
-    <div class="tableScroll" tabindex="0" role="group" aria-label={p.disclosure.kicker}>
-      <table class="dataTable">
+    {/*
+      접어 둡니다.
+
+      열한 줄 중 아홉 줄이 "확정 예정" 입니다. 펼쳐 두면 한 화면 가득한
+      "확정 예정" 의 벽이 되는데, 그건 정직한 표시이지만 브랜드에는 도움이
+      되지 않습니다. 법적으로는 **접근할 수 있으면** 됩니다.
+
+      접어도 되는 이유는 내용이 서버가 내려준 HTML 에 그대로 있기 때문입니다
+      (열 때 채우는 방식이 아닙니다). 크롤러와 스크린리더는 그걸 읽습니다.
+      다만 접힌 내용의 **가중치** 는 펼친 것보다 낮게 다뤄질 수 있어, 답변
+      엔진이 인용하는 FAQ 는 접지 않습니다 — tests/e2e/product-seo.spec.ts
+      가 그 경계를 지킵니다.
+
+      요약 줄에 무엇이 들어 있는지 적어, 열지 않고도 여기가 무엇인지 압니다.
+    */}
+    <details class="disclosure">
+      <summary>
+        <span class="disclosure__label">{p.disclosure.columns.item}</span>
+        <span class="disclosure__count">{disclosureRows.length}</span>
+      </summary>
+
+      <p class="spec__note disclosure__note">{p.disclosure.note}</p>
+
+      {/*
+        375px 에서 2열은 들어가지만 값이 길면 줄바꿈이 심해집니다. 좁은
+        화면에서는 항목 이름 아래 값을 쌓습니다 — 가로 스크롤을 쓰면
+        오른쪽 열(값)이 화면 밖에 남는데, 그게 이 표의 내용입니다.
+
+        `<table>` 마크업은 유지합니다. 스크린리더가 표로 읽고, 법적 표시라
+        구조가 남아 있어야 합니다.
+      */}
+      <table class="dataTable dataTable--stack">
         <thead>
           <tr>
             <th scope="col">{p.disclosure.columns.item}</th>
@@ -323,7 +352,7 @@ const specRows = [
           {
             disclosureRows.map((row) => (
               <tr data-disclosure={row.key}>
-                <td>{row.label}</td>
+                <th scope="row">{row.label}</th>
                 <td>
                   {row.value ?? (
                     <span class="spec__value--pending">{p.disclosure.pending}</span>
@@ -334,9 +363,7 @@ const specRows = [
           }
         </tbody>
       </table>
-    </div>
-
-    <p class="spec__note">{p.disclosure.note}</p>
+    </details>
   </section>
 
   {

@@ -50,6 +50,11 @@ export interface PanelApplication {
   locale: string;
   /** 광고성 정보 수신 동의. 선택 항목이라 없을 수 있습니다. */
   marketing: boolean;
+  /**
+   * 야간(21시~익일 8시) 수신 동의. 「정보통신망법」 제50조 3항이 요구하는
+   * **별도** 동의라 marketing 과 따로 둡니다.
+   */
+  night: boolean;
 }
 
 function newId(now: Date): string {
@@ -136,13 +141,14 @@ export async function apply(
 ): Promise<void> {
   const iso = now.toISOString();
   const marketingAt = a.marketing ? iso : null;
+  const nightAt = a.night ? iso : null;
 
   await db
     .prepare(
       `INSERT INTO panel_applications
          (id, name, email, activity, frequency, region, locale,
-          created_at, consented_at, marketing_at, unsubscribe_token)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          created_at, consented_at, marketing_at, unsubscribe_token, night_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(email) DO UPDATE SET
          name = excluded.name,
          activity = excluded.activity,
@@ -151,12 +157,13 @@ export async function apply(
          locale = excluded.locale,
          consented_at = excluded.consented_at,
          marketing_at = excluded.marketing_at,
+         night_at = excluded.night_at,
          -- 다시 지원했다는 것은 받겠다는 뜻입니다. 예전에 해지했더라도 되살립니다.
          unsubscribed_at = NULL`,
     )
     .bind(
       newId(now), a.name, a.email, a.activity, a.frequency, a.region, a.locale,
-      iso, iso, marketingAt, newToken(),
+      iso, iso, marketingAt, newToken(), nightAt,
     )
     .run();
 }
@@ -197,7 +204,7 @@ export async function listApplications(
   const { results } = await db
     .prepare(
       `SELECT id, name, email, activity, frequency, region, locale,
-              created_at, consented_at, marketing_at, unsubscribed_at
+              created_at, consented_at, marketing_at, unsubscribed_at, night_at
          FROM panel_applications ${where}
         ORDER BY created_at DESC
         LIMIT ? OFFSET ?`,
@@ -217,6 +224,7 @@ export async function listApplications(
     consentedAt: String(r.consented_at),
     marketingAt: r.marketing_at ? String(r.marketing_at) : null,
     unsubscribedAt: r.unsubscribed_at ? String(r.unsubscribed_at) : null,
+    nightAt: r.night_at ? String(r.night_at) : null,
   }));
 }
 

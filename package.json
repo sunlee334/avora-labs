@@ -25,7 +25,8 @@
     "test:e2e:launch": "E2E_MODE=launch playwright test",
     "test": "npm run test:e2e && npm run test:e2e:launch",
     "db:migrate:local": "wrangler d1 migrations apply avora-orders --local",
-    "db:migrate": "wrangler d1 migrations apply avora-orders --remote"
+    "db:migrate": "wrangler d1 migrations apply avora-orders --remote",
+    "export:lists": "node scripts/export-lists.mjs"
   },
   "dependencies": {
     "@astrojs/markdown-satteri": "^0.3.8",

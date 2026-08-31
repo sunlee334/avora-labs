@@ -30,6 +30,7 @@
   --color-accent: var(--paros-aegean);
   --color-accent-soft: var(--paros-aegean-tint);
   --color-campaign: var(--paros-sunset);
+  --color-campaign-text: var(--paros-uv-press);
   --color-link: var(--paros-sea);
   --color-focus: var(--paros-ink);
   --color-action: var(--paros-uv-fill);

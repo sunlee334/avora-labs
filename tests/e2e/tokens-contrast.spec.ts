@@ -49,6 +49,11 @@ const USED: Array<{ fg: string; bg: string; where: string; min: number }> = [
   // 캠페인 오렌지는 글자가 **올라가는** 자리와 **올라가지 않는** 자리가 다릅니다.
   // uvFill 은 버튼 채움이라 흰 글자를 얹으므로 4.5:1 을 넘겨야 합니다.
   { fg: 'white', bg: 'uvFill', where: '버튼 글자 / 캠페인 채움', min: 4.5 },
+  // 캠페인 색을 **글자로** 쓰는 자리(타임라인의 "진행중"). 처음에 채움용
+  // sunset 을 그대로 썼다가 3.14:1 로 걸렸습니다 — 그 조합이 여기 없었기
+  // 때문에 화면에 올라간 뒤에야 axe 가 잡았습니다.
+  { fg: 'uvPress', bg: 'wash', where: '캠페인 글자 / 기본 배경', min: 4.5 },
+  { fg: 'uvPress', bg: 'aegeanTint', where: '캠페인 글자 / 교차 섹션', min: 4.5 },
   // 본문 링크. 밑줄과 함께 쓰지만 색만으로도 읽혀야 합니다.
   { fg: 'sea', bg: 'wash', where: '본문 링크 / 기본 배경', min: 4.5 },
 ];

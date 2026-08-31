@@ -86,12 +86,38 @@ test.describe('제품 상세', () => {
     const res = await request.get('/en/product');
     const html = await res.text();
 
-    // details/summary 로 접으면 답변엔진이 본문으로 보지 않을 수 있습니다.
-    expect(html).not.toContain('<details');
+    /*
+     * 답변엔진이 인용하는 것은 질문과 답입니다. 그걸 접어 두면 본문으로 보지
+     * 않을 수 있어, **FAQ 만은** 펼친 채로 둡니다.
+     *
+     * 처음에는 페이지 전체에 `<details` 가 없는지 봤는데, 그건 이 검사가
+     * 말하는 것보다 넓었습니다. 상품정보고시는 열한 줄 중 아홉이 "확정 예정"
+     * 이라 접어 두고(D2), 대신 아래에서 그 내용이 초기 HTML 에 실려 있는지
+     * 따로 확인합니다.
+     */
+    const faq = html.slice(html.indexOf('id="faq"'));
+    expect(faq, 'FAQ 가 접혀 있습니다').not.toContain('<details');
+
     // 질문 문구는 번역 파일이 정합니다 — 여기 베껴 적으면 문구를 다듬을
     // 때마다 이 검사가 함께 깨집니다.
     expect(html).toContain(en.product.faq.items[0].q);
     expect(html).toContain('SPF50+ / PA++++');
+  });
+
+  test('접어 둔 상품정보고시도 초기 HTML 에 실린다', async ({ request }) => {
+    /*
+     * 접는 것과 안 싣는 것은 다릅니다. `<details>` 안이라도 서버가 내려준
+     * HTML 에 들어 있어야 크롤러와 스크린리더가 읽습니다. 자바스크립트로
+     * 열 때 채우는 방식으로 바뀌면 여기서 걸립니다.
+     */
+    const html = await (await request.get('/ko/product')).text();
+    const start = html.indexOf('class="disclosure"');
+    expect(start, '고시 접힘을 찾지 못했습니다').toBeGreaterThan(0);
+
+    const block = html.slice(start, html.indexOf('</details>', start));
+    for (const label of Object.values(ko.product.disclosure.labels)) {
+      expect(block, `«${label}» 이 초기 HTML 에 없습니다`).toContain(label);
+    }
   });
 });
 

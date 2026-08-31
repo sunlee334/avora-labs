@@ -99,6 +99,10 @@
       "campaign": {
         "ref": "color.palette.sunset"
       },
+      "campaignText": {
+        "ref": "color.palette.uvPress",
+        "$why": "캠페인 색을 **글자로** 쓸 때의 값. campaign(sunset #E2673B)은 기본 배경 대비 3.14:1 이라 본문 크기 글자에 쓸 수 없습니다. 채움·테두리에는 campaign 을, 글자에는 이것을 쓰세요 — 5.97:1 입니다."
+      },
       "link": {
         "ref": "color.palette.sea"
       },

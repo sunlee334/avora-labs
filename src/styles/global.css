@@ -29,7 +29,7 @@ body {
   font-family: var(--font-body);
   font-size: 16px;
   font-weight: 400;
-  line-height: 1.75;
+  line-height: calc(1.75 * var(--leading-scale));
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -176,19 +176,19 @@ button {
   font-family: var(--font-display);
   font-weight: 300;
   font-size: clamp(26px, 6.2vw, 44px);
-  line-height: 1.35;
+  line-height: calc(1.35 * var(--leading-scale));
   letter-spacing: -0.015em;
   text-wrap: balance;
 }
 
 .display--tight {
-  line-height: 1.2;
+  line-height: calc(1.2 * var(--leading-scale));
 }
 
 .body {
   color: var(--color-text-muted);
   font-size: 15px;
-  line-height: 1.85;
+  line-height: calc(1.85 * var(--leading-scale));
   max-width: var(--size-measure);
 }
 
@@ -196,7 +196,7 @@ button {
   font-family: var(--font-display);
   font-weight: 300;
   font-size: clamp(19px, 4.6vw, 28px);
-  line-height: 1.6;
+  line-height: calc(1.6 * var(--leading-scale));
   letter-spacing: -0.01em;
   max-width: 24ch;
   text-wrap: balance;
@@ -504,7 +504,7 @@ button {
   margin-top: 18px;
   font-size: 15px;
   font-weight: 600;
-  line-height: 1.6;
+  line-height: calc(1.6 * var(--leading-scale));
 }
 
 .panelForm {
@@ -627,12 +627,353 @@ button {
   gap: 12px 18px;
 }
 
+/* ── 상품정보고시 (접힘) ──────────────────────────────────── */
+
+.disclosure {
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  margin-top: 20px;
+}
+.disclosure > summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--size-tap-min);
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  list-style: none;
+}
+/* 사파리는 ::-webkit-details-marker 로 삼각형을 그립니다. */
+.disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+/* 열림 상태를 색이 아니라 방향으로 알립니다. */
+.disclosure > summary::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform var(--motion-dur-base) var(--motion-ease-out);
+  opacity: 0.55;
+}
+.disclosure[open] > summary::after {
+  transform: rotate(-135deg) translate(-2px, -2px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .disclosure > summary::after {
+    transition: none;
+  }
+}
+/* 몇 줄이 들어 있는지. 열지 않고도 규모를 압니다. */
+.disclosure__count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+.disclosure__note {
+  margin-top: 4px;
+}
+
+/*
+ * 좁은 화면에서 행을 카드로 쌓습니다.
+ *
+ * 가로 스크롤 상자로 감싸면 오른쪽 열(값)이 화면 밖에 남는데, 그게 이 표의
+ * 내용입니다. `<table>` 마크업은 유지합니다 — 스크린리더가 표로 읽고,
+ * 법적 표시라 구조가 남아 있어야 합니다.
+ *
+ * `.dataTable` 의 `min-width: 520px` 은 가로로 미는 법률 표를 위한 값이라
+ * 여기서는 풀어 줍니다 — 남겨 두면 320px 화면에서 표가 200px 넘게
+ * 삐져나갑니다. 클래스를 두 번 적은 것은 오타가 아닙니다. `.dataTable`
+ * 규칙이 이 파일 아래쪽에 있어서 특이도가 같으면 순서로 집니다.
+ */
+.dataTable.dataTable--stack {
+  min-width: 0;
+}
+.dataTable--stack thead {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.dataTable--stack tr {
+  display: block;
+  padding: 12px 0;
+  border-top: 1px solid var(--color-border);
+}
+.dataTable--stack tbody tr:first-child {
+  border-top: 0;
+}
+.dataTable--stack th[scope='row'] {
+  display: block;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  padding: 0;
+  /*
+   * `.dataTable th` 는 열 제목이 짧아 `nowrap` 입니다. 행 제목은 다릅니다 —
+   * "개인정보분쟁조정위원회" 나 "Personal Information Dispute Mediation
+   * Committee" 처럼 길고, 줄바꿈을 막으면 표가 469px 로 굳어 320px 화면을
+   * 149px 밀어냅니다. 한국어만 보고 있으면 안 보입니다.
+   */
+  white-space: normal;
+}
+/*
+ * 표 안의 연락처는 손가락으로 눌러야 합니다.
+ *
+ * 인라인 링크는 글자 높이(18px)밖에 안 됩니다. 메일 주소와 전화번호가
+ * 여기 들어가므로 누를 수 있는 높이를 줍니다.
+ */
+.dataTable--stack td a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--size-tap-min);
+}
+.dataTable--stack td {
+  display: block;
+  padding: 2px 0 0;
+  font-size: 15px;
+}
+@media (min-width: 700px) {
+  .dataTable.dataTable--stack {
+    min-width: 520px;
+  }
+  .dataTable--stack thead {
+    position: static;
+    width: auto;
+    height: auto;
+    clip-path: none;
+  }
+  .dataTable--stack tr {
+    display: table-row;
+    padding: 0;
+    border: 0;
+  }
+  .dataTable--stack tbody tr {
+    border-top: 1px solid var(--color-border);
+  }
+  .dataTable--stack th[scope='row'],
+  .dataTable--stack td {
+    display: table-cell;
+    padding: 12px 16px 12px 0;
+    vertical-align: baseline;
+  }
+  .dataTable--stack th[scope='row'] {
+    width: 30%;
+    /* 넓은 화면에서도 행 제목은 접혀야 합니다 — 위 주석을 보세요. */
+    white-space: normal;
+  }
+}
+
+
+/* ── 푸터의 사업자 정보 (접힘) ────────────────────────────── */
+
+.footer__business {
+  margin-top: 24px;
+  border-top: 1px solid var(--color-border-inverse);
+}
+.footer__business > summary {
+  display: flex;
+  align-items: center;
+  min-height: var(--size-tap-min);
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--color-text-muted-inverse);
+  list-style: none;
+}
+.footer__business > summary::-webkit-details-marker {
+  display: none;
+}
+.footer__business > summary::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  margin-left: 8px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg) translate(-2px, -2px);
+  opacity: 0.6;
+}
+.footer__business[open] > summary::after {
+  transform: rotate(-135deg) translate(-2px, -2px);
+}
+.footer__copyright {
+  margin-top: 18px;
+  font-size: 12px;
+  color: var(--color-text-muted-inverse);
+}
+
+/* ── 언어별 조판 ──────────────────────────────────────────── */
+
+/*
+ * 행간은 언어마다 다릅니다.
+ *
+ * 태국어는 성조 부호가 글자 위아래로 두세 단 쌓입니다 — 한글·라틴에 맞춘
+ * 행간이면 윗줄의 아래 부호와 아랫줄의 위 부호가 서로 닿습니다.
+ * 베트남어는 이중 발음부호(ế ộ ữ)가 대문자 위로 올라갑니다.
+ *
+ * **`line-height` 를 직접 주지 않고 배율로 둡니다.** 화면마다 제 행간이
+ * 있고(본문 1.85, 표 1.7, 인용 1.6 …), `:lang()` 으로 한 값을 덮으면 그
+ * 차이가 다 뭉개집니다. 게다가 클래스와 특이도가 같아서 순서에 따라 이기고
+ * 지는 규칙이 갈립니다 — 실제로 `.body` 는 덮이지 않았습니다.
+ *
+ * 배율은 상속되므로 `<html lang>` 하나로 화면 전체에 걸리고, 한 페이지에
+ * 다른 언어가 섞여 들어와도 그 부분만 맞습니다.
+ *
+ * 셀렉터가 `:lang(th)` 가 아니라 `[lang]:lang(th)` 인 이유:
+ * 기본값을 두는 `:root` 와 `:lang(th)` 는 특이도가 같고, `:root` 가 이 아래에
+ * 있어서 순서로 집니다. `[lang]` 을 붙이면 순서와 무관하게 이깁니다. 겸사겸사
+ * `<span lang="th">` 처럼 중간에 끼어든 다른 언어도 같이 잡힙니다.
+ */
+[lang]:lang(th) {
+  --leading-scale: 1.08;
+}
+[lang]:lang(vi) {
+  --leading-scale: 1.04;
+}
+
+/*
+ * 밑줄이 글자를 관통하지 않게.
+ *
+ * 기본 밑줄은 한글 받침을 가로지르고, 베트남어의 아래 부호(ự ệ)와 태국어
+ * 성조 부호를 뭉갭니다. `skip-ink` 는 글자를 피해 끊어 그립니다.
+ */
+a {
+  text-underline-offset: 0.22em;
+  text-decoration-thickness: 1px;
+  text-decoration-skip-ink: auto;
+}
+/* 태국어는 부호가 아래로도 내려가므로 한 단 더 띄웁니다. */
+:lang(th) a {
+  text-underline-offset: 0.28em;
+}
+
+/* 신청자 수. 값이 올 때까지 자리를 차지하지 않습니다. */
+.notify__waiting {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  margin-bottom: 8px;
+}
+
+/*
+ * 야간 수신 동의.
+ *
+ * 활동 선택과 개인정보 안내 사이에 둡니다 — 폼 맨 아래 안내문 무더기에
+ * 섞이면 체크박스라는 것도, 선택이라는 것도 읽히지 않습니다.
+ */
+.notify__night {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: var(--size-tap-min);
+  padding-block: 6px;
+  margin-top: 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.notify__night input {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  margin-top: 2px;
+  accent-color: var(--color-text);
+}
+.notify__night-why {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+/* ── 타임라인 ─────────────────────────────────────────────── */
+
+.timeline {
+  list-style: none;
+  margin: 22px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+}
+.timeline li {
+  display: grid;
+  grid-template-columns: minmax(72px, auto) 1fr auto;
+  gap: 12px;
+  align-items: baseline;
+  padding: 14px 0;
+  border-top: 1px solid var(--color-border);
+}
+.timeline li:last-child {
+  border-bottom: 1px solid var(--color-border);
+}
+/* 날짜는 자릿수가 흔들리지 않아야 세로로 읽힙니다. */
+.timeline__when {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+.timeline__what {
+  font-size: 15px;
+}
+.timeline__state {
+  font-size: 11.5px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+/*
+ * 지금 어디인가.
+ *
+ * 캠페인 오렌지를 쓰는 자리인데, **채움이 아니라 글자** 입니다.
+ * `--color-campaign`(sunset #E2673B)은 기본 배경 대비 3.14:1 이라 11.5px
+ * 글자에 쓸 수 없습니다 — 처음에 그렇게 썼다가 axe 가 잡았습니다.
+ * `--color-campaign-text` 는 같은 계열의 어두운 쪽(5.97:1)입니다.
+ */
+.timeline__now .timeline__state {
+  color: var(--color-campaign-text);
+  font-weight: 600;
+}
+
+/* ── 상단 공지 배너 ───────────────────────────────────────── */
+
+.notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px 10px;
+  min-height: var(--size-tap-min);
+  padding: 10px var(--space-gutter-mobile);
+  background: var(--color-bg-inverse);
+  color: var(--color-text-inverse);
+  font-size: 13.5px;
+  text-decoration: none;
+  text-align: center;
+}
+.notice__label {
+  font-weight: 600;
+}
+.notice__body {
+  color: var(--color-text-muted-inverse);
+  font-size: 12.5px;
+}
+
 /* ── 네비게이션 ───────────────────────────────────────────── */
 /* 헤더 높이를 토큰으로 둡니다.
    :root 에 선언해야 합니다 — .nav 에 두면 #story 가 <main> 안이라 상속받지
    못하고 scroll-margin-top 이 0px 으로 조용히 떨어집니다(두 엔진 실측).
    .lang__sheet 는 .nav 자손이라 양쪽 다 동작하므로 그 실수를 못 잡습니다. */
 :root {
+  /* 행간 배율. 언어별로 덮어씁니다 — 이 블록보다 **위** 에 있는
+     `[lang]:lang(th)` 규칙이 특이도로 이깁니다. */
+  --leading-scale: 1;
+
   /* 모바일 = padding(12+12) + 44(워드마크) + 1(border) */
   --nav-height: 69px;
 }
@@ -1020,7 +1361,7 @@ button {
   font-family: var(--font-display);
   font-weight: 300;
   font-size: clamp(28px, 8vw, 40px);
-  line-height: 1.25;
+  line-height: calc(1.25 * var(--leading-scale));
   letter-spacing: -0.01em;
   margin-bottom: 14px;
 }
@@ -1040,7 +1381,7 @@ button {
 .hero__promise {
   margin-top: 14px;
   font-size: clamp(14px, 3.6vw, 16px);
-  line-height: 1.5;
+  line-height: calc(1.5 * var(--leading-scale));
   color: var(--color-accent);
   max-width: 22ch;
 }
@@ -1092,7 +1433,7 @@ button {
 .journey__body {
   color: var(--color-text-muted);
   font-size: 13.5px;
-  line-height: 1.7;
+  line-height: calc(1.7 * var(--leading-scale));
 }
 
 @media (min-width: 900px) {
@@ -1139,7 +1480,7 @@ button {
   margin: 4px 0 0;
   color: var(--color-text-muted);
   font-size: 13.5px;
-  line-height: 1.7;
+  line-height: calc(1.7 * var(--leading-scale));
 }
 
 @media (min-width: 720px) {
@@ -1239,7 +1580,7 @@ button {
 .principles p {
   color: var(--color-text-muted);
   font-size: 13.5px;
-  line-height: 1.75;
+  line-height: calc(1.75 * var(--leading-scale));
 }
 /*
  * 열 수를 숫자로 박지 않습니다. 원칙이 셋에서 넷(LIGHT·COMFORT·PROTECTION·
@@ -1327,7 +1668,7 @@ button {
 .steps p {
   color: var(--color-text-muted);
   font-size: 13.5px;
-  line-height: 1.7;
+  line-height: calc(1.7 * var(--leading-scale));
 }
 @media (min-width: 900px) {
   .steps {
@@ -1353,7 +1694,7 @@ button {
 .faq p {
   color: var(--color-text-muted);
   font-size: 14px;
-  line-height: 1.85;
+  line-height: calc(1.85 * var(--leading-scale));
   max-width: var(--size-measure);
 }
 
@@ -1733,7 +2074,7 @@ button {
 .agree__detail {
   margin-top: 10px;
   font-size: 12.5px;
-  line-height: 1.8;
+  line-height: calc(1.8 * var(--leading-scale));
   color: var(--color-text-muted);
 }
 .agree a {
@@ -1834,7 +2175,7 @@ button {
   padding: 14px 16px;
   border-bottom: 1px solid var(--color-border);
   vertical-align: top;
-  line-height: 1.7;
+  line-height: calc(1.7 * var(--leading-scale));
 }
 .dataTable th,
 .tableScroll > table th {
@@ -1911,7 +2252,7 @@ button {
   padding-inline-start: 22px;
   color: var(--color-text-muted);
   font-size: 15px;
-  line-height: 1.7;
+  line-height: calc(1.7 * var(--leading-scale));
 }
 .factList li::before {
   content: '';
@@ -1940,7 +2281,7 @@ button {
   padding-inline-start: 22px;
   color: var(--color-text-muted);
   font-size: 15px;
-  line-height: 1.7;
+  line-height: calc(1.7 * var(--leading-scale));
 }
 .pendingList li::before {
   content: '';
@@ -1974,9 +2315,16 @@ button {
   font-size: 17px;
   margin-bottom: 30px;
 }
+/*
+ * 링크 묶음을 2×2 로 둡니다.
+ *
+ * 넷이 세로로 쌓이면 모바일에서 푸터가 화면 두 개를 넘습니다. 그러면 마지막
+ * 묶음까지 내려가는 사람이 거의 없습니다.
+ */
 .footer__cols {
   display: grid;
-  gap: 26px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 26px 20px;
   padding-top: 26px;
   border-top: 1px solid var(--color-border-inverse);
 }
@@ -1993,7 +2341,7 @@ button {
 .footer__col li {
   display: block;
   font-size: 14px;
-  line-height: 2.1;
+  line-height: calc(2.1 * var(--leading-scale));
   text-decoration: none;
 }
 .footer__col li a {
@@ -2010,7 +2358,7 @@ button {
   border-top: 1px solid var(--color-border-inverse);
   color: var(--color-text-muted-inverse);
   font-size: 12.5px;
-  line-height: 1.9;
+  line-height: calc(1.9 * var(--leading-scale));
 }
 /* 사업자 정보 안의 링크도 탭 영역 44px 를 지킵니다 — 작은 글씨라고 예외는 없습니다. */
 .footer__meta a {
@@ -2081,7 +2429,7 @@ button {
   max-width: var(--size-measure);
   color: var(--color-text-muted);
   font-size: 14px;
-  line-height: 1.85;
+  line-height: calc(1.85 * var(--leading-scale));
 }
 
 .support__contact {
@@ -2325,7 +2673,7 @@ button {
   margin-inline: auto;
   color: var(--color-text-muted);
   font-size: 14px;
-  line-height: 1.85;
+  line-height: calc(1.85 * var(--leading-scale));
 }
 
 .reviews__summary {
@@ -2419,7 +2767,7 @@ button {
 .reviews__body {
   max-width: var(--size-measure);
   font-size: 15px;
-  line-height: 1.85;
+  line-height: calc(1.85 * var(--leading-scale));
   /* 후기에는 붙여 쓴 긴 글이 들어올 수 있습니다. */
   overflow-wrap: anywhere;
 }
@@ -2444,7 +2792,7 @@ button {
   border-radius: 8px;
   background: var(--color-bg);
   color: var(--color-text);
-  line-height: 1.8;
+  line-height: calc(1.8 * var(--leading-scale));
   resize: vertical;
 }
 .rating {
@@ -2670,7 +3018,7 @@ button {
   display: block;
   color: var(--color-text-muted);
   font-size: 14px;
-  line-height: 1.7;
+  line-height: calc(1.7 * var(--leading-scale));
   max-width: var(--size-measure);
 }
 .postList__date {
@@ -2726,7 +3074,7 @@ button {
 .post__body li {
   color: var(--color-text);
   font-size: 15px;
-  line-height: 1.9;
+  line-height: calc(1.9 * var(--leading-scale));
 }
 .post__body ul,
 .post__body ol {
@@ -2927,7 +3275,7 @@ button {
 .inquiryList__body {
   margin-top: 10px;
   font-size: 14px;
-  line-height: 1.8;
+  line-height: calc(1.8 * var(--leading-scale));
   max-width: var(--size-measure);
   /* 손이 아니라 사람이 쓴 문자열이라 무엇이 올지 모릅니다. */
   overflow-wrap: anywhere;
@@ -2949,7 +3297,7 @@ button {
 }
 .inquiryList__answer p:last-child {
   font-size: 14px;
-  line-height: 1.8;
+  line-height: calc(1.8 * var(--leading-scale));
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
@@ -2968,7 +3316,7 @@ button {
   font-family: inherit;
   /* 16px 미만이면 iOS 가 초점을 받을 때 화면을 확대합니다. */
   font-size: 16px;
-  line-height: 1.7;
+  line-height: calc(1.7 * var(--leading-scale));
   resize: vertical;
 }
 .inquiryForm textarea:focus-visible {
@@ -2988,7 +3336,7 @@ button {
 .notify__heading {
   font-size: 17px;
   font-weight: 600;
-  line-height: 1.4;
+  line-height: calc(1.4 * var(--leading-scale));
 }
 .notify__body {
   margin-top: 6px;
@@ -3043,7 +3391,7 @@ button {
 .notify__consent {
   margin-top: 12px;
   font-size: 12px;
-  line-height: 1.6;
+  line-height: calc(1.6 * var(--leading-scale));
   color: var(--color-text-muted);
 }
 /* ── 알림 신청의 활동 선택 ────────────────────────────────── */
@@ -3068,7 +3416,7 @@ button {
 .notify__acts-why {
   margin-top: 4px;
   font-size: 12px;
-  line-height: 1.6;
+  line-height: calc(1.6 * var(--leading-scale));
   color: var(--color-text-muted);
 }
 .notify__acts-list {
@@ -3111,7 +3459,7 @@ button {
 .notify__privacy {
   margin-top: 8px;
   font-size: 12px;
-  line-height: 1.6;
+  line-height: calc(1.6 * var(--leading-scale));
   color: var(--color-text-muted);
 }
 .notify__privacy--link {

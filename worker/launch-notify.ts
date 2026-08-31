@@ -38,6 +38,13 @@ export interface NotifySignup {
   locale: string;
   source: string | null;
   activities: string | null;
+  /**
+   * 야간(21시~익일 8시) 수신 동의 여부.
+   *
+   * 「정보통신망법」 제50조 3항은 그 시간대 광고성 정보에 **별도 동의** 를
+   * 요구합니다. 일반 광고 동의로는 보낼 수 없습니다.
+   */
+  night: boolean;
 }
 
 /**
@@ -99,7 +106,7 @@ export function normalizeEmail(raw: unknown): string | null {
  */
 export async function signup(
   db: D1Database,
-  { email, locale, source, activities }: NotifySignup,
+  { email, locale, source, activities, night }: NotifySignup,
   now: Date,
 ): Promise<SignupResult> {
   const iso = now.toISOString();
@@ -108,18 +115,19 @@ export async function signup(
     .prepare(
       `UPDATE launch_notify
           SET unsubscribed_at = NULL, consented_at = ?, locale = ?, source = ?,
-              activities = COALESCE(?, activities)
+              activities = COALESCE(?, activities), night_at = ?
         WHERE email = ? AND unsubscribed_at IS NOT NULL`,
     )
-    .bind(iso, locale, source, activities, email)
+    .bind(iso, locale, source, activities, night ? iso : null, email)
     .run();
   if ((revived.meta?.changes ?? 0) > 0) return 'revived';
 
   const inserted = await db
     .prepare(
       `INSERT INTO launch_notify
-         (id, email, locale, source, activities, created_at, consented_at, unsubscribe_token)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+         (id, email, locale, source, activities, created_at, consented_at,
+          unsubscribe_token, night_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(email) DO NOTHING`,
     )
     .bind(
@@ -131,6 +139,7 @@ export async function signup(
       iso,
       iso,
       newId(now, 'UNSUB'),
+      night ? iso : null,
     )
     .run();
 

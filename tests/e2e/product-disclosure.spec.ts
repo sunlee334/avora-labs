@@ -77,7 +77,13 @@ test.describe('확정된 값은 설정과 같다', () => {
     // 같은 사실을 두 곳에 따로 적으면 한쪽만 낡습니다.
     await page.goto('/ko/product');
     const steps = await page.locator('.steps strong').allInnerTexts();
-    const usage = await page.locator('[data-disclosure="usage"] td').last().innerText();
+    /*
+     * `innerText` 가 아니라 `textContent` 입니다. 고시표는 접혀 있고(D2),
+     * `innerText` 는 화면에 그려진 것만 돌려주므로 닫힌 `<details>` 안에서는
+     * 빈 문자열이 옵니다. 여기서 보는 것은 **두 곳의 내용이 같은가** 이지
+     * 지금 보이는가가 아닙니다.
+     */
+    const usage = await page.locator('[data-disclosure="usage"] td').last().textContent();
     for (const step of steps) {
       expect(usage, `"${step}" 가 사용방법 줄에 없습니다`).toContain(step.trim());
     }

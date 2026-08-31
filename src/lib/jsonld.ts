@@ -33,8 +33,33 @@ export function organization() {
      * 합니다. 계정이 비어 있으면 항목 자체를 넣지 않습니다.
      */
     ...(SOCIAL.instagramUrl ? { sameAs: [SOCIAL.instagramUrl] } : {}),
+
+    /*
+     * 브랜드를 **명시적으로** 매답니다.
+     *
+     * PAROS 는 에게해의 섬 이름입니다. 검색엔진과 답변엔진 모두 이 이름을
+     * 먼저 섬으로 읽고, 도메인(avoralabs.co)과 브랜드명이 달라 둘을 잇는
+     * 근거가 사이트 밖에 거의 없습니다.
+     *
+     * 여기서 "이 PAROS 는 선케어 브랜드이고 AVORA LABS 가 만든다" 를 기계가
+     * 읽을 수 있는 형태로 선언합니다. 카피 규칙(본문에서 브랜드명을 어떻게
+     * 병기할지)은 담당자 합의가 필요하지만, 이 선언은 그와 무관합니다.
+     */
+    brand: {
+      '@type': 'Brand',
+      name: BUSINESS.brandName,
+      alternateName: '파로스',
+      description: 'Active lifestyle sun care brand. 액티브 라이프스타일 선케어 브랜드.',
+      ...(SOCIAL.instagramUrl ? { sameAs: [SOCIAL.instagramUrl] } : {}),
+    },
+    alternateName: '아보라랩스',
+    /*
+     * 카테고리를 제목·llms.txt 와 같은 말로 적습니다. 여기만 "beauty" 로
+     * 남아 있으면 기계가 읽는 세 곳(제목·구조화 데이터·llms.txt)이 서로
+     * 다른 카테고리를 말하게 됩니다.
+     */
     description:
-      'AVORA LABS creates brands for people in motion. Its first brand is PAROS, an active lifestyle beauty brand named after the Aegean island, positioned as ACTIVE LIFESTYLE BEAUTY rather than sports beauty.',
+      'AVORA LABS creates brands for people in motion. Its first brand is PAROS, an active lifestyle sun care brand named after the Aegean island — made for anyone who moves, not only athletes.',
 
     // 사업자 정보. 답변엔진이 "이 브랜드는 누가 파는가" 에 답할 수 있어야
     // 하고, 그 답이 푸터의 법정 표시와 어긋나면 안 됩니다.

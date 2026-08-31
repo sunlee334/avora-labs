@@ -238,6 +238,18 @@ const indexable = locale === 'ko';
         <p class="agree__body">{f.marketing.body}</p>
       </div>
 
+      {/*
+        야간 수신은 광고 수신과 **별도 동의** 입니다(정보통신망법 제50조 3항).
+        선택이고 기본으로 꺼져 있습니다.
+      */}
+      <div class="agree agree--optional">
+        <label class="agree__row">
+          <input type="checkbox" name="night" />
+          <span>{f.night.label}</span>
+        </label>
+        <p class="agree__body">{f.night.body}</p>
+      </div>
+
       <Button variant="primary" type="submit" block loadingLabel={f.sending}>
         {f.submit}
       </Button>

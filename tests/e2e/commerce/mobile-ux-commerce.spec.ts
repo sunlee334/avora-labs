@@ -78,25 +78,38 @@ test.describe('가로 스크롤', () => {
 });
 
 test.describe('손가락으로 누를 수 있는가', () => {
+  /**
+   * 움직임을 끄고, 페이지 안에서 한 번에 잽니다.
+   *
+   * `.rise` 의 `translateY` 가 걸려 있는 동안에는 사각형이 행렬 계산을 거쳐
+   * 나와 소수점 오차가 섞입니다 — `min-height: 44px` 인 버튼이 43.9999 로
+   * 나왔습니다. 같은 처방을 tests/e2e/mobile-ux.spec.ts 에도 적용했고, 거기
+   * 주석에 자세히 적어 두었습니다.
+   */
   async function tooSmall(page: Page): Promise<string[]> {
-    const targets = page.locator('a[href], button, input[type="submit"]');
-    const count = await targets.count();
-    const found: string[] = [];
-    for (let i = 0; i < count; i++) {
-      const el = targets.nth(i);
-      if (!(await el.isVisible())) continue;
-      const box = await el.boundingBox();
-      if (!box) continue;
-      if (box.height < 44 || box.width < 44) {
-        const label = ((await el.textContent()) || '').trim().slice(0, 24);
-        found.push(`"${label}" ${Math.round(box.width)}×${Math.round(box.height)}`);
+    const result = await page.evaluate(() => {
+      const out: string[] = [];
+      for (const el of document.querySelectorAll<HTMLElement>(
+        'a[href], button, input[type="submit"]',
+      )) {
+        const cs = getComputedStyle(el);
+        if (cs.display === 'none' || cs.visibility === 'hidden') continue;
+        const r = el.getBoundingClientRect();
+        if (r.width === 0 && r.height === 0) continue;
+        if (r.height < 44 || r.width < 44) {
+          const label = (el.textContent ?? '').trim().slice(0, 24);
+          out.push(`"${label}" ${Math.round(r.width)}×${Math.round(r.height)}`);
+        }
       }
-    }
-    return found;
+      return out;
+    });
+    return result;
   }
 
   for (const path of PAGES) {
     test(`${path} — 탭 영역 44×44px 이상`, async ({ page }) => {
+      // 등장 변형을 끕니다 — tooSmall 의 주석을 보세요.
+      await page.emulateMedia({ reducedMotion: 'reduce' });
       await page.setViewportSize({ width: 390, height: 844 });
       await page.goto(path);
       const small = await tooSmall(page);
@@ -105,6 +118,7 @@ test.describe('손가락으로 누를 수 있는가', () => {
   }
 
   test('/ko/account — 로그인 상태의 버튼들도 확보한다', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     await loginAs(page, 'mobile-tap-user');
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/ko/account');

@@ -27,3 +27,6 @@ blob-report/
 # os
 .DS_Store
 .fontsrc/
+
+# 명단 백업. 개인정보가 담기므로 저장소에 올리지 않습니다.
+backups/

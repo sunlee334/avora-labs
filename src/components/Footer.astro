@@ -16,7 +16,6 @@ const businessRows = [
   { label: t.footer.business.address, value: BUSINESS.address },
   { label: t.footer.business.registrationNumber, value: BUSINESS.registrationNumber },
   { label: t.footer.business.mailOrderNumber, value: BUSINESS.mailOrderNumber },
-  { label: t.footer.business.phone, value: BUSINESS.phone },
 ].filter((row) => row.value);
 ---
 
@@ -96,23 +95,47 @@ const businessRows = [
       </div>
     </div>
 
-    <div class="footer__meta">
-      {
-        businessRows.map((row) => (
-          <div>
-            {row.label} {row.value}
-          </div>
-        ))
-      }
-      {
-        BUSINESS.email && (
-          <div>
-            {t.footer.business.email}{' '}
-            <a href={`mailto:${BUSINESS.email}`}>{BUSINESS.email}</a>
-          </div>
-        )
-      }
-      <div>{t.footer.copyright}</div>
-    </div>
+    {/*
+      사업자 정보를 접습니다.
+
+      여섯 줄이 세로로 쌓이면 모바일에서 꼬리가 깁니다. 국내 이커머스가 흔히
+      쓰는 방식이고, 법적으로는 **접근할 수 있으면** 됩니다 — `<details>` 는
+      검색엔진도 스크린리더도 안을 읽습니다.
+
+      저작권 표시는 밖에 둡니다. 접힘 안에 넣으면 화면에 아무것도 남지 않는
+      순간이 생깁니다.
+    */}
+    <details class="footer__business">
+      <summary>{t.footer.business.summary}</summary>
+      <div class="footer__meta">
+        {
+          businessRows.map((row) => (
+            <div>
+              {row.label} {row.value}
+            </div>
+          ))
+        }
+        {
+          BUSINESS.phone && (
+            <div>
+              {t.footer.business.phone}{' '}
+              {/* 휴대폰에서 바로 걸 수 있어야 합니다. 숫자를 그냥 적어 두면
+                  손님이 손으로 옮겨 적습니다. */}
+              <a href={`tel:${BUSINESS.phone.replace(/[^0-9+]/g, '')}`}>{BUSINESS.phone}</a>
+            </div>
+          )
+        }
+        {
+          BUSINESS.email && (
+            <div>
+              {t.footer.business.email}{' '}
+              <a href={`mailto:${BUSINESS.email}`}>{BUSINESS.email}</a>
+            </div>
+          )
+        }
+      </div>
+    </details>
+
+    <p class="footer__copyright">{t.footer.copyright}</p>
   </div>
 </footer>
