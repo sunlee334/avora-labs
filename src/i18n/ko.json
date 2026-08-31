@@ -70,7 +70,7 @@
   "home": {
     "meta": {
       "title": "PAROS — 액티브 라이프스타일 선케어 | AVORA LABS",
-      "description": "활동적인 매력과 부드러운 케어가 함께하는 스킨케어 브랜드 PAROS. 첫 제품 Daily Sunscreen SPF50+ / PA++++ 의 처방은 실제로 달리는 사람 수십 명이 블라인드로 비교해 고릅니다. 2027년 상반기 출시 예정.",
+      "description": "액티브 라이프스타일 선케어 브랜드 PAROS. 첫 제품 데일리 선크림(Daily Sunscreen) SPF50+ / PA++++ 자외선차단제의 처방은 실제로 달리고 오르고 타는 사람들이 제조사를 가린 채 비교해 고릅니다. 집계는 공개합니다.",
       "ogAlt": "낮은 태양을 배경으로 달리는 사람의 실루엣"
     },
     "notice": {
@@ -199,7 +199,7 @@
     },
     "product": {
       "kicker": "First Product",
-      "name": "Daily Sunscreen",
+      "name": "Daily Sunscreen · 데일리 선크림",
       "spec": "SPF50+ / PA++++ · 튜브 50ml",
       "cta": "제품 보기"
     },
@@ -217,11 +217,11 @@
   "product": {
     "meta": {
       "title": "PAROS 데일리 선크림 SPF50+ / PA++++ — 액티브 라이프스타일 선케어",
-      "description": "PAROS의 첫 제품 Daily Sunscreen. SPF50+ / PA++++ 자외선차단 기능성화장품. 처방은 실제로 달리는 사람들이 제조사를 가린 채 블라인드로 비교해 고릅니다. 2027년 상반기 출시 예정.",
+      "description": "PAROS 데일리 선크림(Daily Sunscreen). SPF50+ / PA++++ 자외선차단 기능성화장품. 처방은 실제로 달리고 오르고 타는 사람들이 제조사를 가린 채 비교해 고릅니다. 집계와 탈락한 처방의 점수까지 공개합니다.",
       "ogAlt": "밝은 표면 위에 놓인 PAROS Daily Sunscreen"
     },
     "hero": {
-      "imageAlt": "밝은 표면 위에 놓인 PAROS Daily Sunscreen 용기",
+      "imageAlt": "밝은 표면 위에 놓인 PAROS 데일리 선크림 용기",
       "headline": "움직이는 모든 순간에도, 피부는 편안하게 숨 쉽니다.",
       "priceUnknown": "가격 확정 예정",
       "ctaExternal": "스마트스토어에서 구매",
@@ -319,8 +319,8 @@
           "a": "아닙니다. 이미 시험과 심사를 마친 공장 보유 처방 중에서 고릅니다. 새로 개발하는 대신, 고르는 일을 실제로 운동하는 분들께 넘겼습니다. 검증단이 제조사 이름을 가린 샘플을 같은 기준으로 비교하고, 집계 결과를 그대로 공개합니다."
         },
         {
-          "q": "Daily Sunscreen의 자외선 차단 지수는 얼마인가요?",
-          "a": "SPF50+ / PA++++ 입니다. 국내 기준 최고 등급으로, 실외에서 장시간 활동하는 상황을 기준으로 잡았습니다."
+          "q": "데일리 선크림(Daily Sunscreen)의 자외선 차단 지수는 얼마인가요?",
+          "a": "SPF50+ / PA++++ 입니다. 국내 기준 최고 등급으로, 실외에서 장시간 활동하는 상황을 기준으로 잡았습니다. 「화장품법」상 자외선차단제(기능성화장품)에 해당합니다."
         },
         {
           "q": "운동할 때 써도 되나요?",
@@ -824,6 +824,7 @@
   "a11y": {
     "skipToContent": "본문으로 건너뛰기",
     "openMenu": "메뉴 열기",
+    "openSubmenu": "{name} 하위 메뉴",
     "closeMenu": "메뉴 닫기",
     "selectLanguage": "언어 선택"
   },

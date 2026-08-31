@@ -53,13 +53,32 @@ const utility = UTILITY_VISIBLE.filter((item) => item.badge !== 'cart');
           </li>
         ) : (
           <li class="nav__group">
+            {/*
+              제목은 **링크**, 화살표는 **버튼** 입니다.
+
+              전에는 제목이 통째로 `<button>` 이었습니다. 그러면 크롤러가
+              고객센터로 가는 길을 못 찾고, 가운데 클릭·새 탭 열기도 안 됩니다.
+              메뉴를 열지 않고 바로 가고 싶은 사람도 갈 방법이 없었습니다.
+
+              그래서 둘로 나눕니다 — 글자를 누르면 그 화면으로 가고, 화살표를
+              누르면 하위 목록이 열립니다. 자바스크립트가 없어도 링크는 그대로
+              동작하고, 화살표만 아무 일도 하지 않습니다.
+            */}
+            <a
+              class="nav__group-link"
+              href={localePath(locale, top.path)}
+              aria-current={top.match === path ? 'page' : undefined}
+            >
+              {top.label(t)}
+            </a>
             <button
               type="button"
+              class="nav__caret-btn"
               aria-expanded="false"
               aria-controls={`nav-${top.id}`}
+              aria-label={t.a11y.openSubmenu.replace('{name}', top.label(t))}
               data-nav-drop
             >
-              <span>{top.label(t)}</span>
               <span class="nav__caret" aria-hidden="true"></span>
             </button>
             <ul class="nav__dropdown" id={`nav-${top.id}`} hidden>

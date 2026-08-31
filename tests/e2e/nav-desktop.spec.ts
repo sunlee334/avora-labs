@@ -55,6 +55,65 @@ async function desktop(page: Page): Promise<void> {
   await page.setViewportSize({ width: 1280, height: 900 });
 }
 
+test.describe('묶음 제목도 갈 수 있는 곳이다', () => {
+  /*
+   * 전에는 "고객센터" 가 통째로 `<button>` 이었습니다. 그러면 세 가지가
+   * 막힙니다 — 크롤러가 그 아래 화면으로 가는 길을 못 찾고, 가운데 클릭·새
+   * 탭 열기가 안 되고, 메뉴를 열지 않고 바로 가려는 사람이 갈 방법이 없습니다.
+   *
+   * 화면에서는 티가 안 납니다. 눌러 보면 열리니까요.
+   */
+  test('묶음 제목이 링크다', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/ko/');
+
+    const groups = page.locator('.nav__group');
+    const n = await groups.count();
+    expect(n, '드롭다운 묶음이 없습니다').toBeGreaterThan(0);
+
+    for (let i = 0; i < n; i++) {
+      const link = groups.nth(i).locator('.nav__group-link');
+      await expect(link, `${i}번째 묶음 제목이 링크가 아닙니다`).toHaveCount(1);
+      const href = await link.getAttribute('href');
+      expect(href, '제목에 href 가 없습니다').toMatch(/^\/ko\//);
+    }
+  });
+
+  test('제목을 눌러도 하위 목록이 열리지 않고 그냥 간다', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/ko/');
+    await page.locator('.nav__group .nav__group-link').first().click();
+    await expect(page).toHaveURL(/\/ko\/support\/?$/);
+  });
+
+  test('화살표는 따로 있고 열고 닫는 일만 한다', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/ko/');
+
+    const caret = page.locator('.nav__caret-btn').first();
+    // 무엇의 하위 메뉴인지 읽혀야 합니다. "메뉴 열기" 만으로는 알 수 없습니다.
+    await expect(caret).toHaveAttribute('aria-label', /고객센터/);
+
+    const panelId = await caret.getAttribute('aria-controls');
+    const panel = page.locator(`#${panelId}`);
+    await expect(panel).toBeHidden();
+    await caret.click();
+    await expect(panel).toBeVisible();
+    // 주소는 그대로여야 합니다 — 화살표는 이동하지 않습니다.
+    await expect(page).toHaveURL(/\/ko\/$/);
+  });
+
+  test('자바스크립트가 없어도 링크는 살아 있다', async ({ browser }) => {
+    const ctx = await browser.newContext({ javaScriptEnabled: false });
+    const page = await ctx.newPage();
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/ko/');
+    const href = await page.locator('.nav__group .nav__group-link').first().getAttribute('href');
+    expect(href, 'JS 없이는 갈 길이 없습니다').toMatch(/support/);
+    await ctx.close();
+  });
+});
+
 test.describe('헤더 최상위', () => {
   test.beforeEach(async ({ page }) => desktop(page));
 

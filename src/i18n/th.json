@@ -824,6 +824,7 @@
   "a11y": {
     "skipToContent": "ข้ามไปยังเนื้อหา",
     "openMenu": "เปิดเมนู",
+    "openSubmenu": "เมนูย่อยของ{name}",
     "closeMenu": "ปิดเมนู",
     "selectLanguage": "เลือกภาษา"
   },

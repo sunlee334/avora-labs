@@ -106,7 +106,21 @@ export interface NavFlags {
  */
 export type ResolvedTop =
   | { kind: 'link'; id: string; label: Label; path: string; match: string }
-  | { kind: 'group'; id: string; label: Label; children: readonly NavLeaf[] };
+  | {
+      kind: 'group';
+      id: string;
+      label: Label;
+      /**
+       * 묶음 자체가 가는 곳.
+       *
+       * 묶음 제목이 `<button>` 이기만 하면 크롤러가 따라갈 수 없고, 가운데
+       * 클릭·새 탭도 안 됩니다. 첫 자식의 주소를 묶음의 착지점으로 씁니다 —
+       * "고객센터" 는 자주 묻는 질문(`/support`)이 그 자리입니다.
+       */
+      path: string;
+      match: string;
+      children: readonly NavLeaf[];
+    };
 
 // ── 내부 ────────────────────────────────────────────────────
 // NAV 와 resolveTop 을 함께 내보내면 컴포넌트가 visibleTop() 을 우회해 NAV 를
@@ -196,7 +210,20 @@ function resolveTop(
       match: only.match ?? only.path,
     };
   }
-  return { kind: 'group', id, label, children };
+  /*
+   * 착지점은 **첫 자식** 입니다. 목록의 첫 항목이 그 묶음의 대표라는 것이
+   * 이 파일의 배열 순서가 이미 말하고 있는 사실이고, 따로 적어 두면 둘이
+   * 어긋날 자리가 하나 늘어납니다.
+   */
+  const [first] = children;
+  return {
+    kind: 'group',
+    id,
+    label,
+    path: first.path,
+    match: first.match ?? first.path,
+    children,
+  };
 }
 
 // ── 공개 표면 ───────────────────────────────────────────────

@@ -1065,6 +1065,27 @@ a {
    조건**입니다 — 지우면 패널이 헤더 왼쪽 아래로 갑니다. */
 .nav__group {
   position: relative;
+  /*
+   * 제목은 링크, 화살표는 버튼입니다(Nav.astro 주석 참조). 둘이 한 덩어리로
+   * 보여야 하므로 나란히 세웁니다.
+   */
+  display: flex;
+  align-items: center;
+}
+.nav__group-link {
+  padding-inline-end: 2px;
+}
+.nav__caret-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--size-tap-min);
+  min-width: 28px;
+  padding: 0 6px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: inherit;
 }
 .nav__links button {
   display: inline-flex;

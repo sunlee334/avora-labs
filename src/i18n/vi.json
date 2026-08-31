@@ -824,6 +824,7 @@
   "a11y": {
     "skipToContent": "Chuyển đến nội dung",
     "openMenu": "Mở menu",
+    "openSubmenu": "Menu con của {name}",
     "closeMenu": "Đóng menu",
     "selectLanguage": "Chọn ngôn ngữ"
   },

@@ -824,6 +824,7 @@
   "a11y": {
     "skipToContent": "跳到正文",
     "openMenu": "打开菜单",
+    "openSubmenu": "{name} 子菜单",
     "closeMenu": "关闭菜单",
     "selectLanguage": "选择语言"
   },
