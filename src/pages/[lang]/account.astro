@@ -62,8 +62,14 @@ const a = t.account;
         방침 링크가 푸터에만 있었습니다. 개인정보를 받는 것은 이 버튼을 누르는
         순간인데, 그 자리에서 어디로 가는지 말하지 않으면 동의가 형식만 남습니다.
       */}
-      <p class="cart__notice">
-        {a.privacyNote}{' '}
+      <p class="cart__notice">{a.privacyNote}</p>
+      {/*
+        링크를 문장 끝에 붙이지 않고 제 줄로 내보냅니다. 작은 글씨 안의 인라인
+        링크는 96×16px 짜리 과녁이 되어 손가락으로 정확히 누를 수 없습니다
+        (mobile-ux 의 44×44 검사가 잡았습니다). 신청 폼의 방침 링크와 같은
+        처리입니다 — 그쪽은 107×14 였습니다.
+      */}
+      <p class="cart__notice notify__privacy notify__privacy--link">
         <a href={localePath(locale, 'legal/privacy')}>{a.privacyLink}</a>
       </p>
 
