@@ -9,20 +9,19 @@ import { test, expect } from '@playwright/test';
 
 test.describe('히어로 이미지', () => {
   /*
-   * 이 파일은 **모바일 프로필에서만** 돕니다.
+   * **이 파일은 화면 크기를 바꾸지 않습니다.**
    *
-   * 히어로 높이는 `svh` 로 정해집니다. desktop 프로필은 1280×900 으로 시작한
-   * 창의 크기를 바꿔 쓰는데, 그러면 `svh` 가 바뀐 화면이 아니라 **창** 기준으로
-   * 풀리는 일이 있습니다 — CI 에서 히어로가 658px 이 아니라 1049px 로 계산돼
-   * 필요한 이미지 폭이 1600px 로 나왔습니다.
+   * 히어로 높이는 `svh` 로 정해집니다. 그런데 세션 도중에 화면 크기를 바꾸면
+   * `svh` 가 바뀐 화면이 아니라 원래 창 기준으로 풀리는 일이 있습니다 — CI 에서
+   * 히어로가 658px 대신 1049px 로 계산돼, 필요한 이미지 폭이 1600px 로 나오고
+   * 검사가 실패했습니다. 로컬에서는 재현되지 않았습니다.
    *
-   * 실제 사용자에게는 없는 상황입니다. 휴대폰은 화면 크기가 바뀌지 않고,
-   * mobile 프로필(iPhone 14)은 처음부터 그 크기로 뜹니다. 여기서 보려는 것도
-   * 휴대폰에서의 선명도입니다.
+   * 실제 사용자에게는 없는 상황입니다. 휴대폰은 화면 크기가 바뀌지 않습니다.
+   * 그래서 각 검사를 **맞는 프로필에 맡기고** 크기는 건드리지 않습니다.
    */
-  test.skip(({ isMobile }) => !isMobile, 'svh 기준이 흔들리지 않는 모바일 프로필에서만 봅니다');
 
-  test('휴대폰에서 늘려 그리지 않는다', async ({ page }) => {
+  test('휴대폰에서 늘려 그리지 않는다', async ({ page, isMobile }) => {
+    test.skip(!isMobile, '휴대폰 프로필에서 봅니다');
     /*
      * 사진은 가로 1600×1049 인데 히어로는 세로로 깁니다. `object-fit: cover`
      * 가 높이를 채우려고 사진을 키우므로, 화면 폭이 390px 이어도 브라우저가
@@ -31,7 +30,6 @@ test.describe('히어로 이미지', () => {
      * `sizes` 에 그 배율을 적지 않으면 브라우저는 화면 폭만 보고 작은 후보를
      * 받아 늘려 그립니다 — 측정값으로 선명도가 4분의 1이 됐습니다.
      */
-    await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/ko/');
 
     const m = await page.evaluate(async () => {
@@ -79,15 +77,13 @@ test.describe('히어로 이미지', () => {
     ).toBe(true);
   });
 
-  test('폭이 넓어지면 과하게 큰 파일을 받지 않는다', async ({ page }) => {
+  test('폭이 넓어지면 과하게 큰 파일을 받지 않는다', async ({ page, isMobile }) => {
+    test.skip(isMobile, '넓은 화면 프로필에서 봅니다');
     /*
      * 배율을 넉넉히 잡아 두면 데스크톱에서 필요 없는 바이트를 받게 됩니다.
      *
-     * 여기서는 화면을 넓혀야 하므로 `svh` 가 다시 흔들릴 수 있습니다. 그래서
-     * 이 검사는 "받은 것이 그린 것의 1.6배를 넘지 않는가" 만 봅니다 — 높이가
-     * 어떻게 풀리든 그 비율은 같이 움직입니다.
+     * desktop 프로필이 이미 1280×900 이므로 크기를 건드리지 않습니다.
      */
-    await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto('/ko/');
     const over = await page.evaluate(async () => {
       const img = document.querySelector<HTMLImageElement>('.hero__media img')!;
@@ -100,7 +96,7 @@ test.describe('히어로 이미지', () => {
   });
 
   test('자리를 미리 잡아 화면이 흔들리지 않는다', async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 844 });
+    // 폭과 무관한 속성이라 어느 프로필에서 보든 같습니다.
     await page.goto('/ko/');
     const img = page.locator('.hero__media img');
     // width/height 가 없으면 이미지가 도착할 때 아래 내용이 밀립니다.
