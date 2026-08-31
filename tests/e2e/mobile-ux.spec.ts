@@ -158,6 +158,16 @@ test.describe('모션 접근성', () => {
 
 test.describe('시맨틱 마크업', () => {
   test('h1 은 페이지당 하나, main 과 nav 가 존재한다', async ({ page }) => {
+    /*
+     * 홈만 보고 있었습니다. `/brand` 를 새로 만들었을 때 h1 이 하나도 없는
+     * 채로 통과했습니다 — 홈에서 옮겨 온 문단이 그대로 문단이었습니다.
+     * 화면 낭독기 사용자는 목차에서 "이 페이지가 무엇인가" 를 알 수 없습니다.
+     */
+    for (const path of ['/ko/brand', '/ko/product', '/ko/panel', '/ko/support']) {
+      await page.goto(path);
+      await expect(page.locator('h1'), `${path} 의 h1`).toHaveCount(1);
+    }
+
     await page.goto('/ko/');
     await expect(page.locator('h1')).toHaveCount(1);
     await expect(page.locator('main#main')).toHaveCount(1);

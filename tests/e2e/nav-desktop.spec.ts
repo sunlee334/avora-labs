@@ -412,9 +412,10 @@ test.describe('브랜드 항목이 스토리까지 데려간다', () => {
     for (const width of [390, 1280]) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto('/ko/product');
-      // 헤더 링크는 900px 이상에서만 보입니다. 여기서 보는 것은 **착지** 이지
-      // 클릭 경로가 아니므로(그쪽은 단일 출처 테스트가 덮습니다) 같은 주소로
-      // 바로 이동합니다 — 브랜드 항목이 하는 일과 글자 단위로 같습니다.
+      // 여기서 보는 것은 **착지** 이지 클릭 경로가 아닙니다. 브랜드 항목은
+      // 이제 `/brand` 페이지라 프래그먼트를 쓰지 않지만, 밖에 공유된 옛
+      // `#story` 링크는 남아 있고 그쪽으로 넘어온 사람도 헤더에 가리면 안
+      // 됩니다. 그 경로를 그대로 밟습니다.
       await page.evaluate(() => {
         location.href = '/ko/#story';
       });

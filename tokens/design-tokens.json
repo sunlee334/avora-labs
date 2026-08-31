@@ -152,8 +152,13 @@
       "value": "65ch",
       "use": "본문 최대 너비"
     },
-    "pageMax": {
-      "value": "1280px"
+    "containerMax": {
+      "value": "1120px",
+      "use": "본문 컨테이너 최대 너비. 이 값이 없으면 헤드라인이 화면 끝까지 늘어나고, 본문은 65ch 에서 멈춰 둘의 기준선이 어긋납니다 — 그게 \"좌측으로 쏠려 보인다\" 의 정체입니다."
+    },
+    "containerNarrow": {
+      "value": "720px",
+      "use": "긴 글만 있는 섹션. 1120px 로 흘리면 한 줄이 한글 70자를 넘어 읽기 어렵습니다. 40~50자가 편안합니다."
     },
     "textInput": {
       "value": "16px",
@@ -170,6 +175,20 @@
     },
     "sectionDesktop": {
       "value": "104px"
+    },
+    "sectionLgMobile": {
+      "value": "88px",
+      "use": "강조 섹션 — 히어로 다음, 차별점 선언"
+    },
+    "sectionLgDesktop": {
+      "value": "144px"
+    },
+    "sectionSmMobile": {
+      "value": "32px",
+      "use": "앞 섹션에 붙어야 하는 섹션 — 근거와 그 근거의 표"
+    },
+    "sectionSmDesktop": {
+      "value": "56px"
     },
     "gutterMobile": {
       "value": "20px"

@@ -214,6 +214,30 @@
       }
     }
   },
+  "brand": {
+    "meta": {
+      "title": "品牌 — PAROS | AVORA LABS",
+      "description": "PAROS 这个名字的由来，以及这个品牌想做什么。以爱琴海帕罗斯岛命名的活力生活方式防晒品牌。"
+    },
+    "origin": {
+      "kicker": "Origin",
+      "statementBefore": "将运动活力与",
+      "statementEmphasis": "温和护理",
+      "statementAfter": "结合的护肤。"
+    },
+    "question": {
+      "kicker": "The Question",
+      "quote": "当身体最富生机的时刻，为什么肌肤所感受到的护理却总是平淡而千篇一律？",
+      "body": "以往的美妆市场停留在两个极端。追求华丽的普通化妆品在日常活动中显得厚重闷塞，而只强调功能的运动化妆品则粗糙生硬，忽略了肌肤应有的舒适与质感。",
+      "naming": "PAROS 是爱琴海上的一座岛。阳光强烈，海水依然清澈；风很粗粝，人们依然自由地活动。我们从这个自然的力量与美并不对立的地方，取来了品牌的态度。"
+    },
+    "philosophy": {
+      "kicker": "Philosophy",
+      "quote": "运动是生命最纯粹、最有力的表达。从清晨的漫步，到全神贯注掌控生活的时刻，PAROS 不打扰这份流动，只是让肌肤回到它本来的样子。",
+      "body": "在尽情活动之后，PAROS 触及肌肤的瞬间所带来的细腻柔滑 —— 这份反差正是 PAROS 的独特之处。"
+    },
+    "bridgeLink": "阅读品牌故事"
+  },
   "product": {
     "meta": {
       "title": "PAROS 每日防晒 SPF50+ / PA++++ — 活力生活方式防晒",

@@ -45,12 +45,17 @@
 
   --size-tap-min: 44px;
   --size-measure: 65ch;
-  --size-page-max: 1280px;
+  --size-container-max: 1120px;
+  --size-container-narrow: 720px;
   --size-text-input: 16px;
   --size-control-height: 48px;
 
   --space-section-mobile: 56px;
   --space-section-desktop: 104px;
+  --space-section-lg-mobile: 88px;
+  --space-section-lg-desktop: 144px;
+  --space-section-sm-mobile: 32px;
+  --space-section-sm-desktop: 56px;
   --space-gutter-mobile: 20px;
   --space-gutter-desktop: 48px;
 

@@ -49,9 +49,10 @@ export function dict(locale: string): Dict {
  * `trailingSlash: 'ignore'` 라서 빌드는 이것을 잡아 주지 않습니다. 실제 서빙에서만
  * 드러나므로 여기서 형태를 하나로 고정합니다.
  *
- * ⚠️ 프래그먼트와 질의는 경로가 아닙니다. `#story` 뒤에 슬래시를 붙이면
- *    `/ko/#story/` 가 되어 앵커가 죽습니다. 내비게이션의 브랜드 항목이 실제로
- *    이 형태를 씁니다(`src/config/nav.ts`).
+ * ⚠️ 프래그먼트와 질의는 경로가 아닙니다. `#notify` 뒤에 슬래시를 붙이면
+ *    `/ko/#notify/` 가 되어 앵커가 죽습니다. 홈의 첫 화면 버튼이 그 형태를
+ *    씁니다. 브랜드 항목도 `#story` 로 같은 일을 했는데, 지금은 실제
+ *    페이지(`/brand`)라 프래그먼트를 쓰지 않습니다.
  */
 export function localePath(locale: string, path = ''): string {
   const clean = path.replace(/^\/+/, '');

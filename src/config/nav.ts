@@ -3,8 +3,9 @@
  *
  * 헤더(`Nav.astro`)·모바일 시트(`MenuSheet.astro`)·푸터(`Footer.astro`) 셋이
  * 같은 목록을 각자 하드코딩하고 있었습니다. 메뉴 하나를 고치려면 세 파일을
- * 고쳐야 했고, 실제로 어긋나 있었습니다 — 헤더의 홈 링크는 `/{lang}/#story`,
- * 시트와 푸터는 `/{lang}/`.
+ * 고쳐야 했고, 실제로 어긋나 있었습니다 — 헤더의 브랜드 링크는
+ * `/{lang}/#story`, 시트와 푸터는 `/{lang}/`. (그 항목은 지금 `/brand`
+ * 페이지입니다.)
  *
  * ── 철칙: 이 파일의 import 문은 `import type` 하나뿐입니다 ──
  * 값 import 가 하나라도 들어가면 Playwright 스펙에서 **모듈 로드 자체가
@@ -57,9 +58,13 @@ export interface NavLeaf {
   /**
    * `aria-current` 판정용. `Base.astro` 가 내려주는 `path` prop 과 비교합니다.
    *
-   * **`path` 와 분리돼 있는 것이 브랜드 항목의 전제입니다** — `path` 는
-   * `'#story'` 지만 `match` 는 `''` 이라, 판정은 프래그먼트가 없던 때와 글자
-   * 단위로 같은 결과를 냅니다.
+   * 생략하면 `path` 를 그대로 씁니다. 둘이 갈라지는 것은 **주소에 프래그먼트가
+   * 붙을 때** 입니다 — 그때는 `path` 가 `'#어디'` 여도 판정은 어느 페이지에
+   * 있는가로 해야 합니다.
+   *
+   * 지금 이 필드를 쓰는 항목은 없습니다. 브랜드 항목이 `'#story'` 였다가
+   * 실제 페이지(`/brand`)가 되면서 마지막 사용처가 사라졌습니다. 프래그먼트
+   * 링크를 다시 넣게 되면 그때 필요합니다.
    */
   match?: string;
   /**
@@ -137,8 +142,16 @@ const NAV: readonly NavGroup[] = [
     id: 'brand',
     label: (t) => t.nav.brand,
     children: [
-      // 주소는 /{lang}/#story, aria-current 판정은 '' — 위 match 주석 참조.
-      { id: 'story', label: (t) => t.nav.story, path: '#story', match: '' },
+      /*
+       * 전에는 `/{lang}/#story` 앵커였습니다 — 홈의 한 지점으로 스크롤하는
+       * 링크입니다. 섹션 순서를 바꾸면서 브랜드 서사가 아래로 내려갔고,
+       * 누르면 페이지 중간 어딘가로 튕겼습니다. 네비게이션이 목적지를
+       * 약속하고 스크롤을 배달하는 셈이었습니다.
+       *
+       * 이제 실제 페이지입니다. `match` 를 따로 두지 않아도 됩니다 —
+       * 주소와 판정이 같아졌습니다.
+       */
+      { id: 'story', label: (t) => t.nav.story, path: 'brand' },
     ],
   },
   {

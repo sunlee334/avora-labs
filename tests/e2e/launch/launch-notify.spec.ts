@@ -124,10 +124,16 @@ test.describe('홈 신청 자리', () => {
     const y = await page.locator('[data-source="home-hero"]').evaluate(
       (el) => el.getBoundingClientRect().top + window.scrollY,
     );
-    const story = await page.locator('#story').evaluate(
+    /*
+     * 브랜드 서사는 `/brand` 로 옮겼습니다(`#story` 도 그쪽에 있습니다).
+     * 홈에 남은 것은 그리로 보내는 브릿지이고, 위계에서 차지하는 자리는
+     * 같습니다 — 맨 뒤. 이 검사가 지키는 것은 그대로입니다:
+     * **신청 자리가 브랜드 이야기보다 앞에 온다.**
+     */
+    const story = await page.locator('[data-section="brand_bridge"]').evaluate(
       (el) => el.getBoundingClientRect().top + window.scrollY,
     );
-    expect(y, '신청 자리가 오리진 섹션보다 위에 있어야 합니다').toBeLessThan(story);
+    expect(y, '신청 자리가 브랜드 브릿지보다 위에 있어야 합니다').toBeLessThan(story);
   });
 
   test('출시 시기를 제품 페이지와 같은 말로 밝힌다', async ({ page }) => {

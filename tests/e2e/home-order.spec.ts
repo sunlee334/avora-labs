@@ -24,7 +24,12 @@ async function tops(page: import('@playwright/test').Page) {
       panel: y(document.querySelector('#panel')),
       product: y(document.querySelector('main a.cta[href$="/product/"]')?.closest('section')),
       journey: y(document.querySelector('.journey')?.closest('section')),
-      story: y(document.querySelector('#story')),
+      /*
+       * 브랜드 서사는 `/brand` 로 옮겼습니다. 홈에 남은 것은 그리로 보내는
+       * 브릿지 한 단락입니다 — 위계에서 차지하는 자리는 같습니다(맨 뒤).
+       * 전에는 `#story` 를 봤는데, 그 id 는 이제 `/brand` 에 있습니다.
+       */
+      story: y(document.querySelector('[data-section="brand_bridge"]')),
     };
   });
 }
@@ -36,10 +41,10 @@ test.describe('메시지 위계가 순서로 드러난다', () => {
 
     expect(t.panel, '검증단 섹션이 없습니다').toBeGreaterThan(0);
     expect(t.product, '제품 섹션이 없습니다').toBeGreaterThan(0);
-    expect(t.story, '브랜드 서사(Origin)가 없습니다').toBeGreaterThan(0);
+    expect(t.story, '브랜드 브릿지가 없습니다').toBeGreaterThan(0);
 
     expect(t.panel, '검증단이 제품 스펙보다 뒤에 있습니다').toBeLessThan(t.product);
-    expect(t.product, '제품 스펙이 브랜드 서사보다 뒤에 있습니다').toBeLessThan(t.story);
+    expect(t.product, '제품 스펙이 브랜드 브릿지보다 뒤에 있습니다').toBeLessThan(t.story);
 
     /*
      * 이 파일이 막겠다는 회귀는 **The Choice 가 뒤로 밀리는 것** 입니다.
@@ -49,7 +54,7 @@ test.describe('메시지 위계가 순서로 드러난다', () => {
      */
     expect(t.choice, 'The Choice 섹션을 찾지 못했습니다').toBeGreaterThan(0);
     expect(t.choice, '근거(The Choice)가 검증단보다 뒤에 있습니다').toBeLessThan(t.panel);
-    expect(t.choice, '근거가 브랜드 서사보다 뒤에 있습니다').toBeLessThan(t.story);
+    expect(t.choice, '근거가 브랜드 브릿지보다 뒤에 있습니다').toBeLessThan(t.story);
     expect(t.journey, '여정 섹션을 찾지 못했습니다').toBeGreaterThan(0);
     expect(t.journey, '여정이 제품 스펙보다 앞에 있습니다').toBeGreaterThan(t.product);
   });

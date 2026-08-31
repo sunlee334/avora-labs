@@ -144,12 +144,99 @@ button {
 }
 
 /* ── layout ───────────────────────────────────────────────── */
+/*
+ * 본문 컨테이너.
+ *
+ * ── 왜 max-width 가 필요한가 ────────────────────────────────
+ * 없을 때 화면에서 벌어지는 일: 헤드라인(`.display`)은 블록이라 화면 끝까지
+ * 늘어나고, 본문(`.body`)은 `max-width: 65ch` 에서 멈춥니다. 1440px 화면에서
+ * 실측하면 헤드라인 1344px · 본문 581px 로, 두 층의 오른쪽 끝이 811px 어긋
+ * 납니다. 왼쪽 정렬은 그대로인데 오른쪽이 들쭉날쭉해지니 **"내용이 좌측으로
+ * 쏠려 보인다"** 가 됩니다.
+ *
+ * 폭을 하나로 묶고 가운데 두면 두 층이 같은 기준선을 씁니다.
+ *
+ * ── 글자를 가운데 정렬하는 것과 다릅니다 ────────────────────
+ * 블록을 화면 중앙에 놓는 것이지 텍스트를 가운데로 모으는 것이 아닙니다.
+ * 가운데 정렬된 본문은 줄마다 시작점이 달라 읽기 어렵습니다. 본문은 계속
+ * 왼쪽 정렬입니다.
+ */
+/*
+ * ── 왜 max-width 가 아니라 padding 인가 ─────────────────────
+ * 이 저장소는 `.section` 과 `.wrap` 을 **같은 요소** 에 겁니다
+ * (`<section class="section section--alt wrap">`). `.wrap` 에 max-width 를
+ * 주면 섹션 자체가 좁아지고, 그러면 배경 밴드도 함께 줄어듭니다 — 실측으로
+ * 1440px 화면에서 교차 섹션 배경이 1120px 로 잘렸습니다. 밴드는 전체 폭이고
+ * **그 안의 내용만** 가운데 모여야 합니다.
+ *
+ * 좌우 여백을 키워 같은 결과를 냅니다. 요소는 전체 폭으로 남고 내용만
+ * 가운데로 옵니다. 마크업을 건드리지 않아도 되는 것은 덤입니다 —
+ * `.wrap` 이 쓰이는 곳이 다섯 페이지에 걸쳐 수십 곳입니다.
+ *
+ * `max()` 안의 뺄셈은 화면이 좁을 때 음수가 되고, 그때는 앞의 기본 여백이
+ * 이깁니다.
+ */
 .wrap {
-  padding-inline: var(--space-gutter-mobile);
+  padding-inline: max(
+    var(--space-gutter-mobile),
+    calc((100% - var(--size-container-max)) / 2)
+  );
+}
+
+/*
+ * 긴 글만 있는 섹션.
+ *
+ * 1120px 로 흘리면 한 줄이 한글 70자를 넘습니다. 눈이 다음 줄 첫머리를 찾지
+ * 못해 같은 줄을 다시 읽게 됩니다. 40~50자가 편안합니다.
+ */
+.wrap--narrow {
+  padding-inline: max(
+    var(--space-gutter-mobile),
+    calc((100% - var(--size-container-narrow)) / 2)
+  );
 }
 
 .section {
   padding-block: var(--space-section-mobile);
+}
+
+/*
+ * 섹션 리듬.
+ *
+ * 모든 섹션이 같은 여백이면 페이지가 한 덩어리로 읽혀 리듬이 없습니다.
+ * 실측했을 때 홈의 아홉 섹션이 예외 없이 104px 이었습니다.
+ *
+ *   --lg  강조. 앞뒤로 크게 띄워 무게를 줍니다
+ *   기본  정보 섹션
+ *   --sm  앞 섹션에 **붙어야 하는** 것. 근거와 그 근거의 표처럼
+ *         둘이 한 덩어리로 읽혀야 할 때
+ */
+.section--lg {
+  padding-block: var(--space-section-lg-mobile);
+}
+.section--sm {
+  padding-block: var(--space-section-sm-mobile);
+}
+/* 붙는 섹션은 위쪽만 좁힙니다 — 아래까지 좁히면 다음 섹션과 엉깁니다. */
+.section--attach {
+  padding-block-start: var(--space-section-sm-mobile);
+}
+
+/*
+ * 텍스트 + 미디어 2열.
+ *
+ * **이미지가 없으면 1열입니다.** 지금 이 사이트에는 제품 사진이 두 장뿐이고,
+ * 나머지는 2027년에나 생깁니다. 그때까지 회색 플레이스홀더를 놓지 않습니다 —
+ * 빈 회색 사각형은 이미지가 없는 것보다 더 허전해 보입니다.
+ *
+ * `auto-fit` 이 그 일을 합니다. 자식이 하나면 한 칸, 둘이면 두 칸이 됩니다.
+ * 사진이 들어오는 날 마크업에 한 덩어리만 더하면 저절로 2열이 됩니다.
+ */
+.section--split > .split {
+  display: grid;
+  gap: var(--space-gutter-desktop);
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+  align-items: start;
 }
 
 /*
@@ -163,21 +250,49 @@ button {
   background: var(--color-accent-soft);
 }
 
+/*
+ * 어두운 밴드.
+ *
+ * ── 왜 클래스가 아니라 토큰을 뒤집는가 ─────────────────────
+ * 전에는 `.kicker` 와 `.body` 두 클래스만 이름으로 적어 뒤집었습니다. 그러면
+ * **밴드 안에 새 클래스가 들어올 때마다 빠집니다.** 실제로 The Journey 를
+ * 어두운 밴드로 옮기자 `.journey__step`·`.journey__body` 가 그대로 잉크색이라
+ * 5개 언어에서 50개 요소가 1.75:1 이 됐습니다.
+ *
+ * 커스텀 속성은 상속되므로, 밴드에서 역할 토큰 자체를 바꾸면 그 안의 모든
+ * 자손이 따라옵니다. 앞으로 무엇을 넣든 색을 따로 챙기지 않아도 됩니다.
+ */
 .section--dark {
   background: var(--color-bg-inverse);
   color: var(--color-accent);
-}
-.section--dark .kicker,
-.section--dark .body {
-  color: var(--color-text-muted-inverse);
+  --color-text: var(--color-text-inverse);
+  --color-text-muted: var(--color-text-muted-inverse);
 }
 
 @media (min-width: 900px) {
   .wrap {
-    padding-inline: var(--space-gutter-desktop);
+    padding-inline: max(
+      var(--space-gutter-desktop),
+      calc((100% - var(--size-container-max)) / 2)
+    );
+  }
+  .wrap--narrow {
+    padding-inline: max(
+      var(--space-gutter-desktop),
+      calc((100% - var(--size-container-narrow)) / 2)
+    );
   }
   .section {
     padding-block: var(--space-section-desktop);
+  }
+  .section--lg {
+    padding-block: var(--space-section-lg-desktop);
+  }
+  .section--sm {
+    padding-block: var(--space-section-sm-desktop);
+  }
+  .section--attach {
+    padding-block-start: var(--space-section-sm-desktop);
   }
 }
 
@@ -997,8 +1112,10 @@ a {
   --nav-height: 69px;
 }
 
-/* 브랜드 항목이 #story 로 가므로 착지가 스티키 헤더에 가리지 않게 합니다.
-   저장소에 scroll-margin/scroll-padding 선언이 0건이었습니다. */
+/* 착지점이 스티키 헤더에 가리지 않게 합니다.
+   `#story` 는 이제 `/brand` 페이지에 있습니다 — 헤더의 브랜드 항목이 실제
+   페이지가 되면서 옮겨 갔고, 밖에 공유된 옛 링크가 그리로 넘어옵니다
+   (src/lib/story-anchor.ts). 저장소에 scroll-margin 선언이 0건이었습니다. */
 #story,
 /* 건너뛰기 링크의 착지점도 같은 이유로 필요합니다. */
 #main {
@@ -3740,9 +3857,29 @@ a {
  * 히어로 사진 바로 아래입니다. 스크롤 한 번 안에 사진·헤드라인·폼이
  * 모두 들어오도록 위아래 여백을 섹션 기본값보다 좁힙니다.
  */
+/*
+ * 첫 화면의 신청 자리.
+ *
+ * 히어로에 **붙어야** 하는 섹션이라 위 여백을 좁힙니다 — 사진과 폼이 한
+ * 덩어리로 읽혀야 합니다. 아래는 0 인데, 다음 섹션이 자기 여백을 갖고 있어
+ * 여기서 또 띄우면 둘이 겹칩니다.
+ *
+ * 전에는 26px 을 직접 적었습니다. 그러면 이 값이 왜 26 인지 아무도 모르고,
+ * 리듬 토큰을 조정해도 여기만 따라오지 않습니다.
+ */
 .heroNotify {
-  padding-top: 26px;
+  padding-top: var(--space-section-sm-mobile);
   padding-bottom: 0;
+}
+/*
+ * 넓은 화면 값은 **여기** 에 둡니다. 파일 위쪽의 미디어 블록에 적었더니
+ * 아래의 기본 규칙이 순서로 이겨 1440px 에서도 모바일 값이 나왔습니다.
+ * 특이도가 같으면 나중에 쓴 것이 이깁니다.
+ */
+@media (min-width: 900px) {
+  .heroNotify {
+    padding-top: var(--space-section-sm-desktop);
+  }
 }
 .heroNotify .notify {
   margin-top: 14px;
