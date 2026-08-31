@@ -72,9 +72,28 @@ const b = t.brand;
 
     긴 글이라 `wrap--narrow` 입니다. 1120px 로 흘리면 한 줄이 한글 70자를
     넘어, 눈이 다음 줄 첫머리를 찾지 못합니다.
+
+    ── 어두운 밴드가 여기인 이유 ──────────────────────────────
+    처음에는 마지막 Philosophy 를 어둡게 했습니다. 그런데 **푸터도 같은
+    잉크색** 이라 둘이 이어 붙어, 문서의 61~64% 가 끊김 없는 한 색이
+    됐습니다(홈은 27%). 페이지 아래 절반이 통짜 검정이면 어디서 본문이
+    끝나고 어디서 푸터가 시작하는지 알 수 없습니다.
+
+    가운데로 옮기면 밝음 → 어둠 → 옅음 → 푸터(어둠)가 되어 경계가 살아
+    있고, 대비가 필요했던 이유(팔레트 A 에는 캠페인 컬러가 없습니다)도
+    그대로 채웁니다. 오히려 브랜드가 존재하는 까닭을 묻는 이 대목이 눈에
+    걸릴 자리로는 더 맞습니다.
   */}
-  <section class="section section--alt wrap wrap--narrow rise">
-    <p class="kicker">{b.question.kicker}</p>
+  <section class="section section--lg section--dark wrap wrap--narrow rise">
+    {/*
+      머리말이 곧 이 섹션의 제목입니다("The Question").
+
+      홈에 있을 때는 `<p>` 가 맞았습니다 — 홈에는 각 섹션마다 `<h2>` 가 따로
+      있었으니까요. 페이지로 독립하면서 본문 세 덩어리 중 제목이 있는 것은
+      h1 하나뿐이 됐고, 목차로 훑는 사람은 h1 다음에 곧장 푸터로 떨어졌습니다.
+      보이는 모습은 `.kicker` 가 정하므로 그대로입니다.
+    */}
+    <h2 class="kicker">{b.question.kicker}</h2>
     <blockquote class="quote">{b.question.quote}</blockquote>
     <p class="body" style="margin-top: 28px">{b.question.body}</p>
     <p class="body" style="margin-top: 18px">{b.question.naming}</p>
@@ -83,11 +102,11 @@ const b = t.brand;
   {/*
     Philosophy.
 
-    팔레트 A 에는 캠페인 컬러가 없습니다. 밝은 지반이 이어지다 여기 한 곳만
-    뒤집히는 대비가 "브랜드의 에너지 버튼" 역할을 대신합니다.
+    푸터가 잉크색이라 그 바로 위는 어둡지 않아야 합니다 — 위 The Question
+    주석을 보세요. 옅은 교차 지반이 마지막 문단을 푸터에서 떼어 놓습니다.
   */}
-  <section class="section section--lg section--dark wrap wrap--narrow rise">
-    <p class="kicker">{b.philosophy.kicker}</p>
+  <section class="section section--alt wrap wrap--narrow rise">
+    <h2 class="kicker">{b.philosophy.kicker}</h2>
     <blockquote class="quote">{b.philosophy.quote}</blockquote>
     <p class="body" style="margin-top: 28px">{b.philosophy.body}</p>
   </section>

@@ -107,8 +107,17 @@ button {
   color: inherit;
 }
 
+/*
+ * `--color-text` 가 아니라 `--color-focus` 를 씁니다.
+ *
+ * 밝은 지반에서는 둘 다 잉크라 보이는 결과가 같습니다. 다른 것은 어두운
+ * 면입니다 — 초점 테두리는 글자색을 따라갈 이유가 없고(글자가 흐린 회색인
+ * 자리에서도 테두리는 또렷해야 합니다), 무엇보다 `--color-focus` 라는 이름의
+ * 토큰이 정의만 되고 아무도 쓰지 않은 채 남아 있었습니다. 이름을 보고
+ * 가져다 쓴 사람은 어두운 면에서 배경과 같은 색을 얻게 됩니다.
+ */
 :focus-visible {
-  outline: 2px solid var(--color-text);
+  outline: 2px solid var(--color-focus);
   outline-offset: 3px;
   border-radius: 2px;
 }
@@ -175,12 +184,25 @@ button {
  *
  * `max()` 안의 뺄셈은 화면이 좁을 때 음수가 되고, 그때는 앞의 기본 여백이
  * 이깁니다.
+ *
+ * ── 왜 변수로 빼 두는가 ────────────────────────────────────
+ * 이 값을 쓰는 곳이 `.wrap` 하나가 아닙니다. 헤더·히어로 문구·사진 캡션도
+ * 같은 기준선에 서야 하는데, 처음에는 `.wrap` 에만 넣었습니다. 그 결과
+ * **본문만 안쪽으로 들어오고 나머지는 제자리에 남아** 1920px 에서 헤더
+ * 워드마크가 본문보다 352px 왼쪽에 섰습니다. 스티키 헤더라 스크롤 내내
+ * 보이는 어긋남이었습니다.
+ *
+ * 퍼센트는 변수에 담아도 **쓰는 쪽 요소** 기준으로 풀립니다. 그래서 전체
+ * 폭인 헤더와 섹션이 같은 한 줄을 공유할 수 있습니다.
  */
-.wrap {
-  padding-inline: max(
+:root {
+  --pad-container: max(
     var(--space-gutter-mobile),
     calc((100% - var(--size-container-max)) / 2)
   );
+}
+.wrap {
+  padding-inline: var(--pad-container);
 }
 
 /*
@@ -190,10 +212,22 @@ button {
  * 못해 같은 줄을 다시 읽게 됩니다. 40~50자가 편안합니다.
  */
 .wrap--narrow {
-  padding-inline: max(
-    var(--space-gutter-mobile),
-    calc((100% - var(--size-container-narrow)) / 2)
-  );
+  padding-inline: var(--pad-container);
+}
+/*
+ * 좁히는 것은 **오른쪽 끝** 이지 시작점이 아닙니다.
+ *
+ * 처음에는 720px 단을 화면 가운데 놓았습니다. 그러면 좁은 섹션이 넓은
+ * 섹션보다 왼쪽에서 200px 더 들어가, 홈을 세로로 읽을 때 시작점이
+ * 160 → 360 → 160 으로 튑니다. 모든 섹션이 좁은 `/brand` 에서는 더
+ * 뚜렷했습니다 — 헤더·푸터 워드마크는 160px 인데 본문만 360px 이라
+ * 페이지 전체가 오른쪽으로 밀린 것처럼 보였습니다.
+ *
+ * 왼쪽을 컨테이너에 맞추고 폭만 잘라내면 시작점은 하나로 남고, 긴 글이
+ * 40~50자에서 접히는 효과는 그대로입니다.
+ */
+.wrap--narrow > * {
+  max-width: var(--size-container-narrow);
 }
 
 .section {
@@ -251,35 +285,56 @@ button {
 }
 
 /*
- * 어두운 밴드.
+ * 어두운 면.
  *
  * ── 왜 클래스가 아니라 토큰을 뒤집는가 ─────────────────────
  * 전에는 `.kicker` 와 `.body` 두 클래스만 이름으로 적어 뒤집었습니다. 그러면
- * **밴드 안에 새 클래스가 들어올 때마다 빠집니다.** 실제로 The Journey 를
+ * **면 안에 새 클래스가 들어올 때마다 빠집니다.** 실제로 The Journey 를
  * 어두운 밴드로 옮기자 `.journey__step`·`.journey__body` 가 그대로 잉크색이라
  * 5개 언어에서 50개 요소가 1.75:1 이 됐습니다.
  *
- * 커스텀 속성은 상속되므로, 밴드에서 역할 토큰 자체를 바꾸면 그 안의 모든
- * 자손이 따라옵니다. 앞으로 무엇을 넣든 색을 따로 챙기지 않아도 됩니다.
+ * 커스텀 속성은 상속되므로, 역할 토큰 자체를 바꾸면 그 안의 모든 자손이
+ * 따라옵니다.
+ *
+ * ── 왜 셋을 한 규칙에 묶는가 ────────────────────────────────
+ * 잉크를 칠하는 곳이 셋인데(밴드·공지 배너·푸터) **뒤집는 곳은 하나뿐이었고,
+ * 그마저 글자색 둘만 뒤집었습니다.** 실측한 결과:
+ *
+ *   The Journey 의 `li` 구분선 5줄 — 1.00:1
+ *
+ * `--color-border` 가 `rgba(37,43,49,.14)`, 즉 **잉크 자신의 14%** 입니다.
+ * 잉크 위에 잉크를 얹었으니 선이 아예 없습니다. 목록이 문단 덩어리로
+ * 뭉쳐 보이던 것이 이것입니다.
+ *
+ * 나머지 둘도 같은 함정을 안고 있었습니다. `.notice` 는 잉크를 직접 칠하는데
+ * 토큰은 그대로여서, 배너 링크에 초점이 가면 테두리가 배경과 같은 색이었고
+ * (`:focus-visible` 이 `--color-focus` 를 씁니다) — 키보드로 다니는 사람은
+ * 자기가 어디 있는지 볼 수 없었습니다.
+ *
+ * 이 목록은 **역방향 값이 정의된 토큰 전부** 입니다. 새 토큰에 역방향을
+ * 만들면 여기에도 추가해야 합니다. 폼·링크를 어두운 면에 넣을 때는
+ * `tokens-contrast.spec.ts` 에 조합을 등록하고 실측하세요 — 상속이
+ * 닿지 않는 곳(예: 브라우저 기본 UI 색)이 남아 있습니다.
  */
+.section--dark,
+.notice,
+.footer {
+  --color-text: var(--color-text-inverse);
+  --color-text-muted: var(--color-text-muted-inverse);
+  --color-border: var(--color-border-inverse);
+  --color-bg: var(--color-bg-inverse);
+  --color-focus: var(--color-text-inverse);
+}
 .section--dark {
   background: var(--color-bg-inverse);
   color: var(--color-accent);
-  --color-text: var(--color-text-inverse);
-  --color-text-muted: var(--color-text-muted-inverse);
 }
 
 @media (min-width: 900px) {
-  .wrap {
-    padding-inline: max(
+  :root {
+    --pad-container: max(
       var(--space-gutter-desktop),
       calc((100% - var(--size-container-max)) / 2)
-    );
-  }
-  .wrap--narrow {
-    padding-inline: max(
-      var(--space-gutter-desktop),
-      calc((100% - var(--size-container-narrow)) / 2)
     );
   }
   .section {
@@ -332,7 +387,27 @@ button {
   font-size: clamp(19px, 4.6vw, 28px);
   line-height: calc(1.6 * var(--leading-scale));
   letter-spacing: -0.01em;
-  max-width: 24ch;
+  /*
+   * `ch` 가 아니라 `em` 입니다.
+   *
+   * `1ch` 는 **첫 번째 사용 가능한 서체의 숫자 0 자폭** 이고, 그 글자가 없으면
+   * CSS 규격이 `0.5em` 을 쓰라고 정합니다. 표시서체는 한국어·중국어·태국어에서
+   * 라틴 자족과 자국 자족 두 벌로 나뉘는데, 뒤쪽 자족에 숫자가 들어가지
+   * 않습니다. 그래서 같은 `24ch` 가 이렇게 갈렸습니다:
+   *
+   *   ko·zh·th  336px  (= 24 × 0.5em, 대체값)
+   *   en·vi     429px  (= 24 × 0.638em, 실제 자폭)
+   *
+   * 서브셋에 어떤 글자가 담기느냐가 레이아웃을 정하는 셈이라, 폰트 파이프라인을
+   * 건드릴 때마다 조용히 28% 씩 움직입니다. 본문의 `65ch` 는 본문 서체에 숫자가
+   * 있어 다섯 언어가 모두 580.8px 로 같습니다 — 갈리는 것은 표시서체뿐입니다.
+   *
+   * 넓은 쪽(en·vi 가 쓰던 값)으로 통일했습니다. 좁은 쪽으로 맞추면 중국어가
+   * 줄당 11자가 되어 시가 되고, 베트남어 인용문은 10줄로 늘어납니다.
+   * 지금은 다섯 언어가 3~8줄 안에 들어옵니다 —
+   * 줄당 ko 19 · en 29 · zh 12 · th 32 · vi 28 자.
+   */
+  max-width: 15.3em;
   text-wrap: balance;
 }
 
@@ -376,14 +451,26 @@ button {
 }
 
 /* ── 스크롤 등장 ──────────────────────────────────────────── */
+/*
+ * 감추는 것은 `.js` 가 있을 때만입니다.
+ *
+ * `is-in` 을 붙이는 것은 스크립트입니다. 스크립트가 없으면 영영 붙지 않고,
+ * 그러면 `opacity: 0` 이 그대로 남습니다. 실측한 결과 `/brand` 는 본문
+ * 셋이 전부 `.rise` 라 **가운데가 통째로 백지** 였습니다(홈은 히어로만 남고
+ * 일곱 덩어리가 사라졌습니다).
+ *
+ * 표식은 `<head>` 의 인라인 스크립트가 첫 그림 전에 답니다.
+ */
 .rise {
-  opacity: 0;
-  transform: translateY(16px);
   transition:
     opacity var(--motion-rise-duration) var(--motion-rise-easing),
     transform var(--motion-rise-duration) var(--motion-rise-easing);
 }
-.rise.is-in {
+.js .rise {
+  opacity: 0;
+  transform: translateY(16px);
+}
+.js .rise.is-in {
   opacity: 1;
   transform: none;
 }
@@ -1134,7 +1221,17 @@ a {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 12px var(--space-gutter-mobile);
+  /*
+   * 좌우는 본문과 **같은 컨테이너** 를 씁니다.
+   *
+   * 거터만 쓰면 화면이 1216px(= 1120 + 48×2)를 넘는 순간부터 워드마크가
+   * 본문보다 왼쪽에 서고, 폭에 비례해 계속 벌어집니다 — 1920px 에서 352px.
+   * 스티키 헤더라 스크롤 내내 보입니다.
+   *
+   * `padding-inline` 만 키우므로 배경과 아래 경계선은 전체 폭 그대로입니다.
+   */
+  padding-block: 12px;
+  padding-inline: var(--pad-container);
   background: color-mix(in srgb, var(--color-bg) 88%, transparent);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--color-border);
@@ -1325,7 +1422,7 @@ a {
     --nav-height: 117px;
   }
   .nav {
-    padding: 14px var(--space-gutter-desktop);
+    padding-block: 14px;
     /* 두 행 — 위는 유틸리티, 아래는 기본 메뉴. row-gap 은 0 입니다:
        두 행이 각자 44px 를 갖고 유틸리티 줄에 hairline 이 이미 있어,
        그 사이 죽은 공간은 스티키 헤더에서 순손실입니다. */
@@ -1562,7 +1659,8 @@ a {
 .hero__copy {
   position: relative;
   color: var(--color-accent);
-  padding: 0 var(--space-gutter-mobile) 44px;
+  /* 사진은 전체 폭입니다. 그 위의 **글자** 는 본문과 같은 줄에서 시작합니다. */
+  padding: 0 var(--pad-container) 44px;
   max-width: 40ch;
 }
 .hero__thin {
@@ -1662,7 +1760,7 @@ a {
     min-height: 88svh;
   }
   .hero__copy {
-    padding: 0 var(--space-gutter-desktop) 76px;
+    padding-block-end: 76px;
     max-width: 60ch;
   }
   /*
@@ -1810,12 +1908,8 @@ a {
   font-size: 11px;
   letter-spacing: 0.1em;
   color: var(--color-text-muted);
-  padding: 12px var(--space-gutter-mobile) 0;
-}
-@media (min-width: 900px) {
-  .figure figcaption {
-    padding-inline: var(--space-gutter-desktop);
-  }
+  /* 사진은 전체 폭이지만 캡션은 글입니다 — 본문과 같은 줄에서 시작합니다. */
+  padding: 12px var(--pad-container) 0;
 }
 
 /* ── 제품 페이지 ──────────────────────────────────────────── */
@@ -2681,7 +2775,7 @@ a {
   html {
     scroll-behavior: auto;
   }
-  .rise {
+  .js .rise {
     opacity: 1;
     transform: none;
     transition: none;

@@ -280,11 +280,24 @@ const PY = process.env.AVORA_FONT_PY || (existsSync(VENV_PY) ? VENV_PY : 'python
 const DISPLAY_PATHS = [
   'home.journey.lead',
   'home.product.name',
-  'home.question.quote',
-  'home.philosophy.quote',
+  // 홈에 남은 것은 브랜드로 보내는 브릿지 한 단락입니다.
   'home.origin.statementBefore',
   'home.origin.statementEmphasis',
   'home.origin.statementAfter',
+  /*
+   * /brand 의 세 덩어리.
+   *
+   * 서사를 홈에서 떼어 낼 때 이 목록은 그대로 뒀습니다. 그런데 그때
+   * 가리키던 `home.question.quote`·`home.philosophy.quote` 는 어느 화면도
+   * 그리지 않는 문구가 됐고, 실제로 그려지는 `brand.*` 는 목록에
+   * 없었습니다. 두 벌의 글자가 같아서 우연히 동작하던 상태입니다 —
+   * 브랜드 문구를 한 글자라도 고치면 그 글자만 시스템 서체로 떨어집니다.
+   */
+  'brand.origin.statementBefore',
+  'brand.origin.statementEmphasis',
+  'brand.origin.statementAfter',
+  'brand.question.quote',
+  'brand.philosophy.quote',
   'product.hero.headline',
   'footer.tagline',
   'legal.privacy.heading',

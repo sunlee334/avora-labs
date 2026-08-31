@@ -87,12 +87,6 @@
       "statementEmphasis": "sự dịu nhẹ",
       "statementAfter": "."
     },
-    "question": {
-      "kicker": "The Question",
-      "quote": "Vào khoảnh khắc cơ thể bừng lên sức sống nhất, tại sao thứ mà làn da cảm nhận lại luôn bình thường và giống hệt nhau?",
-      "body": "Thị trường làm đẹp lâu nay dừng ở hai thái cực. Mỹ phẩm thông thường chạy theo vẻ hào nhoáng lại trở nên nặng nề và bí bách giữa những chuyển động thường ngày, trong khi mỹ phẩm thể thao chỉ hô hào công năng thì thô ráp, bỏ quên sự thoải mái và tinh tế mà làn da xứng đáng có.",
-      "naming": "PAROS là tên một hòn đảo ở biển Aegean. Nắng gắt nhưng biển vẫn trong; gió mạnh nhưng người ta vẫn chuyển động tự do. Chúng tôi lấy thái độ của thương hiệu từ nơi mà sức mạnh và vẻ đẹp của thiên nhiên không chống lại nhau."
-    },
     "journey": {
       "kicker": "The Journey",
       "lead": "Nơi sản phẩm hiện diện",
@@ -121,11 +115,6 @@
     },
     "break": {
       "imageAlt": "Cận cảnh những giọt mồ hôi đọng trên da ngay sau khi vận động"
-    },
-    "philosophy": {
-      "kicker": "Philosophy",
-      "quote": "Chuyển động là biểu hiện thuần khiết và mạnh mẽ nhất của sự sống. Từ một buổi đi bộ nhẹ lúc sáng sớm đến khoảnh khắc bạn nắm lấy nhịp sống của mình, PAROS không cắt ngang dòng chảy ấy, chỉ để làn da trở về đúng kết cấu của nó.",
-      "body": "Ngay sau khi vận động hết mình, sự mềm mại tinh tế mà PAROS mang đến khi chạm vào da — chính sự tương phản đó làm nên nét riêng của PAROS."
     },
     "choice": {
       "kicker": "The Choice",

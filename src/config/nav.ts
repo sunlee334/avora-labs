@@ -151,7 +151,19 @@ const NAV: readonly NavGroup[] = [
        * 이제 실제 페이지입니다. `match` 를 따로 두지 않아도 됩니다 —
        * 주소와 판정이 같아졌습니다.
        */
-      { id: 'story', label: (t) => t.nav.story, path: 'brand' },
+      {
+        id: 'story',
+        label: (t) => t.nav.story,
+        /*
+         * 자식이 하나라 `resolveTop()` 이 그룹을 링크로 접고, 접힌 항목은
+         * **부모** 라벨("브랜드")을 씁니다. 그런데 푸터는 평면 목록이라
+         * **잎** 을 그대로 그려서 "브랜드 스토리" 가 나갔습니다 — 같은 자리를
+         * 가리키는 링크가 헤더와 푸터에서 다른 이름으로 불린 것입니다.
+         * 고객센터(faq)에 이어 두 번째 자리입니다.
+         */
+        flatLabel: (t) => t.nav.brand,
+        path: 'brand',
+      },
     ],
   },
   {

@@ -46,17 +46,102 @@ test.describe('컨테이너', () => {
     ).toBe(160);
   });
 
-  test('헤드라인과 본문이 같은 기준선을 쓴다', async ({ page }) => {
+  test('헤드라인이 컨테이너를 넘지 않는다', async ({ page }) => {
     /*
      * 이게 "좌측으로 쏠려 보인다" 의 정체였습니다. 헤드라인은 블록이라 화면
-     * 끝까지 늘어나고 본문은 65ch 에서 멈춰, 1440px 에서 오른쪽 끝이 811px
-     * 어긋났습니다. 왼쪽은 맞는데 오른쪽이 들쭉날쭉하면 쏠려 보입니다.
+     * 끝까지 늘어나고 본문은 65ch 에서 멈춰, 1440px 에서 상자의 오른쪽 끝이
+     * 811px 어긋났습니다. 왼쪽은 맞는데 오른쪽이 들쭉날쭉하면 쏠려 보입니다.
+     *
+     * 상한을 걸어도 둘의 오른쪽 끝은 계속 다릅니다 — 본문에는 읽기 폭
+     * 상한(65ch)이 따로 있고, 그건 없애면 안 되는 것입니다. 실제 **글자** 가
+     * 끝나는 지점을 재면 차이는 93~102px 로, 문단마다 줄 끝이 다른 보통의
+     * 흘림과 같은 크기입니다. 그래서 여기서 지키는 것은 상한 하나입니다.
      */
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/ko/');
     const sec = page.locator('.section').filter({ has: page.locator('p.body') }).first();
     const head = (await sec.locator('.display, h2').first().boundingBox())!;
     expect(Math.round(head.width), '헤드라인이 컨테이너보다 넓습니다').toBeLessThanOrEqual(1120);
+  });
+
+  test('헤더·히어로·캡션·본문·푸터가 한 줄에서 시작한다', async ({ page }) => {
+    /*
+     * 컨테이너를 `.wrap` 에만 넣었더니 **본문만 안쪽으로 들어오고 나머지는
+     * 제자리에 남았습니다.** 1920px 에서 헤더 워드마크 48px, 본문 400px —
+     * 352px 어긋남이고, 스티키 헤더라 스크롤 내내 보였습니다.
+     *
+     * 어긋남은 화면이 1216px(= 1120 + 48×2)를 넘어야 나타납니다. 그전까지는
+     * 거터가 이겨서 전부 같은 값이 나옵니다. 320/375px 만 재던 검사가
+     * 이것을 놓친 이유입니다.
+     */
+    for (const width of [375, 1440, 1920]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto('/ko/');
+      const lefts = await page.evaluate(() => {
+        // 상자가 아니라 **글자** 가 시작하는 지점을 봅니다.
+        const left = (sel: string) => {
+          const el = document.querySelector(sel);
+          if (!el) return null;
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          const rects = [...range.getClientRects()];
+          return rects.length
+            ? Math.round(Math.min(...rects.map((r) => r.left)))
+            : Math.round(el.getBoundingClientRect().left);
+        };
+        return {
+          헤더: left('.nav__wordmark'),
+          히어로: left('.hero__thin'),
+          캡션: left('.figure figcaption'),
+          본문: left('main .section.wrap:not(.wrap--narrow) h2'),
+          푸터: left('.footer__wordmark'),
+        };
+      });
+      const found = Object.entries(lefts).filter(([, v]) => v !== null);
+      expect(found.length, `${width}px 에서 잰 요소가 ${found.length}개뿐입니다`).toBe(5);
+      const unique = new Set(found.map(([, v]) => v));
+      expect(
+        unique.size,
+        `${width}px — ${found.map(([k, v]) => `${k} ${v}`).join(' · ')}`,
+      ).toBe(1);
+    }
+  });
+
+  test('좁은 섹션도 같은 자리에서 시작한다', async ({ page }) => {
+    /*
+     * `.wrap--narrow` 를 가운데 정렬로 두면 좁은 섹션이 넓은 섹션보다
+     * 200px 더 들어갑니다((1120−720)/2). 홈을 세로로 읽으면 시작점이
+     * 160 → 360 → 160 으로 튀고, 모든 섹션이 좁은 `/brand` 는 헤더·푸터가
+     * 160px 인데 본문만 360px 이라 페이지 전체가 밀린 것처럼 보였습니다.
+     *
+     * 좁히는 것은 오른쪽 끝이지 시작점이 아닙니다.
+     */
+    await page.setViewportSize({ width: 1440, height: 900 });
+    for (const path of ['/ko/', '/ko/brand/']) {
+      await page.goto(path);
+      const lefts = await page.evaluate(() =>
+        [...document.querySelectorAll('main .section')]
+          .map((sec) => {
+            const head = sec.querySelector('.kicker, h2, .display');
+            if (!head) return null;
+            const range = document.createRange();
+            range.selectNodeContents(head);
+            const rects = [...range.getClientRects()];
+            if (!rects.length) return null;
+            return {
+              sec: (sec as HTMLElement).dataset.section ?? sec.className,
+              left: Math.round(Math.min(...rects.map((r) => r.left))),
+            };
+          })
+          .filter((x): x is { sec: string; left: number } => x !== null),
+      );
+      expect(lefts.length, `${path} 에서 잰 섹션이 없습니다`).toBeGreaterThan(2);
+      const unique = new Set(lefts.map((x) => x.left));
+      expect(
+        unique.size,
+        `${path} — ${lefts.map((x) => `${x.sec} ${x.left}`).join(' · ')}`,
+      ).toBe(1);
+    }
   });
 
   test('본문 텍스트를 가운데 정렬하지 않는다', async ({ page }) => {
@@ -74,17 +159,67 @@ test.describe('컨테이너', () => {
     }
   });
 
-  test('긴 글 섹션은 한 줄이 40~50자 범위다', async ({ page }) => {
-    // 1120px 로 흘리면 한글 70자를 넘어, 눈이 다음 줄 첫머리를 찾지 못합니다.
+  test('긴 글은 다섯 언어 모두 읽기 좋은 줄 길이다', async ({ page }) => {
+    /*
+     * 1120px 로 흘리면 한글이 한 줄 70자를 넘어, 눈이 다음 줄 첫머리를 찾지
+     * 못합니다.
+     *
+     * 범위가 문자 체계마다 다릅니다. 한글·한자는 글자 하나가 거의 정사각형이라
+     * 40~50자가 편안하고, 라틴·태국 문자는 글자가 좁아 같은 물리적 폭에
+     * 60~80자가 들어갑니다. 한 잣대로 재면 어느 한쪽이 반드시 틀립니다 —
+     * 처음에는 한국어 기준 하나만 두어 나머지 넷을 아예 보지 못했습니다.
+     */
+    const BOUNDS: Record<string, [number, number]> = {
+      ko: [30, 52],
+      zh: [22, 52],
+      en: [45, 85],
+      th: [45, 85],
+      vi: [45, 85],
+    };
     await page.setViewportSize({ width: 1440, height: 900 });
-    await page.goto('/ko/brand/');
-    const chars = await page.evaluate(() => {
-      const el = document.querySelector<HTMLElement>('.wrap--narrow p.body')!;
-      const cs = getComputedStyle(el);
-      // 한글은 글자 하나가 대체로 font-size 만큼 넓습니다.
-      return el.getBoundingClientRect().width / parseFloat(cs.fontSize);
-    });
-    expect(Math.round(chars), `한 줄 약 ${Math.round(chars)}자`).toBeLessThanOrEqual(52);
+    for (const lang of LOCALES) {
+      await page.goto(`/${lang}/brand/`);
+      await page.evaluate(() => document.fonts.ready);
+      const perLine = await page.evaluate(() =>
+        [...document.querySelectorAll('main p.body')].map((el) => {
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          const lines = [...range.getClientRects()].filter((r) => r.height > 4).length;
+          return Math.round((el.textContent ?? '').trim().length / Math.max(lines, 1));
+        }),
+      );
+      expect(perLine.length, `${lang} 에 본문이 없습니다`).toBeGreaterThan(0);
+      const [lo, hi] = BOUNDS[lang];
+      for (const n of perLine) {
+        expect(n, `${lang} 본문 줄당 ${perLine.join(', ')} 자 (허용 ${lo}~${hi})`).toBeGreaterThanOrEqual(lo);
+        expect(n, `${lang} 본문 줄당 ${perLine.join(', ')} 자 (허용 ${lo}~${hi})`).toBeLessThanOrEqual(hi);
+      }
+    }
+  });
+});
+
+test.describe('언어별 폭', () => {
+  test('인용문 폭이 다섯 언어에서 같다', async ({ page }) => {
+    /*
+     * `1ch` 는 **첫 번째 사용 가능한 서체의 숫자 0 자폭** 이고, 그 글자가 없으면
+     * 규격이 `0.5em` 을 쓰라고 정합니다. 표시서체는 ko·zh·th 에서 라틴 자족과
+     * 자국 자족 두 벌로 나뉘는데 뒤쪽에 숫자가 없어, 같은 `24ch` 가
+     * ko·zh·th 336px / en·vi 429px 로 갈렸습니다.
+     *
+     * 서브셋에 어떤 글자가 담기느냐가 레이아웃을 정하면, 폰트 파이프라인을
+     * 건드릴 때마다 조용히 28% 씩 움직입니다.
+     */
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const widths: Record<string, string> = {};
+    for (const lang of LOCALES) {
+      await page.goto(`/${lang}/brand/`);
+      await page.evaluate(() => document.fonts.ready);
+      widths[lang] = await page.locator('.quote').first().evaluate((el) => getComputedStyle(el).maxWidth);
+    }
+    expect(
+      new Set(Object.values(widths)).size,
+      Object.entries(widths).map(([k, v]) => `${k} ${v}`).join(' · '),
+    ).toBe(1);
   });
 });
 
@@ -141,6 +276,93 @@ test.describe('배경 밴드', () => {
       return max;
     });
     expect(runs, `같은 배경이 ${runs}개 연속입니다`).toBeLessThan(3);
+  });
+
+  test('한 색이 페이지 절반을 넘지 않는다', async ({ page }) => {
+    /*
+     * 섹션 **개수** 만 세면 놓칩니다. 앞선 검사는 "같은 배경 3연속 금지" 인데,
+     * `/brand` 는 마지막 섹션이 어두운 밴드이고 **푸터도 같은 잉크색** 이라
+     * 둘이 이어 붙었습니다. 개수로는 2연속이라 통과하지만 실제 화면에서는
+     * 문서의 61~64% 가 끊김 없는 한 색이었습니다(홈은 27%).
+     *
+     * 그래서 높이로 봅니다. 푸터도 함께 넣습니다 — 보는 사람에게 푸터는
+     * 마지막 섹션 다음에 오는 또 하나의 면일 뿐입니다.
+     */
+    for (const width of [390, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const path of ['/ko/', '/ko/brand/']) {
+        await page.goto(path);
+        const share = await page.evaluate(() => {
+          const blocks = [...document.querySelectorAll('main > *'), document.querySelector('.footer')];
+          const rows = blocks
+            .filter((el): el is HTMLElement => el instanceof HTMLElement)
+            .map((el) => ({ bg: getComputedStyle(el).backgroundColor, h: el.getBoundingClientRect().height }));
+          const total = rows.reduce((a, x) => a + x.h, 0);
+          let best = 0, cur = 0, prev: string | null = null;
+          for (const x of rows) {
+            cur = x.bg === prev ? cur + x.h : x.h;
+            prev = x.bg;
+            best = Math.max(best, cur);
+          }
+          return best / total;
+        });
+        expect(
+          share,
+          `${path} ${width}px — 한 색이 ${Math.round(share * 100)}% 를 차지합니다`,
+        ).toBeLessThan(0.5);
+      }
+    }
+  });
+
+  test('어두운 면 위의 선이 보인다', async ({ page }) => {
+    /*
+     * 글자만 챙기면 놓칩니다. `--color-border` 는 `rgba(37,43,49,.14)` —
+     * **잉크 자신의 14%** 입니다. 어두운 면 위에서는 잉크에 잉크를 얹는 셈이라
+     * 선이 사라집니다. 실제로 The Journey 의 `li` 구분선 5줄이 1.00:1 이었고,
+     * 목록이 문단 덩어리로 뭉쳐 보였습니다.
+     *
+     * 대비 기준(4.5:1)은 글자용입니다. 1px 실선은 그보다 훨씬 낮아도 보이므로
+     * 여기서는 "배경과 구분되는가" 만 봅니다.
+     */
+    await page.setViewportSize({ width: 1440, height: 900 });
+    for (const path of ['/ko/', '/ko/brand/']) {
+      await page.goto(path);
+      const worst = await page.evaluate(() => {
+        const lin = (c: number) => (c /= 255) <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+        const parse = (s: string) => {
+          const m = s.match(/[\d.]+/g)!.map(Number);
+          return { r: m[0], g: m[1], b: m[2], a: m[3] ?? 1 };
+        };
+        type C = { r: number; g: number; b: number; a: number };
+        // 반투명 선은 배경 위에 얹힌 뒤의 색으로 봐야 합니다.
+        const over = (fg: C, bg: C): C => ({
+          r: fg.r * fg.a + bg.r * (1 - fg.a),
+          g: fg.g * fg.a + bg.g * (1 - fg.a),
+          b: fg.b * fg.a + bg.b * (1 - fg.a),
+          a: 1,
+        });
+        const L = (c: C) => 0.2126 * lin(c.r) + 0.7152 * lin(c.g) + 0.0722 * lin(c.b);
+        const ratio = (a: C, b: C) => {
+          const [hi, lo] = [L(a), L(b)].sort((x, y) => y - x);
+          return (hi + 0.05) / (lo + 0.05);
+        };
+        let min = 99;
+        for (const surf of document.querySelectorAll('.section--dark, .footer, .notice')) {
+          const bg = parse(getComputedStyle(surf).backgroundColor);
+          for (const el of surf.querySelectorAll<HTMLElement>('*')) {
+            const cs = getComputedStyle(el);
+            for (const side of ['Top', 'Bottom', 'Left', 'Right'] as const) {
+              const w = parseFloat(cs[`border${side}Width` as keyof CSSStyleDeclaration] as string);
+              if (!w || (cs[`border${side}Style` as keyof CSSStyleDeclaration] as string) === 'none') continue;
+              const bc = parse(cs[`border${side}Color` as keyof CSSStyleDeclaration] as string);
+              min = Math.min(min, ratio(over(bc, bg), bg));
+            }
+          }
+        }
+        return min;
+      });
+      expect(worst, `${path} 어두운 면 위 선 최저 ${worst.toFixed(2)}:1`).toBeGreaterThan(1.2);
+    }
   });
 
   test('어두운 밴드 안의 글자가 읽힌다', async ({ page }) => {
@@ -203,8 +425,15 @@ test.describe('브랜드 페이지', () => {
   test('밖에 공유된 #story 링크가 깨지지 않는다', async ({ page }) => {
     // 인스타 프로필·단톡방·북마크에 남아 있을 수 있습니다.
     await page.goto('/ko/#story');
-    await page.waitForURL(/\/ko\/brand\/?$/, { timeout: 5000 });
+    await page.waitForURL(/\/ko\/brand\/#story$/, { timeout: 5000 });
     await expect(page.locator('#story')).toBeVisible();
+    /*
+     * 조각까지 따라와야 합니다. `/brand` 는 `id="story"` 와 그 자리를 스티키
+     * 헤더에서 떼어 놓는 `scroll-margin-top` 을 달아 두었는데, 조각을 버리면
+     * 둘 다 한 번도 쓰이지 않는 죽은 코드가 됩니다. 지금은 마침 그 섹션이 맨
+     * 위라 눈에 보이는 차이가 없어, 어긋나도 아무도 알아채지 못합니다.
+     */
+    expect(new URL(page.url()).hash, '조각이 버려졌습니다').toBe('#story');
   });
 
   test('자바스크립트가 없어도 브랜드로 가는 길이 홈에 있다', async ({ request }) => {
@@ -222,4 +451,29 @@ test.describe('브랜드 페이지', () => {
       expect(xml, `${lang} 은 색인 대상이 아닌데 사이트맵에 있습니다`).not.toContain(`/${lang}/brand/`);
     }
   });
+});
+
+test.describe('스크립트가 없을 때', () => {
+  /*
+   * `.rise` 는 `opacity: 0` 으로 시작하고, 눈에 들어오면 스크립트가 `is-in` 을
+   * 붙여 나타냅니다. 그런데 **스크립트가 없으면 붙이는 일이 영영 없습니다.**
+   * `/brand` 는 본문 세 덩어리가 전부 `.rise` 라 가운데가 통째로 백지였고,
+   * 홈도 히어로만 남고 일곱 덩어리가 사라졌습니다.
+   *
+   * Playwright 의 `toBeVisible()` 은 opacity 를 보지 않아 이것을 통과시킵니다.
+   * 그래서 계산된 opacity 를 직접 읽습니다.
+   */
+  test.use({ javaScriptEnabled: false });
+
+  for (const path of ['/ko/', '/ko/brand/', '/ko/product/']) {
+    test(`${path} 의 본문이 보인다`, async ({ page }) => {
+      await page.goto(path);
+      const hidden = await page.evaluate(() =>
+        [...document.querySelectorAll('main > *')]
+          .filter((el) => parseFloat(getComputedStyle(el).opacity) < 0.05)
+          .map((el) => el.tagName.toLowerCase() + '.' + (el.className || '').split(' ')[0]),
+      );
+      expect(hidden, `안 보이는 덩어리: ${hidden.join(', ')}`).toEqual([]);
+    });
+  }
 });

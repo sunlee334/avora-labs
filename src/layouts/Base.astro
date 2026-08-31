@@ -96,6 +96,25 @@ const xDefault = !wanted || wanted.includes(X_DEFAULT_LOCALE)
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+    {/*
+      스크롤 등장 애니메이션의 **시작 상태를 켜는** 표식입니다.
+
+      `.rise` 는 `opacity: 0` 으로 시작하고 아래 IntersectionObserver 가
+      `is-in` 을 붙여야 나타납니다. 그런데 스크립트가 없으면 그 붙이는 일이
+      영영 일어나지 않습니다 — 실측하면 `/brand` 는 본문 세 덩어리가 전부
+      `.rise` 라 **화면 가운데가 통째로 백지** 였고, 홈도 히어로를 뺀 일곱
+      덩어리가 보이지 않았습니다.
+
+      그래서 감추는 쪽을 이 표식 뒤에 둡니다. 스크립트가 돌지 않으면 표식이
+      없고, 표식이 없으면 아무것도 감춰지지 않습니다.
+
+      `<head>` 안에서 동기적으로 실행되므로 첫 그림 전에 붙습니다 — 켜져
+      있을 때 내용이 한 번 번쩍이는 일은 없습니다.
+    */}
+    <script is:inline>
+      document.documentElement.classList.add('js');
+    </script>
+
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />

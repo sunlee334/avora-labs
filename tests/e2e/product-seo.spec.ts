@@ -185,6 +185,28 @@ test.describe('사이트 전역 SEO', () => {
     expect(body).toContain('Do not state values');
   });
 
+  test('llms.txt 가 가리키는 주소가 전부 살아 있고, 브랜드는 브랜드 페이지를 가리킨다', async ({ request }) => {
+    /*
+     * 정적 파일이라 화면이 바뀌어도 따라오지 않습니다. 브랜드 서사를
+     * `/brand` 로 옮긴 뒤에도 "브랜드" 항목이 홈을 가리킨 채였고, 설명문까지
+     * "브랜드 소개" 라고 말했습니다 — 답변 엔진에게는 그 이름표가 붙은 유일한
+     * 링크라, 브랜드 이야기가 없는 페이지를 브랜드 페이지로 안내한 셈입니다.
+     */
+    const body = await (await request.get('/llms.txt')).text();
+    const urls = [...body.matchAll(/\]\((https:\/\/[^)]+)\)/g)].map((m) => m[1]);
+    expect(urls.length, 'llms.txt 에 링크가 없습니다').toBeGreaterThan(4);
+
+    for (const url of urls) {
+      const path = new URL(url).pathname;
+      const res = await request.get(path);
+      expect(res.status(), `llms.txt 가 가리키는 ${path}`).toBe(200);
+    }
+
+    const brandLine = body.split('\n').find((l) => l.startsWith('- [브랜드]'));
+    expect(brandLine, 'llms.txt 에 브랜드 항목이 없습니다').toBeTruthy();
+    expect(brandLine, '브랜드 항목이 브랜드 페이지를 가리키지 않습니다').toContain('/ko/brand/');
+  });
+
   test('페이지마다 title 과 description 이 다르다', async ({ request }) => {
     const home = await (await request.get('/ko/')).text();
     const product = await (await request.get('/ko/product')).text();
