@@ -536,14 +536,15 @@ test.describe('개인정보처리방침이 실제 수집과 맞는다', () => {
    */
   test('회원 기능이 켜져 있으면 계정 수집 항목이 적혀 있다', async ({ page }) => {
     await page.goto('/ko/legal/privacy');
-    const table = page.locator('.dataTable');
+    // 이 화면에는 표가 넷입니다 — 수집 항목 표만 봅니다.
+    const table = page.locator('[data-collect]');
     await expect(table).toContainText('로그인 제공자가 준 고유 식별자');
     await expect(table).toContainText('마지막 배송지');
   });
 
   test('후기를 받으면 후기 수집 항목도 적혀 있다', async ({ page }) => {
     await page.goto('/ko/legal/privacy');
-    await expect(page.locator('.dataTable')).toContainText('후기 내용');
+    await expect(page.locator('[data-collect]')).toContainText('후기 내용');
     // 후기에 이름이 어떻게 나가는지도 밝힙니다.
     await expect(page.locator('main')).toContainText('가운데를 가려');
   });
@@ -552,7 +553,7 @@ test.describe('개인정보처리방침이 실제 수집과 맞는다', () => {
     const counts: number[] = [];
     for (const lang of ['ko', 'en', 'zh', 'th', 'vi']) {
       await page.goto(`/${lang}/legal/privacy`);
-      counts.push(await page.locator('.dataTable tbody tr').count());
+      counts.push(await page.locator('[data-collect] tbody tr').count());
     }
     expect(new Set(counts).size, `언어별 항목 수가 다릅니다: ${counts.join(', ')}`).toBe(1);
   });

@@ -252,7 +252,9 @@ test.describe('관리 화면 스타일이 공개 페이지로 새지 않는다',
     await page.setViewportSize({ width: 360, height: 800 });
     await page.goto('/ko/legal/shipping');
     const minWidth = await page
-      .locator('.dataTable')
+      // 쌓이는 변형(.dataTable--stack)은 일부러 min-width 를 풉니다. 여기서
+      // 보는 것은 가로로 미는 쪽입니다.
+      .locator('.dataTable:not(.dataTable--stack)')
       .first()
       .evaluate((el) => getComputedStyle(el).minWidth);
     expect(minWidth).toBe('520px');
