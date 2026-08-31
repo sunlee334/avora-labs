@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
-import { ORIGIN, BUSINESS } from '../../src/config/site';
+import { ORIGIN, BUSINESS, INDEXED_LOCALES } from '../../src/config/site';
 import { jsonLdOf, sitemapUrls } from '../support/sitemap';
 import en from '../../src/i18n/en.json' with { type: 'json' };
 import ko from '../../src/i18n/ko.json' with { type: 'json' };
@@ -158,12 +158,20 @@ test.describe('사이트 전역 SEO', () => {
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', target!);
   });
 
-  test('sitemap 에 5개 언어 홈이 모두 있다', async ({ request }) => {
+  test('sitemap 에 색인하는 언어의 홈이 있다', async ({ request }) => {
+    /*
+     * 전에는 5개 언어를 모두 확인했습니다. ZH/TH/VI 는 진출(2028년)까지
+     * 색인하지 않기로 하면서 사이트맵에서도 뺐습니다 — 넣어 두면 사이트맵은
+     * "색인해 달라", 페이지는 "하지 말라" 가 됩니다.
+     *
+     * 어느 언어를 넣을지는 tests/e2e/indexing-policy.spec.ts 가 정하고,
+     * 여기서는 그 결정이 사이트맵에 반영됐는지만 봅니다.
+     */
     const res = await request.get('/sitemap-0.xml');
     expect(res.status()).toBe(200);
     const xml = await res.text();
-    for (const locale of ['ko', 'en', 'zh', 'th', 'vi']) {
-      expect(xml).toContain(`/${locale}/`);
+    for (const locale of INDEXED_LOCALES) {
+      expect(xml, `${locale} 홈이 사이트맵에 없습니다`).toContain(`/${locale}/`);
     }
     // 404 는 사이트맵에서 빠져 있어야 합니다.
     expect(xml).not.toContain('/404');

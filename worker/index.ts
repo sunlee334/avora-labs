@@ -92,6 +92,7 @@ import {
   handleIdentities,
   handleProviders,
   handleUnlink,
+  handleDeleteAccount,
   currentUser,
   type AuthEnv,
 } from './auth';
@@ -1668,6 +1669,10 @@ async function route(request: Request, env: Env, ctx: ExecutionContext): Promise
   }
   if (pathname === '/api/account/identities/unlink' && request.method === 'POST') {
     return handleUnlink(request, env);
+  }
+  // 탈퇴. 되돌릴 수 없으므로 확인 문구를 함께 받습니다(worker/auth/index.ts).
+  if (pathname === '/api/account/delete' && request.method === 'POST') {
+    return handleDeleteAccount(request, env);
   }
 
   // 관리 API — 무엇을 하려는지 보기 전에 먼저 신원을 확인합니다.

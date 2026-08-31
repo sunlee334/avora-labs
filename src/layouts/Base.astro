@@ -11,6 +11,8 @@ import {
   LOCALE_TAGS,
   OG_LOCALES,
   DEFAULT_LOCALE,
+  X_DEFAULT_LOCALE,
+  INDEXED_LOCALES,
   BUSINESS,
   WEB_ANALYTICS_TOKEN,
   SITE_VERIFICATION,
@@ -46,8 +48,8 @@ interface Props {
    * 받습니다. 사이트 전체 신뢰도가 떨어집니다.
    *
    * ⚠️ **x-default 도 함께 다뤄야 합니다.** 그것은 아래 langs 배열 바깥에
-   *    따로 있고 DEFAULT_LOCALE('en') 을 무조건 가리킵니다. 배열만 줄이면
-   *    한국어 전용 글의 x-default 가 여전히 /en/ 404 를 가리킵니다.
+   *    따로 있고 X_DEFAULT_LOCALE('ko') 을 가리킵니다. 배열만 줄이면
+   *    그 언어가 빠진 글의 x-default 가 없는 주소를 가리킵니다.
    */
   locales?: readonly Locale[];
 }
@@ -83,8 +85,8 @@ const langs = wanted
 
 // 기본 언어판이 없으면 x-default 를 아예 내보내지 않습니다.
 // 없는 주소를 "여기가 기본입니다" 라고 알리는 것보다 침묵이 낫습니다.
-const xDefault = !wanted || wanted.includes(DEFAULT_LOCALE)
-  ? new URL(localePath(DEFAULT_LOCALE, path), ORIGIN).href
+const xDefault = !wanted || wanted.includes(X_DEFAULT_LOCALE)
+  ? new URL(localePath(X_DEFAULT_LOCALE, path), ORIGIN).href
   : null;
 ---
 
@@ -97,7 +99,17 @@ const xDefault = !wanted || wanted.includes(DEFAULT_LOCALE)
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    {noindex && <meta name="robots" content="noindex, follow" />}
+    {/*
+      색인은 두 가지가 함께 정합니다 — 화면이 스스로 끄는 경우(noindex prop,
+      예: 한국어판만 내보내는 /panel)와, 언어가 아직 색인 대상이 아닌 경우
+      (INDEXED_LOCALES). 둘 중 하나라도 걸리면 내보내지 않습니다.
+
+      `follow` 는 남깁니다 — 색인하지 말라는 것이지 링크를 따라가지 말라는
+      것은 아닙니다. 이 페이지들이 가리키는 한국어판은 계속 발견돼야 합니다.
+    */}
+    {(noindex || !INDEXED_LOCALES.includes(locale)) && (
+      <meta name="robots" content="noindex, follow" />
+    )}
 
     {/* 언어별 대안 URL. locales 를 넘기지 않으면 5개 언어 전부 + x-default */}
     {

@@ -620,7 +620,7 @@
       },
       "rights": {
         "heading": "Your rights and how to exercise them",
-        "body": "You may ask us at any time to show, correct, delete, or stop processing your personal data. Tell us at the contact below and we will act without delay and let you know the result.\n\nEvery launch-notification and test-panel email carries an unsubscribe link that works immediately. We do not ask you to identify yourself for that.\n\nIf a legal representative or an authorised person asks on your behalf, we need a document showing that authority."
+        "body": "You may ask us at any time to show, correct, delete, or stop processing your personal data. Tell us at the contact below and we will act without delay and let you know the result.\n\nEvery launch-notification and test-panel email carries an unsubscribe link that works immediately. We do not ask you to identify yourself for that.\n\nIf a legal representative or an authorised person asks on your behalf, we need a document showing that authority.\n\nIf you have an account, you can delete it yourself from My Page. Deleting it removes your email, name, and saved address. Order records stay for the five years Korean e-commerce law requires, and remain searchable by order number and phone number."
       },
       "entrust": {
         "heading": "Processing entrusted to others, and transfer abroad",
@@ -1033,6 +1033,8 @@
     },
     "error": "Something went wrong. Please try again.",
     "loginWith": "Continue with {provider}",
+    "privacyNote": "Signing in gives us your name and email. See the privacy policy for details.",
+    "privacyLink": "Privacy policy",
     "providers": {
       "google": "Google",
       "kakao": "Kakao",
@@ -1063,6 +1065,17 @@
         "heading": "Orders do not collect in this account",
         "body": "Sales run elsewhere for now, so those orders do not appear here. Once we sell directly, orders and addresses will be managed on this page."
       }
+    },
+    "delete": {
+      "heading": "Delete account",
+      "body": "Deleting your account removes your email, name, and saved address. This cannot be undone.",
+      "orders": "Order records stay. Korean e-commerce law requires them to be kept for five years. You can still look them up with the order number and phone number.",
+      "confirmLabel": "To continue, type {word} in the box below.",
+      "submit": "Delete account",
+      "sending": "Deleting…",
+      "mismatch": "That does not match. Please type {word} exactly.",
+      "error": "We couldn't delete it. Please try again in a moment.",
+      "done": "Your account has been deleted."
     }
   },
   "inquiry": {

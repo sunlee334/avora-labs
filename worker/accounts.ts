@@ -391,19 +391,43 @@ export async function removeIdentity(
 
   // 남은 로그인 수단이 없습니다 — 이 계정에는 아무도 들어올 수 없으므로
   // 개인정보(이메일·이름·저장된 배송지)를 남길 이유가 없습니다.
-  const detached = await db
-    .prepare('UPDATE orders SET user_id = NULL WHERE user_id = ?')
-    .bind(identity.user_id)
-    .run();
-
-  // 세션은 users 를 ON DELETE CASCADE 로 참조하므로 함께 사라집니다.
-  await db.prepare('DELETE FROM users WHERE id = ?').bind(identity.user_id).run();
+  const detached = await purgeUser(db, identity.user_id);
 
   return {
     found: true,
     userRemoved: true,
-    ordersDetached: detached.meta?.changes ?? 0,
+    ordersDetached: detached,
   };
+}
+
+/**
+ * 계정과 그 안의 개인정보를 지웁니다.
+ *
+ * ── 주문은 지우지 않습니다 ──────────────────────────────────
+ * 「전자상거래법」 제6조는 계약·청약철회 기록과 대금결제 기록을 5년간
+ * 보존하도록 합니다. 그래서 주문 자체는 남기고 계정과의 연결만 끊습니다
+ * (`user_id` 를 비웁니다). 남은 주문은 비회원 주문과 같은 상태가 되고,
+ * 주문번호와 연락처로는 여전히 조회됩니다.
+ *
+ * 계정에 저장해 둔 것(이메일·이름·마지막 배송지)은 그 의무와 무관하므로
+ * 함께 사라집니다. 세션과 로그인 수단은 `ON DELETE CASCADE` 로 따라옵니다.
+ *
+ * 두 곳이 씁니다 — 카카오 쪽에서 연결이 끊겼을 때(removeIdentity)와,
+ * 손님이 직접 탈퇴할 때. **같은 일이므로 같은 코드여야 합니다.** 따로
+ * 적으면 한쪽만 고치는 날이 오고, 그날 남는 것은 지워졌어야 할 개인정보입니다.
+ *
+ * @returns 계정과의 연결이 끊긴 주문 수
+ */
+export async function purgeUser(db: D1Database, userId: string): Promise<number> {
+  const detached = await db
+    .prepare('UPDATE orders SET user_id = NULL WHERE user_id = ?')
+    .bind(userId)
+    .run();
+
+  // 세션·로그인 수단은 users 를 ON DELETE CASCADE 로 참조하므로 함께 사라집니다.
+  await db.prepare('DELETE FROM users WHERE id = ?').bind(userId).run();
+
+  return detached.meta?.changes ?? 0;
 }
 
 export function publicUser(user: User) {

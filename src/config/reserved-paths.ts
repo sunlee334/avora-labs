@@ -61,11 +61,21 @@ export const SITEMAP_KO_ONLY = ['/panel'] as const;
  * 여기 두는 이유는 위 두 배열과 규칙이 한 파일에 모여 있어야 나중에 셋이
  * 따로 놀지 않기 때문입니다.
  */
-export function inSitemap(url: string): boolean {
+export function inSitemap(url: string, indexedLocales: readonly string[]): boolean {
   if (SITEMAP_EXCLUDED.some((excluded) => url.includes(excluded))) return false;
   // 한국어판만 넣는 경로는 `/ko/` 를 지나야 통과합니다.
   if (SITEMAP_KO_ONLY.some((path) => url.includes(path))) return url.includes('/ko/');
-  return true;
+  /*
+   * 아직 색인하지 않는 언어는 사이트맵에도 넣지 않습니다. 넣으면 사이트맵은
+   * "색인해 달라", 페이지는 "하지 말라" 고 서로 다른 말을 하게 됩니다 —
+   * tests/e2e/product-seo.spec.ts 가 그 어긋남을 잡습니다.
+   *
+   * 목록을 여기서 import 하지 않고 **받는** 이유: 이 파일은 `astro.config.ts`
+   * 와 `scripts/check-slugs.mjs` 가 함께 씁니다. 후자는 Node 가 직접 읽으므로
+   * 상대 import 에 확장자가 필요한데, 그러면 TypeScript 쪽 설정을 함께 바꿔야
+   * 합니다. 인자로 받으면 이 파일은 아무것도 의존하지 않은 채로 남습니다.
+   */
+  return indexedLocales.some((locale) => url.includes(`/${locale}/`));
 }
 
 /**

@@ -1,5 +1,5 @@
 import { test, expect, type APIRequestContext } from '@playwright/test';
-import { BUSINESS } from '../../src/config/site';
+import { BUSINESS, INDEXED_LOCALES } from '../../src/config/site';
 
 /**
  * 공지·읽을거리.
@@ -184,12 +184,20 @@ test.describe('hreflang 이 없는 주소를 가리키지 않는다', () => {
     }
   });
 
-  test('x-default 는 기본 언어판이 있을 때만 나온다', async ({ request }) => {
-    // 픽스처에 영어판이 있으므로 지금은 나와야 합니다. 한국어 전용 글이라면
-    // 아예 없어야 합니다 — 그 분기는 Base.astro 가 담당합니다.
+  test('x-default 는 대표 언어판이 있을 때만 나온다', async ({ request }) => {
+    /*
+     * 대표판은 한국어입니다(X_DEFAULT_LOCALE). 이 픽스처 글은 한국어판이
+     * 있으므로 x-default 가 그쪽을 가리켜야 합니다. 대표 언어판이 없는
+     * 글이라면 x-default 자체가 나오지 않아야 하고, 그 분기는 Base.astro 가
+     * 담당합니다 — 없는 주소를 "여기가 기본" 이라고 알리는 것보다 침묵이
+     * 낫습니다.
+     *
+     * 전에는 `/en/` 을 기대했습니다. 대표판을 한국어로 옮기면서 함께
+     * 바뀐 것이지, 이 검사가 보던 규칙이 달라진 것은 아닙니다.
+     */
     const html = await (await request.get(`/ko/support/posts/${SLUG}`)).text();
     const x = alternatesOf(html).find((a) => a.hreflang === 'x-default');
-    expect(x?.href).toContain('/en/support/posts/');
+    expect(x?.href).toContain('/ko/support/posts/');
   });
 
   test('현재 언어는 언제나 목록에 있다', async ({ request }) => {
@@ -263,9 +271,13 @@ test.describe('사이트맵', () => {
     }
   });
 
-  test('목록도 5개 언어 다 들어간다', async ({ request }) => {
+  test('목록은 색인하는 언어에 다 들어간다', async ({ request }) => {
+    /*
+     * 전에는 5개 언어를 다 봤습니다. ZH/TH/VI 는 진출(2028년)까지 색인하지
+     * 않기로 하면서 사이트맵에서 뺐습니다 — 페이지는 그대로 열립니다.
+     */
     const urls = await sitemapUrls(request);
-    for (const lang of LOCALES) {
+    for (const lang of INDEXED_LOCALES) {
       expect(urls.some((u) => u.includes(`/${lang}/support/posts/`)), lang).toBe(true);
     }
   });

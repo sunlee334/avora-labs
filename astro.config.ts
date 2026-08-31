@@ -2,7 +2,7 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import { satteri } from '@astrojs/markdown-satteri';
 import { hastTableScroll } from './src/hast/table-scroll';
-import { ORIGIN, LOCALES, DEFAULT_LOCALE, LOCALE_TAGS } from './src/config/site';
+import { ORIGIN, LOCALES, DEFAULT_LOCALE, LOCALE_TAGS, INDEXED_LOCALES } from './src/config/site';
 import { inSitemap } from './src/config/reserved-paths';
 
 /**
@@ -64,7 +64,12 @@ export default defineConfig({
        *    (`posts/checkout-tips` → `/checkout`), 같은 배열을
        *    `scripts/check-slugs.mjs` 가 접두 일치로 미리 막습니다.
        */
-      filter: inSitemap,
+      /*
+       * 판정은 `inSitemap()` 이 합니다 — 여기서 목록을 다시 적으면 안 됩니다
+       * (tests/e2e/fonts-content.spec.ts 가 그걸 봅니다). 색인 대상 언어만
+       * 넘겨줍니다.
+       */
+      filter: (url: string) => inSitemap(url, INDEXED_LOCALES),
     }),
   ],
   vite: {

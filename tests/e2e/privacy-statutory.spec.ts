@@ -77,6 +77,21 @@ test.describe('처리방침 법정 기재사항', () => {
     ).toBe(true);
   });
 
+  test('스스로 지울 수 있는 길을 방침이 안내한다', async ({ request }) => {
+    /*
+     * 「개인정보 보호법」 제36조는 정보주체가 삭제를 요구할 수 있게 합니다.
+     * 화면에 탈퇴가 생겼으므로 방침도 그 길을 알려야 합니다 — 방침에는
+     * "연락 주세요" 만 적혀 있고 화면에는 버튼이 있으면, 둘 중 하나는
+     * 사실이 아닙니다.
+     *
+     * 주문이 남는다는 것도 함께 적혀 있어야 합니다. 지운 뒤에 알면 늦습니다.
+     */
+    const html = await (await request.get('/ko/legal/privacy/')).text();
+    const rights = html.slice(html.indexOf(ko.legal.privacy.rights.heading));
+    expect(rights, '스스로 지우는 길이 방침에 없습니다').toContain('마이페이지');
+    expect(rights, '주문이 남는다는 사실이 없습니다').toContain('전자상거래법');
+  });
+
   test('보호책임자 연락처가 사업자 설정과 같다', async ({ request }) => {
     // 문구에 박아 두면 연락처가 바뀔 때 5개 언어를 다 고쳐야 합니다.
     const html = await (await request.get('/ko/legal/privacy/')).text();

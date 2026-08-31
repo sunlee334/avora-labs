@@ -14,6 +14,8 @@ import { googleAuth } from './google';
 import { kakaoAuth } from './kakao';
 import { mockAuth, mockAuth2 } from './mock';
 import type { AuthProvider } from './types';
+// 탈퇴 확인 문구. 화면과 서버가 **같은 곳** 을 봐야 갈라지지 않습니다.
+import commerce from '../../src/config/commerce.json';
 import {
   findOrCreateUser,
   identitiesForUser,
@@ -23,6 +25,7 @@ import {
   deleteSession,
   purgeExpiredSessions,
   userFromToken,
+  purgeUser,
   SESSION_COOKIE,
   SESSION_DAYS,
   newToken,
@@ -330,6 +333,62 @@ export async function handleUnlink(request: Request, env: AuthEnv): Promise<Resp
     return json({ error: result.reason, message }, result.reason === 'LAST_IDENTITY' ? 409 : 404);
   }
   return json({ ok: true });
+}
+
+/**
+ * 탈퇴 — 손님이 직접 계정을 지웁니다.
+ *
+ * ── 왜 필요한가 ─────────────────────────────────────────────
+ * 「개인정보 보호법」 제36조는 정보주체가 삭제를 요구할 수 있도록 합니다.
+ * 처리방침에 "연락 주시면 지워 드립니다" 라고 적어 두는 것으로 최소한은
+ * 충족되지만, 로그인 한 번으로 만들어진 계정을 지우려면 메일을 써야 하는
+ * 것은 균형이 맞지 않습니다.
+ *
+ * ── 왜 확인 문구를 요구하는가 ───────────────────────────────
+ * 되돌릴 수 없습니다. 버튼 한 번으로 지워지면 잘못 눌린 것과 지우려던 것을
+ * 구분할 수 없습니다. 화면이 보여준 문구를 그대로 보내야 진행합니다 —
+ * 비밀번호가 없는 소셜 로그인이라 "본인 확인" 을 대신할 것이 이것뿐입니다.
+ *
+ * 주문 기록은 남습니다(purgeUser 주석 참조). 그 사실을 화면에서 먼저
+ * 알려야 하고, 알린 뒤에 이 문구를 받습니다.
+ */
+export async function handleDeleteAccount(request: Request, env: AuthEnv): Promise<Response> {
+  const user = await currentUser(request, env);
+  if (!user) return json({ error: 'NOT_SIGNED_IN', message: '로그인이 필요합니다.' }, 401);
+  if (!env.DB) return json({ error: 'ACCOUNTS_NOT_CONFIGURED' }, 503);
+
+  let body: { confirm?: unknown };
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: 'INVALID_JSON' }, 400);
+  }
+
+  /*
+   * 확인 문구는 **화면이 정하고 서버가 검사** 합니다. 언어마다 다른 말을
+   * 쓰면 서버가 다섯 벌을 알아야 하므로, 어느 언어에서도 같은 짧은 낱말을
+   * 씁니다. 화면이 그 낱말을 보여줍니다.
+   */
+  if (body.confirm !== commerce.accounts.deleteConfirm) {
+    return json(
+      { error: 'CONFIRM_MISMATCH', message: '확인 문구가 다릅니다.' },
+      400,
+    );
+  }
+
+  const ordersDetached = await purgeUser(env.DB, user.id);
+
+  /*
+   * 세션 쿠키를 거둡니다.
+   *
+   * 세션 자체는 `users` 를 `ON DELETE CASCADE` 로 참조하므로 계정과 함께
+   * 이미 사라졌습니다 — 쿠키를 남겨 둬도 다음 요청은 401 입니다. 그래도
+   * 거두는 이유는 죽은 쿠키를 브라우저가 계속 실어 보낼 이유가 없어서입니다.
+   * 동작이 달라지지 않으므로 검사로는 확인되지 않습니다.
+   */
+  return json({ ok: true, ordersDetached }, 200, {
+    'Set-Cookie': cookie(SESSION_COOKIE, '', 0, isSecure(request)),
+  });
 }
 
 export async function handleLogout(request: Request, env: AuthEnv): Promise<Response> {

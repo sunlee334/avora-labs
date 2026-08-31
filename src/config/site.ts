@@ -23,8 +23,50 @@ export const ORIGIN = 'https://avoralabs.co';
 export const LOCALES = ['ko', 'en', 'zh', 'th', 'vi'] as const;
 export type Locale = (typeof LOCALES)[number];
 
-/** hreflang="x-default" 가 가리킬 언어. 어느 언어권도 아닌 방문자가 받게 됩니다. */
+/**
+ * 언어를 알 수 없을 때 대신 쓸 언어.
+ *
+ * 사전에 없는 언어 코드가 들어오거나(`dict()`), Accept-Language 로 5개 중
+ * 어느 것도 고를 수 없을 때(worker) 이 언어를 줍니다. 프랑스어 접속자가
+ * 한국어를 받는 것보다 영어를 받는 편이 낫습니다.
+ */
 export const DEFAULT_LOCALE: Locale = 'en';
+
+/**
+ * `hreflang="x-default"` 가 가리킬 언어.
+ *
+ * **위의 DEFAULT_LOCALE 과 다른 일을 합니다.** 한동안 같은 값을 썼는데,
+ * 둘은 묻는 것이 다릅니다.
+ *
+ *   DEFAULT_LOCALE    "언어를 모르겠다. 무엇을 보여줄까"  → 영어
+ *   X_DEFAULT_LOCALE  "이 사이트의 대표판은 어느 것인가"  → 한국어
+ *
+ * 한국 법인이고, 검증단 모집도 펀딩도 첫 판매도 한국입니다. 크롤러가
+ * 대표판으로 보는 것이 한국어여야 브랜드명 검색의 신호가 한 곳에 모입니다.
+ *
+ * 진출이 시작되면(2028년) 다시 볼 값입니다.
+ */
+export const X_DEFAULT_LOCALE: Locale = 'ko';
+
+/**
+ * 검색엔진에 내보낼 언어.
+ *
+ * ── 왜 다섯이 아닌가 ────────────────────────────────────────
+ * 중국·태국·베트남 진출은 2028년입니다(기획안 12장). 그 전까지 세 언어판은
+ * 갱신되지 않는 얇은 페이지로 남는데, 그것이 색인되면 **사이트 전체의 품질
+ * 신호를 끌어내립니다.** 아직 팔지도 않는 시장에서 유입이 와도 전환되지
+ * 않으니 얻는 것도 없습니다.
+ *
+ * ── 왜 지우지 않고 noindex 인가 ────────────────────────────
+ * URL 과 hreflang 은 그대로 둡니다. 주소가 사라지면 이미 공유된 링크가
+ * 죽고, hreflang 이 빠지면 "이 페이지의 다른 언어판" 정보를 잃습니다.
+ * 진출 시점에 이 배열에 세 언어를 더하면 그대로 열립니다.
+ *
+ * 이 값을 보는 곳이 셋입니다 — `Base.astro`(robots 메타),
+ * `reserved-paths.ts`(사이트맵), 그리고 그 둘이 어긋나지 않는지 보는 검사.
+ * 셋이 같은 배열을 봐야 "사이트맵에는 있는데 noindex" 같은 모순이 안 생깁니다.
+ */
+export const INDEXED_LOCALES: readonly Locale[] = ['ko', 'en'];
 
 /** 언어 선택 UI에 표시할 이름 — 각 언어의 자기 이름으로 적습니다. */
 export const LOCALE_LABELS: Record<Locale, string> = {

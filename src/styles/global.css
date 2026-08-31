@@ -22,6 +22,25 @@ html {
   scroll-behavior: smooth;
 }
 
+/*
+ * `hidden` 이 항상 이기게 합니다.
+ *
+ * 브라우저 기본값은 `[hidden] { display: none }` 인데, **클래스 규칙이 그것을
+ * 이깁니다.** 이 파일에는 `display` 를 지정한 클래스가 89개 있어서, 어떤
+ * 요소에 `hidden` 을 걸었을 때 실제로 감춰지는지가 그 요소가 무슨 클래스를
+ * 달고 있느냐에 달립니다 — 코드를 읽어서는 알 수 없습니다.
+ *
+ * 이 저장소에서 두 번 물렸습니다. 첫 번째는 `.btn`(inline-flex)이라 히어로
+ * 버튼이 안 감춰졌고, 두 번째는 `.identityList`(grid)라 탈퇴한 뒤에도 로그인
+ * 수단 목록이 화면에 남았습니다. 둘 다 화면을 열어 보기 전에는 모릅니다.
+ *
+ * `!important` 를 쓰는 이유: 이 규칙이 지면 안 되기 때문입니다. `hidden` 은
+ * "이건 지금 관계없다" 는 뜻이고, 그보다 강한 의도는 없습니다.
+ */
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   background: var(--color-bg);
@@ -1488,14 +1507,6 @@ a {
    * 색을 넣어 테두리 자리까지 채웁니다 — **윤곽선을 그리는 것이 아닙니다.**
    */
   border-color: var(--color-bg);
-}
-/*
- * `.btn` 이 `display: inline-flex` 라 브라우저 기본값 `[hidden] { display: none }`
- * 를 이깁니다. 신청을 마치고 버튼을 거둘 때(launch-notify.ts) 이 줄이 없으면
- * 아무 일도 일어나지 않습니다.
- */
-.hero__cta[hidden] {
-  display: none;
 }
 .hero__cta:active {
   background: var(--color-accent-soft);

@@ -14,6 +14,8 @@ import { LOCALES, type Locale } from '../../config/site';
 import { dict, localePath } from '../../i18n';
 import { ACCOUNTS_ENABLED, CAN_ORDER, SELLS_DIRECTLY } from '../../config/runtime';
 import carriers from '../../config/carriers.json';
+// 탈퇴 확인 문구. 서버도 같은 값을 봅니다(worker/auth/index.ts).
+import commerce from '../../config/commerce.json';
 import InquirySection from '../../components/InquirySection.astro';
 import MyReviewsSection from '../../components/MyReviewsSection.astro';
 
@@ -53,6 +55,18 @@ const a = t.account;
         로그인 버튼이 됩니다 — 없는 것만 못합니다.
       */}
       <div class="providerButtons" data-login-buttons></div>
+
+      {/*
+        무엇을 받는지 **누르기 전에** 알립니다.
+
+        방침 링크가 푸터에만 있었습니다. 개인정보를 받는 것은 이 버튼을 누르는
+        순간인데, 그 자리에서 어디로 가는지 말하지 않으면 동의가 형식만 남습니다.
+      */}
+      <p class="cart__notice">
+        {a.privacyNote}{' '}
+        <a href={localePath(locale, 'legal/privacy')}>{a.privacyLink}</a>
+      </p>
+
       <p class="cart__notice">{SELLS_DIRECTLY ? a.guestNote : a.preLaunch.guestNote}</p>
     </div>
 
@@ -197,6 +211,61 @@ const a = t.account;
       {/* 로그인한 사람만 보고 남깁니다. 주문이 없어도 됩니다 —
           구매 전 질문을 받기 위해서입니다. */}
       <InquirySection locale={locale} mode="account" />
+
+      {/*
+        탈퇴.
+
+        ── 왜 있어야 하는가 ──────────────────────────────────────
+        「개인정보 보호법」 제36조는 정보주체가 삭제를 요구할 수 있게 합니다.
+        처리방침에 "연락 주시면 지워 드립니다" 만 적어 두는 것으로 최소한은
+        충족되지만, 로그인 한 번으로 만들어진 계정을 지우려면 메일을 써야
+        하는 것은 균형이 맞지 않습니다.
+
+        ── 왜 맨 아래인가 ────────────────────────────────────────
+        찾을 수 있어야 하지만 먼저 눈에 띌 필요는 없습니다. 다른 일을 하러
+        온 사람의 동선에 두면 잘못 누르는 일이 생깁니다.
+
+        ── 왜 문구를 받는가 ──────────────────────────────────────
+        되돌릴 수 없습니다. 버튼 하나면 잘못 눌린 것과 지우려던 것을 구분할
+        수 없고, 비밀번호가 없는 소셜 로그인이라 본인 확인을 대신할 것이
+        이것뿐입니다. 서버도 같은 문구를 검사합니다(worker/auth/index.ts).
+      */}
+      <details class="disclosure accountDelete">
+        <summary>
+          <span class="disclosure__label">{a.delete.heading}</span>
+        </summary>
+
+        <p class="body" style="margin-top: 14px">{a.delete.body}</p>
+        {/* 남는 것을 먼저 말합니다. 지운 뒤에 알면 늦습니다. */}
+        <p class="cart__notice" style="margin-top: 12px">{a.delete.orders}</p>
+
+        <form data-delete-account style="margin-top: 20px">
+          <div class="field">
+            <label for="delete-confirm">
+              {a.delete.confirmLabel.replace('{word}', commerce.accounts.deleteConfirm)}
+            </label>
+            <input
+              id="delete-confirm"
+              name="confirm"
+              type="text"
+              autocomplete="off"
+              autocapitalize="characters"
+              spellcheck="false"
+              required
+            />
+          </div>
+          <p class="field__error" data-delete-error hidden></p>
+          <button class="btn btn--secondary" type="submit" data-delete-submit>
+            {a.delete.submit}
+          </button>
+        </form>
+
+        {/*
+          완료 문구는 **폼 밖** 입니다. 성공하면 폼을 통째로 감추는데, 안에
+          두면 문구까지 함께 사라집니다 — 지워졌다는 사실을 아무도 못 봅니다.
+        */}
+        <p class="body" data-delete-done hidden>{a.delete.done}</p>
+      </details>
     </div>
   </section>
 
@@ -218,6 +287,9 @@ const a = t.account;
     data-msg-link-taken={a.identities.messages.taken}
     data-msg-unlinked={a.identities.messages.unlinked}
     data-msg-link-failed={a.identities.messages.failed}
+    data-msg-delete-mismatch={a.delete.mismatch.replace('{word}', commerce.accounts.deleteConfirm)}
+    data-msg-delete-error={a.delete.error}
+    data-delete-confirm={commerce.accounts.deleteConfirm}
     data-carriers={JSON.stringify(carriers.carriers)}
     data-status-labels={JSON.stringify(a.status)}
     data-fulfillment-labels={JSON.stringify(t.legal.shipping.steps.labels)}
@@ -693,6 +765,64 @@ const a = t.account;
         }
       } catch {
         error.textContent = L.labelError!;
+        error.hidden = false;
+      } finally {
+        submit.disabled = false;
+      }
+    });
+
+    /*
+     * 탈퇴.
+     *
+     * 서버가 확인 문구를 다시 검사합니다 — 여기서 먼저 보는 것은 손님이
+     * 오타를 냈을 때 왕복 없이 알려 주기 위해서입니다. 검사를 화면에만 두면
+     * 개발자 도구로 지나갈 수 있으므로 서버 쪽이 진짜 관문입니다.
+     */
+    $<HTMLFormElement>('[data-delete-account]').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const form = event.currentTarget as HTMLFormElement;
+      const error = $('[data-delete-error]');
+      const done = $('[data-delete-done]');
+      const submit = $<HTMLButtonElement>('[data-delete-submit]');
+      const expected = L.deleteConfirm ?? '';
+      error.hidden = true;
+
+      const typed = String(new FormData(form).get('confirm') ?? '').trim();
+      if (typed !== expected) {
+        error.textContent = L.msgDeleteMismatch ?? '';
+        error.hidden = false;
+        return;
+      }
+
+      submit.disabled = true;
+      try {
+        const res = await fetch('/api/account/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ confirm: typed }),
+        });
+        await drain(res);
+
+        if (res.ok) {
+          /*
+           * 지워진 계정의 화면을 그대로 두면, 남아 있는 이름·주문이 아직
+           * 살아 있는 것처럼 보입니다. 완료 문구만 남기고 전부 거둡니다.
+           */
+          done.hidden = false;
+          form.hidden = true;
+          for (const el of document.querySelectorAll<HTMLElement>(
+            '[data-account-signed] > *:not(.accountDelete)',
+          )) {
+            el.hidden = true;
+          }
+          done.setAttribute('tabindex', '-1');
+          done.focus({ preventScroll: true });
+        } else {
+          error.textContent = L.msgDeleteError ?? '';
+          error.hidden = false;
+        }
+      } catch {
+        error.textContent = L.msgDeleteError ?? '';
         error.hidden = false;
       } finally {
         submit.disabled = false;

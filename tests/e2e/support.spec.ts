@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { BUSINESS, LOCALES } from '../../src/config/site';
+import { BUSINESS, LOCALES, INDEXED_LOCALES } from '../../src/config/site';
 import commerce from '../../src/config/commerce.json' with { type: 'json' };
 import payment from '../../src/config/payment-config.json' with { type: 'json' };
 import ko from '../../src/i18n/ko.json' with { type: 'json' };
@@ -170,10 +170,21 @@ test.describe('찾아갈 수 있는가', () => {
   });
 
   test('사이트맵에 들어 있다', async ({ request }) => {
-    // noindex 도 robots 차단도 아니므로 색인 대상입니다.
+    /*
+     * 색인하는 언어만 봅니다. ZH/TH/VI 는 진출(2028년)까지 색인하지 않기로
+     * 해서 사이트맵에서도 뺐습니다 — 페이지는 그대로 열립니다.
+     */
     const xml = await (await request.get('/sitemap-0.xml')).text();
-    for (const lang of LOCALES) {
+    for (const lang of INDEXED_LOCALES) {
       expect(xml, `${lang} 고객센터가 사이트맵에 없습니다`).toContain(`/${lang}/support`);
+    }
+  });
+
+  test('색인하지 않는 언어도 페이지는 열린다', async ({ request }) => {
+    // 사이트맵에서 뺀 것이지 지운 것이 아닙니다. 이미 공유된 링크가 살아야 합니다.
+    for (const lang of LOCALES.filter((l) => !INDEXED_LOCALES.includes(l))) {
+      const res = await request.get(`/${lang}/support/`);
+      expect(res.status(), `/${lang}/support/ 가 열리지 않습니다`).toBe(200);
     }
   });
 });

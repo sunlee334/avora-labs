@@ -620,7 +620,7 @@
       },
       "rights": {
         "heading": "Quyền của chủ thể dữ liệu và cách thực hiện",
-        "body": "Bạn có thể yêu cầu xem, sửa, xoá hoặc dừng xử lý dữ liệu cá nhân của mình bất cứ lúc nào. Hãy báo cho chúng tôi theo liên hệ bên dưới; chúng tôi sẽ xử lý ngay và thông báo kết quả.\n\nMỗi email thông báo ra mắt và email nhóm thử nghiệm đều có liên kết huỷ nhận, có hiệu lực ngay và không cần xác minh danh tính.\n\nNếu người đại diện theo pháp luật hoặc người được uỷ quyền yêu cầu thay bạn, cần có giấy tờ chứng minh việc uỷ quyền."
+        "body": "Bạn có thể yêu cầu xem, sửa, xoá hoặc dừng xử lý dữ liệu cá nhân của mình bất cứ lúc nào. Hãy báo cho chúng tôi theo liên hệ bên dưới; chúng tôi sẽ xử lý ngay và thông báo kết quả.\n\nMỗi email thông báo ra mắt và email nhóm thử nghiệm đều có liên kết huỷ nhận, có hiệu lực ngay và không cần xác minh danh tính.\n\nNếu người đại diện theo pháp luật hoặc người được uỷ quyền yêu cầu thay bạn, cần có giấy tờ chứng minh việc uỷ quyền.\n\nNếu bạn có tài khoản, bạn có thể tự xoá tại Trang của tôi. Khi xoá, email, tên và địa chỉ giao hàng đã lưu sẽ bị xoá. Hồ sơ đơn hàng vẫn được giữ trong năm năm theo luật thương mại điện tử Hàn Quốc và vẫn tra cứu được bằng mã đơn hàng và số điện thoại."
       },
       "entrust": {
         "heading": "Uỷ thác xử lý và chuyển dữ liệu ra nước ngoài",
@@ -1033,6 +1033,8 @@
     },
     "error": "Không xử lý được yêu cầu. Vui lòng thử lại sau.",
     "loginWith": "Đăng nhập bằng {provider}",
+    "privacyNote": "Khi đăng nhập, chúng tôi nhận tên và email của bạn. Xem chi tiết trong chính sách bảo mật.",
+    "privacyLink": "Chính sách bảo mật",
     "providers": {
       "google": "Google",
       "kakao": "Kakao",
@@ -1063,6 +1065,17 @@
         "heading": "Đơn hàng không được lưu vào tài khoản này",
         "body": "Hiện sản phẩm được bán ở nơi khác nên đơn hàng từ đó không hiển thị tại đây. Khi chúng tôi bán trực tiếp, đơn hàng và địa chỉ sẽ được quản lý ở trang này."
       }
+    },
+    "delete": {
+      "heading": "Xoá tài khoản",
+      "body": "Xoá tài khoản sẽ xoá email, tên và địa chỉ giao hàng đã lưu. Không thể hoàn tác.",
+      "orders": "Hồ sơ đơn hàng vẫn được giữ. Luật thương mại điện tử Hàn Quốc yêu cầu lưu trong năm năm. Bạn vẫn tra cứu được bằng mã đơn hàng và số điện thoại.",
+      "confirmLabel": "Để tiếp tục, hãy nhập {word} vào ô bên dưới.",
+      "submit": "Xoá tài khoản",
+      "sending": "Đang xoá…",
+      "mismatch": "Không khớp. Vui lòng nhập đúng {word}.",
+      "error": "Không xoá được. Vui lòng thử lại sau giây lát.",
+      "done": "Tài khoản đã được xoá."
     }
   },
   "inquiry": {
