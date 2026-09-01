@@ -6,6 +6,18 @@ dist/
 .astro/
 .wrangler/
 
+# 공유 그림과 장바구니 썸네일. **빌드가 매번 다시 만듭니다**(prebuild 의 npm run og).
+#
+# public/fonts/** 와 scripts/og-fonts/** 는 반대로 커밋합니다 — CI 에는 원본
+# 폰트(.fontsrc)가 없어 **만들 수가 없기** 때문입니다. 그건 산출물이 아니라
+# CI 에 넘기는 입력입니다.
+#
+# 그림은 CI 가 만들 수 있고 실제로 매번 만듭니다. 그래서 커밋해 두면 그 파일은
+# 배포되는 그림이 아니게 됩니다 — 렌더러 판본이 로컬과 CI 에서 미묘하게 달라
+# 바이트가 갈리고, 저장소의 그림은 아무도 보지 않는 사본으로 남습니다.
+public/og/
+public/product/thumb.jpg
+
 # wrangler 가 생성하는 Cloudflare 런타임 타입 (약 580KB, 빌드 때 자동 생성)
 worker-configuration.d.ts
 
