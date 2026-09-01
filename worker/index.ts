@@ -61,6 +61,7 @@ import {
   sendPanelConfirmation,
   type MailerEnv,
 } from './mailer';
+import { runWeeklyDigest } from './digest';
 import { ORIGIN } from '../src/config/site.ts';
 import {
   apply as applyPanel,
@@ -1825,4 +1826,17 @@ export default {
     return jsonOnError(request, () => route(request, env, ctx), { env, ctx });
   },
 
+  /**
+   * 크론 트리거 — 주간 현황 다이제스트 (wrangler.jsonc 의 triggers.crons).
+   *
+   * 요청이 없으므로 관리 화면 주소를 요청에서 뽑을 수 없습니다. 정식 주소
+   * (`ORIGIN`)로 만듭니다 — 채팅방에 남는 링크라 어차피 그 주소여야 합니다.
+   *
+   * 무엇을 보내고 왜 0건인 주에도 보내는지는 `worker/digest.ts` 에 있습니다.
+   * 이 함수는 실패해도 throw 하지 않습니다 — 크론이 실패로 끝나면 Cloudflare
+   * 가 재시도해서 같은 알림이 여러 번 갑니다.
+   */
+  async scheduled(_event: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+    ctx.waitUntil(runWeeklyDigest(env, new URL('/admin', ORIGIN).href, new Date(), ctx));
+  },
 };
