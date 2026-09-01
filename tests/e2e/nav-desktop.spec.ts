@@ -123,13 +123,22 @@ test.describe('묶음 제목도 갈 수 있는 곳이다', () => {
 test.describe('헤더 최상위', () => {
   test.beforeEach(async ({ page }) => desktop(page));
 
-  test('최상위는 정확히 3개이고 순서가 정해져 있다', async ({ page }) => {
+  /*
+   * 검증단이 네 번째로 들어왔습니다.
+   *
+   * 자리는 고객센터 **앞** 입니다. 앞의 셋은 "무엇을 파는가 · 누구인가 ·
+   * 지금 무엇을 하는가" 로 이어지고, 고객센터는 그 뒤를 받치는 자리입니다.
+   * 2026년 10월 모집이 끝나면 이 항목을 빼게 될 수도 있는데, 그때 이
+   * 기대값이 3개로 돌아가는 것이 그 결정의 기록이 됩니다.
+   */
+  test('최상위는 정확히 4개이고 순서가 정해져 있다', async ({ page }) => {
     await page.goto('/ko/');
     const items = page.locator('.nav__links > li');
-    await expect(items).toHaveCount(3);
+    await expect(items).toHaveCount(4);
     expect(await items.allInnerTexts().then((t) => t.map((s) => s.trim()))).toEqual([
       '제품',
       '브랜드',
+      '검증단',
       '고객센터',
     ]);
   });
@@ -138,7 +147,7 @@ test.describe('헤더 최상위', () => {
     for (const lang of LOCALES) {
       await page.goto(`/${lang}/`);
       const labels = await page.locator('.nav__links > li').allInnerTexts();
-      expect(labels, `${lang}: 최상위가 3개가 아닙니다`).toHaveLength(3);
+      expect(labels, `${lang}: 최상위가 4개가 아닙니다`).toHaveLength(4);
       expect(
         labels.filter((l) => !l.trim()),
         `${lang}: 빈 라벨이 있습니다`,

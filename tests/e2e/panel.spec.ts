@@ -39,6 +39,59 @@ test.describe('페이지가 서 있다', () => {
   });
 });
 
+/**
+ * 가는 길.
+ *
+ * 페이지는 배점표·커트라인까지 갖춘 채로 서 있었는데 **헤더에도 푸터에도
+ * 링크가 없었습니다.** 홈 중간 섹션의 CTA 와 FAQ 한 줄이 전부였고, 둘 다 홈을
+ * 한참 내려야 나옵니다. 제품·브랜드·고객센터로 들어온 사람에게 검증단은
+ * 존재하지 않는 것과 같았습니다.
+ *
+ * 위의 `정의는 한 곳이다`(nav-desktop.spec.ts)는 정의 파일을 읽어 화면과
+ * 대조하므로, 정의에서 검증단을 빼면 기대집합도 함께 줄어 통과합니다.
+ * **여기서만 목적지를 이름으로 못 박습니다** — 이 화면으로 가는 길이 사라지면
+ * 그 문서가 아니라 이 검사가 막습니다.
+ */
+test.describe('가는 길이 있다', () => {
+  test('헤더에서 갈 수 있다', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/ko/');
+    await expect(
+      page.locator('.nav__links a[href="/ko/panel/"]'),
+      '헤더에 검증단 링크가 없습니다 — 10월 모집의 착지점에 진입로가 없습니다',
+    ).toHaveCount(1);
+  });
+
+  test('푸터에서 갈 수 있다', async ({ page }) => {
+    await page.goto('/ko/');
+    await expect(
+      page.locator('[data-footer-menu] a[href="/ko/panel/"]'),
+      '푸터에 검증단 링크가 없습니다',
+    ).toHaveCount(1);
+  });
+
+  test('좁은 화면 메뉴에서도 갈 수 있다', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 800 });
+    await page.goto('/ko/');
+    await page.locator('[data-menu-open]').click();
+    await expect(
+      page.locator('.menu__sheet a[href="/ko/panel/"]'),
+      '메뉴 시트에 검증단 링크가 없습니다',
+    ).toHaveCount(1);
+  });
+
+  test('5개 언어 전부 같은 자리에 있다', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    for (const lang of LANGS) {
+      await page.goto(`/${lang}/`);
+      await expect(
+        page.locator(`.nav__links a[href="/${lang}/panel/"]`),
+        `${lang}: 헤더에 검증단 링크가 없습니다`,
+      ).toHaveCount(1);
+    }
+  });
+});
+
 test.describe('배점표', () => {
   test('배점과 커트라인이 모두 보인다', async ({ page }) => {
     /*
