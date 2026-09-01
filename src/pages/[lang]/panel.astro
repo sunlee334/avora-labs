@@ -25,6 +25,7 @@ import notesImage from '../../assets/images/panel-notes.jpg';
 import Base from '../../layouts/Base.astro';
 import Button from '../../components/Button.astro';
 import Field from '../../components/Field.astro';
+import CriteriaTable from '../../components/CriteriaTable.astro';
 import { BUSINESS, LOCALES, DEFAULT_LOCALE, type Locale } from '../../config/site';
 import { dict, localePath } from '../../i18n';
 import { breadcrumb } from '../../lib/jsonld';
@@ -36,6 +37,14 @@ export function getStaticPaths() {
 const locale = Astro.params.lang as Locale;
 const t = dict(locale);
 const p = t.panel;
+
+/* 표 컴포넌트가 받는 모양으로 옮깁니다 — 홈은 짧은 이름, 여기는 긴 이름을 씁니다. */
+const criteriaRows = p.criteria.rows.map((row) => ({
+  term: row.item,
+  how: row.how,
+  score: row.score,
+  cut: row.cut,
+}));
 const f = p.form;
 
 /** 국내 모집이라 한국어판만 검색에 내보냅니다. */
@@ -116,28 +125,7 @@ const indexable = locale === 'ko';
   */}
   <section class="section wrap">
     <h2 class="kicker">{p.criteria.heading}</h2>
-    <table class="criteriaTable">
-      <thead>
-        <tr>
-          <th scope="col">{p.criteria.columns.item}</th>
-          <th scope="col">{p.criteria.columns.how}</th>
-          <th scope="col">{p.criteria.columns.score}</th>
-          <th scope="col">{p.criteria.columns.cut}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {
-          p.criteria.rows.map((row) => (
-            <tr>
-              <th scope="row" data-label={p.criteria.columns.item}>{row.item}</th>
-              <td data-label={p.criteria.columns.how}>{row.how}</td>
-              <td class="criteriaTable__num" data-label={p.criteria.columns.score}>{row.score}</td>
-              <td data-label={p.criteria.columns.cut}>{row.cut}</td>
-            </tr>
-          ))
-        }
-      </tbody>
-    </table>
+    <CriteriaTable columns={p.criteria.columns} rows={criteriaRows} />
     <p class="panel__cut">{p.criteria.note}</p>
   </section>
 

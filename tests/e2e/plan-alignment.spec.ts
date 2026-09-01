@@ -22,7 +22,12 @@ test.describe('고르는 과정 — 기획안 2-2 의 근거층', () => {
     for (const lang of LANGS) {
       await page.goto(`/${lang}/`);
       await expect(page.locator('#panel'), lang).toHaveCount(1);
-      await expect(page.locator('#panel .criteria'), lang).toHaveCount(1);
+      /*
+       * 배점표는 Phase J 에서 `#panel` 밖의 독립 섹션으로 나왔습니다 —
+       * 한 섹션은 한 역할만 갖기 위해서입니다. 지키려는 것은 "근거가 홈에
+       * 있다" 이지 "그것이 #panel 안에 있다" 가 아니므로, 선택자만 옮깁니다.
+       */
+      await expect(page.locator('[data-section="criteria"] .criteriaTable'), lang).toHaveCount(1);
     }
   });
 
@@ -31,11 +36,13 @@ test.describe('고르는 과정 — 기획안 2-2 의 근거층', () => {
     // 확인하는지 적지 않으면 "검증했다" 는 말과 다르지 않습니다.
     for (const lang of LANGS) {
       await page.goto(`/${lang}/`);
-      const rows = page.locator('#panel .criteria > div');
+      const rows = page.locator('[data-section="criteria"] .criteriaTable tbody tr');
       await expect(rows, lang).toHaveCount(6);
       for (let i = 0; i < 6; i += 1) {
-        await expect(rows.nth(i).locator('dt'), `${lang} ${i}`).not.toBeEmpty();
-        await expect(rows.nth(i).locator('dd'), `${lang} ${i}`).not.toBeEmpty();
+        // 항목 이름과 **확인 방법** 이 둘 다 있어야 합니다. 항목만 늘어놓는
+        // 것은 "검증했다" 는 말과 다르지 않습니다.
+        await expect(rows.nth(i).locator('th[scope="row"]'), `${lang} ${i}`).not.toBeEmpty();
+        await expect(rows.nth(i).locator('td').first(), `${lang} ${i}`).not.toBeEmpty();
       }
     }
   });

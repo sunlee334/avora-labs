@@ -1,0 +1,53 @@
+---
+/**
+ * 평가 기준 표 — 홈과 `/panel` 이 함께 씁니다.
+ *
+ * ── 왜 컴포넌트인가 ────────────────────────────────────────
+ * 두 화면에 같은 표가 섭니다. 마크업을 두 벌 두면 한쪽만 고쳐지는데, 이 표는
+ * **좁은 화면에서 `data-label` 로 열 이름을 각 칸 앞에 붙여** 행마다 카드로
+ * 쌓습니다(global.css). 머리행과 `data-label` 이 어긋나면 모바일에서 "배점"
+ * 자리에 "커트라인" 이 적히고, 그건 화면을 봐야만 드러납니다.
+ *
+ * 숫자 자체가 어긋나지 않는 것은 사전 쪽에서 이미 지킵니다 — 두 화면 모두
+ * `panel.criteria.rows` 를 원본으로 삼고, id 로 이어 붙입니다.
+ */
+export interface CriteriaRow {
+  /** 항목 이름. 홈은 짧은 이름, /panel 은 긴 이름을 넘깁니다. */
+  term: string;
+  /** 어떻게 확인하는가. */
+  how: string;
+  score: string;
+  cut: string;
+}
+
+interface Props {
+  columns: { item: string; how: string; score: string; cut: string };
+  rows: CriteriaRow[];
+}
+
+const { columns, rows } = Astro.props;
+---
+
+<table class="criteriaTable">
+  <thead>
+    <tr>
+      <th scope="col">{columns.item}</th>
+      <th scope="col">{columns.how}</th>
+      <th scope="col">{columns.score}</th>
+      <th scope="col">{columns.cut}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {
+      rows.map((row) => (
+        <tr>
+          <th scope="row" data-label={columns.item}>{row.term}</th>
+          <td data-label={columns.how}>{row.how}</td>
+          {/* 배점은 숫자입니다 — 고정폭으로 자릿수를 맞춥니다. */}
+          <td class="criteriaTable__num" data-label={columns.score}>{row.score}</td>
+          <td data-label={columns.cut}>{row.cut}</td>
+        </tr>
+      ))
+    }
+  </tbody>
+</table>

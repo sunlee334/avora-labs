@@ -9,10 +9,12 @@ import { Picture } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import heroImage from '../../assets/images/hero-runner-sunrise.jpg';
 import skinImage from '../../assets/images/skin-sweat.jpg';
-import { BUSINESS, LOCALES, type Locale } from '../../config/site';
+import { BUSINESS, SOCIAL, LOCALES, type Locale } from '../../config/site';
+import { FOUNDER_PHOTO, FOUNDER_PHOTO_ALT, FOUNDER_STORY } from '../../config/company';
 import { dict, localePath } from '../../i18n';
 import { organization, website, breadcrumb } from '../../lib/jsonld';
 import LaunchNotify from '../../components/LaunchNotify.astro';
+import CriteriaTable from '../../components/CriteriaTable.astro';
 import { CAN_ORDER } from '../../config/runtime';
 
 export function getStaticPaths() {
@@ -22,6 +24,65 @@ export function getStaticPaths() {
 const locale = Astro.params.lang as Locale;
 const t = dict(locale);
 const h = t.home;
+
+/*
+ * 배점과 커트라인은 **`/panel` 과 같은 원본을 읽습니다.**
+ *
+ * 홈 카피가 "눈 시림 30점, 백탁 25점" 을 문장으로 말합니다. 숫자를 홈에 따로
+ * 적어 두면 언젠가 한쪽만 고쳐지고, 그 순간 카피가 거짓말이 됩니다. 홈은
+ * 짧은 이름과 확인 방법만 갖고, 숫자는 `/panel` 에서 그대로 가져옵니다.
+ *
+ * 두 목록이 어긋나면 **빌드를 멈춥니다.** 조용히 짧은 쪽만 그리면 표에서
+ * 항목이 사라진 것을 아무도 모른 채 배포됩니다.
+ */
+/*
+ * 회사 소개의 두 선택 블록.
+ *
+ * 담당자 원고가 오기 전까지 둘 다 비어 있고, 비어 있으면 화면에 나오지
+ * 않습니다(`src/config/company.ts`).
+ */
+const founderStory = FOUNDER_STORY[locale] ?? null;
+
+/*
+ * 사진은 **파일이 생기는 순간 동작합니다.**
+ *
+ * Astro 의 이미지 최적화는 정적 import 를 요구해서 파일명을 변수로 넘길 수
+ * 없습니다. `import.meta.glob` 이 그 사이를 메웁니다 — 맞는 파일이 없으면 빈
+ * 객체라 빌드가 깨지지 않고, 담당자가 `founder.jpg` 를 넣고 설정 한 줄만
+ * 바꾸면 코드를 고치지 않아도 2열이 됩니다.
+ */
+const founderPhotos = import.meta.glob<{ default: ImageMetadata }>(
+  '../../assets/images/founder.{jpg,jpeg,png,webp}',
+  { eager: true },
+);
+const founderPhoto = FOUNDER_PHOTO
+  ? (founderPhotos[`../../assets/images/${FOUNDER_PHOTO}`]?.default ?? null)
+  : null;
+
+const scoring = t.panel.criteria;
+
+/*
+ * 두 목록을 **id 로** 잇습니다.
+ *
+ * 처음에는 개수만 보고 인덱스로 짝지었습니다. 그러면 어느 한쪽에서 행 순서만
+ * 바꿔도 개수는 그대로라 통과하고, **재도포에 흡수 속도의 점수가 조용히
+ * 붙습니다.** 라벨이 서로 달라서("눈 시림" vs "눈 시림 없음") 이름으로 맞출
+ * 수도 없습니다. 그래서 눈에 보이지 않는 id 를 양쪽에 두고 그것으로 잇습니다.
+ *
+ * 짝을 못 찾으면 **빌드를 멈춥니다.** 조용히 잘못 붙은 점수는 화면을 봐도
+ * 알 수 없습니다 — 아는 사람만 아는 오류가 됩니다.
+ */
+const byId = new Map(scoring.rows.map((row) => [row.id, row]));
+const criteriaRows = h.panel.criteria.map((item) => {
+  const row = byId.get(item.id);
+  if (!row) {
+    throw new Error(
+      `[${locale}] 홈 평가 기준 "${item.id}" 에 맞는 /panel 배점이 없습니다 — ` +
+        `한쪽 목록만 고쳤는지 확인하세요 (있는 id: ${[...byId.keys()].join(', ')}).`,
+    );
+  }
+  return { term: item.term, how: item.body, score: row.score, cut: row.cut };
+});
 ---
 
 <Base
@@ -200,6 +261,23 @@ const h = t.home;
 
     이 자리도 나쁘지 않습니다. 히어로 다음 첫 선언이라 무게가 필요합니다.
   */}
+  {/*
+    문제 제기.
+
+    히어로가 "무엇인지" 를 말했고 다음 섹션이 "어떻게" 를 말합니다. 그 사이에
+    **왜 이것이 있어야 하는가** 가 없으면 방법 선언이 허공에 뜹니다.
+
+    짧게 둡니다 — 서사는 /brand 의 몫이고, 여기서 길어지면 바로 아래
+    The Choice 가 밀립니다. 그리고 **어느 브랜드도 지목하지 않습니다.**
+    카테고리 전체에 대한 서술로만 남깁니다(00-공통규칙 2-2).
+  */}
+  <section class="section wrap wrap--narrow rise" data-section="the_problem">
+    <p class="kicker">{h.problem.kicker}</p>
+    <h2 class="display display--tight">{h.problem.lead}</h2>
+    <p class="body" style="margin-top: 26px">{h.problem.body}</p>
+    <p class="body" style="margin-top: 18px">{h.problem.close}</p>
+  </section>
+
   <section class="section section--lg section--dark wrap wrap--narrow rise" data-section="the_choice">
     <p class="kicker">{h.choice.kicker}</p>
     <h2 class="display display--tight">{h.choice.lead}</h2>
@@ -215,22 +293,36 @@ const h = t.home;
     알림 신청 페이지" 로 고정하라고 합니다. 10월 검증단 모집이 시작되면 그
     링크를 이 자리로 바로 보낼 수 있어야 합니다.
   */}
+  {/*
+    평가 기준 — 검증단에서 떼어낸 독립 섹션.
+
+    한 섹션은 하나의 역할만 갖습니다(J2). 앞 섹션이 "방법" 을 선언했고,
+    여기가 그 **근거** 이고, 다음이 "누가 매기는가" 입니다. 셋이 한 덩어리로
+    붙어 있으면 배점표가 검증단 모집의 부속물처럼 읽힙니다.
+
+    배경은 교차용입니다 — 위가 어두운 면이고 아래 둘이 기본 지반이라,
+    여기까지 기본 지반이면 같은 배경이 셋 이어집니다(Phase I 규칙).
+  */}
+  <section class="section section--alt wrap rise" data-section="criteria">
+    <h2 class="kicker">{h.panel.criteriaHeading}</h2>
+    {/*
+      배점과 커트라인을 홈에도 적습니다.
+
+      바로 위 The Choice 가 "여섯 가지 항목, 100점 만점. 눈 시림 30점,
+      백탁 25점" 이라고 말합니다. 표에 숫자가 없으면 그 문장이 근거 없는
+      주장이 됩니다 — 답변 엔진이 인용할 수 있는 형태로 같은 화면에 둡니다.
+
+      `/panel` 의 배점표와 **같은 컴포넌트·같은 원본** 입니다. 좁은 화면에서
+      행마다 카드로 쌓는 것도 그쪽에서 이미 풀어 둔 방식입니다.
+    */}
+    <CriteriaTable columns={scoring.columns} rows={criteriaRows} />
+  </section>
+
   <section class="section section--lg wrap rise" id="panel" data-section="test_panel">
     <p class="kicker">{h.panel.kicker}</p>
     <h2 class="display display--tight">{h.panel.lead}</h2>
     <p class="body" style="margin-top: 26px">{h.panel.body}</p>
 
-    <h3 class="kicker" style="margin-top: 34px">{h.panel.criteriaHeading}</h3>
-    <dl class="criteria">
-      {
-        h.panel.criteria.map((item) => (
-          <div>
-            <dt>{item.term}</dt>
-            <dd>{item.body}</dd>
-          </div>
-        ))
-      }
-    </dl>
 
     <p class="body" style="margin-top: 24px">{h.panel.note}</p>
 
@@ -360,6 +452,98 @@ const h = t.home;
     **문구는 새로 짓지 않았습니다.** Origin 의 선언 문장을 그대로 씁니다 —
     같은 문장이 `/brand` 첫머리에도 있고, 그게 두 화면을 잇는 고리입니다.
   */}
+  {/*
+    AVORA LABS — 회사.
+
+    지금까지 이 사이트에는 **회사가 없었습니다.** 브랜드와 제품 이야기만 있고,
+    누가 왜 이걸 하는지는 푸터의 사업자정보가 전부였습니다.
+
+    ── 여기 있는 것과 없는 것 ─────────────────────────────────
+    화면에 적은 두 문장은 **이미 공개된 값** 입니다 — Organization 구조화
+    데이터의 slogan 과 제품 FAQ 가 같은 말을 하고 있습니다.
+
+    창업 배경·대표자 사진·팀 규모 표현은 담당자에게 받아야 하는 것이라
+    `src/config/company.ts` 에 자리만 두었습니다. **비어 있는 동안에는 그
+    문단이 아예 나오지 않습니다.** 회색 플레이스홀더 상자를 놓지 않습니다.
+
+    사진이 들어오면 `FOUNDER_PHOTO` 한 줄로 2열이 됩니다 —
+    `.section--split` 의 auto-fit 이 자식 수를 보고 칸을 정합니다.
+
+    인스타그램을 여기 둡니다. 푸터에만 있으면 "살아 있는 회사" 라는 신호가
+    본문 어디에도 없습니다.
+  */}
+  <section class="section section--alt section--split wrap rise" data-section="company">
+    <div class="split">
+      <div>
+        <p class="kicker">{h.company.kicker}</p>
+        <h2 class="display display--tight">{h.company.lead}</h2>
+        <p class="body" style="margin-top: 26px">{h.company.body}</p>
+        {founderStory && <p class="body" style="margin-top: 18px">{founderStory}</p>}
+        {
+          SOCIAL.instagramUrl && (
+            <p style="margin-top: 26px">
+              {/* tapLink — 손가락으로 누를 수 있는 높이를 보장합니다(D 모바일 규칙). */}
+              <a class="tapLink" href={SOCIAL.instagramUrl} rel="me noopener" target="_blank">
+                {h.company.instagram}
+                <span class="company__handle">{SOCIAL.instagramHandle}</span>
+              </a>
+            </p>
+          )
+        }
+      </div>
+      {
+        founderPhoto && (
+          <Picture
+            src={founderPhoto}
+            alt={FOUNDER_PHOTO_ALT[locale] ?? ''}
+            formats={['avif', 'webp']}
+            widths={[390, 780]}
+            sizes="(max-width: 900px) 100vw, 50vw"
+            quality={62}
+            loading="lazy"
+            decoding="async"
+          />
+        )
+      }
+    </div>
+  </section>
+
+  {/*
+    홈 FAQ — 셋만.
+
+    제품 페이지에도 FAQ 가 있지만, **가장 먼저 떠오르는 의문은 홈에서** 답해야
+    합니다. 홈에서 "기성 처방" 을 읽은 사람이 그 자리에서 갖는 질문이라,
+    제품 페이지까지 가야 답이 있으면 대부분은 가기 전에 나갑니다.
+
+    ── 접지 않습니다 ─────────────────────────────────────────
+    셋뿐이고, 접으면 읽히지 않습니다. 답변엔진이 접힌 내용을 본문으로 보지
+    않을 수 있다는 문제도 제품 페이지 FAQ 와 같습니다.
+
+    ── 구조화 데이터는 여기서 내지 않습니다 ────────────────────
+    이 사이트는 FAQPage 를 **고객센터 한 곳에서만** 냅니다. 같은 주제로 여러
+    페이지가 FAQPage 를 내면 검색에서 서로 갉아먹고, 답변엔진은 어느 쪽을
+    인용할지 모릅니다(제품 페이지 FAQ 주석 참조). 그 결정을 여기서 혼자
+    뒤집지 않았습니다 — 담당자 확인 대기 항목입니다.
+  */}
+  <section class="section wrap wrap--narrow rise" data-section="home_faq">
+    <p class="kicker">{h.faq.kicker}</p>
+    <h2 class="display display--tight">{h.faq.heading}</h2>
+    <dl class="homeFaq">
+      {
+        h.faq.items.map((item) => (
+          <div>
+            <dt>{item.q}</dt>
+            <dd>{item.a}</dd>
+          </div>
+        ))
+      }
+    </dl>
+    <p class="homeFaq__more">
+      <a class="tapLink" href={localePath(locale, 'panel')}>{h.faq.panelLink}</a>
+      <a class="tapLink" href={`${localePath(locale, 'product')}#faq`}>{h.faq.more}</a>
+    </p>
+  </section>
+
   <section class="section wrap wrap--narrow rise" data-section="brand_bridge">
     <p class="kicker">{h.origin.kicker}</p>
     <p class="display display--tight">

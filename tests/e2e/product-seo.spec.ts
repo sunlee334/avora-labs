@@ -95,8 +95,31 @@ test.describe('제품 상세', () => {
      * 이라 접어 두고(D2), 대신 아래에서 그 내용이 초기 HTML 에 실려 있는지
      * 따로 확인합니다.
      */
-    const faq = html.slice(html.indexOf('id="faq"'));
+    /*
+     * ⚠️ 이 검사는 오랫동안 **아무것도 재지 않았습니다.** FAQ 섹션에 `id="faq"`
+     * 가 없어서 `indexOf` 가 -1 을 돌려주고, `slice(-1)` 이 마지막 한 글자만
+     * 남겼습니다. 한 글자 안에 `<details` 가 있을 리 없으니 늘 통과했습니다.
+     *
+     * 앵커가 생기면서 드러났습니다. 이제 앵커가 있는지 먼저 확인하고, 범위를
+     * **FAQ 섹션 안** 으로 닫습니다 — 문서 끝까지 열어 두면 뒤따르는
+     * 상품정보고시의 `<details>`(D2 에서 일부러 접은 것)를 잡습니다.
+     */
+    const anchor = html.indexOf('id="faq"');
+    expect(anchor, 'FAQ 섹션에 앵커가 없습니다 — 홈에서 이 자리로 링크가 옵니다')
+      .toBeGreaterThan(-1);
+
+    // 창을 섹션 여는 태그부터 잡습니다. 앵커(`id="faq"`)부터 자르면 섹션을
+    // **감싼** `<details>` 가 창 밖에 남아 접어도 통과합니다.
+    const start = html.lastIndexOf('<section', anchor);
+    const end = html.indexOf('id="disclosure"', anchor);
+    const faq = html.slice(start, end > -1 ? end : undefined);
     expect(faq, 'FAQ 가 접혀 있습니다').not.toContain('<details');
+
+    // 감싸는 경우까지 봅니다 — 여는 태그 바로 앞을 함께 확인합니다.
+    expect(
+      html.slice(Math.max(0, start - 200), start),
+      'FAQ 섹션이 접기 요소로 감싸져 있습니다',
+    ).not.toContain('<details');
 
     // 질문 문구는 번역 파일이 정합니다 — 여기 베껴 적으면 문구를 다듬을
     // 때마다 이 검사가 함께 깨집니다.

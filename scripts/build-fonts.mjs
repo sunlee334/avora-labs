@@ -287,6 +287,15 @@ const DISPLAY_PATHS = [
    * 주석이 적어 둔 것과 같은 상태였습니다. 문구가 바뀌면서 드러났습니다.
    */
   'home.choice.lead',
+  'home.problem.lead',
+  'home.company.lead',
+  'home.faq.heading',
+  /*
+   * `home.panel.lead` 는 Phase J 이전부터 빠져 있던 것입니다. 같은 종류의
+   * 결함이고 이 목록을 손보는 김에 함께 닫습니다 — 빠뜨리면 검증단 제목의
+   * 일부 글자만 기기 기본 서체로 떨어집니다.
+   */
+  'home.panel.lead',
   'home.journey.lead',
   'home.product.name',
   // 홈에 남은 것은 브랜드로 보내는 브릿지 한 단락입니다.

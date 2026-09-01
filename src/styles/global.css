@@ -1867,38 +1867,6 @@ a {
   }
 }
 
-/* ── 검증단 평가 항목 ─────────────────────────────────────── */
-/*
- * 항목과 "어떻게 확인하는가" 의 짝이라 dl 입니다. 이 목록이 하는 일은
- * 분위기를 만드는 것이 아니라 **측정 방법을 밝히는 것** 이라, 카드
- * 이나 번호 매김(.journey)이 아니라 시험 프로토콜처럼 보이게 둡니다.
- * 규칙선만 쓰고 배경을 칠하지 않아서, 어느 지반에 놓아도 그대로 작동합니다.
- */
-.criteria {
-  display: grid;
-  margin-top: 14px;
-}
-.criteria > div {
-  padding-block: 15px;
-  border-top: 1px solid var(--color-border);
-}
-.criteria > div:last-child {
-  border-bottom: 1px solid var(--color-border);
-}
-.criteria dt {
-  font-family: var(--font-display);
-  font-size: 18px;
-  font-weight: 400;
-}
-.criteria dd {
-  /* dd 의 브라우저 기본값은 margin-inline-start: 40px 입니다. 남겨 두면
-     확인 방법만 혼자 들여쓰여 실수처럼 보입니다. */
-  margin: 4px 0 0;
-  color: var(--color-text-muted);
-  font-size: 13.5px;
-  line-height: calc(1.7 * var(--leading-scale));
-}
-
 @media (min-width: 720px) {
   /*
    * 넓어지면 항목과 확인 방법을 같은 줄에 놓습니다. 세로로만 쌓으면
@@ -1909,16 +1877,6 @@ a {
    * 시작해, 짝이 아니라 따로 노는 두 덩어리로 보였습니다.
    * 규칙선은 그대로 폭을 다 씁니다 — .journey 와 같은 결입니다.
    */
-  .criteria > div {
-    display: grid;
-    grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
-    gap: 20px;
-    align-items: baseline;
-  }
-  .criteria dd {
-    margin: 0;
-    max-width: var(--size-measure);
-  }
 }
 
 /* ── 이미지 브레이크 ──────────────────────────────────────── */
@@ -2668,6 +2626,53 @@ a {
   display: inline-flex;
   align-items: center;
   min-height: var(--size-tap-min);
+}
+
+/*
+ * 홈 FAQ.
+ *
+ * 질문과 답의 짝이라 dl 입니다. **접지 않습니다** — 셋뿐이라 접으면 읽히지
+ * 않고, 답변엔진이 접힌 내용을 본문으로 보지 않을 수 있습니다.
+ *
+ * 답은 문단이 둘로 나뉘므로 `white-space: pre-line` 으로 원문의 줄바꿈을
+ * 살립니다. 문단마다 <p> 를 만들면 사전이 배열이 되어 번역이 어긋나기 쉽습니다.
+ */
+.homeFaq {
+  display: grid;
+  margin-top: 30px;
+}
+.homeFaq > div {
+  padding-block: 22px;
+  border-top: 1px solid var(--color-border);
+}
+.homeFaq > div:last-child {
+  border-bottom: 1px solid var(--color-border);
+}
+.homeFaq dt {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 400;
+}
+.homeFaq dd {
+  /* dd 의 기본 margin-inline-start: 40px 를 지웁니다 — 답만 들여쓰이면 실수처럼 보입니다. */
+  margin: 10px 0 0;
+  color: var(--color-text-muted);
+  font-size: 14.5px;
+  line-height: calc(1.7 * var(--leading-scale));
+  white-space: pre-line;
+}
+.homeFaq__more {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 24px;
+  margin-top: 24px;
+}
+
+/* 회사 소개의 인스타 계정명. 푸터의 같은 처리(.footer__handle)를 밝은 지반
+   기준으로 옮긴 것입니다 — 부모가 flex 라 사이 공백이 버려져 여백을 줍니다. */
+.company__handle {
+  margin-inline-start: 6px;
+  color: var(--color-text-muted);
 }
 
 /* 확정된 사실의 목록 — 빈 네모(pendingList)와 채운 점으로 구분합니다. */

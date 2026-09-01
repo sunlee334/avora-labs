@@ -81,6 +81,12 @@
       "imageAlt": "Bóng một người đang chạy trên đường mòn đá dưới ánh mặt trời thấp",
       "promise": "Tiêu chí chúng tôi công bố, điểm số để người chạy chấm."
     },
+    "problem": {
+      "kicker": "The Problem",
+      "lead": "Kem chống nắng cho lúc vận động lâu nay chỉ có hai kiểu.",
+      "body": "Đẹp nhưng gục ngã trước mồ hôi,\nhoặc có chức năng nhưng da không dễ chịu ngay khi thoa.",
+      "close": "Chúng tôi muốn làm thứ không thuộc về cả hai."
+    },
     "origin": {
       "kicker": "Origin",
       "statementBefore": "Chăm sóc da kết hợp sức sống của vận động với ",
@@ -113,6 +119,32 @@
         }
       ]
     },
+    "company": {
+      "kicker": "AVORA LABS",
+      "lead": "Chúng tôi tạo ra thương hiệu cho những người luôn chuyển động.",
+      "body": "PAROS là thương hiệu đầu tiên của AVORA LABS. Tên gọi đến từ một hòn đảo ở biển Aegean, và được làm cho tất cả những ai vận động — không chỉ vận động viên.",
+      "instagram": "Instagram"
+    },
+    "faq": {
+      "kicker": "Câu hỏi thường gặp",
+      "heading": "Xin trả lời trước",
+      "items": [
+        {
+          "q": "Không tự phát triển thì khác gì các thương hiệu khác?",
+          "a": "Phần lớn thương hiệu mỹ phẩm đều dùng công thức của nhà máy. Chỉ là ít nơi công bố điều đó cùng với tiêu chí đánh giá.\n\nChúng tôi công bố trước sáu hạng mục, thang điểm và mức sàn, rồi theo đúng kết quả tổng. Kể cả điểm của những công thức bị loại."
+        },
+        {
+          "q": "Công thức có sẵn thì chất lượng có kém hơn không?",
+          "a": "Ứng viên là những công thức đã qua kiểm nghiệm và thẩm định.\n\nThứ chúng tôi thêm vào không phải thành phần mà là sự sàng lọc. So sánh nhiều ứng viên trong cùng điều kiện rồi loại dần."
+        },
+        {
+          "q": "Nhóm thử nghiệm được chọn thế nào?",
+          "a": "Chúng tôi tuyển từ các nhóm chạy bộ, phòng leo núi và cộng đồng lướt sóng. Bạn cứ tập như thường lệ và so sánh theo bộ tiêu chí đã định.\n\nBắt đầu từ tháng 10 năm 2026."
+        }
+      ],
+      "panelLink": "Hướng dẫn tham gia nhóm thử nghiệm",
+      "more": "Các câu hỏi khác về sản phẩm"
+    },
     "break": {
       "imageAlt": "Cận cảnh những giọt mồ hôi đọng trên da ngay sau khi vận động"
     },
@@ -130,26 +162,32 @@
       "criteriaHeading": "Những gì được so sánh",
       "criteria": [
         {
+          "id": "sting",
           "term": "Cay mắt",
           "body": "Sau hơn 30 phút vận động, khi mồ hôi đang chảy"
         },
         {
+          "id": "cast",
           "term": "Vệt trắng",
           "body": "Ngay sau khi thoa và 30 giây sau, dưới cùng một ánh sáng"
         },
         {
+          "id": "tack",
           "term": "Bết dính",
           "body": "Một phút sau khi thoa, ấn lên mu bàn tay"
         },
         {
+          "id": "water",
           "term": "Độ bám · kháng nước",
           "body": "Sau khi tiếp xúc với nước và thấm nhẹ bằng khăn"
         },
         {
+          "id": "reapply",
           "term": "Thoa lại",
           "body": "Thoa chồng lên sau 30 phút"
         },
         {
+          "id": "absorb",
           "term": "Tốc độ thẩm thấu",
           "body": "Cho đến khi thấm hoàn toàn"
         }
@@ -1153,36 +1191,42 @@
       },
       "rows": [
         {
+          "id": "sting",
           "item": "Không cay mắt",
           "how": "Thoa lên trán và thái dương khi mồ hôi đang chảy, sau hơn 30 phút vận động",
           "score": "30",
           "cut": "Dưới 18 điểm bị loại"
         },
         {
+          "id": "cast",
           "item": "Không vệt trắng",
           "how": "Chụp ngay sau khi thoa và sau 30 giây, dưới cùng một ánh sáng",
           "score": "25",
           "cut": "Dưới 15 điểm bị loại"
         },
         {
+          "id": "tack",
           "item": "Không nhờn dính",
           "how": "Ấn lên mu bàn tay sau khi thoa 1 phút",
           "score": "15",
           "cut": "—"
         },
         {
+          "id": "water",
           "item": "Bám dính · kháng nước",
           "how": "Sau 20 phút thì tiếp xúc nước rồi lau bằng khăn, kiểm tra phần còn lại",
           "score": "15",
           "cut": "—"
         },
         {
+          "id": "reapply",
           "item": "Thoa lại",
           "how": "Thoa chồng sau 30 phút, kiểm tra vón và bết",
           "score": "10",
           "cut": "—"
         },
         {
+          "id": "absorb",
           "item": "Tốc độ thẩm thấu",
           "how": "Đo thời gian đến khi thấm hoàn toàn",
           "score": "5",

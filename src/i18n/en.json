@@ -81,6 +81,12 @@
       "imageAlt": "Silhouette of a runner on a rocky trail against a low sun",
       "promise": "We set the standard. They score it."
     },
+    "problem": {
+      "kicker": "The Problem",
+      "lead": "Sun care for moving bodies has been one of two things.",
+      "body": "Beautiful, but undone by sweat.\nOr functional, but no pleasure to wear.",
+      "close": "We are trying to make neither."
+    },
     "origin": {
       "kicker": "Origin",
       "statementBefore": "Skincare where athletic energy meets ",
@@ -113,6 +119,32 @@
         }
       ]
     },
+    "company": {
+      "kicker": "AVORA LABS",
+      "lead": "We create brands for people in motion.",
+      "body": "PAROS is the first brand from AVORA LABS. It takes its name from an island in the Aegean, and it is made for anyone who moves — not only athletes.",
+      "instagram": "Instagram"
+    },
+    "faq": {
+      "kicker": "Frequently asked",
+      "heading": "Answering these up front",
+      "items": [
+        {
+          "q": "If you do not make it yourselves, how are you different?",
+          "a": "Most cosmetics brands use a manufacturer’s formula. Few of them publish that fact together with the standard they judge by.\n\nWe publish the six criteria, the points and the cutoffs first, and we follow the tally as it comes. That includes the scores of the formulas that failed."
+        },
+        {
+          "q": "Does an existing formula mean lower quality?",
+          "a": "The candidates are formulas that have already passed testing and review.\n\nWhat we add is not an ingredient but a selection. We compare several candidates under the same conditions and filter them."
+        },
+        {
+          "q": "How do you pick the test panel?",
+          "a": "We recruit from running crews, climbing gyms and surfing communities. You keep doing the exercise you already do, and compare against a fixed set of criteria.\n\nIt starts in October 2026."
+        }
+      ],
+      "panelLink": "About joining the panel",
+      "more": "Other questions about the product"
+    },
     "break": {
       "imageAlt": "Close-up of sweat beading on skin right after activity"
     },
@@ -130,26 +162,32 @@
       "criteriaHeading": "What they compare",
       "criteria": [
         {
+          "id": "sting",
           "term": "Eye sting",
           "body": "After 30+ minutes of exercise, while sweat is running"
         },
         {
+          "id": "cast",
           "term": "White cast",
           "body": "Right after application and 30 seconds later, under the same light"
         },
         {
+          "id": "tack",
           "term": "Tackiness",
           "body": "One minute after application, pressing the back of the hand"
         },
         {
+          "id": "water",
           "term": "Adhesion · water resistance",
           "body": "After contact with water and a light towel dry"
         },
         {
+          "id": "reapply",
           "term": "Reapplication",
           "body": "Layered again 30 minutes later"
         },
         {
+          "id": "absorb",
           "term": "Absorption speed",
           "body": "Until it has fully sunk in"
         }
@@ -1153,36 +1191,42 @@
       },
       "rows": [
         {
+          "id": "sting",
           "item": "No stinging",
           "how": "Applied to the forehead and temples after 30+ minutes of activity, with sweat running",
           "score": "30",
           "cut": "Out below 18"
         },
         {
+          "id": "cast",
           "item": "No white cast",
           "how": "Photographed right after applying and 30 seconds later, under the same light",
           "score": "25",
           "cut": "Out below 15"
         },
         {
+          "id": "tack",
           "item": "No stickiness",
           "how": "Pressing the back of the hand one minute after applying",
           "score": "15",
           "cut": "—"
         },
         {
+          "id": "water",
           "item": "Adhesion · water resistance",
           "how": "Wet 20 minutes after applying, then wiped with a towel; residue checked",
           "score": "15",
           "cut": "—"
         },
         {
+          "id": "reapply",
           "item": "Reapplication",
           "how": "Layered again after 30 minutes; checked for pilling and patchiness",
           "score": "10",
           "cut": "—"
         },
         {
+          "id": "absorb",
           "item": "Absorption speed",
           "how": "Timed until it sinks in completely",
           "score": "5",
