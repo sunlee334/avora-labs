@@ -10,7 +10,6 @@ import { Picture } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import productImage from '../../assets/images/product-daily-sunscreen.jpg';
 import waterImage from '../../assets/images/water-droplets.jpg';
-import textureImage from '../../assets/images/cream-texture.jpg';
 import { LOCALES, BUSINESS, type Locale } from '../../config/site';
 import { dict, localePath } from '../../i18n';
 import { breadcrumb, productSchema } from '../../lib/jsonld';
@@ -191,7 +190,7 @@ const specRows = [
   </section>
 
   {/*
-    고르는 기준.
+    통과 기준.
 
     아직 제품이 없습니다. 이럴 때 신뢰를 만드는 것은 완성된 사양이 아니라
     **무엇을 양보하지 않는가** 입니다. 기획안은 눈 시림과 백탁 두 가지를
@@ -203,24 +202,6 @@ const specRows = [
     <p class="body" style="margin-top: 18px">{p.standards.body}</p>
   </section>
 
-  {/*
-    질감. 바로 위 문단이 "백탁을 양보하지 않는다" 고 말하는 자리라,
-    **비교 사진이 아니라 질감 사진** 을 둡니다 — 아직 하지 않은 비교의
-    결과를 그림으로 보여 주면 그것은 근거가 아니라 주장이 됩니다.
-  */}
-  <figure class="figure rise">
-    <Picture
-      src={textureImage}
-      alt={p.figures.texture.alt}
-      formats={['avif', 'webp']}
-      widths={[390, 780]}
-      sizes="100vw"
-      quality={52}
-      loading="lazy"
-      decoding="async"
-    />
-    <figcaption>TEXTURE</figcaption>
-  </figure>
 
   {/* 스펙 */}
   <section class="section wrap rise">

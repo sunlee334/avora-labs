@@ -19,7 +19,7 @@ import { LOCALES } from '../../src/config/site';
 /** 물체 사진 — 통째로 보여야 합니다. */
 const CONTAIN = ['SAMPLE', 'SCORE'];
 /** 질감 사진 — 잘라서 화면을 채웁니다. */
-const COVER = ['FIELD', 'TEXTURE', 'SKIN', 'WATER'];
+const COVER = ['FIELD', 'SKIN', 'WATER'];
 
 async function figures(page: import('@playwright/test').Page) {
   return page.locator('figure.figure').evaluateAll((nodes) =>

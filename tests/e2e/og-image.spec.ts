@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 import { LOCALES } from '../../src/config/site';
 
 /**
@@ -50,11 +51,27 @@ test.describe('공유 그림', () => {
      * 근거** 가 화면의 문구와 같은지 봅니다 — 그림은 `home.hero.promise` 를
      * 그대로 그리므로, 화면에 그 문구가 있으면 그림도 그 언어입니다.
      *
-     * 이렇게 재는 이유: 문구를 고치고 `npm run og` 를 잊으면 그림만 옛말을
-     * 하게 되는데, 그건 `npm run og -- --check` 가 잡습니다. 여기서는 두
-     * 곳이 같은 곳에서 나온다는 것만 지킵니다.
+     * ⚠️ 여기서 그림 자체는 보지 않습니다. "문구를 고치고 `npm run og` 를
+     * 잊었다" 는 **빌드가** 잡습니다 — 원본 폰트가 없는 곳(CI)에서 prebuild 의
+     * `npm run og` 가 커버리지를 확인하고 모자라면 멈춥니다(build-og.mjs 의
+     * checkSubsets). 여기서 지키는 것은 "화면과 그림이 같은 곳에서 나온다" 와
+     * **언어마다 다른 문구를 쓴다** 입니다 — 한 언어를 복사해 다섯에 붙이는
+     * 사고가 이 둘 사이로 빠져나갑니다.
      */
-    const html = await (await request.get('/ko/')).text();
-    expect(html).toContain('처방은 달리는 사람들이 고릅니다.');
+    /*
+     * 문구를 **사전에서 읽어** 옵니다. 예전에는 여기에 문장을 그대로 적어
+     * 두었는데, 카피가 바뀌자 이 검사만 옛말을 붙들고 실패했습니다.
+     * 지키려는 것은 특정 문장이 아니라 "화면과 그림이 같은 곳에서 나온다" 입니다.
+     */
+    const seen = new Set<string>();
+    for (const locale of LOCALES) {
+      const dict = JSON.parse(readFileSync(`src/i18n/${locale}.json`, 'utf8'));
+      const promise: string = dict.home.hero.promise;
+      expect(promise.length, `${locale} 히어로 보조 문구가 비었습니다`).toBeGreaterThan(0);
+      const html = await (await request.get(`/${locale}/`)).text();
+      expect(html, `${locale} 화면이 그림과 다른 문구를 그립니다`).toContain(promise);
+      seen.add(promise);
+    }
+    expect(seen.size, `언어마다 다른 문구여야 하는데 ${seen.size}종뿐입니다`).toBe(LOCALES.length);
   });
 });

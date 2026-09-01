@@ -278,6 +278,15 @@ const PY = process.env.AVORA_FONT_PY || (existsSync(VENV_PY) ? VENV_PY : 'python
  * .principles__term / .footer__tagline 에 대응합니다.
  */
 const DISPLAY_PATHS = [
+  /*
+   * 홈 The Choice 의 헤드라인.
+   *
+   * `display display--tight` 로 그려지는데 이 목록에 없었습니다. 지금까지
+   * 무사했던 것은 옛 문구("만들지 않았습니다. 골랐습니다.")의 글자가 우연히
+   * 다른 display 문구에 전부 들어 있었기 때문입니다 — 바로 아래 brand.*
+   * 주석이 적어 둔 것과 같은 상태였습니다. 문구가 바뀌면서 드러났습니다.
+   */
+  'home.choice.lead',
   'home.journey.lead',
   'home.product.name',
   // 홈에 남은 것은 브랜드로 보내는 브릿지 한 단락입니다.

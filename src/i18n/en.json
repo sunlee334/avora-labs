@@ -70,7 +70,7 @@
   "home": {
     "meta": {
       "title": "PAROS — active lifestyle sun care | AVORA LABS",
-      "description": "PAROS is an active lifestyle skincare brand where athletic energy meets gentle care. The formula for our first product, Daily Sunscreen SPF50+ / PA++++, is chosen by dozens of runners in a blind comparison. Launching in the first half of 2027.",
+      "description": "PAROS is an active lifestyle skincare brand where athletic energy meets gentle care. For our first product, Daily Sunscreen SPF50+ / PA++++, we publish the standard first and hand the scoring to people who actually run. Launching in the first half of 2027.",
       "ogAlt": "Silhouette of a runner against a low sun"
     },
     "notice": {
@@ -79,7 +79,7 @@
     },
     "hero": {
       "imageAlt": "Silhouette of a runner on a rocky trail against a low sun",
-      "promise": "The formula is chosen by the people who run."
+      "promise": "We set the standard. They score it."
     },
     "origin": {
       "kicker": "Origin",
@@ -118,9 +118,10 @@
     },
     "choice": {
       "kicker": "The Choice",
-      "lead": "We didn't make it. We chose it.",
-      "body": "We decided not to develop a new formula for our first product. We are choosing from formulas that have already passed testing and review. There is no reason to hide that, so we are saying it first.",
-      "body2": "But we are not the ones doing the choosing. We are handing that over to people who actually run, climb and sweat. Even with the same contents inside, a formula picked by a lab and one picked by the people who wear it are not the same product."
+      "lead": "We publish the standard before the product.",
+      "body": "Most brands show you a finished product and explain why it is good. We reversed the order.\nNothing is decided yet, and this is exactly when we publish what passes and what gets cut.",
+      "body2": "Six criteria, 100 points in total. Eye sting is 30, white cast is 25.\nMiss the cutoff on either one and we will not use it, however high the total.",
+      "body3": "We set the standard. The people who actually run give the scores.\nThe candidates are existing formulas — not something we developed, and we say so here."
     },
     "panel": {
       "kicker": "Test Panel",
@@ -230,7 +231,7 @@
   "product": {
     "meta": {
       "title": "PAROS Daily Sunscreen SPF50+ / PA++++ — active lifestyle sun care",
-      "description": "PAROS Daily Sunscreen. SPF50+ / PA++++ UV protection, a functional cosmetic. The formula is chosen by people who actually run, comparing samples blind with the manufacturer hidden. Launching in the first half of 2027.",
+      "description": "PAROS Daily Sunscreen. SPF50+ / PA++++ UV protection, a functional cosmetic. We publish the standard first; people who actually run score the candidates blind, with the manufacturer hidden. We publish the tally, including the formulas that failed.",
       "ogAlt": "PAROS Daily Sunscreen on a bright surface"
     },
     "hero": {
@@ -329,7 +330,7 @@
         },
         {
           "q": "Did you develop the formula yourselves?",
-          "a": "No. We are choosing from formulas the manufacturer already holds, ones that have passed testing and review. Instead of developing a new one, we handed the choosing over to people who actually train. The panel compares samples with the manufacturer's name hidden, against the same criteria, and we publish the tally as it comes out."
+          "a": "No. The candidates are formulas the manufacturer already holds, ones that have passed testing and review. Instead of developing a new one, we publish the standard first and hand the scoring to people who actually train. The panel compares samples with the manufacturer's name hidden, against the same criteria, and we publish the tally as it comes."
         },
         {
           "q": "What is the SPF rating of Daily Sunscreen?",
@@ -373,14 +374,11 @@
     },
     "backToStory": "Back to the story",
     "standards": {
-      "kicker": "How we choose",
+      "kicker": "The standard",
       "lead": "There are two things we won't give up.",
       "body": "It must not sting when sweat runs into the eyes, and it must not leave a white cast on any skin tone. A formula that fails either one is dropped from the shortlist however good the rest of it looks. The judgement is not ours — it comes from the panel's tally."
     },
     "figures": {
-      "texture": {
-        "alt": "A white cream swatch spread on a beige surface"
-      },
       "water": {
         "alt": "A close-up of water droplets on a surface"
       }
@@ -1122,13 +1120,13 @@
   },
   "panel": {
     "meta": {
-      "title": "PAROS Test Panel — the people who choose the formula",
+      "title": "PAROS Test Panel — the people who score the formulas",
       "description": "You receive samples with the manufacturer’s name hidden and compare them against set criteria. The tally decides the formula, and the scores of the ones that did not make it are published too."
     },
-    "heading": "We are not the ones who choose the formula.",
+    "heading": "We show you the standard first.",
     "lead": [
       "Many brands send a finished product to runners and ask what they thought.\nWe reversed the order.",
-      "Nothing has been decided yet. We send the candidate formulas as they are,\nand hand over the decision of which one becomes the product."
+      "First we decide and publish what passes and what gets cut.\nThen we send the candidate formulas exactly as they are, with nothing settled.\nWhich one becomes the product is decided by your scores."
     ],
     "figures": {
       "skin": {

@@ -70,7 +70,7 @@
   "home": {
     "meta": {
       "title": "PAROS — chống nắng cho lối sống năng động | AVORA LABS",
-      "description": "PAROS là thương hiệu chăm sóc da theo phong cách sống năng động, kết hợp sức sống của vận động với sự chăm sóc dịu nhẹ. Công thức của sản phẩm đầu tiên Daily Sunscreen SPF50+ / PA++++ do hàng chục người chạy bộ chọn ra qua so sánh ẩn danh. Dự kiến ra mắt nửa đầu năm 2027.",
+      "description": "PAROS là thương hiệu chăm sóc da theo phong cách sống năng động, kết hợp sức sống của vận động với sự chăm sóc dịu nhẹ. Với sản phẩm đầu tiên Daily Sunscreen SPF50+ / PA++++, chúng tôi công bố tiêu chí trước và giao việc chấm điểm cho những người thật sự chạy bộ. Dự kiến ra mắt nửa đầu năm 2027.",
       "ogAlt": "Bóng người chạy in trên nền mặt trời thấp"
     },
     "notice": {
@@ -79,7 +79,7 @@
     },
     "hero": {
       "imageAlt": "Bóng một người đang chạy trên đường mòn đá dưới ánh mặt trời thấp",
-      "promise": "Công thức do chính những người chạy bộ chọn."
+      "promise": "Tiêu chí chúng tôi công bố, điểm số để người chạy chấm."
     },
     "origin": {
       "kicker": "Origin",
@@ -118,9 +118,10 @@
     },
     "choice": {
       "kicker": "The Choice",
-      "lead": "Chúng tôi không tạo ra nó. Chúng tôi chọn nó.",
-      "body": "Chúng tôi quyết định không phát triển công thức mới cho sản phẩm đầu tiên, mà chọn từ những công thức đã qua kiểm nghiệm và thẩm định. Không có lý do gì để giấu, nên chúng tôi nói ra trước.",
-      "body2": "Nhưng người chọn không phải chúng tôi. Chúng tôi giao việc đó cho những người thật sự chạy, leo và đổ mồ hôi. Dù bên trong là cùng một thứ, công thức do phòng thí nghiệm chọn và công thức do người dùng chọn không phải cùng một sản phẩm."
+      "lead": "Chúng tôi công bố tiêu chí trước, sản phẩm sau.",
+      "body": "Thông thường người ta đưa ra sản phẩm hoàn thiện rồi giải thích vì sao nó tốt. Chúng tôi đảo ngược thứ tự.\nNgay lúc chưa có gì được quyết định, chúng tôi công bố trước điều gì được chọn và điều gì bị loại.",
+      "body2": "Sáu hạng mục, thang điểm 100. Cay mắt 30 điểm, vệt trắng 25 điểm.\nChỉ cần không đạt mức sàn ở một trong hai, tổng điểm cao đến mấy chúng tôi cũng không dùng.",
+      "body3": "Tiêu chí do chúng tôi đặt ra, điểm số do những người thực sự chạy chấm.\nỨng viên là các công thức sẵn có — không phải do chúng tôi phát triển mới, và chúng tôi ghi rõ điều đó."
     },
     "panel": {
       "kicker": "Test Panel",
@@ -230,7 +231,7 @@
   "product": {
     "meta": {
       "title": "PAROS Daily Sunscreen SPF50+ / PA++++ — chống nắng cho lối sống năng động",
-      "description": "Daily Sunscreen — sản phẩm đầu tiên của PAROS. Chống nắng SPF50+ / PA++++, mỹ phẩm chức năng. Công thức do những người thật sự chạy bộ chọn ra qua so sánh ẩn tên nhà sản xuất. Dự kiến ra mắt nửa đầu năm 2027.",
+      "description": "Daily Sunscreen — sản phẩm đầu tiên của PAROS. Chống nắng SPF50+ / PA++++, mỹ phẩm chức năng. Chúng tôi công bố tiêu chí trước; điểm số do những người thật sự chạy bộ chấm với tên nhà sản xuất được ẩn đi. Công bố cả kết quả tổng và điểm của các công thức bị loại.",
       "ogAlt": "PAROS Daily Sunscreen đặt trên bề mặt sáng"
     },
     "hero": {
@@ -329,7 +330,7 @@
         },
         {
           "q": "Công thức do các bạn tự phát triển phải không?",
-          "a": "Không. Chúng tôi chọn từ những công thức nhà máy đã có sẵn và đã qua kiểm nghiệm, thẩm định. Thay vì phát triển công thức mới, chúng tôi giao việc chọn cho những người thật sự tập luyện. Nhóm thử nghiệm so sánh các mẫu đã ẩn tên nhà sản xuất theo cùng một bộ tiêu chí, và chúng tôi công bố nguyên kết quả tổng hợp."
+          "a": "Không. Ứng viên là những công thức nhà máy đã có sẵn và đã qua kiểm nghiệm, thẩm định. Thay vì phát triển công thức mới, chúng tôi công bố tiêu chí trước và giao việc chấm điểm cho những người thật sự tập luyện. Nhóm thử nghiệm so sánh các mẫu đã ẩn tên nhà sản xuất theo cùng một bộ tiêu chí, và chúng tôi công bố nguyên kết quả tổng."
         },
         {
           "q": "Daily Sunscreen có chỉ số chống nắng bao nhiêu?",
@@ -373,14 +374,11 @@
     },
     "backToStory": "Quay lại câu chuyện thương hiệu",
     "standards": {
-      "kicker": "Tiêu chí chúng tôi chọn",
+      "kicker": "Tiêu chí đạt",
       "lead": "Có hai điều chúng tôi không nhân nhượng.",
       "body": "Không được cay mắt khi mồ hôi chảy vào, và không được để lại vệt trắng trên bất kỳ tông da nào. Công thức không đạt một trong hai điều này sẽ bị loại, dù những điểm khác có tốt đến đâu. Phán quyết không thuộc về chúng tôi mà thuộc về kết quả tổng hợp của nhóm thử nghiệm."
     },
     "figures": {
-      "texture": {
-        "alt": "Vệt kem trắng trên nền màu be"
-      },
       "water": {
         "alt": "Cận cảnh những giọt nước trên bề mặt"
       }
@@ -1122,13 +1120,13 @@
   },
   "panel": {
     "meta": {
-      "title": "PAROS tuyển nhóm thử nghiệm — những người chọn công thức",
+      "title": "PAROS tuyển nhóm thử nghiệm — những người chấm điểm công thức",
       "description": "Bạn nhận các mẫu đã ẩn tên nhà sản xuất và so sánh theo bộ tiêu chí định sẵn. Kết quả tổng hợp quyết định công thức, và điểm của những công thức bị loại cũng được công bố."
     },
-    "heading": "Công thức không do chúng tôi chọn.",
+    "heading": "Chúng tôi cho bạn xem tiêu chí trước.",
     "lead": [
       "Nhiều thương hiệu gửi sản phẩm đã hoàn thiện cho người chạy bộ rồi hỏi cảm nhận.\nChúng tôi đảo ngược thứ tự.",
-      "Khi chưa có gì được quyết định, chúng tôi gửi thẳng các công thức ứng viên,\nvà trao lại quyết định xem công thức nào sẽ thành sản phẩm."
+      "Trước hết chúng tôi quyết định và công bố điều gì được chọn, điều gì bị loại.\nSau đó gửi đi các công thức ứng viên đúng như hiện trạng, chưa quyết định gì.\nCông thức nào thành sản phẩm là do điểm số của bạn định đoạt."
     ],
     "figures": {
       "skin": {
