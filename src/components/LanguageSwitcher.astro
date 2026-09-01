@@ -76,6 +76,16 @@ const t = dict(locale);
     // 백드롭(시트 바깥)을 누르면 닫습니다. dialog 자체가 백드롭 클릭도 받으므로
     // 클릭 지점이 시트 영역 밖인지 좌표로 판별합니다.
     sheet.addEventListener('click', (event) => {
+      /*
+       * 좌표를 보기 전에 **발신자를 먼저 가릅니다.**
+       *
+       * Space·Enter 로 활성화한 클릭은 `clientX = clientY = 0` 인 합성
+       * 이벤트입니다. 바텀시트는 화면 아래에 붙어 `box.top` 이 항상 0보다
+       * 크므로, 좌표만 보면 **키보드 입력이 전부 "바깥을 눌렀다"** 가 됩니다.
+       * `<dialog>` 는 백드롭을 눌렀을 때만 자기 자신이 target 이라, 이 한
+       * 줄이 키보드와 백드롭을 정확히 가릅니다.
+       */
+      if (event.target !== sheet) return;
       const box = sheet.getBoundingClientRect();
       const outside =
         event.clientX < box.left ||

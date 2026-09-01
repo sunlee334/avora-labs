@@ -97,6 +97,30 @@ test.describe('닫을 수 있는가', () => {
     await expect(page.locator('[data-menu-sheet]')).toBeHidden();
   });
 
+  test('키보드로 묶음을 펼쳐도 메뉴가 닫히지 않는다', async ({ page }) => {
+    /*
+     * 백드롭 판정을 좌표로만 하면 **키보드가 메뉴를 닫습니다.**
+     *
+     * Space·Enter 로 활성화한 클릭은 `clientX = clientY = 0` 입니다. 시트는
+     * 화면 아래에 붙어 `box.top` 이 항상 0보다 크므로, 그 클릭은 "시트
+     * 바깥" 으로 판정됩니다. 마우스로 눌러 본 사람은 영영 모르는 자리입니다 —
+     * 위의 `시트 바깥(백드롭)` 검사도 실제 좌표로 누르므로 지나갑니다.
+     *
+     * 고객센터를 Tab 으로 찾아가 Space 를 누르면, 하위가 펼쳐지자마자 메뉴가
+     * 통째로 사라졌습니다.
+     */
+    await page.goto('/ko/');
+    await openMenu(page);
+    const group = page.locator('.menu__item--group', { hasText: '고객센터' });
+    await group.focus();
+    await page.keyboard.press('Space');
+    await expect(group, '하위가 펼쳐지지 않았습니다').toHaveAttribute('aria-expanded', 'true');
+    await expect(
+      page.locator('[data-menu-sheet]'),
+      '키보드로 눌렀더니 메뉴가 닫혔습니다',
+    ).toBeVisible();
+  });
+
   test('닫으면 열었던 버튼으로 포커스가 돌아온다', async ({ page }) => {
     // 없으면 포커스가 문서 처음으로 튀어, 키보드 사용자는 메뉴를 닫을 때마다
     // 자기 자리를 잃습니다.
