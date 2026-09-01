@@ -119,6 +119,43 @@ const PY = process.env.AVORA_FONT_PY || (existsSync(VENV_PY) ? VENV_PY : 'python
 
 let seq = 0;
 
+/**
+ * 폰트가 스스로 적어 둔 수정 시각을 Unix 초로 읽습니다.
+ *
+ * ── 왜 필요한가 ────────────────────────────────────────────
+ * `fontTools.varLib.instancer` 는 결과물의 `head.modified` 에 **지금 시각** 을
+ * 찍습니다. 그래서 문구를 한 글자도 안 바꾸고 `npm run og` 를 돌려도 가변
+ * 폰트에서 나온 셋(wordmark · promise-latin · promise-zh)이 매번 6바이트씩
+ * 달라지고, 커밋할 때마다 관계없는 변경이 섞입니다.
+ *
+ * ── 왜 0 이 아니라 원본의 날짜인가 ─────────────────────────
+ * `fontTools.subset` 은 이 값을 **건드리지 않고 원본 것을 그대로 넘깁니다.**
+ * 그래서 정적 폰트에서 나온 둘(promise-ko · promise-th)은 원래부터 안 흔들렸고,
+ * 그 값은 "이 서브셋을 잘라낸 폰트의 날짜" 입니다.
+ *
+ * instancer 에도 같은 값을 주면 다섯 파일이 **같은 규칙** 을 따르게 됩니다.
+ * `SOURCE_DATE_EPOCH=0` 으로 못 박아도 흔들림은 멈추지만, 그러면 가변 폰트만
+ * 1970년이라고 적힌 채 다른 규칙으로 남습니다.
+ *
+ * LONGDATETIME 은 1904-01-01 기준 초이고, Unix 기준과 2,082,844,800초 차이입니다.
+ */
+const MAC_TO_UNIX_EPOCH = 2082844800n;
+
+function fontModifiedEpoch(file) {
+  const b = readFileSync(file);
+  const numTables = b.readUInt16BE(4);
+  for (let i = 0; i < numTables; i++) {
+    const p = 12 + i * 16;
+    if (b.toString('latin1', p, p + 4) !== 'head') continue;
+    // head 안에서 modified 는 28바이트째 8바이트입니다.
+    const unix = b.readBigUInt64BE(b.readUInt32BE(p + 8) + 28) - MAC_TO_UNIX_EPOCH;
+    // 1970년 이전이라고 적힌 폰트가 있으면 fontTools 가 음수를 못 받습니다.
+    return unix > 0n ? unix : 0n;
+  }
+  return 0n;
+}
+
+
 function subsetTtf(source, outFile, chars, instance) {
   const tmpFiles = [];
   // 글자 목록을 파일로 넘깁니다 — build-fonts.mjs 와 같은 이유(인자 길이 한도).
@@ -140,6 +177,8 @@ function subsetTtf(source, outFile, chars, instance) {
       const instanced = join(tmpdir(), `avora-og-inst-${process.pid}-${seq++}.ttf`);
       execFileSync(PY, ['-m', 'fontTools.varLib.instancer', source, instance, '-o', instanced], {
         stdio: ['ignore', 'ignore', 'inherit'],
+        // 결과물의 날짜를 원본 폰트의 날짜로 못 박습니다 — fontModifiedEpoch 참조.
+        env: { ...process.env, SOURCE_DATE_EPOCH: String(fontModifiedEpoch(source)) },
       });
       tmpFiles.push(instanced);
       input = instanced;
