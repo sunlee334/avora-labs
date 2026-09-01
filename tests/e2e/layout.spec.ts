@@ -169,12 +169,28 @@ test.describe('컨테이너', () => {
      * 60~80자가 들어갑니다. 한 잣대로 재면 어느 한쪽이 반드시 틀립니다 —
      * 처음에는 한국어 기준 하나만 두어 나머지 넷을 아예 보지 못했습니다.
      */
+    /*
+     * ── 왜 글자 수가 아니라 em 인가 ────────────────────────────
+     * 처음에는 `글자 수 ÷ 줄 수` 로 쟀습니다. 그런데 브랜드 페이지에서
+     * **문단 그릇이 전부 581px 로 같은데** 어떤 문단은 57자, 어떤 문단은
+     * 34자로 재어졌습니다. 라틴 낱말과 구두점이 섞이면 같은 폭에 글자가 더
+     * 많이 들어가기 때문입니다. 그릇이 같은데 결과가 갈리면 그건 그릇을 재는
+     * 지표가 아닙니다 — 문단의 구두점 밀도를 재고 있었던 것입니다.
+     *
+     * 지금은 **가장 긴 줄의 실제 폭** 을 글자 크기로 나눠 em 으로 봅니다.
+     * 문자 체계와 무관하게 같은 것을 재고, 그릇이 넓어지면 반드시 걸립니다.
+     *
+     * 범위는 이 검사가 원래 쓰던 글자 수 기준을 그대로 옮긴 것입니다 —
+     * 한글·한자는 글자 하나가 약 1em, 라틴·태국 문자는 약 0.5em 입니다.
+     *   ko 30~52자  → 30~52em      en·th·vi 45~85자 → 22.5~42.5em
+     *   zh 22~52자  → 22~52em
+     */
     const BOUNDS: Record<string, [number, number]> = {
       ko: [30, 52],
       zh: [22, 52],
-      en: [45, 85],
-      th: [45, 85],
-      vi: [45, 85],
+      en: [22.5, 42.5],
+      th: [22.5, 42.5],
+      vi: [22.5, 42.5],
     };
     await page.setViewportSize({ width: 1440, height: 900 });
     for (const lang of LOCALES) {
@@ -184,15 +200,27 @@ test.describe('컨테이너', () => {
         [...document.querySelectorAll('main p.body')].map((el) => {
           const range = document.createRange();
           range.selectNodeContents(el);
-          const lines = [...range.getClientRects()].filter((r) => r.height > 4).length;
-          return Math.round((el.textContent ?? '').trim().length / Math.max(lines, 1));
+          const rects = [...range.getClientRects()].filter((r) => r.height > 4);
+          const widest = Math.max(...rects.map((r) => r.width), 0);
+          const em = parseFloat(getComputedStyle(el).fontSize);
+          return { em: Math.round((widest / em) * 10) / 10, wrapped: rects.length > 1 };
         }),
       );
       expect(perLine.length, `${lang} 에 본문이 없습니다`).toBeGreaterThan(0);
       const [lo, hi] = BOUNDS[lang];
-      for (const n of perLine) {
-        expect(n, `${lang} 본문 줄당 ${perLine.join(', ')} 자 (허용 ${lo}~${hi})`).toBeGreaterThanOrEqual(lo);
-        expect(n, `${lang} 본문 줄당 ${perLine.join(', ')} 자 (허용 ${lo}~${hi})`).toBeLessThanOrEqual(hi);
+      const shown = perLine.map((r) => `${r.em}${r.wrapped ? '' : '(한줄)'}`).join(', ');
+      for (const { em, wrapped } of perLine) {
+        // 너무 긴 줄은 한 줄짜리 문단에서도 문제입니다.
+        expect(em, `${lang} 본문 줄 폭 ${shown} em (허용 ${lo}~${hi})`).toBeLessThanOrEqual(hi);
+        /*
+         * 하한은 **줄바꿈이 일어난 문단에만** 적용합니다. 한 줄로 끝난 문단의
+         * 폭은 그릇이 아니라 그 문장의 길이라, 짧은 문단이 있다는 이유로
+         * "그릇이 좁다" 고 말하면 거짓말입니다. 그릇이 정말 좁아지면 긴 문단이
+         * 좁게 줄바꿈되면서 여기 걸립니다.
+         */
+        if (wrapped) {
+          expect(em, `${lang} 본문 줄 폭 ${shown} em (허용 ${lo}~${hi})`).toBeGreaterThanOrEqual(lo);
+        }
       }
     }
   });
