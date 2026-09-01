@@ -18,6 +18,10 @@
  * 사이트맵에도 들어가지 않습니다 — 팔지도 않는 시장에서 유입을 받아 봐야
  * 전환되지 않고, 얇은 페이지가 사이트 품질 신호를 끌어내립니다.
  */
+import { Picture } from 'astro:assets';
+import skinImage from '../../assets/images/panel-skin.jpg';
+import sampleImage from '../../assets/images/panel-sample.jpg';
+import notesImage from '../../assets/images/panel-notes.jpg';
 import Base from '../../layouts/Base.astro';
 import Button from '../../components/Button.astro';
 import Field from '../../components/Field.astro';
@@ -56,10 +60,46 @@ const indexable = locale === 'ko';
     {p.lead.map((para) => <p class="body panel__lead">{para}</p>)}
   </section>
 
+  {/*
+    누구를 찾는가. 실내 러닝머신이 아니라 **볕 아래에서 움직이는 사람** 입니다 —
+    눈 시림과 백탁은 그 조건에서만 드러납니다.
+  */}
+  <figure class="figure rise">
+    <Picture
+      src={skinImage}
+      alt={p.figures.skin.alt}
+      formats={['avif', 'webp']}
+      widths={[390, 780]}
+      sizes="100vw"
+      quality={52}
+      loading="lazy"
+      decoding="async"
+    />
+    <figcaption>FIELD</figcaption>
+  </figure>
+
   <section class="section section--alt wrap">
     <h2 class="kicker">{p.what.heading}</h2>
     <p class="body panel__lead">{p.what.body}</p>
   </section>
+
+  {/*
+    무엇을 받는가. 본문이 "제조사 이름을 가린 샘플" 이라고 말하는 그 상태입니다 —
+    상표가 없어야 블라인드 평가가 성립합니다.
+  */}
+  <figure class="figure figure--contain rise">
+    <Picture
+      src={sampleImage}
+      alt={p.figures.sample.alt}
+      formats={['avif', 'webp']}
+      widths={[390, 780]}
+      sizes="100vw"
+      quality={52}
+      loading="lazy"
+      decoding="async"
+    />
+    <figcaption>SAMPLE</figcaption>
+  </figure>
 
   {/*
     배점표.
@@ -100,6 +140,24 @@ const indexable = locale === 'ko';
     </table>
     <p class="panel__cut">{p.criteria.note}</p>
   </section>
+
+  {/*
+    무엇을 적는가. 빈 노트입니다 — 채워진 평가지를 보여 주면 아직 하지 않은
+    평가의 결과를 내보이는 셈이 됩니다.
+  */}
+  <figure class="figure figure--contain rise">
+    <Picture
+      src={notesImage}
+      alt={p.figures.notes.alt}
+      formats={['avif', 'webp']}
+      widths={[390, 780]}
+      sizes="100vw"
+      quality={52}
+      loading="lazy"
+      decoding="async"
+    />
+    <figcaption>SCORE</figcaption>
+  </figure>
 
   {/*
     탈락 공개.

@@ -10,6 +10,7 @@ import { Picture } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import productImage from '../../assets/images/product-daily-sunscreen.jpg';
 import waterImage from '../../assets/images/water-droplets.jpg';
+import textureImage from '../../assets/images/cream-texture.jpg';
 import { LOCALES, BUSINESS, type Locale } from '../../config/site';
 import { dict, localePath } from '../../i18n';
 import { breadcrumb, productSchema } from '../../lib/jsonld';
@@ -202,6 +203,25 @@ const specRows = [
     <p class="body" style="margin-top: 18px">{p.standards.body}</p>
   </section>
 
+  {/*
+    질감. 바로 위 문단이 "백탁을 양보하지 않는다" 고 말하는 자리라,
+    **비교 사진이 아니라 질감 사진** 을 둡니다 — 아직 하지 않은 비교의
+    결과를 그림으로 보여 주면 그것은 근거가 아니라 주장이 됩니다.
+  */}
+  <figure class="figure rise">
+    <Picture
+      src={textureImage}
+      alt={p.figures.texture.alt}
+      formats={['avif', 'webp']}
+      widths={[390, 780]}
+      sizes="100vw"
+      quality={52}
+      loading="lazy"
+      decoding="async"
+    />
+    <figcaption>TEXTURE</figcaption>
+  </figure>
+
   {/* 스펙 */}
   <section class="section wrap rise">
     <p class="kicker">{p.spec.kicker}</p>
@@ -242,11 +262,17 @@ const specRows = [
     </ol>
   </section>
 
-  {/* 물방울 이미지 */}
+  {/*
+    물방울 이미지.
+
+    alt 는 캡션이 아닙니다. 예전에는 alt="WATER" 하나였는데, 그건 화면에
+    보이는 라벨이지 **그림이 뜨지 않은 사람에게 남는 설명** 이 아닙니다.
+    라벨은 figcaption 으로 내리고 alt 에는 사진의 내용을 적습니다.
+  */}
   <figure class="figure rise">
     <Picture
       src={waterImage}
-      alt="WATER"
+      alt={p.figures.water.alt}
       formats={['avif', 'webp']}
       widths={[390, 780]}
       sizes="100vw"
@@ -254,6 +280,7 @@ const specRows = [
       loading="lazy"
       decoding="async"
     />
+    <figcaption>WATER</figcaption>
   </figure>
 
   {/*

@@ -376,6 +376,14 @@
       "kicker": "Tiêu chí chúng tôi chọn",
       "lead": "Có hai điều chúng tôi không nhân nhượng.",
       "body": "Không được cay mắt khi mồ hôi chảy vào, và không được để lại vệt trắng trên bất kỳ tông da nào. Công thức không đạt một trong hai điều này sẽ bị loại, dù những điểm khác có tốt đến đâu. Phán quyết không thuộc về chúng tôi mà thuộc về kết quả tổng hợp của nhóm thử nghiệm."
+    },
+    "figures": {
+      "texture": {
+        "alt": "Vệt kem trắng trên nền màu be"
+      },
+      "water": {
+        "alt": "Cận cảnh những giọt nước trên bề mặt"
+      }
     }
   },
   "support": {
@@ -1122,6 +1130,17 @@
       "Nhiều thương hiệu gửi sản phẩm đã hoàn thiện cho người chạy bộ rồi hỏi cảm nhận.\nChúng tôi đảo ngược thứ tự.",
       "Khi chưa có gì được quyết định, chúng tôi gửi thẳng các công thức ứng viên,\nvà trao lại quyết định xem công thức nào sẽ thành sản phẩm."
     ],
+    "figures": {
+      "skin": {
+        "alt": "Những giọt mồ hôi trên vai sau khi tập luyện ngoài trời"
+      },
+      "sample": {
+        "alt": "Ba tuýp màu trắng không nhãn"
+      },
+      "notes": {
+        "alt": "Cuốn sổ trắng mở sẵn và một cây bút"
+      }
+    },
     "what": {
       "heading": "Bạn sẽ làm gì",
       "body": "Bạn nhận hai đến ba mẫu đã ẩn tên nhà sản xuất.\nCứ tập luyện như thường lệ, rồi so sánh theo sáu tiêu chí dưới đây.\nViệc đánh giá diễn ra từ tháng 10 đến tháng 11 năm 2026."

@@ -376,6 +376,14 @@
       "kicker": "How we choose",
       "lead": "There are two things we won't give up.",
       "body": "It must not sting when sweat runs into the eyes, and it must not leave a white cast on any skin tone. A formula that fails either one is dropped from the shortlist however good the rest of it looks. The judgement is not ours — it comes from the panel's tally."
+    },
+    "figures": {
+      "texture": {
+        "alt": "A white cream swatch spread on a beige surface"
+      },
+      "water": {
+        "alt": "A close-up of water droplets on a surface"
+      }
     }
   },
   "support": {
@@ -1122,6 +1130,17 @@
       "Many brands send a finished product to runners and ask what they thought.\nWe reversed the order.",
       "Nothing has been decided yet. We send the candidate formulas as they are,\nand hand over the decision of which one becomes the product."
     ],
+    "figures": {
+      "skin": {
+        "alt": "Sweat beading on a shoulder after exercising outdoors"
+      },
+      "sample": {
+        "alt": "Three unlabelled white tubes"
+      },
+      "notes": {
+        "alt": "An open blank notebook with a pen"
+      }
+    },
     "what": {
       "heading": "What you would be doing",
       "body": "You receive two or three samples with the manufacturer’s name hidden.\nYou keep doing the activity you already do, and compare them against the six criteria below.\nThe evaluation runs from October to November 2026."
