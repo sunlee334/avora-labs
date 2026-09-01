@@ -116,10 +116,40 @@ function json(body: unknown, status = 200, extra: Record<string, string> = {}): 
   });
 }
 
-/** 로그인 후 돌아갈 곳. 외부 주소로 보내지 않도록 우리 경로만 허용합니다. */
-function safeReturnPath(raw: string | null): string {
-  if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return '/ko/account';
-  return raw;
+/**
+ * 로그인 후 돌아갈 곳. 외부 주소로 보내지 않도록 우리 경로만 허용합니다.
+ *
+ * ── 왜 `//` 만으로는 부족한가 ──────────────────────────────
+ * 브라우저의 주소 파서(WHATWG URL)는 **역슬래시를 슬래시와 같게** 봅니다.
+ * 그래서 `/\evil.example` 은 `//evil.example` 과 똑같이 풀립니다:
+ *
+ *     new URL('/\evil.example', 'https://avoralabs.co')
+ *       → https://evil.example/
+ *
+ * `//` 만 막으면 이 형태가 그대로 통과해 `Location` 헤더로 나가고, 손님은
+ * **우리 화면에서 로그인을 마친 직후** 남의 사이트에 착지합니다. 방금
+ * 로그인에 성공한 사람이라 경계가 가장 낮은 순간이고, 그 자리에 우리와
+ * 똑같이 생긴 화면을 놓으면 그대로 넘어갑니다.
+ *
+ * curl 로는 재현되지 않습니다 — RFC 3986 파서라 역슬래시를 경로 문자로
+ * 보고 오리진에 머뭅니다. 브라우저에서만 나타나는 차이입니다.
+ *
+ * 문자를 하나씩 막는 대신 **주소로 한 번 풀어서 경로만 도로 꺼냅니다.**
+ * 계정 연결 분기가 이미 그렇게 하고 있고(`target.pathname + target.search`),
+ * 새로운 우회 형태가 나와도 파서가 같은 답을 내므로 여기서 따라 적을 것이
+ * 없습니다.
+ */
+function safeReturnPath(raw: string | null, base: URL): string {
+  if (!raw || !raw.startsWith('/')) return '/ko/account';
+  let parsed: URL;
+  try {
+    parsed = new URL(raw, base);
+  } catch {
+    return '/ko/account';
+  }
+  // 풀어 보니 우리 집이 아니면 돌려보내지 않습니다.
+  if (parsed.origin !== base.origin) return '/ko/account';
+  return parsed.pathname + parsed.search;
 }
 
 /**
@@ -141,7 +171,7 @@ async function startOAuth(request: Request, env: AuthEnv, mode: 'login' | 'link'
 
   const redirectUri = new URL(`/api/auth/callback/${provider.name}`, url).href;
   const state = newToken();
-  const returnTo = safeReturnPath(url.searchParams.get('returnTo'));
+  const returnTo = safeReturnPath(url.searchParams.get('returnTo'), url);
 
   const { authorizeUrl } = provider.start(
     redirectUri,
@@ -221,7 +251,7 @@ export async function handleCallback(
   }
 
   const now = new Date();
-  const returnTo = safeReturnPath(encodedReturn ? decodeURIComponent(encodedReturn) : null);
+  const returnTo = safeReturnPath(encodedReturn ? decodeURIComponent(encodedReturn) : null, url);
   const clearState = cookie(STATE_COOKIE, '', 0, isSecure(request));
 
   /*

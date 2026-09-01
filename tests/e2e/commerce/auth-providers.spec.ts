@@ -446,6 +446,47 @@ test.describe('연결도 우리가 시작한 것만 받는다', () => {
     expect((await res.json()).error).toBe('STATE_MISMATCH');
   });
 
+  test('로그인 후 외부 주소로 보내지 않는다 — 역슬래시 우회 포함', async ({ page }) => {
+    /*
+     * `//evil` 은 막고 있었는데 `/\evil` 이 통과했습니다.
+     *
+     * 브라우저의 주소 파서는 **역슬래시를 슬래시와 같게** 봅니다:
+     *
+     *     new URL('/\evil.example', 'https://avoralabs.co') → https://evil.example/
+     *
+     * 그래서 `//` 만 막으면 같은 결과를 내는 형태가 그대로 `Location` 으로
+     * 나갔습니다. 손님은 **우리 화면에서 로그인을 마친 직후** 남의 사이트에
+     * 착지합니다 — 경계가 가장 낮은 순간입니다.
+     *
+     * curl 로는 재현되지 않습니다(RFC 3986 파서는 역슬래시를 경로로 봅니다).
+     * 그래서 문자열이 아니라 **파서가 어디로 푸는지** 를 봅니다.
+     */
+    const BYPASSES = [
+      '/\\evil.example',
+      '/\\/evil.example',
+      '//evil.example',
+      '/\\\\evil.example',
+      'https://evil.example/x',
+    ];
+
+    for (const raw of BYPASSES) {
+      const user = freshUser('ret');
+      const start = await page.request.get(
+        `/api/auth/login?provider=mock&returnTo=${encodeURIComponent(raw)}`,
+        { maxRedirects: 0 },
+      );
+      const callback = new URL(start.headers()['location']);
+      callback.searchParams.set('code', user);
+      const done = await page.request.get(callback.href, { maxRedirects: 0 });
+
+      const location = done.headers()['location'];
+      expect(location, `${raw} 에 Location 이 없습니다`).toBeTruthy();
+      // 브라우저가 푸는 대로 풀어서 오리진을 봅니다.
+      const landed = new URL(location, 'https://avoralabs.co');
+      expect(landed.origin, `returnTo=${raw} → ${landed.href}`).toBe('https://avoralabs.co');
+    }
+  });
+
   test('연결 후에도 외부 주소로 보내지 않는다', async ({ page }) => {
     const USER_LINK_RETURN = freshUser('link-return');
     await loginWith(page, 'mock', USER_LINK_RETURN);
