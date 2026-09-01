@@ -54,7 +54,7 @@ function safeRequest(request: Request) {
 type Level = 'error' | 'warning';
 
 /** 여기서만 이벤트를 보냅니다. `src/config/site.ts` 의 ORIGIN 과 같아야 합니다. */
-const PRODUCTION_HOST = 'avoralabs.co';
+export const PRODUCTION_HOST = 'avoralabs.co';
 
 export interface SentryEnv {
   SENTRY_DSN?: string;

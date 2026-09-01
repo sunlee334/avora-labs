@@ -97,12 +97,24 @@
     // 비우면 전송을 통째로 건너뜁니다. 로컬과 테스트에서 이벤트가 쌓이지
     // 않게 하는 스위치이기도 합니다.
     "SENTRY_DSN": "https://4cad7b354a2d66d13cacd6c496489185@o4512008388935680.ingest.us.sentry.io/4512008410562560",
-    "SENTRY_ENVIRONMENT": "production"
+    "SENTRY_ENVIRONMENT": "production",
+
+    // 확인 메일의 보내는 주소. 비밀값이 아닙니다 — 받는 사람에게 그대로 보입니다.
+    //
+    // ⚠️ 이 주소의 **도메인이 Resend 에서 인증(SPF·DKIM)되어 있어야** 합니다.
+    //    인증 전에 보내면 Resend 가 403 으로 거절하거나, 통과하더라도 받는
+    //    쪽에서 스팸으로 분류합니다. 첫 확인 메일이 스팸함에 들어가면 그
+    //    주소는 그 뒤로도 계속 스팸함으로 갑니다.
+    //
+    // 이 값만으로는 아무것도 나가지 않습니다. 실제 발송의 스위치는
+    // RESEND_API_KEY 하나입니다(아래 주석 참조).
+    "MAIL_FROM": "PAROS <hello@avoralabs.co>"
   },
 
   "observability": {
     "enabled": true
   },
+
 
   // 어느 배포에서 터졌는지 알기 위해서입니다. Sentry 의 release 로 들어가,
   // "어제 배포부터 늘었다" 를 볼 수 있게 합니다.
@@ -155,6 +167,14 @@
   //     "send_email": [{ "name": "SEND_EMAIL", "destination_address": "<받는주소>" }]
   //     vars: { "NOTIFY_EMAIL_FROM": "orders@<도메인>", "NOTIFY_EMAIL_TO": "<받는주소>" }
   //     ⚠ 도메인 등록 전에 바인딩을 걸면 배포가 깨지므로 주석으로 둡니다.
+  //
+  // 확인 메일 발송을 켤 때 (F2-1):
+  //   1. Resend 에서 avoralabs.co 도메인을 등록하고 DNS 에 SPF·DKIM 을 넣습니다.
+  //   2. 대시보드에서 Verified 로 바뀐 것을 눈으로 확인합니다.
+  //   3. npx wrangler secret put RESEND_API_KEY
+  //   이 세 번째가 스위치입니다. 키가 없으면 워커는 발송을 통째로 건너뜁니다.
+  //   운영 호스트(avoralabs.co)로 들어온 요청에서만 나갑니다 — 검사가 도는
+  //   wrangler dev 에서는 키가 있어도 나가지 않습니다(worker/mailer.ts).
   //
   // 결제를 켤 때 추가할 것:
   //   wrangler secret put TOSS_SECRET_KEY

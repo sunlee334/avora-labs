@@ -114,6 +114,9 @@ export function normalizeRegion(raw: unknown) {
   return pick(REGIONS, raw);
 }
 
+/** 처음 낸 지원인가, 같은 주소가 다시 낸 것인가. */
+export type ApplyResult = 'new' | 'again';
+
 /**
  * 지원서를 받습니다.
  *
@@ -138,12 +141,23 @@ export async function apply(
   db: D1Database,
   a: PanelApplication,
   now: Date,
-): Promise<void> {
+): Promise<ApplyResult> {
   const iso = now.toISOString();
   const marketingAt = a.marketing ? iso : null;
   const nightAt = a.night ? iso : null;
 
-  await db
+  /*
+   * 새로 만든 id 를 미리 쥐고, 문장이 돌려준 id 와 견줍니다.
+   *
+   * 처음 낸 지원인지 다시 낸 것인지를 **경쟁 없이** 알아내는 방법입니다.
+   * `meta.changes` 는 INSERT 와 DO UPDATE 를 둘 다 1 로 세어 구분되지 않고,
+   * 미리 SELECT 로 확인하면 그 사이에 같은 주소가 끼어들 수 있습니다.
+   * `id` 는 DO UPDATE 가 손대지 않는 열이라, 돌아온 값이 방금 만든 것이면
+   * 이 문장이 행을 새로 만든 것입니다.
+   */
+  const id = newId(now);
+
+  const row = await db
     .prepare(
       `INSERT INTO panel_applications
          (id, name, email, activity, frequency, region, locale,
@@ -159,13 +173,16 @@ export async function apply(
          marketing_at = excluded.marketing_at,
          night_at = excluded.night_at,
          -- 다시 지원했다는 것은 받겠다는 뜻입니다. 예전에 해지했더라도 되살립니다.
-         unsubscribed_at = NULL`,
+         unsubscribed_at = NULL
+       RETURNING id`,
     )
     .bind(
-      newId(now), a.name, a.email, a.activity, a.frequency, a.region, a.locale,
+      id, a.name, a.email, a.activity, a.frequency, a.region, a.locale,
       iso, iso, marketingAt, newToken(), nightAt,
     )
-    .run();
+    .first<{ id: string }>();
+
+  return row?.id === id ? 'new' : 'again';
 }
 
 /**

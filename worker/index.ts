@@ -51,10 +51,17 @@ import {
   normalizeEmail,
   signup,
   unsubscribe,
+  unsubscribeTokenFor,
   activeCount,
   listSignups,
   signupsBySource,
 } from './launch-notify';
+import {
+  sendNotifyConfirmation,
+  sendPanelConfirmation,
+  type MailerEnv,
+} from './mailer';
+import { ORIGIN } from '../src/config/site.ts';
 import {
   apply as applyPanel,
   unsubscribe as unsubscribePanel,
@@ -128,7 +135,7 @@ const ADAPTERS: Record<string, PaymentAdapter> = {
   mock: mockPayments,
 };
 
-interface Env extends AdminEnv, AuthEnv, RateLimitEnv, SentryEnv {
+interface Env extends AdminEnv, AuthEnv, RateLimitEnv, SentryEnv, MailerEnv {
   ASSETS: Fetcher;
   DB?: D1Database;
   /** 어떤 PG 어댑터를 쓸지. 미설정이면 결제 엔드포인트가 비활성입니다. */
@@ -740,7 +747,11 @@ const INQUIRY_BODY_MAX = 2000;
  * 주소가 명단에 있는지를 아무에게나 알려 주는 것이라, 남의 주소를 넣어 보며
  * 명단을 캐낼 수 있습니다. 그래서 성공과 중복은 화면에서 구분되지 않습니다.
  */
-async function handleLaunchNotify(request: Request, env: Env): Promise<Response> {
+async function handleLaunchNotify(
+  request: Request,
+  env: Env,
+  ctx: ExecutionContext,
+): Promise<Response> {
   if (!env.DB) return json({ error: 'NOTIFY_NOT_CONFIGURED' }, 503);
 
   let body: {
@@ -786,7 +797,34 @@ async function handleLaunchNotify(request: Request, env: Env): Promise<Response>
    * 봅니다 — 'true' 문자열이나 1 을 동의로 읽으면 의도치 않은 값 하나가
    * 야간 광고 수신 동의로 둔갑합니다.
    */
-  await signup(env.DB, { email, locale, source, activities, night: body.night === true }, new Date());
+  const result = await signup(
+    env.DB,
+    { email, locale, source, activities, night: body.night === true },
+    new Date(),
+  );
+
+  /*
+   * 확인 메일은 **처음 오른 사람과 되살아난 사람에게만** 보냅니다.
+   *
+   * 이미 명단에 있는 주소가 다시 제출되어도 보내지 않습니다. 이 폼은 로그인
+   * 없이 아무 주소나 넣을 수 있어서, 재제출마다 보내면 남의 주소를 적어
+   * 반복 제출하는 것만으로 **그 사람의 편지함을 두들길 수 있습니다.**
+   * 속도 제한이 1차 방어이고, 이 조건이 2차 방어입니다.
+   *
+   * 되살아난 경우(예전에 해지했다가 다시 신청)는 보냅니다 — 그 사람에게는
+   * 지금이 처음 신청한 것과 같고, 해지 링크를 다시 받아야 합니다.
+   */
+  if (result !== 'already') {
+    const token = await unsubscribeTokenFor(env.DB, email);
+    if (token) {
+      const unsubscribeUrl = new URL(
+        `/api/launch-notify/unsubscribe?t=${encodeURIComponent(token)}`,
+        request.url,
+      ).href;
+      sendNotifyConfirmation(env, ctx, request, { to: email, locale, unsubscribeUrl });
+    }
+  }
+
   // 중복이어도 201 입니다 — 신청한 사람 입장에서는 성공했습니다.
   return json({ ok: true }, 201);
 }
@@ -802,7 +840,11 @@ async function handleLaunchNotify(request: Request, env: Env): Promise<Response>
  * 그래서 여기서는 빠진 항목마다 무엇이 문제인지 돌려줍니다. "지원되지
  * 않았습니다" 만 보여주면 지원자는 어느 칸을 고쳐야 할지 모릅니다.
  */
-async function handlePanelApply(request: Request, env: Env): Promise<Response> {
+async function handlePanelApply(
+  request: Request,
+  env: Env,
+  ctx: ExecutionContext,
+): Promise<Response> {
   if (!env.DB) return json({ error: 'PANEL_NOT_CONFIGURED' }, 503);
 
   let body: Record<string, unknown>;
@@ -844,7 +886,7 @@ async function handlePanelApply(request: Request, env: Env): Promise<Response> {
 
   const locale = typeof body.locale === 'string' ? body.locale.slice(0, 8) : 'ko';
 
-  await applyPanel(
+  const result = await applyPanel(
     env.DB,
     {
       name: name!,
@@ -860,6 +902,11 @@ async function handlePanelApply(request: Request, env: Env): Promise<Response> {
     },
     new Date(),
   );
+
+  // 확인 메일은 처음 낸 지원에만 보냅니다 — 알림 폼과 같은 이유입니다.
+  if (result === 'new') {
+    sendPanelConfirmation(env, ctx, request, { to: email!, locale });
+  }
 
   // 다시 낸 경우에도 201 입니다 — 지원자 입장에서는 성공했습니다.
   return json({ ok: true }, 201);
@@ -1584,7 +1631,7 @@ async function route(request: Request, env: Env, ctx: ExecutionContext): Promise
 
   // 출시 알림 — 제품이 나오기 전까지 관심을 담아 두는 유일한 자리입니다.
   if (pathname === '/api/launch-notify' && request.method === 'POST') {
-    return handleLaunchNotify(request, env);
+    return handleLaunchNotify(request, env, ctx);
   }
   if (pathname === '/api/launch-notify/unsubscribe' && request.method === 'GET') {
     return handleLaunchUnsubscribe(request, env);
@@ -1595,7 +1642,7 @@ async function route(request: Request, env: Env, ctx: ExecutionContext): Promise
 
   // 검증단 지원 — 10월 크루 접촉 때 링크를 걸 자리(/panel)가 여기로 보냅니다.
   if (pathname === '/api/panel' && request.method === 'POST') {
-    return handlePanelApply(request, env);
+    return handlePanelApply(request, env, ctx);
   }
   if (pathname === '/api/panel/unsubscribe' && request.method === 'GET') {
     return handlePanelUnsubscribe(request, env);
@@ -1777,4 +1824,5 @@ export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     return jsonOnError(request, () => route(request, env, ctx), { env, ctx });
   },
+
 };

@@ -187,6 +187,25 @@ export async function unsubscribe(
   return (res.meta?.changes ?? 0) > 0;
 }
 
+/**
+ * 확인 메일에 넣을 해지 링크의 토큰.
+ *
+ * `signup()` 이 돌려주지 않는 이유: 새로 넣은 경우에는 방금 만든 토큰이지만
+ * 되살린 경우에는 **예전 토큰이 그대로 남습니다.** 두 경로를 하나의 반환값으로
+ * 묶으면 어느 쪽 토큰인지 부르는 쪽이 알 수 없습니다. 보낼 때만 한 번 읽습니다 —
+ * 이미 명단에 있던 사람의 재신청에서는 이 질의가 아예 돌지 않습니다.
+ */
+export async function unsubscribeTokenFor(
+  db: D1Database,
+  email: string,
+): Promise<string | null> {
+  const row = await db
+    .prepare('SELECT unsubscribe_token AS t FROM launch_notify WHERE email = ?')
+    .bind(email)
+    .first<{ t: string }>();
+  return row?.t ?? null;
+}
+
 /** 아직 받겠다고 한 사람 수. 관리 화면에서 펀딩 준비 상황을 볼 때 씁니다. */
 export async function activeCount(db: D1Database): Promise<number> {
   const row = await db
