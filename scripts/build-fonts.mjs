@@ -316,6 +316,10 @@ const DISPLAY_PATHS = [
   'brand.origin.statementAfter',
   'brand.question.quote',
   'brand.philosophy.quote',
+  /* 브랜드 페이지가 넓어지며 생긴 display 헤드라인 셋. */
+  'brand.island.lead',
+  'brand.audience.lead',
+  'brand.company.lead',
   'product.hero.headline',
   'footer.tagline',
   'legal.privacy.heading',

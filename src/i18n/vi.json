@@ -251,18 +251,83 @@
       "kicker": "Origin",
       "statementBefore": "Chăm sóc da kết hợp sức sống của vận động với ",
       "statementEmphasis": "sự dịu nhẹ",
-      "statementAfter": "."
+      "statementAfter": ".",
+      "lead": "PAROS đồng hành với vẻ đẹp của mọi khoảnh khắc cơ thể chuyển động, và ở lại đến lúc làn da cần được vỗ về sau đó."
     },
     "question": {
       "kicker": "The Question",
       "quote": "Vào khoảnh khắc cơ thể bừng lên sức sống nhất, tại sao thứ mà làn da cảm nhận lại luôn bình thường và giống hệt nhau?",
       "body": "Thị trường làm đẹp lâu nay dừng ở hai thái cực. Mỹ phẩm thông thường chạy theo vẻ hào nhoáng lại trở nên nặng nề và bí bách giữa những chuyển động thường ngày, trong khi mỹ phẩm thể thao chỉ hô hào công năng thì thô ráp, bỏ quên sự thoải mái và tinh tế mà làn da xứng đáng có.",
-      "naming": "PAROS là tên một hòn đảo ở biển Aegean. Nắng gắt nhưng biển vẫn trong; gió mạnh nhưng người ta vẫn chuyển động tự do. Chúng tôi lấy thái độ của thương hiệu từ nơi mà sức mạnh và vẻ đẹp của thiên nhiên không chống lại nhau."
+      "belief": "Chúng tôi tin rằng đi bộ, chạy, đổ mồ hôi, gặp nước rồi lại chuyển động — mỗi khoảnh khắc ấy đều là lúc ta chăm sóc chính mình.",
+      "close": "Càng vận động nhiều, làn da càng cần sự chăm sóc tinh tế hơn; càng được chăm sóc dễ chịu, ta càng có thể tự do chuyển động trở lại.\nChuyển động và chăm sóc cùng tồn tại một cách tự nhiên — đó là lý do PAROS bắt đầu."
+    },
+    "island": {
+      "kicker": "The Name",
+      "lead": "Chúng tôi không chỉ mượn một cái tên từ hòn đảo Hy Lạp.",
+      "body": "Nắng gắt của biển Aegean, làn gió lướt qua da, mặt biển trong đến tận đáy, và đá cẩm thạch trắng đã ngậm ánh sáng suốt một thời gian dài.",
+      "attitude": "Paros là nơi sức mạnh của thiên nhiên và vẻ đẹp không đối lập nhau. Dưới nắng gắt biển vẫn trong, giữa gió mạnh người ta vẫn chuyển động tự do, và hòn đá bị thời gian mài mòn lại càng đẹp hơn.",
+      "stance": "Mạnh nhưng không thô. Năng động nhưng không nặng nề. Tự nhiên nhưng không vụng về. Đó là vẻ đẹp mà PAROS nghĩ đến.",
+      "note": "Vì vậy chúng tôi không bê nguyên phong cảnh nơi ấy về. Thứ giữ lại chỉ là cảm giác có được ở Paros."
+    },
+    "elements": {
+      "kicker": "Brand Codes",
+      "items": [
+        {
+          "term": "LIGHT",
+          "body": "Nắng gắt và ánh sáng tự nhiên. Nguồn năng lượng khiến một đời sống chuyển động bắt đầu."
+        },
+        {
+          "term": "WIND",
+          "body": "Làn gió lướt qua da. Chuyển động, và tự do."
+        },
+        {
+          "term": "WATER",
+          "body": "Mồ hôi và biển, rồi sự tươi mới sau đó. Khoảnh khắc ta sắp xếp lại chính mình."
+        },
+        {
+          "term": "STONE",
+          "body": "Thứ chịu được thời gian và chỉ giữ lại phần cốt lõi. Chiều sâu của PAROS."
+        }
+      ],
+      "note": "Bốn yếu tố này xuyên suốt sản phẩm, thiết kế, chiến dịch và nội dung."
+    },
+    "audience": {
+      "kicker": "Who It Is For",
+      "lead": "Đây không phải thương hiệu làm cho vận động viên.",
+      "body": "Những người đi bộ, chạy, đi xa, đổ mồ hôi và thử điều mới. Bất cứ ai sống một cách chủ động đều có chỗ trong PAROS.",
+      "note": "Không phải sản phẩm cho những giờ tập luyện, mà là thương hiệu hiện diện tự nhiên trong trọn một ngày chuyển động."
     },
     "philosophy": {
       "kicker": "Philosophy",
       "quote": "Chuyển động là biểu hiện thuần khiết và mạnh mẽ nhất của sự sống. Từ một buổi đi bộ nhẹ lúc sáng sớm đến khoảnh khắc bạn nắm lấy nhịp sống của mình, PAROS không cắt ngang dòng chảy ấy, chỉ để làn da trở về đúng kết cấu của nó.",
-      "body": "Ngay sau khi vận động hết mình, sự mềm mại tinh tế mà PAROS mang đến khi chạm vào da — chính sự tương phản đó làm nên nét riêng của PAROS."
+      "body": "Ngay sau khi vận động hết mình, sự mềm mại tinh tế mà PAROS mang đến khi chạm vào da — chính sự tương phản đó làm nên nét riêng của PAROS.",
+      "beauty": "Kiến trúc trắng, biển xanh, nắng gắt, đá mòn vì gió. Vẻ đẹp vốn có của những thứ thuộc về tự nhiên. PAROS nhìn về cùng hướng ấy — không phải thêm vào nhiều hơn, mà giữ lại đúng những gì một đời sống chuyển động cần."
+    },
+    "company": {
+      "kicker": "AVORA LABS",
+      "lead": "Bắt đầu từ một câu hỏi rất giản dị.",
+      "origin": "Chúng tôi cho rằng chuyển động mạnh mẽ và sự chăm sóc dịu dàng có thể đi cùng nhau, rằng chức năng và vẻ đẹp không nhất thiết phải đối lập. Không phải sản phẩm cho giờ tập luyện, mà là vẻ đẹp cho trọn một đời sống chuyển động. AVORA LABS bắt đầu từ ý nghĩ đó.",
+      "name": "AVORA ghép chữ A của Athlete · Active — người chuyển động — với VORA của Vitality & Aura, sức sống trong trẻo và khí chất toát ra từ làn da khoẻ mạnh tự nhiên.",
+      "formula": "ACTIVE + VITALITY + AURA",
+      "toParos": "AVORA LABS không dừng lại ở việc làm ra một sản phẩm. Thứ chúng tôi tìm thấy không phải một ngành hàng mà là một khả thể — vẻ đẹp cho đời sống chuyển động. PAROS là thương hiệu đầu tiên dựng triết lý ấy thành một thế giới riêng."
+    },
+    "message": {
+      "kicker": "Brand Message",
+      "items": [
+        {
+          "en": "FOR EVERY MOVEMENT.",
+          "gloss": "Cho mọi khoảnh khắc chuyển động"
+        },
+        {
+          "en": "MOVE. SWEAT. REAPPLY.",
+          "gloss": "Chuyển động, đổ mồ hôi, rồi chăm sóc lại"
+        },
+        {
+          "en": "MOVE FREELY. CARE GENTLY.",
+          "gloss": "Chuyển động tự do, chăm sóc dịu dàng"
+        }
+      ],
+      "close": "Vẻ đẹp mà PAROS nói đến không phải thứ hoàn tất sau khi chuyển động dừng lại. Chuyển động, mồ hôi và ánh nắng — tất cả những khoảnh khắc ấy đều là một phần của vẻ đẹp."
     },
     "bridgeLink": "Đọc câu chuyện thương hiệu"
   },

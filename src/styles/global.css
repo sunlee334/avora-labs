@@ -2629,6 +2629,79 @@ a {
 }
 
 /*
+ * 브랜드 코드 넷 (LIGHT / WIND / WATER / STONE).
+ *
+ * ⚠️ **아이콘을 붙이지 마세요.** 해·바람·물방울·돌 그림은 어느 브랜드에나
+ * 있어서 붙이는 순간 이 넷이 남의 것과 구분되지 않습니다(기획안 5장).
+ *
+ * 번호도 매기지 않습니다. The Journey(01–05)는 하루의 **순서** 라 번호가
+ * 뜻을 갖지만, 이 넷은 순서가 없습니다. 번호를 붙이면 없는 위계가 생깁니다.
+ *
+ * 이름은 고정폭입니다 — 라틴 대문자 넉 자라 자간이 규칙적으로 서고,
+ * 이 사이트에서 고정폭은 "이름표" 의 서체입니다.
+ */
+.codes {
+  display: grid;
+  margin-top: 30px;
+}
+.codes > div {
+  padding-block: 20px;
+  border-top: 1px solid var(--color-border);
+}
+.codes > div:last-child {
+  border-bottom: 1px solid var(--color-border);
+}
+.codes dt {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+}
+.codes dd {
+  /* dd 의 기본 margin-inline-start: 40px 를 지웁니다. */
+  margin: 8px 0 0;
+  color: var(--color-text-muted);
+  font-size: 14.5px;
+  line-height: calc(1.7 * var(--leading-scale));
+}
+
+/* AVORA = ACTIVE + VITALITY + AURA. 이름의 구성을 한 줄로 보여 줍니다. */
+.codes__formula {
+  margin-top: 14px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  color: var(--color-text);
+}
+
+/*
+ * 브랜드 메시지 셋.
+ *
+ * 영문이 표기이고 아래 한 줄이 그 뜻입니다. 뜻을 괄호로 묶지 않는 이유:
+ * 괄호는 곁가지라는 뜻인데, 여기서는 그 줄이 다섯 언어 독자에게 본문입니다.
+ */
+.messages {
+  list-style: none;
+  margin: 30px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 22px;
+}
+.messages strong {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(15px, 4vw, 19px);
+  letter-spacing: 0.14em;
+}
+.messages span {
+  display: block;
+  margin-top: 6px;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+/*
  * 홈 FAQ.
  *
  * 질문과 답의 짝이라 dl 입니다. **접지 않습니다** — 셋뿐이라 접으면 읽히지

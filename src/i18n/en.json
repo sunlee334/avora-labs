@@ -251,18 +251,83 @@
       "kicker": "Origin",
       "statementBefore": "Skincare where athletic energy meets ",
       "statementEmphasis": "gentle care",
-      "statementAfter": "."
+      "statementAfter": ".",
+      "lead": "PAROS stays with you through the beauty of every moment in motion, and through the moments after, when the skin needs care."
     },
     "question": {
       "kicker": "The Question",
       "quote": "When our bodies come most alive, why should the skincare our skin feels stay ordinary?",
       "body": "The beauty market sat at two extremes. Conventional cosmetics chased polish but felt heavy through a day of movement, while sports formulas shouted function and gave up the comfort and refinement skin deserves.",
-      "naming": "PAROS is an island in the Aegean. The sun is fierce, yet the sea stays clear; the wind is rough, yet people keep moving freely. We took the brand's posture from a place where nature's strength and its beauty never work against each other."
+      "belief": "We believe that walking, running, sweating, meeting water and moving again — every one of those moments is time spent looking after yourself.",
+      "close": "The more you move, the more careful the care your skin needs; the more comfortably you are cared for, the more freely you can move again.\nMovement and care, living together naturally — that is why PAROS began."
+    },
+    "island": {
+      "kicker": "The Name",
+      "lead": "We did not simply borrow a name from a Greek island.",
+      "body": "The hard Aegean sun, the wind across the skin, water you can see through, and white marble that has held the light for a very long time.",
+      "attitude": "Paros is a place where the strength of nature and its beauty do not stand against each other. The sea stays clear under a hard sun, people move freely through rough wind, and stone worn by time only grows more beautiful.",
+      "stance": "Strong but not coarse. Active but not heavy. Natural but not crude. That is the beauty PAROS has in mind.",
+      "note": "So we do not copy the scenery over. What we keep is only the feeling of being there."
+    },
+    "elements": {
+      "kicker": "Brand Codes",
+      "items": [
+        {
+          "term": "LIGHT",
+          "body": "Hard sun and natural light. The energy that starts a life in motion."
+        },
+        {
+          "term": "WIND",
+          "body": "Wind passing across the skin. Movement, and freedom."
+        },
+        {
+          "term": "WATER",
+          "body": "Sweat and sea, and the refresh after. The moment you gather yourself again."
+        },
+        {
+          "term": "STONE",
+          "body": "What endures time and keeps only the essential. The depth of PAROS."
+        }
+      ],
+      "note": "These four run through the product, the design, the campaigns and the content."
+    },
+    "audience": {
+      "kicker": "Who It Is For",
+      "lead": "This is not a brand for athletes.",
+      "body": "People who walk, run, travel, sweat and try new things. Anyone who lives actively has a place in PAROS.",
+      "note": "Not a product for the hours you train, but a brand that sits naturally in the whole of a moving day."
     },
     "philosophy": {
       "kicker": "Philosophy",
       "quote": "Movement is the purest, most powerful expression of being alive. From an easy walk at dawn to the moment you take hold of the day, PAROS stays out of the way and lets skin find its own texture.",
-      "body": "Right after you have moved hard, PAROS meets your skin with a precise, unhurried softness. That reversal is what makes it ours."
+      "body": "Right after you have moved hard, PAROS meets your skin with a precise, unhurried softness. That reversal is what makes it ours.",
+      "beauty": "White architecture, blue sea, hard sun, stone worn by wind. The beauty natural things already have. PAROS looks the same way — not adding more, but keeping only what a life in motion needs."
+    },
+    "company": {
+      "kicker": "AVORA LABS",
+      "lead": "It started with one very simple question.",
+      "origin": "We thought strong movement and gentle care could go together, and that function and beauty need not stand against each other. Not a product for training hours, but beauty for a whole life in motion. AVORA LABS began from that thought.",
+      "name": "AVORA joins the A of Athlete and Active — the one who moves — with the VORA of Vitality & Aura, the clear energy and poise that come from skin in good health.",
+      "formula": "ACTIVE + VITALITY + AURA",
+      "toParos": "AVORA LABS did not stop at making one product. What we found was not a category but a possibility — beauty for a life in motion. PAROS is the first brand built to carry that idea as a world of its own."
+    },
+    "message": {
+      "kicker": "Brand Message",
+      "items": [
+        {
+          "en": "FOR EVERY MOVEMENT.",
+          "gloss": "For every moment in motion"
+        },
+        {
+          "en": "MOVE. SWEAT. REAPPLY.",
+          "gloss": "Move, sweat, and care again"
+        },
+        {
+          "en": "MOVE FREELY. CARE GENTLY.",
+          "gloss": "Move freely, care gently"
+        }
+      ],
+      "close": "The beauty PAROS speaks of is not what is left after the movement stops. The movement, the sweat, the sunlight — all of it is part of the beauty."
     },
     "bridgeLink": "Read the brand story"
   },
