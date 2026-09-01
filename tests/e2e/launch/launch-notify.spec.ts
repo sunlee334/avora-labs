@@ -111,11 +111,23 @@ test.describe('출시 알림 API', () => {
 });
 
 test.describe('홈 신청 자리', () => {
+  /*
+   * 셋이 된 이유.
+   *
+   * 하단 고정 CTA 의 시트(B2)가 세 번째 폼을 들고 옵니다. 그런데 이 검사가
+   * 지키는 것은 **인라인 두 자리** 입니다 — 자바스크립트 없이도 신청할 수
+   * 있는 경로가 첫 화면과 스토리 끝에 각각 있다는 것. 시트는 그 위에 얹힌
+   * 것이지 대체가 아닙니다.
+   *
+   * 그래서 총합을 세는 대신 **자리를 이름으로** 셉니다. 총합만 보면 인라인
+   * 하나를 지우고 시트를 하나 더 넣어도 통과합니다.
+   */
   test('첫 화면과 스토리 끝, 두 자리에 있다', async ({ page }) => {
     await page.goto('/ko/');
-    await expect(page.locator('[data-launch-notify]')).toHaveCount(2);
     await expect(page.locator('[data-launch-notify][data-source="home-hero"]')).toHaveCount(1);
     await expect(page.locator('[data-launch-notify][data-source="home-end"]')).toHaveCount(1);
+    // 시트를 뺀 나머지가 인라인 자리입니다.
+    await expect(page.locator('[data-launch-notify]:not([data-source="sheet"])')).toHaveCount(2);
   });
 
   test('첫 화면 자리가 사진 바로 다음에 온다', async ({ page }) => {
@@ -175,7 +187,14 @@ test.describe('홈 신청 자리', () => {
   test('5개 언어 모두 두 자리가 있다', async ({ page }) => {
     for (const lang of ['ko', 'en', 'zh', 'th', 'vi']) {
       await page.goto(`/${lang}/`);
-      await expect(page.locator('[data-launch-notify]'), lang).toHaveCount(2);
+      await expect(
+        page.locator('[data-launch-notify][data-source="home-hero"]'),
+        lang,
+      ).toHaveCount(1);
+      await expect(
+        page.locator('[data-launch-notify][data-source="home-end"]'),
+        lang,
+      ).toHaveCount(1);
     }
   });
 });

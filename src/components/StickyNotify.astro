@@ -1,0 +1,227 @@
+---
+/**
+ * 하단 고정 CTA + 바텀시트 (B-컴포넌트 B2).
+ *
+ * ── 무엇이 문제였나 ─────────────────────────────────────────
+ * 홈이 12개 섹션으로 길어지면서, 신청 폼은 첫 화면(#notify)과 검증단 섹션
+ * 두 곳에만 남았습니다. 검증단 섹션은 페이지의 절반쯤이고 **그 아래로는
+ * 다섯 섹션 동안 전환 경로가 하나도 없습니다** — 타임라인·첫 제품·여정·
+ * 회사 소개·FAQ 를 다 읽고 마음이 움직인 사람이 할 수 있는 일이, 다시 위로
+ * 올라가는 것뿐이었습니다.
+ *
+ * 게다가 이 브랜드는 **한 손 조작이 타깃 상황 그 자체** 입니다. 유일한 상시
+ * 진입점이 우측 상단 햄버거인데, 그 자리는 오른손 엄지가 가장 닿기 어렵습니다.
+ *
+ * ── 인라인 폼을 지우지 않은 이유 ────────────────────────────
+ * 지시서는 "인라인 폼이 2개 남아 있다" 를 문제로 적었지만, 실제 결함은
+ * **중간에 길이 없다** 는 쪽입니다. 인라인 폼 둘은 자바스크립트 없이도
+ * 동작하는 유일한 신청 경로이고, 두 번째 폼의 자리(검증단 이야기 바로 뒤)와
+ * `source="home-end"` 값에는 각각 기록된 근거가 있습니다. 동작하는 경로를
+ * 걷어내고 **자바스크립트가 있어야만 열리는** 시트로 바꾸는 것은 맞바꿈이
+ * 나쁩니다. 그래서 지우지 않고 **더합니다.**
+ *
+ * 대신 같은 화면에 둘이 함께 보이지 않게 합니다 — 인라인 폼이 시야에
+ * 들어오면 이 바는 내려갑니다. "한 화면에 Primary 는 하나만"(B1)입니다.
+ *
+ * ── 자바스크립트가 없으면 ───────────────────────────────────
+ * 바는 **나타나지 않습니다.** 처음부터 내려가 있고 스크립트만 올립니다.
+ * 열리지 않는 시트를 여는 바가 화면 아래를 영구히 덮는 것보다, 아예 없는
+ * 편이 낫습니다 — 그 경우에도 인라인 폼 둘은 그대로 있습니다.
+ *
+ * ── 왜 <dialog> 인가 ────────────────────────────────────────
+ * 포커스 가둠·Esc·`::backdrop`·배경 inert 를 브라우저가 처리합니다. 직접
+ * 만들면 거의 반드시 포커스가 새거나 배경 스크롤이 뚫립니다. 이 저장소의
+ * 메뉴 시트·언어 시트와도 같은 구조라, 사용자가 배울 상호작용이 늘지
+ * 않습니다.
+ */
+import LaunchNotify from './LaunchNotify.astro';
+import { dict } from '../i18n';
+import type { Locale } from '../config/site';
+
+interface Props {
+  locale: Locale;
+  /** 시트 안 폼의 제목·본문. 자리마다 말이 달라야 하므로 페이지가 정합니다. */
+  heading: string;
+  body: string;
+}
+
+const { locale, heading, body } = Astro.props;
+const t = dict(locale);
+---
+
+{/*
+  `<a href="#notify">` 입니다 — `<button>` 이 아닙니다.
+
+  이 컨트롤이 하는 일은 "신청 폼으로 데려가는 것" 이고, 시트는 그것을 더 빨리
+  하는 방법입니다. 스크립트가 가로채 시트를 열고, 못 가로채면 앵커가 첫 화면
+  폼으로 데려갑니다. 목적지가 있는 컨트롤은 링크입니다.
+*/}
+<div class="stickyCta" data-sticky-cta data-shown="false">
+  <a
+    class="cta stickyCta__btn"
+    href="#notify"
+    aria-haspopup="dialog"
+    data-sticky-cta-open
+  >{t.notify.submit}</a>
+</div>
+
+<dialog class="notifySheet" aria-label={t.notify.submit} data-notify-sheet>
+  {/*
+    손잡이와 닫기를 **한 줄로 묶습니다.**
+
+    처음에는 둘 다 `position: absolute` 였는데, 시트가 `overflow-y: auto` 라
+    **내용과 함께 스크롤돼 화면 밖으로 나갔습니다.** 스크롤 컨테이너 안의
+    절대 배치는 스크롤되지 않은 좌표를 기준으로 잡히기 때문입니다. 시트 안이
+    긴 폼이라(활동 6개 + 야간 동의 + 개인정보 안내) 375px 화면에서는 60px 만
+    내려도 ✕ 가 사라졌고, 그러면 손가락으로 닫을 길이 시트 위 백드롭 한 줄만
+    남습니다 — 모바일에는 Esc 가 없습니다.
+
+    같은 이유로 제목과 겹치던 문제도 함께 사라집니다. ✕ 가 흐름 밖에 있으면
+    긴 번역(vi·th)의 제목 첫 줄이 그 아래로 들어갔습니다.
+
+    손잡이는 끌어내려 닫히지는 않지만 "내려서 닫는 것" 이라는 신호는 줍니다.
+    장식이므로 낭독기에서 감춥니다.
+  */}
+  <div class="notifySheet__head">
+    <div class="notifySheet__grip" aria-hidden="true"></div>
+    <button class="notifySheet__close" type="button" aria-label={t.nav.close} data-notify-sheet-close>
+      <span aria-hidden="true">✕</span>
+    </button>
+  </div>
+
+  {/*
+    `source="sheet"` 입니다.
+
+    이 값이 그대로 GA4 의 `form_location` 이 되고(`lib/launch-notify.ts`),
+    D1 행에도 남습니다. 시트에서 들어온 신청이 몇 건인지 세지 못하면 이
+    컴포넌트를 계속 둘지 판단할 근거가 없습니다.
+  */}
+  <LaunchNotify locale={locale} source="sheet" heading={heading} body={body} />
+</dialog>
+
+<script>
+  /*
+   * 바를 언제 올리는가.
+   *
+   * 스크롤 위치(px)로 정하지 않습니다 — 섹션이 하나 늘거나 번역이 길어지면
+   * 그 숫자가 조용히 틀려집니다. **무엇이 화면에 있는가** 로 정합니다.
+   *
+   * 셋 중 하나라도 보이면 내립니다:
+   *   히어로      — 첫 화면에는 이미 버튼이 있습니다(.hero__cta)
+   *   인라인 폼   — 폼이 보이는데 같은 말을 하는 바를 겹쳐 두지 않습니다
+   *   푸터        — 법적 고지·사업자정보를 가리지 않습니다
+   *
+   * 푸터를 억제 대상에 넣었기 때문에 본문에 아래 여백을 따로 마련하지
+   * 않아도 됩니다. 바가 가리는 동안 밑에 있는 것은 계속 흘러가는 본문이고,
+   * 페이지 끝에서는 바가 이미 내려가 있습니다.
+   */
+  const bar = document.querySelector<HTMLElement>('[data-sticky-cta]');
+  const sheet = document.querySelector<HTMLDialogElement>('[data-notify-sheet]');
+  const opener = document.querySelector<HTMLAnchorElement>('[data-sticky-cta-open]');
+
+  if (bar && sheet && opener && typeof sheet.showModal === 'function') {
+    // 시트 **안**의 폼은 억제 대상이 아닙니다. 그것까지 세면 시트를 여는
+    // 순간 바가 사라지고, 닫아도 돌아오지 않습니다.
+    const inlineForms = [...document.querySelectorAll<HTMLElement>('[data-launch-notify]')].filter(
+      (form) => !sheet.contains(form),
+    );
+
+    const suppressors = [
+      document.querySelector<HTMLElement>('.hero'),
+      ...inlineForms,
+      document.querySelector<HTMLElement>('.footer'),
+    ].filter((el): el is HTMLElement => el !== null);
+
+    const onScreen = new Set<Element>();
+    const io = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) onScreen.add(entry.target);
+        else onScreen.delete(entry.target);
+      }
+      bar.dataset.shown = String(onScreen.size === 0);
+    });
+    for (const el of suppressors) io.observe(el);
+
+    opener.addEventListener('click', (event) => {
+      /*
+       * 새 탭·다운로드 같은 보조 동작은 브라우저에 맡깁니다.
+       *
+       * 이 컨트롤을 `<button>` 이 아니라 `<a href="#notify">` 로 둔 이유가
+       * "목적지가 있는 컨트롤은 링크" 였는데, 무조건 preventDefault 하면
+       * 링크를 자처하고 링크처럼 굴지 않는 것이 됩니다 — Cmd+클릭으로 새
+       * 탭에 열려던 사람 앞에서 시트가 열립니다.
+       *
+       * `src/lib/hero-cta.ts` 의 첫 화면 버튼이 같은 판단을 이미 하고 있고,
+       * 그 세 줄을 그대로 씁니다.
+       */
+      if (event.defaultPrevented) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      if (event.button !== 0) return;
+
+      event.preventDefault();
+      sheet.showModal();
+      /*
+       * 초점을 이메일 칸으로 옮깁니다.
+       *
+       * showModal() 은 시트 안 첫 번째 초점 가능한 요소로 초점을 주는데,
+       * 여기서는 닫기 버튼입니다. 시트를 연 목적은 닫는 것이 아닙니다.
+       * `preventScroll` 은 시트 안이 스크롤되어 제목이 밀려 올라가는 것을
+       * 막습니다.
+       */
+      sheet.querySelector<HTMLInputElement>('input[name="email"]')?.focus({ preventScroll: true });
+    });
+
+    sheet
+      .querySelector<HTMLButtonElement>('[data-notify-sheet-close]')
+      ?.addEventListener('click', () => sheet.close());
+
+    /*
+     * 백드롭을 눌러 닫습니다.
+     *
+     * ⚠️ 좌표만 보면 **키보드가 시트를 닫습니다.**
+     *
+     * Space·Enter 로 활성화한 클릭은 `clientX = clientY = 0` 인 합성
+     * 이벤트입니다. 바텀시트는 화면 아래에 붙으므로 `box.top` 이 항상 0보다
+     * 크고, 그래서 `0 < box.top` 이 참이 되어 "바깥을 눌렀다" 로 판정됩니다.
+     * 실제로 시트 안에서 Tab 으로 활동 체크박스나 야간 동의로 옮겨 Space 를
+     * 누르면 체크는 되면서 시트가 그 자리에서 닫혔습니다. 제출 버튼에서
+     * Enter 를 누르면 더 나쁩니다 — click 이 먼저 버블해 시트를 닫고, 그
+     * 뒤에 폼이 제출되어 **완료 문구를 아무도 보지 못합니다.**
+     *
+     * `<dialog>` 는 백드롭을 눌렀을 때만 자기 자신이 `event.target` 입니다.
+     * 그래서 좌표를 보기 전에 **발신자를 먼저 가릅니다.** 좌표 검사는 그대로
+     * 남깁니다 — 시트 자체의 여백을 누른 것과 백드롭을 누른 것은 둘 다
+     * target 이 dialog 라 좌표로만 갈립니다.
+     */
+    sheet.addEventListener('click', (event) => {
+      if (event.target !== sheet) return;
+      const box = sheet.getBoundingClientRect();
+      if (
+        event.clientX < box.left ||
+        event.clientX > box.right ||
+        event.clientY < box.top ||
+        event.clientY > box.bottom
+      ) {
+        sheet.close();
+      }
+    });
+
+    /*
+     * 닫으면 초점을 바의 버튼으로 돌려줍니다. 없으면 키보드 사용자는 시트를
+     * 닫을 때마다 문서 처음으로 튕깁니다.
+     *
+     * **신청을 마친 뒤에는 그 버튼이 없습니다.** 성공 경로가 바에 `hidden` 을
+     * 붙이고(`lib/launch-notify.ts`), 전역 `[hidden]{display:none!important}`
+     * 이 그것을 감춥니다. `display:none` 인 요소는 focus() 를 조용히
+     * 무시하므로, 확인하지 않으면 막으려던 바로 그 일이 일어납니다.
+     * 그때는 본문으로 돌려보냅니다.
+     */
+    sheet.addEventListener('close', () => {
+      if (opener.isConnected && opener.offsetParent !== null) {
+        opener.focus();
+        return;
+      }
+      document.getElementById('main')?.focus();
+    });
+  }
+</script>

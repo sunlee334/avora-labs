@@ -1,5 +1,5 @@
-import { test, expect, type Page } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
+import { test, expect } from '@playwright/test';
+import { scanA11y } from '../support/axe';
 
 /**
  * 접근성 자동 검사 (axe-core).
@@ -29,26 +29,12 @@ test.beforeEach(async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
 });
 
-const WCAG = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] as const;
-
-async function scan(page: Page, testInfo: { attach: Function }) {
-  const results = await new AxeBuilder({ page }).withTags([...WCAG]).analyze();
-
-  if (results.violations.length > 0) {
-    // 실패했을 때 무엇이 어디서 걸렸는지 바로 보이게 남깁니다.
-    await testInfo.attach('axe-violations', {
-      body: JSON.stringify(results.violations, null, 2),
-      contentType: 'application/json',
-    });
-  }
-
-  return results.violations.map((v) => ({
-    rule: v.id,
-    impact: v.impact,
-    help: v.help,
-    where: v.nodes.map((n) => n.target.join(' ')).slice(0, 3),
-  }));
-}
+/*
+ * 규칙 목록과 첨부 처리는 `tests/support/axe.ts` 에 있습니다. 신청 시트는
+ * `!CAN_ORDER` 일 때만 존재해 `tests/e2e/launch/` 에서만 검사할 수 있는데,
+ * 이 파일은 두 모드에서 모두 돕니다 — 그래서 설정을 한 곳으로 옮겼습니다.
+ */
+const scan = scanA11y;
 
 test.describe('검사기 자체', () => {
   test('일부러 깨뜨린 화면에서는 위반을 잡아낸다', async ({ page }, testInfo) => {

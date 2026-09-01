@@ -236,7 +236,14 @@ function mountOne(form: HTMLFormElement): void {
          * 줄을 다섯 개 만듭니다. 그리고 할 일이 끝났으면 버튼도 할 일이
          * 끝난 것입니다.
          */
-        document.querySelector('[data-hero-cta]')?.setAttribute('hidden', '');
+        /*
+         * 하단 고정 바도 같은 이유로 거둡니다. 그 버튼의 문구 역시
+         * "출시 알림 받기" 라, 남겨 두면 방금 신청을 마친 사람을 다섯
+         * 섹션 내내 따라다니며 같은 것을 다시 권합니다.
+         */
+        for (const cta of document.querySelectorAll('[data-hero-cta], [data-sticky-cta]')) {
+          cta.setAttribute('hidden', '');
+        }
       } else {
         fail(res.status === 400 ? copy.invalid : copy.error, res.status);
       }

@@ -324,6 +324,17 @@ test.describe('배경 밴드', () => {
           const blocks = [...document.querySelectorAll('main > *'), document.querySelector('.footer')];
           const rows = blocks
             .filter((el): el is HTMLElement => el instanceof HTMLElement)
+            /*
+             * 흐름 밖의 것은 밴드가 아닙니다.
+             *
+             * 홈 끝에는 하단 고정 CTA(`position: fixed`)와 신청 시트
+             * (`<dialog>`)가 `main` 의 직계 자식으로 있습니다. 스크롤하며
+             * 지나가는 면이 아니라 **화면에 붙어 있거나 닫혀 있는** 것들이라,
+             * 높이를 밴드 길이에 보태면 "한 색이 얼마나 이어지는가" 라는
+             * 질문의 답이 틀어집니다. 지금은 68px 이라 결과가 뒤집히지
+             * 않지만, 뒤집히지 않는다는 것이 세도 된다는 뜻은 아닙니다.
+             */
+            .filter((el) => getComputedStyle(el).position === 'static')
             .map((el) => ({ bg: getComputedStyle(el).backgroundColor, h: el.getBoundingClientRect().height }));
           const total = rows.reduce((a, x) => a + x.h, 0);
           let best = 0, cur = 0, prev: string | null = null;
