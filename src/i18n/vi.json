@@ -1337,5 +1337,16 @@
       "heading": "Điều chúng tôi chưa quyết định",
       "body": "Chúng tôi chưa quyết định sẽ tặng gì cho những người tham gia.\nNgay khi có, những người đã đăng ký sẽ được báo trước tiên."
     }
+  },
+  "email": {
+    "notify": {
+      "subject": "Đã tiếp nhận đăng ký nhận thông báo ra mắt PAROS",
+      "body": "Cảm ơn bạn đã đăng ký với {email}.\n\nChúng tôi sẽ gửi ba tin đến địa chỉ này.\n\n{list}\n\nChúng tôi không gửi thường xuyên.",
+      "unsubscribe": "Nếu không muốn nhận, bạn có thể hủy bất cứ lúc nào bằng liên kết bên dưới."
+    },
+    "panel": {
+      "subject": "Đã tiếp nhận đơn đăng ký nhóm kiểm chứng PAROS",
+      "body": "Cảm ơn bạn đã đăng ký với {email}.\n\nChúng tôi sẽ gửi kết quả tuyển chọn đến địa chỉ này trong tháng Mười.\nNgười được chọn sẽ nhận thêm lịch gửi mẫu và cách thức đánh giá.\n\nNếu muốn kiểm tra hoặc rút đơn, bạn chỉ cần trả lời email này."
+    }
   }
 }

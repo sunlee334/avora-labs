@@ -1337,5 +1337,16 @@
       "heading": "What we have not decided yet",
       "body": "We have not yet decided what to give those who take part.\nAs soon as we do, the people who applied will hear first."
     }
+  },
+  "email": {
+    "notify": {
+      "subject": "Your PAROS launch notification request is confirmed",
+      "body": "Thank you for signing up with {email}.\n\nThere are three things we will send to this address.\n\n{list}\n\nWe do not write often.",
+      "unsubscribe": "You can unsubscribe at any time using the link below."
+    },
+    "panel": {
+      "subject": "Your PAROS test panel application is confirmed",
+      "body": "Thank you for applying with {email}.\n\nWe will send the selection result to this address during October.\nThose selected will also receive the sample shipping schedule and how the evaluation works.\n\nIf you would like to check or withdraw your application, simply reply to this email."
+    }
   }
 }

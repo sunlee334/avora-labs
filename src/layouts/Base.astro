@@ -31,7 +31,14 @@ interface Props {
   path?: string;
   title: string;
   description: string;
-  ogImage?: string;
+  /**
+   * 어느 공유 그림을 쓸지. **경로가 아니라 이름** 입니다.
+   *
+   * 그림은 언어마다 다릅니다(`/og/home.ko.jpg`). 경로를 그대로 받으면
+   * 페이지마다 언어를 붙여야 하고, 한 곳만 잊어도 그 언어의 공유 그림이
+   * 조용히 남의 언어로 나갑니다. 이름만 받고 언어는 여기서 붙입니다.
+   */
+  ogImage?: 'home' | 'product';
   ogImageAlt?: string;
   noindex?: boolean;
   /** JSON-LD 객체 배열 — 페이지마다 필요한 스키마를 넘깁니다 */
@@ -59,7 +66,7 @@ const {
   path = '',
   title,
   description,
-  ogImage = '/og/home.jpg',
+  ogImage = 'home',
   ogImageAlt = '',
   noindex = false,
   jsonLd = [],
@@ -68,7 +75,7 @@ const {
 
 const t = dict(locale);
 const canonical = new URL(localePath(locale, path), ORIGIN).href;
-const ogImageUrl = new URL(ogImage, ORIGIN).href;
+const ogImageUrl = new URL(`/og/${ogImage}.${locale}.jpg`, ORIGIN).href;
 
 /*
  * 넘어온 언어만, 없으면 5개 전부. 순서는 alternates() 가 정한 대로 둡니다.

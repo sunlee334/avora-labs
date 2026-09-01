@@ -4,6 +4,7 @@
  * 마크업은 `src/components/LaunchNotify.astro`, 저장은
  * `worker/launch-notify.ts` 입니다.
  */
+import { reportFormFailure } from './report';
 
 interface Copy {
   sending: string;
@@ -119,10 +120,28 @@ function mountOne(form: HTMLFormElement): void {
    */
   let failures = 0;
 
-  function fail(message: string) {
+  function fail(message: string, status?: number) {
     failures += 1;
     const extra = failures >= 2 && copy.fallback ? ` ${copy.fallback}` : '';
     say(message + extra, 'bad');
+
+    /*
+     * 손님에게 보여 주는 것과 별개로, 실패했다는 사실을 남깁니다.
+     *
+     * 여기가 제출 실패가 모이는 한 자리입니다 — 서버가 거절했든 네트워크가
+     * 끊겼든 이 함수를 지납니다. 화면은 "잠시 후 다시" 라고 하고 손님은
+     * 떠나므로, 이 줄이 없으면 폼이 며칠 죽어 있어도 알 수 없습니다.
+     *
+     * 입력 형식이 틀린 경우(400)는 세지 않습니다 — 그건 고장이 아니라
+     * 손님이 오타를 낸 것이고, 그것까지 세면 진짜 고장이 묻힙니다.
+     */
+    if (status !== 400) {
+      reportFormFailure('launch-notify', {
+        status,
+        source: form.dataset.source,
+        locale: form.dataset.locale,
+      });
+    }
   }
 
   form.addEventListener('submit', async (event) => {
@@ -219,9 +238,10 @@ function mountOne(form: HTMLFormElement): void {
          */
         document.querySelector('[data-hero-cta]')?.setAttribute('hidden', '');
       } else {
-        fail(res.status === 400 ? copy.invalid : copy.error);
+        fail(res.status === 400 ? copy.invalid : copy.error, res.status);
       }
     } catch {
+      // 응답이 없습니다 — 오프라인이거나 요청이 끊겼습니다.
       fail(copy.error);
     } finally {
       submit.disabled = false;

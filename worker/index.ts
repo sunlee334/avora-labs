@@ -45,6 +45,7 @@ import { overWriteLimit, tooManyRequests, type RateLimitEnv } from './rate-limit
 import { looksAutomated, tooFast } from './spam';
 import commerceConfig from '../src/config/commerce.json';
 import { jsonOnError } from './errors';
+import type { SentryEnv } from './sentry';
 import {
   normalizeActivities,
   normalizeEmail,
@@ -127,7 +128,7 @@ const ADAPTERS: Record<string, PaymentAdapter> = {
   mock: mockPayments,
 };
 
-interface Env extends AdminEnv, AuthEnv, RateLimitEnv {
+interface Env extends AdminEnv, AuthEnv, RateLimitEnv, SentryEnv {
   ASSETS: Fetcher;
   DB?: D1Database;
   /** 어떤 PG 어댑터를 쓸지. 미설정이면 결제 엔드포인트가 비활성입니다. */
@@ -1774,6 +1775,6 @@ async function route(request: Request, env: Env, ctx: ExecutionContext): Promise
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-    return jsonOnError(request, () => route(request, env, ctx));
+    return jsonOnError(request, () => route(request, env, ctx), { env, ctx });
   },
 };

@@ -88,11 +88,26 @@
     //
     // 사람이 늘면 여기에 이메일을 추가하고 배포하세요. 대시보드 정책도
     // 함께 넓혀야 합니다 — 둘 다 통과해야 들어옵니다.
-    "ADMIN_ALLOWED_EMAILS": "sunlee334@gmail.com,hello.avoralabs@gmail.com,soohong10@gmail.com"
+    "ADMIN_ALLOWED_EMAILS": "sunlee334@gmail.com,hello.avoralabs@gmail.com,soohong10@gmail.com",
+
+    // 에러 추적. DSN 은 **설계상 공개값** 입니다 — 브라우저 번들에 그대로
+    // 실려 나가므로 숨길 방법이 없고, 숨겨야 하는 값도 아닙니다. 이걸 안다고
+    // 남의 이벤트를 읽을 수는 없습니다(읽는 쪽은 계정 인증입니다).
+    //
+    // 비우면 전송을 통째로 건너뜁니다. 로컬과 테스트에서 이벤트가 쌓이지
+    // 않게 하는 스위치이기도 합니다.
+    "SENTRY_DSN": "https://4cad7b354a2d66d13cacd6c496489185@o4512008388935680.ingest.us.sentry.io/4512008410562560",
+    "SENTRY_ENVIRONMENT": "production"
   },
 
   "observability": {
     "enabled": true
+  },
+
+  // 어느 배포에서 터졌는지 알기 위해서입니다. Sentry 의 release 로 들어가,
+  // "어제 배포부터 늘었다" 를 볼 수 있게 합니다.
+  "version_metadata": {
+    "binding": "CF_VERSION_METADATA"
   },
 
   // 주문 저장소. 배송지·연락처가 여기 들어가므로 개인정보 보관 정책이 필요합니다.

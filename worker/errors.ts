@@ -1,3 +1,5 @@
+import { reportError, type SentryEnv } from './sentry';
+
 /**
  * 처리 중 터진 예외를 손님이 읽을 수 있는 답으로 바꿉니다.
  *
@@ -12,12 +14,29 @@
 export async function jsonOnError(
   request: Request,
   run: () => Promise<Response>,
+  /*
+   * 관측용입니다. 없으면 로그만 남기고 그대로 동작합니다 — 이 함수를 직접
+   * 불러 검사하는 곳(tests/e2e/api-error-shape.spec.ts)이 워커 환경 없이
+   * 돌아야 하기 때문입니다.
+   */
+  observe?: { env: SentryEnv; ctx: { waitUntil(p: Promise<unknown>): void } },
 ): Promise<Response> {
   try {
     return await run();
   } catch (err) {
     const { pathname } = new URL(request.url);
     console.error('[worker] 처리 중 예외', pathname, err);
+
+    /*
+     * 로그는 남지만 아무도 보지 않습니다. observability 로그는 찾아 들어가야
+     * 보이고, 장애는 손님이 알려주기 전까지 모릅니다. 여기가 워커의 모든
+     * 예외가 지나는 한 자리이므로 알림도 여기서 겁니다.
+     */
+    if (observe) {
+      reportError(observe.env, observe.ctx, err, request, {
+        tags: { area: pathname.startsWith('/api/') ? 'api' : 'page' },
+      });
+    }
 
     /*
      * 페이지 요청은 다시 던집니다. 그쪽은 Cloudflare 의 오류 화면이 지금까지의
