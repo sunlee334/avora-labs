@@ -252,6 +252,18 @@ const xDefault = !wanted || wanted.includes(X_DEFAULT_LOCALE)
       `is:inline` 인 이유: Astro 가 번들에 넣으면 `gtag` 가 모듈 스코프에
       갇혀 다른 스크립트에서 부를 수 없게 됩니다.
 
+      ── 받는 것은 `load` 뒤로 미룹니다 ─────────────────────────
+      `gtag/js` 는 실측 **170KB**(br)이고 `cache-control: private, max-age=900`
+      이라 15분마다 다시 받습니다. 이 자리가 메인 CSS 보다 앞이라, 그대로 두면
+      페이지가 자기 스타일시트와 대역폭을 두고 다투게 됩니다.
+
+      **큐는 지금 만들고, 스크립트만 나중에 받습니다.** `dataLayer` 와 `gtag`
+      스텁을 즉시 정의해 두면 그 사이에 들어온 호출이 배열에 쌓이고, 나중에
+      도착한 gtag.js 가 그것을 그대로 비웁니다 — 측정이 빠지지 않습니다.
+
+      lenis 를 미루는 방식과 같습니다(아래 body 스크립트). 다만 상한을 1초로
+      짧게 둡니다 — 오래 미루면 금방 떠나는 방문이 집계에서 샙니다.
+
       ⚠️ 이 태그는 쿠키(`_ga`)를 심습니다. 처리방침의 쿠키 조항
          (`legal.privacy.cookies`)과 **항상 같이 나가야 합니다.** 태그만 먼저
          나가면 그 시점부터 법정 기재사항 누락 상태가 됩니다.
@@ -265,10 +277,26 @@ const xDefault = !wanted || wanted.includes(X_DEFAULT_LOCALE)
         window.gtag('js', new Date());
         window.gtag('config', id);
 
-        var s = document.createElement('script');
-        s.async = true;
-        s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
-        document.head.appendChild(s);
+        var fetchGtag = function () {
+          if (document.querySelector('script[data-gtag]')) return;
+          var s = document.createElement('script');
+          s.async = true;
+          s.setAttribute('data-gtag', '');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
+          document.head.appendChild(s);
+        };
+
+        var afterLoad = function () {
+          if (window.requestIdleCallback) {
+            window.requestIdleCallback(fetchGtag, { timeout: 1000 });
+          } else {
+            setTimeout(fetchGtag, 200);
+          }
+        };
+
+        // 이미 끝난 뒤에 이 코드가 도는 경우(bfcache 복원 등)를 위해 상태를 봅니다.
+        if (document.readyState === 'complete') afterLoad();
+        else window.addEventListener('load', afterLoad, { once: true });
       }
     </script>
 

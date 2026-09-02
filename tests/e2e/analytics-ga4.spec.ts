@@ -34,6 +34,71 @@ test.describe('계측이 새지 않는다', () => {
     expect(await page.evaluate(() => typeof (window as any).gtag)).toBe('undefined');
   });
 
+  test('운영에서도 gtag 는 첫 화면을 그린 뒤에 받는다', async ({ page }) => {
+    /*
+     * ── 왜 응답을 고쳐서 검사하는가 ────────────────────────────
+     * 판정이 `location.hostname` 이라 로컬에서는 이 갈래가 아예 돌지 않습니다.
+     * 그래서 **운영에서만 일어나는 일을 아무도 본 적이 없었습니다** — 성능
+     * 기준선도 localhost 로 재서 이 170KB 를 한 번도 잡지 못했습니다.
+     *
+     * 인라인된 호스트 한 줄만 바꿔 그 갈래를 지나가게 합니다
+     * (`toss-widget.spec.ts` 가 클라이언트 키를 끼워 넣는 것과 같은 방법).
+     */
+    await page.route(
+      (url) => url.pathname === '/ko/' || url.pathname === '/ko',
+      async (route) => {
+        const response = await route.fetch();
+        const body = (await response.text()).replace(
+          `const host = "${ANALYTICS_HOST}"`,
+          'const host = "127.0.0.1"',
+        );
+        await route.fulfill({ response, body });
+      },
+    );
+
+    // 진짜 구글로 나가지 않게 막습니다. 검사가 외부 서비스에 매달리면 안 됩니다.
+    let requested = false;
+    await page.route('https://www.googletagmanager.com/**', async (route) => {
+      requested = true;
+      await route.fulfill({ status: 200, contentType: 'text/javascript', body: '' });
+    });
+
+    /*
+     * `load` 가 울리는 **그 순간의** DOM 을 찍어 둡니다. 우리 리스너가 페이지
+     * 스크립트보다 먼저 등록되므로 먼저 울립니다.
+     */
+    await page.addInitScript(() => {
+      window.addEventListener(
+        'load',
+        () => {
+          (window as any).__atLoad = {
+            tagPresent: Boolean(document.querySelector('script[data-gtag]')),
+            queued: ((window as any).dataLayer ?? []).length,
+          };
+        },
+        { once: true },
+      );
+    });
+
+    await page.goto('/ko/');
+
+    const atLoad = await page.evaluate(() => (window as any).__atLoad);
+    expect(atLoad, 'load 시점을 찍지 못했습니다 — 응답 고치기가 안 걸렸을 수 있습니다').toBeTruthy();
+    expect(
+      atLoad.tagPresent,
+      'gtag 를 첫 화면 그리기 전에 받고 있습니다 — 170KB 가 CSS 와 대역폭을 다툽니다',
+    ).toBe(false);
+
+    /*
+     * **큐는 그 전에 이미 차 있어야 합니다.** 스크립트만 미루고 `dataLayer` 는
+     * 즉시 만들기 때문입니다. 이게 없으면 "미루기" 가 "측정을 버리기" 가 됩니다.
+     */
+    expect(atLoad.queued, 'dataLayer 가 비어 있습니다 — 미루면서 측정을 버렸습니다').toBeGreaterThan(0);
+
+    // 그리고 결국은 받아야 합니다. 안 받으면 그냥 꺼 둔 것과 같습니다.
+    await expect.poll(() => requested, { timeout: 5000 }).toBe(true);
+  });
+
   test('판정은 운영 도메인 이름으로 한다', async ({ page }) => {
     /*
      * `import.meta.env.PROD` 로 가르면 안 됩니다 — 테스트도 `npm run build`
