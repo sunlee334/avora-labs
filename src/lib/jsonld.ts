@@ -12,6 +12,33 @@ import { localePath } from '../i18n';
 import { PRICE, CURRENCY } from '../config/runtime';
 import product from '../data/product.json';
 
+/**
+ * 노드 이름표.
+ *
+ * ── 왜 필요한가 ────────────────────────────────────────────
+ * 지금까지 스키마들은 각자 떨어진 섬이었습니다. 홈이 `Organization` 을 내고
+ * 제품 페이지가 `Product` 를 내는데, 그 `Product` 의 브랜드가 저 `Organization`
+ * 의 브랜드와 **같다는 말이 어디에도 없었습니다.**
+ *
+ * 이 파일은 이미 그 문제를 알고 있었습니다 — "PAROS 는 에게해의 섬 이름이고,
+ * 검색엔진은 이 이름을 먼저 섬으로 읽는다. 도메인과 브랜드명이 달라 둘을 잇는
+ * 근거가 사이트 밖에 거의 없다." 그 근거를 사이트 안에서 만드는 방법이
+ * `@id` 입니다. 같은 `@id` 를 여러 페이지가 가리키면 기계는 그것을 **하나의
+ * 개체**로 모읍니다.
+ *
+ * 주소 형태(`#organization`)를 쓰는 이유: `@id` 는 전역에서 유일해야 하고,
+ * URL 이 이미 유일합니다. 새 규칙을 만들 이유가 없습니다.
+ */
+const ID = {
+  organization: `${ORIGIN}/#organization`,
+  brand: `${ORIGIN}/#brand`,
+  product: `${ORIGIN}/#product`,
+  website: (locale: Locale) => `${absoluteUrl(localePath(locale))}#website`,
+} as const;
+
+/** 브랜드 로고. `Organization.logo` 와 `publisher.logo` 가 같은 것을 가리켜야 합니다. */
+const LOGO = absoluteUrl('/brand/avora-wordmark-forest.svg');
+
 export function organization() {
   return {
     '@context': 'https://schema.org',
@@ -21,9 +48,10 @@ export function organization() {
       * 아래 productSchema 의 Brand 노드가 가리킵니다.
       */
     '@type': 'Organization',
+    '@id': ID.organization,
     name: BUSINESS.companyName,
     url: ORIGIN,
-    logo: absoluteUrl('/brand/avora-wordmark-forest.svg'),
+    logo: LOGO,
     slogan: 'We create brands for people in motion.',
 
     /*
@@ -47,6 +75,7 @@ export function organization() {
      */
     brand: {
       '@type': 'Brand',
+      '@id': ID.brand,
       name: BUSINESS.brandName,
       alternateName: '파로스',
       description: 'Active lifestyle sun care brand. 액티브 라이프스타일 선케어 브랜드.',
@@ -87,10 +116,14 @@ export function website(locale: Locale) {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
+    '@id': ID.website(locale),
     // 손님이 보는 사이트 이름입니다 — 페이지 제목도 이 이름으로 끝납니다.
     name: BUSINESS.brandName,
     url: absoluteUrl(localePath(locale)),
     inLanguage: locale,
+    // 이 사이트를 누가 내는가. 홈이 같은 문서에서 Organization 을 함께 내므로
+    // 여기서는 이름표만으로 이어집니다.
+    publisher: { '@type': 'Organization', '@id': ID.organization, name: BUSINESS.companyName },
   };
 }
 
@@ -111,11 +144,28 @@ export function productSchema(locale: Locale, name: string, description: string)
   const schema: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Product',
+    '@id': ID.product,
     name,
     description,
     sku: product.sku,
-    brand: { '@type': 'Brand', name: BUSINESS.brandName },
-    manufacturer: { '@type': 'Organization', name: BUSINESS.companyName },
+    /*
+     * 브랜드와 제조사에 **이름과 `@id` 를 함께** 답니다.
+     *
+     * 전에는 이름만 있었습니다. 그러면 기계 입장에서 이 "PAROS" 가 홈이 선언한
+     * 그 PAROS 인지 알 길이 없습니다 — 같은 문자열일 뿐입니다. `@id` 를 붙이면
+     * 흩어진 노드가 한 개체로 모입니다.
+     *
+     * ⚠️ 그렇다고 `@id` 만 남기면 안 됩니다. `Organization` 노드는 홈에만 있고
+     * 이 페이지에는 없어서, 참조만 있으면 **가리키는 곳이 없는 이름표**가
+     * 됩니다. 이름을 함께 두어야 이 페이지 하나만 읽어도 브랜드를 알 수 있고,
+     * 여러 페이지를 함께 읽으면 `@id` 로 합쳐집니다.
+     */
+    brand: { '@type': 'Brand', '@id': ID.brand, name: BUSINESS.brandName },
+    manufacturer: {
+      '@type': 'Organization',
+      '@id': ID.organization,
+      name: BUSINESS.companyName,
+    },
     category: 'Sunscreen',
     /*
      * 공유 그림은 **언어마다 다릅니다**(`/og/product.ko.jpg`). 여기에 접미사 없는
@@ -179,10 +229,79 @@ export function article(input: {
     inLanguage: input.locale,
     datePublished: input.publishedAt,
     ...(input.updatedAt ? { dateModified: input.updatedAt } : {}),
+    /*
+     * 대표 그림.
+     *
+     * 글에는 그림이 없습니다. 그렇다고 비워 두면 Google 의 Article 안내가
+     * 권장하는 항목이 빠집니다. **지어내지 않고**, 이 글의 화면이 이미
+     * `og:image` 로 내보내고 있는 것과 같은 그림을 가리킵니다 — 한 페이지가
+     * 두 개의 다른 대표 그림을 말할 이유가 없습니다.
+     */
+    image: absoluteUrl(`/og/home.${input.locale}.jpg`),
     // 글쓴이는 개인이 아니라 브랜드입니다. 1인 운영이라도 개인 이름을
     // 구조화 데이터로 내보낼 이유가 없습니다.
-    author: { '@type': 'Organization', name: BUSINESS.brandName },
-    publisher: { '@type': 'Organization', name: BUSINESS.brandName },
+    author: { '@type': 'Organization', '@id': ID.brand, name: BUSINESS.brandName },
+    /*
+     * 펴낸 곳에는 로고가 붙어야 합니다(Google Article 안내). 값은
+     * `organization()` 이 쓰는 것과 같은 상수라, 브랜드 자산을 바꿀 때
+     * 두 곳이 갈라지지 않습니다.
+     */
+    publisher: {
+      '@type': 'Organization',
+      '@id': ID.organization,
+      name: BUSINESS.companyName,
+      logo: { '@type': 'ImageObject', url: LOGO },
+    },
+  };
+}
+
+/**
+ * 배점표 — 이 브랜드가 가진 **가장 인용되기 쉬운 사실**.
+ *
+ * "눈 시림 30점, 백탁 25점, 커트라인 미만은 총점과 무관하게 탈락." 화면에서는
+ * 이미 표로 두었습니다(그림이 아니라 표여야 한다는 판단은 `panel.astro` 주석에
+ * 있습니다). 다만 표까지였습니다 — 답변엔진이 순서와 배점을 확실히 읽으려면
+ * 그 관계가 마크업으로도 있어야 합니다.
+ *
+ * `ItemList` 를 쓰는 이유: 이것은 등수가 아니라 **배점 순으로 정렬된 목록**이고,
+ * 그 순서 자체가 정보입니다(눈 시림이 가장 무겁다). `position` 이 그것을 말합니다.
+ *
+ * ⚠️ 지어낼 값이 없습니다. 화면에 있는 것을 그대로 옮깁니다 — 항목 이름,
+ * 확인 방법, 배점, 커트라인. 새 사실을 만들면 화면과 기계가 다른 말을 합니다.
+ */
+export function criteriaList(input: {
+  name: string;
+  path: string;
+  columns: { score: string; cut: string };
+  rows: ReadonlyArray<{ item: string; how: string; score: string; cut: string }>;
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: input.name,
+    url: absoluteUrl(input.path),
+    // 배점이 큰 것부터 적혀 있고, 그 순서가 곧 무게입니다.
+    itemListOrder: 'https://schema.org/ItemListOrderDescending',
+    numberOfItems: input.rows.length,
+    itemListElement: input.rows.map((row, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: row.item,
+      description: row.how,
+      /*
+       * 배점과 커트라인은 이름이 붙은 값이라 `PropertyValue` 로 냅니다.
+       * 설명 문장에 섞어 넣으면 기계가 숫자를 도로 추출해야 합니다.
+       *
+       * 커트라인이 없는 항목(`—`)은 항목 자체를 넣지 않습니다 — 이 파일의
+       * 원칙대로, 없는 값을 빈 문자열로 채우지 않습니다.
+       */
+      additionalProperty: [
+        { '@type': 'PropertyValue', name: input.columns.score, value: row.score },
+        ...(/\d/.test(row.cut)
+          ? [{ '@type': 'PropertyValue', name: input.columns.cut, value: row.cut }]
+          : []),
+      ],
+    })),
   };
 }
 

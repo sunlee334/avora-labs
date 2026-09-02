@@ -78,6 +78,9 @@ const isoDate = (date: Date) => date.toISOString().slice(0, 10);
   locales={locales}
   title={`${post.data.title} — ${BUSINESS.brandName}`}
   description={post.data.summary}
+  ogType="article"
+  publishedTime={isoDate(post.data.publishedAt)}
+  modifiedTime={post.data.updatedAt ? isoDate(post.data.updatedAt) : undefined}
   jsonLd={[
     article({
       headline: post.data.title,

@@ -40,6 +40,21 @@ interface Props {
    */
   ogImage?: 'home' | 'product';
   ogImageAlt?: string;
+  /**
+   * 이 페이지가 **어떤 종류의 것**인가. 공유 미리보기의 모양을 정합니다.
+   *
+   * 지금까지 모든 페이지가 `website` 였습니다. 글도, 제품도요. 카카오톡·네이버는
+   * 이 값으로 미리보기 형태를 고르고, 글이면 발행 시각까지 함께 읽습니다.
+   * `og:locale` 을 규격에 맞추려고 표를 따로 둔 것과 같은 이유로, 여기도
+   * 규격대로 냅니다.
+   *
+   * 넘기지 않으면 `website` 입니다 — 대부분의 화면은 그것이 맞습니다.
+   */
+  ogType?: 'website' | 'article' | 'product';
+  /** 글일 때만. ISO 날짜이며 `article:published_time` 으로 나갑니다. */
+  publishedTime?: string;
+  /** 실제로 고친 날이 있을 때만. 없으면 태그가 나가지 않습니다. */
+  modifiedTime?: string;
   noindex?: boolean;
   /** JSON-LD 객체 배열 — 페이지마다 필요한 스키마를 넘깁니다 */
   jsonLd?: unknown[];
@@ -68,6 +83,9 @@ const {
   description,
   ogImage = 'home',
   ogImageAlt = '',
+  ogType = 'website',
+  publishedTime,
+  modifiedTime,
   noindex = false,
   jsonLd = [],
   locales,
@@ -146,7 +164,14 @@ const xDefault = !wanted || wanted.includes(X_DEFAULT_LOCALE)
     {xDefault && <link rel="alternate" hreflang="x-default" href={xDefault} />}
 
     {/* SNS 공유 */}
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
+    {/* 글일 때만 나갑니다. 없는 날짜를 빈 값으로 내보내지 않습니다. */}
+    {ogType === 'article' && publishedTime && (
+      <meta property="article:published_time" content={publishedTime} />
+    )}
+    {ogType === 'article' && modifiedTime && (
+      <meta property="article:modified_time" content={modifiedTime} />
+    )}
     <meta property="og:site_name" content={BUSINESS.brandName} />
     {/* hreflang 태그를 그대로 쓰면 안 됩니다 — site.ts 의 OG_LOCALES 주석 참조. */}
     <meta property="og:locale" content={OG_LOCALES[locale]} />
@@ -159,6 +184,20 @@ const xDefault = !wanted || wanted.includes(X_DEFAULT_LOCALE)
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageUrl} />
+    {/*
+      공유 그림의 치수·형식·대체글.
+
+      그림은 전부 1200×630 JPEG 로 이미 규격입니다. 값을 적어 두면 받는 쪽이
+      **파일을 내려받기 전에** 자리를 잡을 수 있어, 첫 공유에서 미리보기가
+      비는 일이 줄어듭니다. 국내 공유가 대부분 카카오톡이라 값을 합니다.
+
+      `twitter:image:alt` 는 `og:image:alt` 와 같은 값입니다 — 한쪽만 있으면
+      읽어 주는 도구에 따라 대체글이 사라집니다.
+    */}
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:image:alt" content={ogImageAlt || description} />
 
     {/*
       검색엔진 사이트 소유권 확인.

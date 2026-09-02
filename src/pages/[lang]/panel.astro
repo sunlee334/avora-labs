@@ -28,7 +28,7 @@ import Field from '../../components/Field.astro';
 import CriteriaTable from '../../components/CriteriaTable.astro';
 import { BUSINESS, LOCALES, DEFAULT_LOCALE, type Locale } from '../../config/site';
 import { dict, localePath } from '../../i18n';
-import { breadcrumb } from '../../lib/jsonld';
+import { breadcrumb, criteriaList } from '../../lib/jsonld';
 
 export function getStaticPaths() {
   return LOCALES.map((lang) => ({ params: { lang } }));
@@ -62,6 +62,20 @@ const indexable = locale === 'ko';
       { name: BUSINESS.brandName, path: localePath(locale) },
       { name: p.heading, path: localePath(locale, 'panel') },
     ]),
+    /*
+      배점표를 기계가 읽을 수 있게 함께 냅니다.
+
+      화면에서 이것을 그림이 아니라 표로 둔 이유(아래 배점표 주석)와 같은
+      이유입니다 — "답변 엔진은 이미지에서 숫자를 꺼내지 못한다." 표까지
+      왔으니 관계도 함께 냅니다. 지어낸 값은 없고, 아래 표가 그리는 것과
+      같은 배열을 넘깁니다.
+    */
+    criteriaList({
+      name: p.criteria.heading,
+      path: localePath(locale, 'panel'),
+      columns: p.criteria.columns,
+      rows: p.criteria.rows,
+    }),
   ]}
 >
   <section class="section wrap">
