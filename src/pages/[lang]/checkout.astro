@@ -252,7 +252,12 @@ const c = t.checkout;
 
 <script>
   import { detailed, totals, newOrderId, isPurchasable } from '../../lib/cart';
-  import { mountWidgets, requestPayment, orderNameFrom } from '../../lib/toss';
+  import {
+    mountWidgets,
+    requestPayment,
+    orderNameFrom,
+    type MountResult,
+  } from '../../lib/toss';
 
   const form = document.querySelector<HTMLFormElement>('[data-checkout]');
   const labels = document.querySelector<HTMLElement>('[data-checkout-labels]');
@@ -306,6 +311,18 @@ const c = t.checkout;
     const widgetError = form.querySelector<HTMLElement>('[data-widget-error]')!;
 
     /*
+     * 결제 실패 문구에 코드를 붙이는 **유일한 자리.**
+     *
+     * 위젯을 못 세웠을 때와 결제 요청이 거절됐을 때, 두 곳이 같은 문장을
+     * 만듭니다. 각자 적으면 `replace` 의 두 번째 인자가 언젠가 한쪽에서만
+     * 문자열이 됩니다 — `$&`·`` $` `` 는 치환 시퀀스라, 그때 문의에 필요한
+     * 코드가 **그 한쪽에서만** 사라집니다. 한 곳으로 모으면 갈라질 자리가
+     * 없습니다.
+     */
+    const failedWithCode = (code: string) =>
+      `${L.labelPaymentFailed} ${L.labelErrorCode!.replace('{code}', () => code)}`;
+
+    /*
      * ⚠️ **여기서 await 하지 않습니다.**
      *
      * 처음에는 `await mountWidgets(...)` 로 썼는데, 그러면 모듈 평가가 그
@@ -335,7 +352,7 @@ const c = t.checkout;
      * 키가 없는 빌드(계약 전)는 버튼을 그대로 두고 완료 화면 갈래를 씁니다.
      * 두 세계가 코드에서 명확히 갈립니다.
      */
-    let widgets: Awaited<ReturnType<typeof mountWidgets>> | null = null;
+    let widgets: MountResult | null = null;
 
     if (clientKey && sums.total != null) {
       // 위젯이 서기 전에는 결제할 수 없습니다. 결제수단을 고르지도 못한
@@ -364,7 +381,7 @@ const c = t.checkout;
          */
         widgetError.textContent =
           result.reason === 'setup-failed' && result.code
-            ? `${L.labelPaymentFailed} ${L.labelErrorCode!.replace('{code}', () => result.code!)}`
+            ? failedWithCode(result.code)
             : L.labelNetwork!;
         widgetError.hidden = false;
         /*
@@ -577,7 +594,7 @@ const c = t.checkout;
          * 한국어 한 벌뿐이라 다섯 언어에 쓸 수 없습니다.
          */
         formError.textContent = result.code
-          ? `${L.labelPaymentFailed} ${L.labelErrorCode!.replace('{code}', () => result.code!)}`
+          ? failedWithCode(result.code)
           : L.labelPaymentFailed!;
         formError.hidden = false;
         payButton.disabled = false;

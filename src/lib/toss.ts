@@ -83,7 +83,7 @@ let loading: Promise<TossGlobal | null> | null = null;
  * 실패하면 `null` 입니다. 던지지 않는 이유: 부르는 쪽이 화면 상태를 되돌려야
  * 하는데, 예외로 빠져나가면 그 코드를 지나지 못합니다.
  */
-export function loadToss(): Promise<TossGlobal | null> {
+function loadToss(): Promise<TossGlobal | null> {
   if (window.TossPayments) return Promise.resolve(window.TossPayments);
   if (loading) return loading;
 
