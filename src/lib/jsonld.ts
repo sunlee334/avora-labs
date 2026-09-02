@@ -117,7 +117,19 @@ export function productSchema(locale: Locale, name: string, description: string)
     brand: { '@type': 'Brand', name: BUSINESS.brandName },
     manufacturer: { '@type': 'Organization', name: BUSINESS.companyName },
     category: 'Sunscreen',
-    image: absoluteUrl('/og/product.jpg'),
+    /*
+     * 공유 그림은 **언어마다 다릅니다**(`/og/product.ko.jpg`). 여기에 접미사 없는
+     * 이름을 적어 두었더니 그 파일이 아예 없어서, 구조화 데이터가 404 를 가리키고
+     * 있었습니다. 검색엔진은 이미지를 못 불러오는 `Product` 를 무효로 봅니다.
+     *
+     * 화면이 `og:image` 로 내보내는 것과 같은 규칙을 씁니다 — 한 페이지가 두 개의
+     * 다른 그림을 자기 대표 이미지라고 말할 이유가 없습니다.
+     *
+     * 지금 가리키는 것은 글자가 얹힌 공유 카드입니다. 실촬영본이 목업을 대체하면
+     * (`product.json` 의 `$pending`) 진짜 제품 사진의 고정 주소로 옮기는 편이 낫습니다.
+     * `/product/thumb.jpg` 는 240×320 이라 그 자리에 쓸 수 없습니다.
+     */
+    image: absoluteUrl(`/og/product.${locale}.jpg`),
     url: absoluteUrl(localePath(locale, 'product')),
   };
 

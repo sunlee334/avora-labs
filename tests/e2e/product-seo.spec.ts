@@ -47,6 +47,43 @@ test.describe('제품 상세', () => {
     // (launch: offers 없음 / commerce: 화면 가격과 일치)
   });
 
+  test('구조화 데이터가 가리키는 그림이 전부 살아 있다', async ({ request }) => {
+    /*
+     * `Product.image` 가 `/og/product.jpg` 를 가리키고 있었습니다. 공유 그림은
+     * 언어마다 다르므로(`product.ko.jpg`) 그 이름의 파일은 **없습니다.**
+     * 검색엔진은 이미지를 불러오지 못하는 `Product` 를 무효로 처리하고,
+     * 답변엔진은 죽은 이미지를 받습니다.
+     *
+     * 위의 검사가 이것을 놓친 이유는 `name`·`brand`·`manufacturer` 까지만
+     * 봤기 때문입니다. **주소가 살아 있는지는 아무도 보지 않았습니다** —
+     * 바로 아래 llms.txt 검사가 링크마다 하는 그 일을요.
+     *
+     * 그래서 제품 페이지 한 장이 아니라 사이트맵 전체를 훑습니다. 다음에
+     * 어느 페이지가 그림을 가진 스키마를 내더라도 같은 그물에 걸립니다.
+     */
+    const seen = new Map<string, string>(); // 그림 주소 → 처음 발견한 페이지
+
+    for (const url of await sitemapUrls(request)) {
+      const path = new URL(url).pathname;
+      for (const schema of jsonLdOf(await (await request.get(path)).text())) {
+        // `image` · `logo` 처럼 그림을 가리키는 값만 모읍니다. 중첩된 노드
+        // (`publisher.logo` 등)까지 닿도록 직렬화한 문자열에서 훑습니다.
+        for (const [, image] of JSON.stringify(schema).matchAll(
+          /"(?:image|logo|contentUrl|thumbnailUrl)":"(https:[^"]+)"/g,
+        )) {
+          if (!seen.has(image)) seen.set(image, path);
+        }
+      }
+    }
+
+    expect(seen.size, '구조화 데이터에 그림이 하나도 없습니다').toBeGreaterThan(0);
+
+    for (const [image, page] of seen) {
+      const res = await request.get(new URL(image).pathname);
+      expect(res.status(), `${page} 의 구조화 데이터가 가리키는 ${image}`).toBe(200);
+    }
+  });
+
   test('아직 확정이 아닌 스펙을 확정처럼 적지 않는다', async ({ page }) => {
     await page.goto('/ko/product');
 
