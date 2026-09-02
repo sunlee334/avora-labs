@@ -30,6 +30,24 @@ test.describe('푸터의 사업자 정보', () => {
     await expect(page.locator('footer')).toContainText('392-32-01888');
   });
 
+  test('통신판매업 신고번호가 5개 언어 푸터에 모두 나온다', async ({ page }) => {
+    /*
+     * 마지막까지 비어 있던 법정 표시 항목입니다. 사업자등록만으로는 생기지
+     * 않아(관할 구청 신고 + 구매안전서비스 이용확인증) 오래 걸렸습니다.
+     *
+     * 5개 언어를 다 보는 이유: 라벨은 언어마다 다르지만 **번호는 하나** 이고,
+     * 한 언어에서만 빠지는 일은 라벨 번역이 아니라 렌더 조건이 갈릴 때
+     * 생깁니다. 값이 비면 줄 자체를 빼는 규칙(`Footer.astro` 의 filter)이
+     * 있어서, 어딘가에서 조용히 사라져도 화면은 멀쩡해 보입니다.
+     */
+    for (const lang of ['ko', 'en', 'zh', 'th', 'vi']) {
+      await page.goto(`/${lang}/`);
+      await expect(page.locator('footer'), `${lang}: 신고번호가 없습니다`).toContainText(
+        '2026-서울마포-2263',
+      );
+    }
+  });
+
   test('아직 없는 값은 빈 줄로 남지 않는다', async ({ page }) => {
     await page.goto('/ko/');
     const text = await page.locator('.footer__meta').innerText();
