@@ -1045,7 +1045,8 @@
     "failed": {
       "heading": "Payment did not go through.",
       "body": "The payment was cancelled or something went wrong during approval. Please try again.",
-      "retry": "Back to cart"
+      "retry": "Back to cart",
+      "code": "Error code: {code}"
     },
     "lookup": {
       "meta": {

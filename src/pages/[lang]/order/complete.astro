@@ -56,6 +56,14 @@ const o = t.order.complete;
       <div data-state-failed hidden>
         <h1 class="display display--tight">{t.order.failed.heading}</h1>
         <p class="body" style="margin-top: 16px" data-failed-message>{t.order.failed.body}</p>
+        {/*
+          결제사가 준 코드를 문의용으로 남깁니다.
+
+          **PG 가 보낸 문장은 그대로 쓰지 않습니다.** 그 문장은 한국어 한 벌뿐이라
+          태국어·베트남어 화면에서는 한국어가 튀어나옵니다. 손님에게 보이는 설명은
+          위의 우리 문구가 하고, 여기에는 문의할 때 필요한 **코드만** 둡니다.
+        */}
+        <p class="cart__notice" style="margin-top: 12px" data-failed-code hidden></p>
         <div class="orderResult__actions">
           <a class="cta" href={localePath(locale, 'cart')}>{t.order.failed.retry}</a>
         </div>
@@ -68,6 +76,7 @@ const o = t.order.complete;
     data-label-paid={t.order.status.paid}
     data-label-failed={t.order.status.failed}
     data-label-cancelled={t.order.status.cancelled}
+    data-label-code={t.order.failed.code}
   ></template>
 </Base>
 
@@ -128,13 +137,39 @@ const o = t.order.complete;
       if (order.status === 'paid') clear();
     }
 
-    function renderFailure(message?: string) {
+    function renderFailure(code?: string | null) {
       loading.hidden = true;
       failBox.hidden = false;
-      if (message) set('[data-failed-message]', message);
+      if (!code) return;
+      const line = root!.querySelector<HTMLElement>('[data-failed-code]');
+      if (!line || !L.labelCode) return;
+      /*
+       * `replace` 의 **두 번째 인자가 문자열이면 `$` 가 치환 시퀀스** 입니다.
+       * `code` 는 주소창에서 오므로 `?code=$\`` 같은 값이 들어올 수 있고,
+       * 그러면 "오류 코드: 오류 코드: " 가 그려져 **정작 문의에 필요한 코드가
+       * 사라집니다.** 함수로 넘기면 그 해석이 일어나지 않습니다.
+       *
+       * `textContent` 라 XSS 는 아니지만, 코드를 보여주려고 만든 줄이 코드를
+       * 지우는 것은 그 자체로 결함입니다.
+       */
+      line.textContent = L.labelCode.replace('{code}', () => code);
+      line.hidden = false;
     }
 
     (async () => {
+      /*
+       * 결제창이 실패로 돌려보낸 경우.
+       *
+       * 토스는 failUrl 에 `code`·`message`·`orderId` 를 붙입니다. 이때는
+       * `paymentKey` 가 없으므로, 이 갈래가 없으면 아래의 "PG 연동 전" 경로로
+       * 흘러 들어가 **실패한 결제가 접수 완료로 보입니다.**
+       */
+      const failCode = params.get('code');
+      if (failCode) {
+        renderFailure(failCode);
+        return;
+      }
+
       if (!orderId) {
         renderFailure();
         return;
@@ -152,7 +187,8 @@ const o = t.order.complete;
           if (res.ok && payload.ok && payload.order) {
             renderOrder(payload.order);
           } else {
-            renderFailure(payload.message);
+            // 워커는 ConfirmResult 를 그대로 돌려줍니다 — 코드는 error 안에 있습니다.
+            renderFailure(payload.error?.code ?? payload.error);
           }
         } catch {
           renderFailure();

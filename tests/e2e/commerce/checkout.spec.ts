@@ -118,10 +118,22 @@ test.describe('체크아웃', () => {
     expect(container!.height).toBeGreaterThan(viewportHeight * 0.6);
   });
 
-  test('결제수단 목록이 설정 파일을 따른다', async ({ page }) => {
+  test('결제수단은 위젯이 그릴 자리만 있다', async ({ page }) => {
+    /*
+     * 전에는 여기서 라디오 넷(payment-config.json 의 enabled 결제수단)을
+     * 셌습니다. 그런데 그 선택은 **어디에도 전달되지 않았습니다** — 제출
+     * 핸들러가 `paymentMethod` 를 읽지 않았고 결제는 늘 카드로 열렸습니다.
+     *
+     * 주문서형 결제위젯은 결제수단 목록을 자기가 그리고 고른 값을 자기가
+     * 들고 있습니다. 우리 라디오를 남기면 손님이 같은 것을 두 번 고르고,
+     * 그중 하나는 여전히 아무 일도 하지 않습니다.
+     *
+     * 위젯이 무엇을 그리는지는 `toss-widget.spec.ts` 가 봅니다. 여기서는
+     * **자리가 있고 옛 라디오가 없다** 만 확인합니다.
+     */
     await fillCart(page);
-    // payment-config.json 에서 KR 의 enabled 결제수단은 넷입니다.
-    await expect(page.locator('[name="paymentMethod"]')).toHaveCount(4);
-    await expect(page.locator('[name="paymentMethod"]:checked')).toHaveCount(1);
+    await expect(page.locator('[name="paymentMethod"]')).toHaveCount(0);
+    await expect(page.locator('[data-toss-methods]')).toHaveCount(1);
+    await expect(page.locator('[data-toss-agreement]')).toHaveCount(1);
   });
 });

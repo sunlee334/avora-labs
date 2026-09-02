@@ -1045,7 +1045,8 @@
     "failed": {
       "heading": "Thanh toán chưa hoàn tất.",
       "body": "Thanh toán đã bị huỷ hoặc có sự cố trong quá trình duyệt. Vui lòng thử lại.",
-      "retry": "Quay lại giỏ hàng"
+      "retry": "Quay lại giỏ hàng",
+      "code": "Mã lỗi: {code}"
     },
     "lookup": {
       "meta": {

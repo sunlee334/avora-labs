@@ -14,8 +14,7 @@
 import Base from '../../layouts/Base.astro';
 import { LOCALES, type Locale } from '../../config/site';
 import { dict, localePath } from '../../i18n';
-import { SELLS_DIRECTLY, CURRENCY } from '../../config/runtime';
-import paymentConfig from '../../config/payment-config.json';
+import { SELLS_DIRECTLY, CURRENCY, TOSS_CLIENT_KEY } from '../../config/runtime';
 
 export function getStaticPaths() {
   return LOCALES.map((lang) => ({ params: { lang } }));
@@ -25,8 +24,6 @@ const locale = Astro.params.lang as Locale;
 const t = dict(locale);
 const c = t.checkout;
 
-const country = paymentConfig.countries[paymentConfig.defaultCountry as 'KR'];
-const methods = country.methods.filter((m) => m.enabled);
 ---
 
 <Base
@@ -51,6 +48,7 @@ const methods = country.methods.filter((m) => m.enabled);
           data-currency={CURRENCY}
           data-complete-href={localePath(locale, 'order/complete')}
           data-cart-href={localePath(locale, 'cart')}
+          {...(TOSS_CLIENT_KEY ? { 'data-toss-client-key': TOSS_CLIENT_KEY } : {})}
         >
           {/* 장바구니가 비었을 때 */}
           <div data-checkout-empty hidden>
@@ -126,19 +124,46 @@ const methods = country.methods.filter((m) => m.enabled);
               </div>
             </fieldset>
 
-            <fieldset class="checkout__group">
-              <legend class="kicker">{c.paymentSection}</legend>
-              <div class="methods">
-                {
-                  methods.map((method, i) => (
-                    <label class="method">
-                      <input type="radio" name="paymentMethod" value={method.code} checked={i === 0} />
-                      <span>{method.label}</span>
-                    </label>
-                  ))
-                }
-              </div>
-            </fieldset>
+            <section class="checkout__group">
+              <p class="kicker">{c.paymentSection}</p>
+              {/*
+                결제수단은 **위젯이 그립니다.**
+
+                전에는 여기에 라디오 넷(카드·네이버페이·카카오페이·토스페이)이
+                있었습니다. 그런데 그 선택은 어디에도 전달되지 않았습니다 —
+                제출 핸들러가 `paymentMethod` 를 읽지 않았고, 결제는 항상 카드
+                통합창으로 열렸습니다. 고르는 시늉만 하는 칸이었습니다.
+
+                주문서형 위젯은 결제수단 목록을 자기가 그리고, 고른 값을 자기가
+                들고 있다가 `requestPayment` 때 씁니다. 그래서 우리 라디오를
+                남기면 손님이 **같은 것을 두 번 고르게** 되고, 그중 하나는
+                여전히 아무 일도 하지 않습니다.
+
+                `payment-config.json` 의 `methods` 는 그대로 둡니다 — 어느
+                수단을 켤지는 토스 개발자센터에서 정하지만, 무엇을 켜기로
+                했는지는 저장소에 남아 있어야 합니다.
+              */}
+              <div class="tossWidget" data-toss-methods></div>
+              {/*
+                토스 약관 동의(전자금융거래·결제대행). 아래 우리 개인정보
+                수집·이용 동의와 **다른 동의** 라 둘 다 필요합니다 — 하나로
+                묶으면 어느 쪽도 받은 것이 아니게 됩니다.
+              */}
+              <div class="tossWidget" data-toss-agreement></div>
+              {/*
+                `aria-live` 가 필요한 이유: 이 오류는 **손님이 아무것도 하지
+                않았는데** 나타납니다(위젯 마운트 실패). 낭독기는 사용자가
+                움직인 자리만 읽으므로, 이것이 없으면 화면을 못 보는 손님에게는
+                아무 일도 일어나지 않습니다 — 결제 버튼만 조용히 잠깁니다.
+              */}
+              <p
+                class="checkout__error"
+                id="widget-error"
+                data-widget-error
+                aria-live="polite"
+                hidden
+              ></p>
+            </section>
 
             <section class="checkout__group">
               <p class="kicker">{c.summarySection}</p>
@@ -212,11 +237,22 @@ const methods = country.methods.filter((m) => m.enabled);
     data-label-paying={c.paying}
     data-label-pay={c.pay}
     data-label-free={t.cart.shippingFree}
+    {/*
+      결제 실패 문구는 **완료 화면의 것을 그대로 씁니다.**
+
+      `order.failed.body`("결제가 취소되었거나 승인 과정에서 문제가 있었습니다")
+      와 `order.failed.code`("오류 코드: {code}")는 이미 5개 언어에 있고, 여기서
+      말해야 하는 것과 정확히 같습니다. 새 키를 만들면 검수받지 않은 줄이 다섯
+      개 늘어날 뿐입니다.
+    */}
+    data-label-payment-failed={t.order.failed.body}
+    data-label-error-code={t.order.failed.code}
   ></template>
 </Base>
 
 <script>
   import { detailed, totals, newOrderId, isPurchasable } from '../../lib/cart';
+  import { mountWidgets, requestPayment, orderNameFrom } from '../../lib/toss';
 
   const form = document.querySelector<HTMLFormElement>('[data-checkout]');
   const labels = document.querySelector<HTMLElement>('[data-checkout-labels]');
@@ -254,6 +290,92 @@ const methods = country.methods.filter((m) => m.enabled);
       set('[data-sum-subtotal]', sums.subtotal != null ? money(sums.subtotal) : '—');
       set('[data-sum-shipping]', sums.shipping === 0 ? L.labelFree! : sums.shipping != null ? money(sums.shipping) : '—');
       set('[data-sum-total]', sums.total != null ? money(sums.total) : '—');
+    }
+
+    /*
+     * ── 결제위젯 ─────────────────────────────────────────────
+     *
+     * 주문서형은 결제수단 UI 가 **주문서에 미리 떠 있어야** 하므로 화면이 뜰
+     * 때 세웁니다. 결제 버튼을 누를 때가 아닙니다.
+     *
+     * 클라이언트 키가 없으면 아무것도 하지 않습니다 — 계약 전에도 주문 생성
+     * → 승인 → 완료 화면 흐름을 그대로 돌려볼 수 있어야 합니다. 키가
+     * `payment-config.json` 에 들어오는 순간 위젯이 이 자리에 뜹니다.
+     */
+    const clientKey = form.dataset.tossClientKey;
+    const widgetError = form.querySelector<HTMLElement>('[data-widget-error]')!;
+
+    /*
+     * ⚠️ **여기서 await 하지 않습니다.**
+     *
+     * 처음에는 `await mountWidgets(...)` 로 썼는데, 그러면 모듈 평가가 그
+     * 자리에서 멈춰 **아래의 submit 핸들러가 붙지 않습니다.** 그 사이에 결제
+     * 버튼을 누르면 폼이 자바스크립트 없이 네이티브 제출을 하고, 받는 분·
+     * 연락처·주소가 **주소창 쿼리로 나간 채** 아무 데도 가지 않습니다.
+     * 검사가 이것을 잡았습니다.
+     *
+     * SDK 는 480KB 이고 외부에서 옵니다. 느린 회선에서는 그 창이 몇 초입니다.
+     * 그래서 화면 조립은 먼저 끝내고, 위젯은 프라미스로 들고 있다가 제출할
+     * 때 기다립니다.
+     */
+    /*
+     * 위젯의 성패를 **버튼 상태 하나로 환원합니다.**
+     *
+     * 전에는 마운트 결과를 프라미스로 들고 다니다가 제출할 때 기다렸습니다.
+     * 그 구조가 결함을 낳았습니다 — 버튼이 처음부터 활성이라, SDK(480KB,
+     * 외부 CDN)가 뜨기 전에 누르면 주문 행만 만들어지고 **한 푼도 결제하지
+     * 않은 손님이 "주문이 완료되었습니다" 화면을 봤습니다.** 느린 회선이나
+     * 사내 방화벽에서 실제로 일어나는 일입니다.
+     *
+     * 이제 키가 있으면 버튼을 **잠근 채로 시작** 하고, 위젯이 실제로 선
+     * 뒤에만 풉니다. 그러면 경합 자체가 없어지고, 제출 핸들러에서
+     * `await` 도 `!ok` 분기도 필요 없어집니다 — 눌렸다는 사실이 곧 위젯이
+     * 섰다는 뜻입니다.
+     *
+     * 키가 없는 빌드(계약 전)는 버튼을 그대로 두고 완료 화면 갈래를 씁니다.
+     * 두 세계가 코드에서 명확히 갈립니다.
+     */
+    let widgets: Awaited<ReturnType<typeof mountWidgets>> | null = null;
+
+    if (clientKey && sums.total != null) {
+      // 위젯이 서기 전에는 결제할 수 없습니다. 결제수단을 고르지도 못한
+      // 상태에서 누를 수 있게 두면 그 클릭이 갈 곳이 없습니다.
+      payButton.disabled = true;
+
+      void mountWidgets({
+        clientKey,
+        amount: sums.total,
+        currency,
+        methodsSelector: '[data-toss-methods]',
+        agreementSelector: '[data-toss-agreement]',
+      }).then((result) => {
+        if (result.ok) {
+          widgets = result;
+          payButton.disabled = false;
+          return;
+        }
+        /*
+         * 못 세웠으면 **말하고 잠근 채로 둡니다.**
+         *
+         * 라이브 전환일에 가장 흔한 실패가 여기입니다 — 잘못된 키,
+         * 개발자센터에 등록하지 않은 도메인. 조용히 넘기면 "결제수단이 안
+         * 보인다" 로만 나타나고 원인을 알 길이 없습니다. 코드는 문의용으로
+         * 남깁니다.
+         */
+        widgetError.textContent =
+          result.reason === 'setup-failed' && result.code
+            ? `${L.labelPaymentFailed} ${L.labelErrorCode!.replace('{code}', () => result.code!)}`
+            : L.labelNetwork!;
+        widgetError.hidden = false;
+        /*
+         * 잠긴 이유를 **버튼에 붙입니다.**
+         *
+         * 안내 문구는 결제수단 섹션 안, 주문 요약과 동의 칸 위에 있어
+         * 버튼에서 한 뭉치 떨어져 있습니다. 낭독기가 버튼에 닿았을 때
+         * 왜 잠겼는지를 함께 읽으려면 이 연결이 필요합니다.
+         */
+        payButton.setAttribute('aria-describedby', 'widget-error');
+      });
     }
 
     // ── 검증 ─────────────────────────────────────────────────
@@ -378,13 +500,88 @@ const methods = country.methods.filter((m) => m.enabled);
           return;
         }
 
-        // 2 — PG 결제창.
-        //     PG 가 아직 정해지지 않아 SDK 를 붙이지 않았습니다. 여기가 그 자리이고,
-        //     지금은 완료 페이지로 넘겨 승인 흐름을 이어서 확인할 수 있게 해 둡니다.
+        // 2 — 결제 요청.
         const complete = new URL(form.dataset.completeHref!, location.origin);
-        complete.searchParams.set('orderId', orderId);
-        complete.searchParams.set('amount', String(amount));
-        location.assign(complete.href);
+
+        /*
+         * 키가 없는 빌드(계약 전)는 완료 화면으로 바로 넘깁니다.
+         *
+         * 그때는 주문번호와 금액을 우리가 쿼리에 실어 줍니다 — 그 화면이
+         * 무엇을 접수했는지 보여줄 근거가 그것뿐입니다.
+         *
+         * ⚠️ **키가 있는데 위젯이 못 선 경우는 여기로 오지 않습니다.** 그때는
+         * 버튼이 잠긴 채라 이 핸들러가 아예 돌지 않습니다. 둘을 한 조건으로
+         * 묶었더니 결제 없이 "주문이 완료되었습니다" 가 떴습니다.
+         */
+        if (!clientKey) {
+          complete.searchParams.set('orderId', orderId);
+          complete.searchParams.set('amount', String(amount));
+          location.assign(complete.href);
+          return;
+        }
+
+        /*
+         * 여기 왔다는 것은 버튼이 풀렸다는 뜻이고, 버튼은 위젯이 선 뒤에만
+         * 풀립니다. 그래도 확인합니다 — 개발자도구로 `disabled` 를 지우면
+         * 이 자리에 닿을 수 있고, 그때 `undefined` 를 SDK 에 넘기면 무슨 일이
+         * 일어나는지는 우리가 정하지 않습니다.
+         */
+        if (!widgets || !widgets.ok) {
+          formError.textContent = L.labelPaymentFailed!;
+          formError.hidden = false;
+          payButton.disabled = false;
+          payButton.textContent = L.labelPay!;
+          return;
+        }
+
+        /*
+         * ⚠️ successUrl 에 `amount`·`orderId` 를 **넣지 않습니다.**
+         *
+         * 토스가 그 두 값과 `paymentKey` 를 직접 붙여 줍니다. 우리가 먼저
+         * 넣으면 `params.get('amount')` 가 **항상 우리 값** 을 돌려주고 토스가
+         * 보낸 값은 영영 읽히지 않습니다. 문서는 "쿼리의 amount 가 요청한
+         * amount 와 같은지 반드시 확인하고 승인하라" 고 하는데, 그러면 그
+         * 확인이 **자기 메아리를 자기와 비교하는 일** 이 됩니다.
+         *
+         * 돈 자체는 서버가 지킵니다 — 승인 전에 D1 의 주문 금액과 대조하고
+         * 서버 금액으로 승인합니다(worker/index.ts). 그래도 방어선 하나를
+         * 스스로 무력화할 이유는 없습니다.
+         */
+        const fail = new URL(form.dataset.completeHref!, location.origin);
+        fail.searchParams.set('orderId', orderId);
+
+        const result = await requestPayment({
+          widgets: widgets.widgets,
+          orderId,
+          orderName: orderNameFrom(lines.map((l) => l.name ?? '')),
+          successUrl: complete.href,
+          failUrl: fail.href,
+          customerName: get('recipientName') || undefined,
+          customerEmail: get('email') || undefined,
+          // 하이픈을 뺍니다 — 문서 예시가 `01012345678` 꼴입니다.
+          customerMobilePhone: get('recipientPhone').replace(/\D/g, '') || undefined,
+        });
+
+        if (result.outcome === 'redirecting') return; // 곧 이 페이지를 떠납니다
+
+        /*
+         * 거절됐습니다 — **손님이 그만둔 것이 아닙니다.**
+         *
+         * 리다이렉트 방식에서 결제를 그만두면 프라미스가 거절되는 대신
+         * `failUrl` 로 `PAY_PROCESS_CANCELED` 를 달고 이동합니다. 여기 오는
+         * 것은 결제가 시작되기도 전의 검증 실패뿐입니다 — 잘못된 키, 미등록
+         * 도메인, 주문번호 규격 위반, 최소 결제금액 미만.
+         *
+         * 전부 우리가 알아야 하는 오류라 조용히 넘기지 않습니다. 문구는 우리
+         * 사전에서 고르고 코드만 문의용으로 덧붙입니다 — 토스가 보낸 문장은
+         * 한국어 한 벌뿐이라 다섯 언어에 쓸 수 없습니다.
+         */
+        formError.textContent = result.code
+          ? `${L.labelPaymentFailed} ${L.labelErrorCode!.replace('{code}', () => result.code!)}`
+          : L.labelPaymentFailed!;
+        formError.hidden = false;
+        payButton.disabled = false;
+        payButton.textContent = L.labelPay!;
       } catch {
         formError.textContent = L.labelNetwork!;
         formError.hidden = false;
