@@ -10,7 +10,11 @@
  *   3. `/admin*`      — 같은 이유로 강제 진입. 인증을 통과해야 화면이 나갑니다
  *   4. 매칭 실패      — 404 페이지를 언어에 맞춰 돌려주기
  */
-import { tossPayments } from './payments/tosspayments';
+import {
+  tossPayments,
+  PAYMENT_STATE_UNSETTLED,
+  PAYMENT_NOT_DONE,
+} from './payments/tosspayments';
 import { mockPayments } from './payments/mock';
 import type { PaymentAdapter } from './payments/types';
 import {
@@ -20,6 +24,7 @@ import {
   markPaid,
   forcePaid,
   markFailed,
+  notePaymentAttempt,
   publicView,
   listOrders,
   orderCounts,
@@ -45,7 +50,7 @@ import { overWriteLimit, tooManyRequests, type RateLimitEnv } from './rate-limit
 import { looksAutomated, tooFast } from './spam';
 import commerceConfig from '../src/config/commerce.json';
 import { jsonOnError } from './errors';
-import type { SentryEnv } from './sentry';
+import { reportError, type SentryEnv } from './sentry';
 import {
   normalizeActivities,
   normalizeEmail,
@@ -423,7 +428,57 @@ async function handlePaymentConfirm(
   if (!result.ok) {
     // 결과를 알 수 없는 실패(네트워크·5xx)는 주문을 닫지 않습니다.
     // 닫아버리면 실제로는 승인이 끝났는데 주문만 실패로 남는 상태가 생깁니다.
+    /*
+     * ── 승인 실패를 남깁니다 ─────────────────────────────────
+     *
+     * 이 핸들러는 실패를 **던지지 않고 JSON 으로 돌려줍니다.** 그래서
+     * `errors.ts` 의 그물(잡히지 않은 예외 → Sentry)에 걸리지 않았고,
+     * **결제 승인 실패가 Sentry 에 한 건도 올라가지 않았습니다.**
+     *
+     * 손님은 실패 화면을 보고 떠나므로, 이 줄이 없으면 결제가 며칠 죽어 있어도
+     * 알 수 없습니다. 신청 폼이 같은 이유로 `reportFormFailure` 를 갖고 있는
+     * 것과 같은 처방입니다.
+     *
+     * 재시도 가능한 실패도 남깁니다 — 오히려 그쪽이 "돈은 나갔는데 주문은
+     * pending" 이 될 수 있는 자리라 더 봐야 합니다.
+     */
+    reportError(
+      env,
+      ctx,
+      new Error(`결제 승인 실패 ${result.error?.code ?? 'UNKNOWN'}: ${result.error?.message ?? ''}`),
+      request,
+      {
+        /*
+         * 재시도 가능한 실패는 warning 이지만, **확정이 안 서는 것은
+         * error 입니다.** 같은 주문번호로 다른 금액이 승인돼 있다거나
+         * 승인 응답이 DONE 이 아닌 경우는 일시적 오류가 아니라 사람이
+         * 봐야 하는 상태입니다 — warning 더미에 묻히면 안 됩니다.
+         */
+        level:
+          result.error?.code === PAYMENT_STATE_UNSETTLED ||
+          result.error?.code === PAYMENT_NOT_DONE
+            ? 'error'
+            : result.error?.retriable
+              ? 'warning'
+              : 'error',
+        tags: {
+          area: 'payment-confirm',
+          provider: adapter.name,
+          code: result.error?.code ?? 'UNKNOWN',
+          retriable: String(result.error?.retriable === true),
+        },
+      },
+    );
+
     if (result.error?.retriable) {
+      /*
+       * 주문을 열어 둔 채로 **승인을 시도했다는 표식** 을 남깁니다.
+       *
+       * 이 행은 돈이 나갔을 수도 있는 행입니다. 표식이 없으면 손님이 그냥
+       * 그만둔 행과 구분되지 않아, 주간 정리가 `failed` 로 닫아 버립니다 —
+       * 이 핸들러가 막으려던 바로 그 상태입니다.
+       */
+      await notePaymentAttempt(env.DB, orderId, paymentKey, now);
       return json({ ...result, retriable: true }, 503);
     }
     await markFailed(env.DB, orderId, now);

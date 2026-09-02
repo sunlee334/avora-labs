@@ -212,6 +212,39 @@ export async function forcePaid(
     .run();
 }
 
+/**
+ * 승인을 시도했다는 사실만 남깁니다 — 상태는 그대로 `pending`.
+ *
+ * ── 왜 필요한가 ─────────────────────────────────────────────
+ * 결과를 단정할 수 없는 승인 실패(네트워크·5xx·`ALREADY_PROCESSED_PAYMENT`)는
+ * 주문을 **일부러** `pending` 으로 둡니다. 그래야 돈이 나갔는데 장부가 실패로
+ * 닫히는 최악을 피합니다.
+ *
+ * 그런데 그 행은 **손님이 그냥 그만둔 행과 구분되지 않았습니다** — 둘 다
+ * `status='pending'`, `payment_key IS NULL`. 그래서 주간 정리
+ * (`worker/digest.ts` 의 `sweepAbandoned`)가 **돈이 나간 행을 `failed` 로
+ * 닫아 버릴 수 있었습니다.** 이 커밋이 없애려던 바로 그 상태를 같은 커밋의
+ * 다른 파일이 만들고 있었던 셈입니다.
+ *
+ * 표식을 남기면 정리가 `payment_key IS NULL` 로 그 행을 건너뜁니다.
+ *
+ * `WHERE status='pending'` 을 붙입니다 — 이미 `paid` 로 넘어간 행의
+ * payment_key 를 덮어쓰면 실제 승인된 거래 식별자를 잃습니다.
+ */
+export async function notePaymentAttempt(
+  db: D1Database,
+  id: string,
+  paymentKey: string,
+  now: string,
+): Promise<void> {
+  await db
+    .prepare(
+      `UPDATE orders SET payment_key = ?, updated_at = ? WHERE id = ? AND status = 'pending'`,
+    )
+    .bind(paymentKey, now, id)
+    .run();
+}
+
 export async function markFailed(db: D1Database, id: string, now: string): Promise<void> {
   await db
     .prepare(`UPDATE orders SET status = 'failed', updated_at = ? WHERE id = ? AND status = 'pending'`)
