@@ -118,7 +118,19 @@ const specRows = [
   {/* 제품 히어로 */}
   <section class="section wrap">
     <div class="product-hero">
-      <div class="product-hero__media rise">
+      {/*
+        ⚠️ **여기에 `rise` 를 붙이지 마세요.** 이 그림이 이 화면의 LCP 요소입니다.
+
+        `.rise` 는 `opacity: 0` 으로 시작하고, 브라우저는 **`opacity: 0` 인 요소를
+        LCP 후보에서 제외합니다.** 그러면 `fetchpriority="high"` 로 먼저 받아 둔
+        그림이 화면에 나타난 것으로 쳐지지 않고, 그것을 푸는 스크립트를 기다립니다.
+
+        그 스크립트는 문서 순서상 Sentry(52KB) 뒤에 있습니다 — 모듈 스크립트는
+        순서대로 실행되니까요. 즉 첫 페인트가 에러 수집기 다운로드에 묶입니다.
+
+        홈 히어로에 `.rise` 가 없는 것도 같은 이유입니다.
+      */}
+      <div class="product-hero__media">
         <Picture
           src={productImage}
           alt={p.hero.imageAlt}
