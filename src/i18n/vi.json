@@ -9,6 +9,7 @@
     "brand": "Thương hiệu",
     "product": "Sản phẩm",
     "panel": "Nhóm thử nghiệm",
+    "journal": "Bài viết",
     "cart": "Giỏ hàng",
     "language": "Chọn ngôn ngữ",
     "menu": "Menu",
@@ -541,18 +542,14 @@
       "email": "Email",
       "phone": "Điện thoại"
     },
-    "posts": {
-      "heading": "Thông báo & Bài viết",
-      "intro": "Thông báo vận hành và những điều nên biết về kem chống nắng.",
+    "notice": {
+      "heading": "Thông báo",
+      "intro": "Thông báo vận hành.",
       "empty": "Chưa có nội dung nào. Chúng tôi sẽ đăng tại đây khi sẵn sàng.",
       "backToList": "Về danh sách",
       "meta": {
-        "title": "Thông báo & Bài viết — PAROS",
-        "description": "Thông báo vận hành của PAROS và bài viết về kem chống nắng."
-      },
-      "categories": {
-        "notice": "Thông báo",
-        "journal": "Bài viết"
+        "title": "Thông báo — PAROS",
+        "description": "Thông báo vận hành của PAROS."
       }
     }
   },
@@ -1487,5 +1484,15 @@
     "card": "Thẻ tín dụng/ghi nợ",
     "transfer": "Chuyển khoản ngân hàng",
     "vbank": "Tài khoản ảo"
+  },
+  "journal": {
+    "heading": "Bài viết",
+    "intro": "Những điều nên biết về kem chống nắng.",
+    "empty": "Chưa có nội dung nào. Chúng tôi sẽ đăng tại đây khi sẵn sàng.",
+    "backToList": "Về danh sách",
+    "meta": {
+      "title": "Bài viết — PAROS",
+      "description": "Bài viết về kem chống nắng do PAROS thực hiện."
+    }
   }
 }

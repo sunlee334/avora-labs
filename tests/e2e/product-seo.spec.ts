@@ -390,7 +390,7 @@ test.describe('사이트맵이 아는 것만 말한다', () => {
     expect(withDate.length, '글에 lastmod 가 없습니다').toBeGreaterThan(0);
 
     for (const entry of withDate) {
-      expect(entry, 'lastmod 가 글이 아닌 주소에 붙었습니다').toContain('/support/posts/');
+      expect(entry, 'lastmod 가 글이 아닌 주소에 붙었습니다').toContain('/support/notice/');
       expect(entry, 'lastmod 가 날짜 형식이 아닙니다').toMatch(/<lastmod>\d{4}-\d{2}-\d{2}/);
     }
 

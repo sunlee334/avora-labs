@@ -1,0 +1,48 @@
+---
+/**
+ * 저널 — 읽을거리 목록.
+ *
+ * ── 왜 최상위인가 ──────────────────────────────────────────
+ * 브랜드명 검색만으로는 유입이 없습니다. 이 자리가 사이트에서 유일하게
+ * **정보성 검색 유입을 만들 수 있는 곳** 입니다. 고객센터 하위에 있으면
+ * 검색에도 사람에게도 "고객지원 문서" 로 읽히므로 주소를 짧게 둡니다.
+ *
+ * 공지(`/support/notice`)와 갈린 이유는 `content.config.ts` 의 `category`
+ * 주석에 있습니다.
+ */
+import Base from '../../../layouts/Base.astro';
+import PostList from '../../../components/PostList.astro';
+import { BUSINESS, LOCALES, type Locale } from '../../../config/site';
+import { dict, localePath } from '../../../i18n';
+import { breadcrumb } from '../../../lib/jsonld';
+import { listFor, BASE } from '../../../lib/posts';
+
+export function getStaticPaths() {
+  return LOCALES.map((lang) => ({ params: { lang } }));
+}
+
+const locale = Astro.params.lang as Locale;
+const t = dict(locale);
+const page = t.journal;
+const posts = await listFor(locale, 'journal');
+---
+
+<Base
+  locale={locale}
+  path={BASE.journal}
+  title={page.meta.title}
+  description={page.meta.description}
+  jsonLd={[
+    breadcrumb([
+      { name: BUSINESS.brandName, path: localePath(locale) },
+      { name: page.heading, path: localePath(locale, BASE.journal) },
+    ]),
+  ]}
+>
+  <section class="section wrap">
+    <h1 class="display display--tight">{page.heading}</h1>
+    <p class="body">{page.intro}</p>
+
+    <PostList locale={locale} category="journal" posts={posts} empty={page.empty} />
+  </section>
+</Base>

@@ -174,7 +174,7 @@ test.describe('마크다운이 렌더될 때만 나오는 글자', () => {
 
 test.describe('글 주소 검사', () => {
   test('금칙어로 시작하면 막는다', () => {
-    // 사이트맵 filter 가 부분 문자열이라 /ko/support/posts/checkout-tips/ 가
+    // 사이트맵 filter 가 부분 문자열이라 /ko/support/notice/checkout-tips/ 가
     // '/checkout' 에 걸려 색인에서 조용히 빠집니다.
     expect(checkSlug('checkout-tips')).toBe('checkout');
     expect(checkSlug('order-guide')).toBe('order');

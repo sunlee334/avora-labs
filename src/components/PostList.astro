@@ -1,0 +1,50 @@
+---
+/**
+ * 글 목록 한 벌.
+ *
+ * 공지와 읽을거리가 서로 다른 주소로 갈리면서 목록 화면이 둘이 됐습니다.
+ * 둘은 **무엇을 보여주는가만 다르고 그리는 방법은 같습니다.** 각자 그리면
+ * 언젠가 한쪽에만 손이 갑니다.
+ */
+import { localePath } from '../i18n';
+import { pathOf, slugOf, type Category } from '../lib/posts';
+import type { Locale } from '../config/site';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  locale: Locale;
+  category: Category;
+  posts: CollectionEntry<'posts'>[];
+  empty: string;
+}
+const { locale, category, posts, empty } = Astro.props;
+
+/**
+ * 날짜는 숫자와 하이픈으로만 씁니다.
+ *
+ * `Intl.DateTimeFormat` 을 쓰면 중국어가 `2026年8月27日` 로 나오는데, 그 세
+ * 글자는 어느 번역 파일에도 마크다운에도 없어 폰트 서브셋에 들어가지
+ * 않습니다. 화면에서 그 글자만 다른 서체로 떨어집니다.
+ */
+const isoDate = (date: Date) => date.toISOString().slice(0, 10);
+---
+
+{
+  posts.length === 0 ? (
+    <p class="postList__empty">{empty}</p>
+  ) : (
+    <ul class="postList">
+      {posts.map((post) => (
+        <li class="postList__item">
+          <a href={localePath(locale, pathOf(category, slugOf(post)))}>
+            <span class="postList__title">{post.data.title}</span>
+            <span class="postList__summary">{post.data.summary}</span>
+          </a>
+          <time class="postList__date" datetime={isoDate(post.data.publishedAt)}>
+            {isoDate(post.data.publishedAt)}
+          </time>
+        </li>
+      ))}
+    </ul>
+  )
+}

@@ -7,7 +7,7 @@
  * 그런데 그 느슨함이 글 주소까지 삼킵니다 —
  *
  *   src/content/posts/ko/checkout-tips.md
- *     → /ko/support/posts/checkout-tips/
+ *     → /ko/journal/checkout-tips/
  *     → '/checkout' 을 포함 → 사이트맵에서 제외
  *
  * 검색에 안 잡히는데 빌드는 통과하고 화면도 멀쩡합니다. 아무도 모릅니다.
@@ -53,7 +53,7 @@ for (const entry of readdirSync(POSTS)) {
   }
 
   // 로케일 디렉터리 이름이 오타면 여기서 잡습니다.
-  // 그냥 두면 /kr/support/posts/... 가 조용히 생성되어 사이트맵에 실립니다
+  // 그냥 두면 /kr/journal/... 가 조용히 생성되어 사이트맵에 실립니다
   // (dict() 가 알 수 없는 언어를 기본 언어로 넘겨서 죽지 않습니다).
   if (!LOCALES.includes(entry)) {
     problems.push(`src/content/posts/${entry}/ — 알 수 없는 언어입니다. ${LOCALES.join(' · ')} 중 하나여야 합니다.`);
@@ -86,7 +86,7 @@ for (const entry of readdirSync(POSTS)) {
     if (blocked) {
       problems.push(
         `src/content/posts/${entry}/${file} — '${blocked}' 로 시작하는 주소는 사이트맵에서 제외됩니다.\n` +
-          `    /${entry}/support/posts/${slug}/ 가 '/${blocked}' 를 포함해 검색에 노출되지 않습니다.\n` +
+          `    /${entry}/journal|support/notice/${slug}/ 가 '/${blocked}' 를 포함해 검색에 노출되지 않습니다.\n` +
           `    다른 이름을 쓰세요 (예: ${slug.replace(new RegExp(`^${blocked}`), 'guide')}).`,
       );
     }

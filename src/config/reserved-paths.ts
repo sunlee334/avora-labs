@@ -7,7 +7,7 @@
  *
  * 한 곳에만 있으면 시간이 지나며 벌어집니다. 그때 생기는 사고는 조용합니다 —
  * `src/content/posts/ko/checkout-tips.md` 를 쓰면 주소가
- * `/ko/support/posts/checkout-tips/` 가 되고, 여기 `/checkout` 이 들어 있어
+ * `/ko/journal/checkout-tips/` 가 되고, 여기 `/checkout` 이 들어 있어
  * **사이트맵에서 소리 없이 빠집니다.** 검색에 안 잡히는데 아무도 모릅니다.
  *
  * ── 왜 부분 문자열인가 ──────────────────────────────────────
@@ -119,7 +119,7 @@ export function inSitemap(
 export const RESERVED_SLUG_PREFIXES = SITEMAP_EXCLUDED.map((path) => {
   /*
    * 접두 일치가 사이트맵의 부분 문자열 일치와 대응하는 **근거**는 모든
-   * 항목이 `/` 로 시작한다는 것입니다. 주소가 `/ko/support/posts/{slug}/`
+   * 항목이 `/` 로 시작한다는 것입니다. 주소가 `/ko/journal/{slug}/`
    * 이므로 `/cart` 는 slug 선두에서만 매치합니다.
    *
    * 누가 슬래시 없이 `'cart'` 를 넣으면 사이트맵은 `my-cart-guide` 를

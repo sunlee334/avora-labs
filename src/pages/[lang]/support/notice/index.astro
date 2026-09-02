@@ -1,0 +1,47 @@
+---
+/**
+ * 공지 — 운영 안내 목록.
+ *
+ * 배송·휴무·품절처럼 **이미 주문한 사람** 에게 알리는 글입니다. 그래서
+ * 고객센터 안에 남습니다 — 이것을 찾는 사람은 검색으로 오지 않습니다.
+ *
+ * 읽을거리가 `/journal` 로 나간 이유는 `content.config.ts` 의 `category`
+ * 주석에 있습니다.
+ */
+import Base from '../../../../layouts/Base.astro';
+import PostList from '../../../../components/PostList.astro';
+import { BUSINESS, LOCALES, type Locale } from '../../../../config/site';
+import { dict, localePath } from '../../../../i18n';
+import { breadcrumb } from '../../../../lib/jsonld';
+import { listFor, BASE } from '../../../../lib/posts';
+
+export function getStaticPaths() {
+  return LOCALES.map((lang) => ({ params: { lang } }));
+}
+
+const locale = Astro.params.lang as Locale;
+const t = dict(locale);
+const page = t.support.notice;
+const posts = await listFor(locale, 'notice');
+---
+
+<Base
+  locale={locale}
+  path={BASE.notice}
+  title={page.meta.title}
+  description={page.meta.description}
+  jsonLd={[
+    breadcrumb([
+      { name: BUSINESS.brandName, path: localePath(locale) },
+      { name: t.support.heading, path: localePath(locale, 'support') },
+      { name: page.heading, path: localePath(locale, BASE.notice) },
+    ]),
+  ]}
+>
+  <section class="section wrap">
+    <h1 class="display display--tight">{page.heading}</h1>
+    <p class="body">{page.intro}</p>
+
+    <PostList locale={locale} category="notice" posts={posts} empty={page.empty} />
+  </section>
+</Base>

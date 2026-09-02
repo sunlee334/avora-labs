@@ -30,7 +30,7 @@ const PAGES = LOCALES.flatMap((l) => [
   `/${l}/legal/terms`,
   `/${l}/legal/privacy`,
   `/${l}/legal/shipping`,
-  `/${l}/support/posts`,
+  `/${l}/support/notice`,
 ]);
 
 /**
@@ -41,7 +41,7 @@ const PAGES = LOCALES.flatMap((l) => [
  * 그게 `.post__body` 에 `overflow-wrap: anywhere` 를 건 이유입니다.
  * 목록 페이지에는 그런 것이 없으므로 상세를 따로 봅니다.
  */
-const POST_PAGES = ['/ko/support/posts/shipping-notice', '/en/support/posts/shipping-notice'];
+const POST_PAGES = ['/ko/support/notice/shipping-notice', '/en/support/notice/shipping-notice'];
 
 /**
  * 검사할 폭.

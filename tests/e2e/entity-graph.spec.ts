@@ -68,7 +68,7 @@ test.describe('브랜드가 하나의 개체로 모인다', () => {
   });
 
   test('글이 펴낸 곳과 로고를 함께 낸다', async ({ request }) => {
-    const { of } = await schemasOf(request, '/ko/support/posts/shipping-notice');
+    const { of } = await schemasOf(request, '/ko/support/notice/shipping-notice');
     const art = of('Article');
 
     expect(art, 'Article 이 없습니다').toBeTruthy();
@@ -81,7 +81,7 @@ test.describe('브랜드가 하나의 개체로 모인다', () => {
      * 한 페이지가 두 개의 다른 대표 그림을 말할 이유가 없습니다. 갈라지면
      * 어느 쪽이 진짜인지 기계가 고르게 되고, 그 선택은 우리 것이 아닙니다.
      */
-    for (const path of ['/ko/product', '/ko/support/posts/shipping-notice']) {
+    for (const path of ['/ko/product', '/ko/support/notice/shipping-notice']) {
       const html = await (await request.get(path)).text();
       const og = html.match(/<meta property="og:image" content="([^"]+)"/)?.[1];
       const schema = jsonLdOf(html).find((s) => s.image);
@@ -94,7 +94,7 @@ test.describe('공유 태그가 페이지 성격을 말한다', () => {
   const cases = [
     { path: '/ko/', type: 'website' },
     { path: '/ko/product', type: 'product' },
-    { path: '/ko/support/posts/shipping-notice', type: 'article' },
+    { path: '/ko/support/notice/shipping-notice', type: 'article' },
   ];
 
   for (const { path, type } of cases) {
@@ -105,7 +105,7 @@ test.describe('공유 태그가 페이지 성격을 말한다', () => {
   }
 
   test('글에는 발행 시각이 함께 나간다', async ({ request }) => {
-    const html = await (await request.get('/ko/support/posts/shipping-notice')).text();
+    const html = await (await request.get('/ko/support/notice/shipping-notice')).text();
     expect(html, 'article:published_time 이 없습니다').toMatch(
       /article:published_time" content="\d{4}-\d{2}-\d{2}"/,
     );

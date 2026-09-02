@@ -69,9 +69,9 @@ const KO_PAGES = [
   'legal/privacy',
   'legal/shipping',
   '404',
-  'support/posts',
+  'support/notice',
   // 마크다운 렌더 결과가 heading-order·대비 위반이 실제로 나는 자리입니다.
-  'support/posts/shipping-notice',
+  'support/notice/shipping-notice',
 ];
 
 test.describe('정적 화면', () => {

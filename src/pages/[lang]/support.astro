@@ -219,11 +219,27 @@ const schemaItems = items
       없습니다" 후 홈으로 튕기는 것이었지 목록이 비어 있는 것이 아니었습니다.
       대신 카드 문구가 내용을 약속하지 않게 쓰고, 빈 상태는 목록이 말합니다.
     */}
+    {/*
+      공지와 읽을거리가 갈렸습니다. 공지는 고객센터 안에 남고, 읽을거리는
+      최상위 `/journal` 로 나갔습니다 — 이유는 `content.config.ts` 의
+      `category` 주석에 있습니다.
+
+      여기서 둘 다 안내합니다. 고객센터에 온 사람이 읽을거리를 찾을 길이
+      아예 없으면, 갈라 놓은 것이 손님에게는 잃은 것이 됩니다.
+    */}
     <div class="support__card">
-      <h2>{page.posts.heading}</h2>
-      <p>{page.posts.intro}</p>
+      <h2>{page.notice.heading}</h2>
+      <p>{page.notice.intro}</p>
       <p>
-        <a class="tapLink" href={localePath(locale, 'support/posts')}>{page.posts.heading}</a>
+        <a class="tapLink" href={localePath(locale, 'support/notice')}>{page.notice.heading}</a>
+      </p>
+    </div>
+
+    <div class="support__card">
+      <h2>{t.journal.heading}</h2>
+      <p>{t.journal.intro}</p>
+      <p>
+        <a class="tapLink" href={localePath(locale, 'journal')}>{t.journal.heading}</a>
       </p>
     </div>
 

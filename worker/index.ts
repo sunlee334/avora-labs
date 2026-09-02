@@ -1858,6 +1858,43 @@ async function route(request: Request, env: Env, ctx: ExecutionContext): Promise
     return page;
   }
 
+  /*
+   * 4.5 — 옛 글 주소를 새 자리로 보냅니다.
+   *
+   * 공지와 읽을거리가 `/support/posts` 한 곳에 섞여 있다가 갈렸습니다:
+   *
+   *   /{lang}/support/posts          → /{lang}/journal/
+   *   /{lang}/support/posts/{slug}   → 그 글이 실제로 있는 곳
+   *
+   * 목록을 저널로 보내는 이유: 밖에 공유된 링크는 대개 읽을거리를 가리키고,
+   * 공지를 찾던 사람은 고객센터에서 한 칸이면 닿습니다.
+   *
+   * 글은 **카테고리를 여기서 알 수 없습니다** — 워커는 마크다운을 읽지
+   * 않습니다. 그래서 두 자리를 실제로 두드려 보고 있는 쪽으로 보냅니다.
+   * 빌드 때 표를 만들어 심는 방법도 있지만, 그러면 글을 옮길 때마다 표와
+   * 실물이 갈라질 수 있습니다. 여기서는 **실물이 답** 입니다.
+   *
+   * 어느 쪽에도 없으면(초안이거나 지워진 글) 저널 목록으로 보냅니다 —
+   * 404 보다 낫고, 그 사람이 찾던 종류의 글이 거기 있습니다.
+   */
+  const oldPost = pathname.match(/^\/([a-z]{2})\/support\/posts(?:\/([^/]+))?\/?$/);
+  if (oldPost && (LOCALES as readonly string[]).includes(oldPost[1])) {
+    const [, lang, slug] = oldPost;
+    let target = `/${lang}/journal/`;
+
+    if (slug) {
+      for (const base of [`/${lang}/journal`, `/${lang}/support/notice`]) {
+        const probe = await env.ASSETS.fetch(new URL(`${base}/${slug}/`, url).href);
+        if (probe.ok) {
+          target = `${base}/${slug}/`;
+          break;
+        }
+      }
+    }
+
+    return Response.redirect(new URL(target, url).href, 301);
+  }
+
   // 5 — 그 외에는 정적 에셋에 넘깁니다.
   const assetResponse = await env.ASSETS.fetch(request);
 

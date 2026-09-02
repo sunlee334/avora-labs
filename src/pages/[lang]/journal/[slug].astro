@@ -1,0 +1,73 @@
+---
+/**
+ * 저널 글 하나.
+ *
+ * 주소·초안 거르기·hreflang 언어 목록은 전부 `src/lib/posts.ts` 가 정합니다.
+ * 이 파일은 그리기만 합니다 — 공지 상세와 같은 규칙을 두 곳에 적지 않으려는
+ * 것입니다.
+ */
+import { render } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import { BUSINESS, type Locale } from '../../../config/site';
+import { dict, localePath } from '../../../i18n';
+import { article, breadcrumb } from '../../../lib/jsonld';
+import { staticPathsFor, pathOf, slugOf, BASE } from '../../../lib/posts';
+
+export async function getStaticPaths() {
+  return staticPathsFor('journal');
+}
+
+const { post, locales } = Astro.props;
+const locale = Astro.params.lang as Locale;
+const t = dict(locale);
+const page = t.journal;
+const { Content } = await render(post);
+
+// Astro.params 대신 props 에서 유도합니다 — params 는 string | undefined 라
+// 값이 없으면 `journal/undefined` 가 canonical·JSON-LD 에 조용히 실립니다.
+const path = pathOf('journal', slugOf(post));
+const isoDate = (date: Date) => date.toISOString().slice(0, 10);
+---
+
+<Base
+  locale={locale}
+  path={path}
+  locales={locales}
+  title={`${post.data.title} — ${BUSINESS.brandName}`}
+  description={post.data.summary}
+  ogType="article"
+  publishedTime={isoDate(post.data.publishedAt)}
+  modifiedTime={post.data.updatedAt ? isoDate(post.data.updatedAt) : undefined}
+  jsonLd={[
+    article({
+      headline: post.data.title,
+      description: post.data.summary,
+      path: localePath(locale, path),
+      locale,
+      publishedAt: isoDate(post.data.publishedAt),
+      ...(post.data.updatedAt ? { updatedAt: isoDate(post.data.updatedAt) } : {}),
+    }),
+    breadcrumb([
+      { name: BUSINESS.brandName, path: localePath(locale) },
+      { name: page.heading, path: localePath(locale, BASE.journal) },
+      { name: post.data.title, path: localePath(locale, path) },
+    ]),
+  ]}
+>
+  <article class="section wrap post">
+    <p class="kicker">{page.heading}</p>
+    <h1 class="display display--tight">{post.data.title}</h1>
+
+    <p class="post__meta">
+      <time datetime={isoDate(post.data.publishedAt)}>{isoDate(post.data.publishedAt)}</time>
+    </p>
+
+    <div class="post__body">
+      <Content />
+    </div>
+
+    <p class="postList__back">
+      <a class="tapLink" href={localePath(locale, BASE.journal)}>{page.backToList}</a>
+    </p>
+  </article>
+</Base>

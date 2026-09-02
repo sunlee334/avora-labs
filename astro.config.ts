@@ -29,8 +29,14 @@ for (const locale of readdirSync('./src/content/posts')) {
     if (!file.endsWith('.md')) continue;
     const front = readFileSync(`./src/content/posts/${locale}/${file}`, 'utf8').split('---')[1] ?? '';
     const pick = (key: string) => front.match(new RegExp(`^${key}:\\s*(\\S+)`, 'm'))?.[1];
+
+    // 초안은 페이지 자체가 만들어지지 않으므로 사이트맵에도 없습니다.
+    if (pick('draft') === 'true') continue;
+
     const date = pick('updatedAt') ?? pick('publishedAt');
-    if (date) POST_DATES.set(`/${locale}/support/posts/${file.replace(/\.md$/, '')}/`, date);
+    // 주소는 카테고리가 정합니다 — `src/lib/posts.ts` 의 BASE 와 같은 표입니다.
+    const base = pick('category') === 'journal' ? 'journal' : 'support/notice';
+    if (date) POST_DATES.set(`/${locale}/${base}/${file.replace(/\.md$/, '')}/`, date);
   }
 }
 

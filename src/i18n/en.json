@@ -9,6 +9,7 @@
     "brand": "Brand",
     "product": "Product",
     "panel": "Test Panel",
+    "journal": "Reading",
     "cart": "Cart",
     "language": "Language",
     "menu": "Menu",
@@ -541,18 +542,14 @@
       "email": "Email",
       "phone": "Phone"
     },
-    "posts": {
-      "heading": "Notices & Reading",
-      "intro": "Operational notices and things worth knowing about sunscreen.",
+    "notice": {
+      "heading": "Notice",
+      "intro": "Operational notices.",
       "empty": "Nothing here yet. We will post as things are ready.",
       "backToList": "Back to list",
       "meta": {
-        "title": "Notices & Reading — PAROS",
-        "description": "Operational notices from PAROS and reading about sunscreen."
-      },
-      "categories": {
-        "notice": "Notice",
-        "journal": "Reading"
+        "title": "Notice — PAROS",
+        "description": "Operational notices from PAROS."
       }
     }
   },
@@ -1487,5 +1484,15 @@
     "card": "Credit and debit card",
     "transfer": "Bank transfer",
     "vbank": "Virtual account"
+  },
+  "journal": {
+    "heading": "Reading",
+    "intro": "Things worth knowing about sunscreen.",
+    "empty": "Nothing here yet. We will post as things are ready.",
+    "backToList": "Back to list",
+    "meta": {
+      "title": "Reading — PAROS",
+      "description": "Reading about sunscreen, written by PAROS."
+    }
   }
 }

@@ -190,6 +190,23 @@ const NAV: readonly NavGroup[] = [
     children: [{ id: 'panel', label: (t) => t.nav.panel, path: 'panel' }],
   },
   {
+    /*
+     * 저널.
+     *
+     * ── 왜 최상위 메뉴인가 ────────────────────────────────────
+     * 브랜드명 검색만으로는 유입이 없습니다. 읽을거리는 사이트에서 유일하게
+     * **정보성 검색으로 새 사람을 데려올 수 있는** 자리이고, 고객센터 하위에
+     * 접혀 있으면 그 사람이 도착한 뒤에도 다음 글로 가지 못합니다.
+     *
+     * 이로써 메뉴가 다섯이 됩니다. 좁은 화면에서 넘치면 **햄버거로 되돌리지
+     * 않고** 다른 방법을 찾습니다 — 지시서가 명시한 제약이고,
+     * `mobile-ux.spec.ts` 가 375px 가로 스크롤을 봅니다.
+     */
+    id: 'journal',
+    label: (t) => t.nav.journal,
+    children: [{ id: 'journal', label: (t) => t.nav.journal, path: 'journal' }],
+  },
+  {
     id: 'support',
     label: (t) => t.nav.support,
     children: [
@@ -199,7 +216,7 @@ const NAV: readonly NavGroup[] = [
         flatLabel: (t) => t.nav.support,
         path: 'support',
       },
-      { id: 'posts', label: (t) => t.support.posts.heading, path: 'support/posts' },
+      { id: 'notice', label: (t) => t.support.notice.heading, path: 'support/notice' },
       // 후기는 결제된 주문에서만 생깁니다(worker/reviews.ts). 자사 결제가
       // 꺼져 있으면 후기가 존재할 수 없어, 이 항목은 언제 눌러도 빈 페이지로
       // 갑니다. 빈 상태 문구가 잘 쓰여 있어도 빈 페이지는 빈 페이지입니다.

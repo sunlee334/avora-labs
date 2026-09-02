@@ -9,6 +9,7 @@
     "brand": "品牌",
     "product": "产品",
     "panel": "测评团",
+    "journal": "阅读",
     "cart": "购物车",
     "language": "选择语言",
     "menu": "菜单",
@@ -541,18 +542,14 @@
       "email": "电子邮件",
       "phone": "电话"
     },
-    "posts": {
-      "heading": "公告与阅读",
-      "intro": "运营公告，以及关于防晒的值得一读的内容。",
+    "notice": {
+      "heading": "公告",
+      "intro": "运营公告。",
       "empty": "目前还没有内容。准备好后会发布在这里。",
       "backToList": "返回列表",
       "meta": {
-        "title": "公告与阅读 — PAROS",
-        "description": "PAROS 的运营公告与防晒相关阅读。"
-      },
-      "categories": {
-        "notice": "公告",
-        "journal": "阅读"
+        "title": "公告 — PAROS",
+        "description": "PAROS 的运营公告。"
       }
     }
   },
@@ -1487,5 +1484,15 @@
     "card": "信用卡·借记卡",
     "transfer": "银行转账",
     "vbank": "虚拟账户"
+  },
+  "journal": {
+    "heading": "阅读",
+    "intro": "关于防晒的值得一读的内容。",
+    "empty": "目前还没有内容。准备好后会发布在这里。",
+    "backToList": "返回列表",
+    "meta": {
+      "title": "阅读 — PAROS",
+      "description": "PAROS 撰写的防晒相关阅读。"
+    }
   }
 }

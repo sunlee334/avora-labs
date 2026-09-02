@@ -16,8 +16,8 @@ test.describe('언어를 바꾸면 그 페이지가 있다', () => {
   const pages = [
     '/ko/',
     '/ko/product/',
-    '/ko/support/posts/',
-    '/ko/support/posts/shipping-notice/', // 두 언어만 있는 글 — 이 검사의 핵심
+    '/ko/support/notice/',
+    '/ko/support/notice/shipping-notice/', // 두 언어만 있는 글 — 이 검사의 핵심
   ];
 
   for (const path of pages) {
@@ -42,7 +42,7 @@ test.describe('언어를 바꾸면 그 페이지가 있다', () => {
      * 화면이 제시하는 언어와 검색엔진에 알리는 언어가 **같아야** 합니다 —
      * 갈라진 순간이 바로 이 결함이 생긴 순간이었습니다.
      */
-    await page.goto('/ko/support/posts/shipping-notice/');
+    await page.goto('/ko/support/notice/shipping-notice/');
 
     const shown = await page.locator('.lang__item').evaluateAll((els) =>
       els.map((el) => new URL((el as HTMLAnchorElement).href).pathname).sort(),
