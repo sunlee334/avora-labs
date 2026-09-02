@@ -13,14 +13,27 @@
  * JS 가 없으면 이 시트는 열리지 않습니다. 그 경우를 위해 푸터에 5개 언어 링크를
  * 항상 평문으로 두었습니다 — 언어 전환 자체는 JS 없이도 가능합니다.
  */
-import { LOCALES, LOCALE_LABELS, LOCALE_TAGS, type Locale } from '../config/site';
-import { dict, localePath } from '../i18n';
+import { LOCALE_LABELS, LOCALE_TAGS, type Locale } from '../config/site';
+import { dict } from '../i18n';
 
 interface Props {
   locale: Locale;
-  path?: string;
+  /**
+   * 이 경로가 **실제로 존재하는** 언어와 그 주소. `Base.astro` 가 hreflang 을
+   * 만들 때 쓴 것과 **같은 배열**을 그대로 받습니다.
+   *
+   * ── 왜 `LOCALES` 를 직접 돌면 안 되는가 ────────────────────
+   * 글은 한국어·영어 두 벌뿐인데 5개 언어를 무조건 돌고 있었습니다. 그래서
+   * 글 페이지의 전환기가 `/zh/support/posts/…` 처럼 **빌드되지 않은 주소**
+   * 세 개를 가리켰고, 언어를 바꾼 사람이 404 를 봤습니다.
+   *
+   * hreflang 쪽은 이미 맞았습니다 — `[slug].astro` 가 `locales` 를 넘겨
+   * 좁혀 두었으니까요. 틀린 것은 화면의 링크뿐이었습니다. 계산된 결과를
+   * 통째로 받으면 그 둘이 **갈라질 자리가 없어집니다.**
+   */
+  langs: readonly { locale: Locale; path: string }[];
 }
-const { locale, path = '' } = Astro.props;
+const { locale, langs } = Astro.props;
 const t = dict(locale);
 ---
 
@@ -44,11 +57,11 @@ const t = dict(locale);
     </div>
     <ul class="lang__list">
       {
-        LOCALES.map((l) => (
+        langs.map(({ locale: l, path: href }) => (
           <li>
             <a
               class="lang__item"
-              href={localePath(l, path)}
+              href={href}
               hreflang={LOCALE_TAGS[l]}
               lang={LOCALE_TAGS[l]}
               aria-current={l === locale ? 'true' : undefined}

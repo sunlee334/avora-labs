@@ -288,7 +288,15 @@ const xDefault = !wanted || wanted.includes(X_DEFAULT_LOCALE)
     <a class="skip-link" href="#main">{t.a11y.skipToContent}</a>
     {/* 공지 배너는 헤더 위입니다 — 설정이 꺼져 있으면 아무것도 그리지 않습니다. */}
     <NoticeBanner locale={locale} />
-    <Nav locale={locale} path={path} />
+    {/*
+      `langs` 를 내려보냅니다 — 위에서 hreflang 을 만든 **바로 그 배열**입니다.
+
+      전에는 전환기가 `LOCALES` 5개를 스스로 돌았습니다. 그래서 한국어·영어로만
+      쓴 글에서 언어를 바꾸면 빌드되지 않은 주소로 가 404 를 만났습니다.
+      hreflang 은 맞고 화면 링크만 틀린 상태였는데, 같은 배열을 쓰면 그 둘이
+      갈라질 수 없습니다.
+    */}
+    <Nav locale={locale} path={path} langs={langs} />
     {/*
       건너뛰기 링크의 착지점.
 

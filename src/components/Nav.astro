@@ -8,8 +8,10 @@ import { BUSINESS, type Locale } from '../config/site';
 interface Props {
   locale: Locale;
   path?: string;
+  /** 언어 전환기로 그대로 넘깁니다 — 뜻은 `LanguageSwitcher.astro` 에 있습니다. */
+  langs: readonly { locale: Locale; path: string }[];
 }
-const { locale, path = '' } = Astro.props;
+const { locale, path = '', langs } = Astro.props;
 const t = dict(locale);
 
 // 장바구니는 배지가 붙는 거래 단축키라 유틸리티 줄이 아니라 .nav__right 에
@@ -161,7 +163,7 @@ const utility = UTILITY_VISIBLE.filter((item) => item.badge !== 'cart');
         </ul>
       )
     }
-    <LanguageSwitcher locale={locale} path={path} />
+    <LanguageSwitcher locale={locale} langs={langs} />
     <MenuSheet locale={locale} path={path} />
   </div>
 </nav>
