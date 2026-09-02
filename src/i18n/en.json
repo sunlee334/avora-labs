@@ -1475,5 +1475,17 @@
       "subject": "Your PAROS test panel application is confirmed",
       "body": "Thank you for applying with {email}.\n\nWe will send the selection result to this address during October.\nThose selected will also receive the sample shipping schedule and how the evaluation works.\n\nIf you would like to check or withdraw your application, simply reply to this email."
     }
+  },
+  "countries": {
+    "KR": "South Korea",
+    "US": "United States",
+    "CN": "China",
+    "TH": "Thailand",
+    "VN": "Vietnam"
+  },
+  "paymentMethods": {
+    "card": "Credit and debit card",
+    "transfer": "Bank transfer",
+    "vbank": "Virtual account"
   }
 }

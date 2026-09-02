@@ -1475,5 +1475,17 @@
       "subject": "Đã tiếp nhận đơn đăng ký nhóm kiểm chứng PAROS",
       "body": "Cảm ơn bạn đã đăng ký với {email}.\n\nChúng tôi sẽ gửi kết quả tuyển chọn đến địa chỉ này trong tháng Mười.\nNgười được chọn sẽ nhận thêm lịch gửi mẫu và cách thức đánh giá.\n\nNếu muốn kiểm tra hoặc rút đơn, bạn chỉ cần trả lời email này."
     }
+  },
+  "countries": {
+    "KR": "Hàn Quốc",
+    "US": "Hoa Kỳ",
+    "CN": "Trung Quốc",
+    "TH": "Thái Lan",
+    "VN": "Việt Nam"
+  },
+  "paymentMethods": {
+    "card": "Thẻ tín dụng/ghi nợ",
+    "transfer": "Chuyển khoản ngân hàng",
+    "vbank": "Tài khoản ảo"
   }
 }

@@ -27,9 +27,20 @@ const locale = Astro.params.lang as Locale;
 const t = dict(locale);
 const page = t.legal.terms;
 
-/** payment-config.json 이 판매 국가의 원본입니다. */
-const countries = Object.values(payment.countries).map((c) => ({
-  name: c.name,
+/**
+ * payment-china 국가와 결제수단의 **사실**은 `payment-config.json` 이,
+ * **이름**은 번역 파일이 정합니다.
+ *
+ * ── 왜 나눴는가 ────────────────────────────────────────────
+ * 설정 파일에는 이름이 한 벌뿐이라, 영어판 약관에도 `대한민국` 과
+ * `신용·체크카드` 가 그대로 실렸습니다. 문장 틀은 `en.json` 에 영어로 멀쩡히
+ * 있는데 **채워지는 값만** 한국어였습니다 — `en.json` 을 고쳐도 바뀌지 않는
+ * 자리였습니다.
+ *
+ * 국가에는 ISO 코드가, 결제수단에는 `code` 가 이미 있어 그것을 열쇠로 씁니다.
+ */
+const countries = Object.entries(payment.countries).map(([code, c]) => ({
+  name: t.countries[code as keyof typeof t.countries] ?? c.name,
   currency: c.currency,
   sellable: c.sellable,
 }));
@@ -38,10 +49,15 @@ const countries = Object.values(payment.countries).map((c) => ({
  * 지금 화면에 실제로 노출되는 결제수단.
  * enabled:false 인 것은 준비만 되어 있고 켜지지 않았으므로 적지 않습니다 —
  * 쓸 수 없는 수단을 약관에 적으면 그것도 틀린 안내입니다.
+ *
+ * ⚠️ **브랜드명은 번역하지 않습니다.** 네이버페이·카카오페이·토스페이는
+ * 그 이름이 곧 식별자입니다(`site.ts` 의 `KEEP_ORIGINAL` 과 같은 기준 —
+ * 브랜드 자산이면 원문, 설명하는 말이면 번역). 그래서 사전에 있는 코드만
+ * 갈아 끼우고 나머지는 설정의 이름을 그대로 씁니다.
  */
 const methods = payment.countries[payment.defaultCountry as 'KR'].methods
   .filter((m) => m.enabled)
-  .map((m) => m.label);
+  .map((m) => t.paymentMethods[m.code as keyof typeof t.paymentMethods] ?? m.label);
 ---
 
 <Base

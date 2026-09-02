@@ -67,10 +67,17 @@ const remoteAnswer =
     ? feeCopy.remote.replace('{surcharge}', money(s.remoteAreaSurcharge))
     : null;
 
-/** 판매 국가는 payment-config.json 이 원본입니다. */
-const sellable = Object.values(payment.countries)
-  .filter((c) => c.sellable)
-  .map((c) => c.name);
+/**
+ * 판매 국가는 payment-config.json 이 원본이고, **이름은 번역 파일**이 정합니다.
+ *
+ * 설정에 이름이 한 벌뿐이라 영어 문장 한가운데에 `대한민국` 이 들어가고
+ * 있었습니다 — "Right now you can order only in 대한민국." 문장 틀은 영어로
+ * 멀쩡히 있는데 채워지는 값만 한국어였습니다. `legal/terms.astro` 와 같은
+ * 사전을 씁니다.
+ */
+const sellable = Object.entries(payment.countries)
+  .filter(([, c]) => c.sellable)
+  .map(([code, c]) => t.countries[code as keyof typeof t.countries] ?? c.name);
 const countriesAnswer = q.countries.a.replace('{countries}', sellable.join(' · '));
 
 /**
