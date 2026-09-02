@@ -18,6 +18,7 @@ import StickyNotify from '../../components/StickyNotify.astro';
 import CriteriaTable from '../../components/CriteriaTable.astro';
 import { CAN_ORDER } from '../../config/runtime';
 import { TIMELINE_DATES, stepStates } from '../../config/timeline';
+import { compareRows } from '../../lib/spec';
 
 export function getStaticPaths() {
   return LOCALES.map((lang) => ({ params: { lang } }));
@@ -44,6 +45,12 @@ if (TIMELINE_DATES.length !== h.timeline.steps.length) {
   );
 }
 const states = stepStates(new Date());
+
+/*
+ * 확정/미확정 판정은 `src/lib/spec.ts` 가 합니다 — 제품 페이지 스펙표와
+ * 같은 출처입니다. 두 화면이 각자 판정하면 언젠가 한쪽만 고쳐집니다.
+ */
+const { settled, unsettled } = compareRows(t);
 
 /*
  * 배점과 커트라인은 **`/panel` 과 같은 원본을 읽습니다.**
@@ -446,7 +453,51 @@ const criteriaRows = h.panel.criteria.map((item) => {
   <section class="section section--alt wrap rise" data-section="first_product">
     <p class="kicker">{h.product.kicker}</p>
     <h2 class="display display--tight">{h.product.name}</h2>
-    <p class="body" style="margin-top: 14px">{h.product.spec}</p>
+    <p class="body" style="margin-top: 14px">{h.product.table.why}</p>
+
+    {/*
+      확정된 것과 아직 아닌 것을 나란히 놓습니다. **정직성이 시각적으로
+      드러나는 자리** 입니다.
+
+      ⚠️ **오른쪽 열을 값으로 채우지 마세요. 비어 있는 것이 요점입니다.**
+      적히는 것은 값이 아니라 *무엇을 기다리는지* 입니다.
+
+      ── 어느 쪽에 놓을지는 여기서 정하지 않습니다 ──────────────
+      `product.json` 의 `spec` 과 `$pending` 이 정합니다. 제품 페이지가 읽는
+      것과 같은 출처라, 홈이 "SPF50+ 확정" 이라고 하고 제품 페이지가 "목표"
+      라고 하는 일이 **구조적으로 생길 수 없습니다.** 한때 홈이 "워터리 젤",
+      스펙표가 "로션·밀크" 라고 동시에 말한 적이 있습니다.
+
+      기능성화장품은 심사·보고가 남아 있어 차단지수를 확정으로 적으면
+      표시·광고 문제가 됩니다(00-공통규칙 2-2).
+    */}
+    <div class="compare">
+      <div class="compare__col">
+        <h3 class="compare__head">{h.product.table.confirmed}</h3>
+        <dl class="compare__list">
+          {settled.map((row) => (
+            <div class="compare__row">
+              <dt>{row.key}</dt>
+              <dd class="compare__value">{row.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+
+      <div class="compare__col">
+        <h3 class="compare__head">{h.product.table.pending}</h3>
+        <dl class="compare__list">
+          {unsettled.map((row) => (
+            <div class="compare__row">
+              <dt>{row.key}</dt>
+              <dd class="compare__wait">{row.wait}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </div>
+
+    <p class="compare__note">{h.product.table.note}</p>
 
     <p style="margin-top: 30px">
       <a class="cta" href={localePath(locale, 'product')}>

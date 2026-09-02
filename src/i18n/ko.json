@@ -230,7 +230,20 @@
       "kicker": "First Product",
       "name": "Daily Sunscreen · 데일리 선크림",
       "spec": "SPF50+ / PA++++ · 튜브 50ml",
-      "cta": "제품 보기"
+      "cta": "제품 보기",
+      "table": {
+        "confirmed": "지금 확정된 것",
+        "pending": "아직 정해지지 않은 것",
+        "container": "용기",
+        "waits": {
+          "protection": "기능성 심사 후",
+          "texture": "검증단 집계 후",
+          "waterResistant": "시험 성적서 확보 후",
+          "container": "용기 발주 후"
+        },
+        "note": "정해지지 않은 항목은 정해지지 않았다고 적었습니다. 2026년 12월 검증단 집계가 끝나면 이 표를 채웁니다.",
+        "why": "움직이는 하루에서 가장 자주, 가장 여러 번 다시 발라야 하는 제품이기 때문입니다."
+      }
     },
     "notify": {
       "hero": {

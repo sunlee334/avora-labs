@@ -242,14 +242,12 @@ button {
  *
  *   --lg  강조. 앞뒤로 크게 띄워 무게를 줍니다
  *   기본  정보 섹션
- *   --sm  앞 섹션에 **붙어야 하는** 것. 근거와 그 근거의 표처럼
- *         둘이 한 덩어리로 읽혀야 할 때
+ *   --attach  앞 섹션에 **붙어야 하는** 것. 근거와 그 근거의 표처럼
+ *             둘이 한 덩어리로 읽혀야 할 때. 위쪽 여백만 좁힙니다 —
+ *             아래까지 좁히면 다음 섹션과 엉깁니다
  */
 .section--lg {
   padding-block: var(--space-section-lg-mobile);
-}
-.section--sm {
-  padding-block: var(--space-section-sm-mobile);
 }
 /* 붙는 섹션은 위쪽만 좁힙니다 — 아래까지 좁히면 다음 섹션과 엉깁니다. */
 .section--attach {
@@ -342,9 +340,6 @@ button {
   }
   .section--lg {
     padding-block: var(--space-section-lg-desktop);
-  }
-  .section--sm {
-    padding-block: var(--space-section-sm-desktop);
   }
   .section--attach {
     padding-block-start: var(--space-section-sm-desktop);
@@ -2648,6 +2643,18 @@ a {
   display: inline-flex;
   align-items: center;
   min-height: var(--size-tap-min);
+  /*
+   * 가로도 함께 지킵니다.
+   *
+   * 세로만 두었더니 **짧은 라벨에서 폭이 무너졌습니다.** 공지와 읽을거리를
+   * 갈랐을 때 "공지·읽을거리"(넓음)가 "공지"(24px)가 되면서 44×44 를
+   * 밑돌았고, `mobile-ux.spec.ts` 가 잡았습니다.
+   *
+   * 라벨 길이는 언어마다 다르고 앞으로도 달라집니다 — 중국어 "公告" 는 두
+   * 글자입니다. 문구를 늘려 맞추는 대신 상자가 최소 크기를 보장하게 둡니다.
+   */
+  min-width: var(--size-tap-min);
+  justify-content: flex-start;
 }
 
 /*
@@ -4317,4 +4324,69 @@ a {
  */
 .tossWidget:empty {
   margin-top: 0;
+}
+
+/* ── 홈 확정/미확정 대조표 ──────────────────────────────────
+ *
+ * 정직성이 시각적으로 드러나는 자리입니다. 두 열이 나란히 있어야 "한쪽은
+ * 찼고 한쪽은 비었다" 가 한눈에 읽힙니다.
+ *
+ * 375px 에서는 2열이 무너지므로 세로로 쌓습니다 — 좁은 화면에서 억지로
+ * 두 열을 유지하면 값이 두 줄씩 접혀 오히려 대조가 사라집니다.
+ */
+.compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px 40px;
+  margin-top: 26px;
+}
+@media (max-width: 560px) {
+  .compare {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+}
+.compare__head {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-border);
+}
+.compare__list {
+  margin: 0;
+}
+.compare__row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: baseline;
+  padding-block: 11px;
+  border-bottom: 1px solid var(--color-border);
+}
+.compare__row dt {
+  font-size: 14px;
+}
+/* 확정된 값은 모노스페이스로 — 숫자와 규격이라는 것이 서체로도 읽힙니다. */
+.compare__value {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+/* 미확정 칸에 들어가는 것은 값이 아니라 **무엇을 기다리는지** 입니다.
+   그래서 모노스페이스를 쓰지 않고, 옅은 색으로 상태임을 드러냅니다. */
+.compare__wait {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  text-align: right;
+}
+.compare__note {
+  margin-top: 18px;
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  max-width: var(--size-measure);
 }

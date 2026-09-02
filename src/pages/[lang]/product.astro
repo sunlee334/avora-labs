@@ -13,6 +13,7 @@ import waterImage from '../../assets/images/water-droplets.jpg';
 import { LOCALES, BUSINESS, type Locale } from '../../config/site';
 import { dict, localePath } from '../../i18n';
 import { breadcrumb, productSchema } from '../../lib/jsonld';
+import { specRows } from '../../lib/spec';
 import productData from '../../data/product.json';
 import LaunchNotify from '../../components/LaunchNotify.astro';
 import { SELLS_DIRECTLY, EXTERNAL_STORE_URL, CAN_ORDER, PRICE, CURRENCY } from '../../config/runtime';
@@ -78,26 +79,12 @@ const priceLabel =
 /*
  * 스펙.
  *
- * 기획안이 값을 정해 준 항목이라도 **아직 확정은 아닙니다.** 공장 처방
- * 선정은 2026년 9~10월이고, 기능성화장품은 심사·보고 절차가 남아 있습니다.
- * 심사 전에 차단지수를 확정 사실로 적으면 표시·광고 문제가 됩니다.
- * 그래서 정해진 값은 보여주되 `target` 인 것은 "목표" 를 달아 둡니다.
- *
- * 제형은 값 자체를 비웠습니다(null → "확정 예정"). 기획안 4장이 로션·밀크로
- * 적어 두긴 했지만 같은 장의 각주가 처방 선정 전이라고 못박고 있고, 실제로
- * 이 사이트는 한때 홈에서 "워터리 젤", 스펙표에서 "로션·밀크" 라고 **동시에**
- * 말하고 있었습니다. 고르기 전에는 고르는 중이라고 적는 편이 맞습니다.
+ * 어느 항목이 확정이고 어느 것이 아직 아닌지는 `src/lib/spec.ts` 가 정합니다.
+ * 홈의 확정/미확정 대조표가 같은 판정을 쓰므로, 두 화면이 다른 말을 할 수
+ * 없습니다 — 한때 홈에서 "워터리 젤", 여기서 "로션·밀크" 라고 동시에 말한
+ * 적이 있습니다.
  */
-const specRows = [
-  { key: p.spec.labels.protection, value: productData.spec.protection, target: true },
-  { key: p.spec.labels.texture, value: null, target: true },
-  { key: p.spec.labels.waterResistant, value: p.spec.values.waterResistant, target: true },
-  { key: p.spec.labels.volume, value: productData.spec.volume, target: false },
-  { key: p.spec.labels.scent, value: p.spec.values.scent, target: false },
-  { key: p.spec.labels.tone, value: p.spec.values.tone, target: false },
-  { key: p.spec.labels.area, value: p.spec.values.area, target: false },
-  { key: p.spec.labels.category, value: p.spec.values.category, target: false },
-];
+const rows = specRows(t);
 ---
 
 <Base
@@ -220,7 +207,7 @@ const specRows = [
     <p class="kicker">{p.spec.kicker}</p>
     <div class="spec">
       {
-        specRows.map((row) => (
+        rows.map((row) => (
           <div class="spec__row">
             <p class="spec__key">{row.key}</p>
             <p class={`spec__value${row.value ? '' : ' spec__value--pending'}`}>

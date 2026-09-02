@@ -230,7 +230,20 @@
       "kicker": "First Product",
       "name": "Daily Sunscreen",
       "spec": "SPF50+ / PA++++ · 50ml 软管",
-      "cta": "查看产品"
+      "cta": "查看产品",
+      "table": {
+        "confirmed": "已确定",
+        "pending": "尚未确定",
+        "container": "容器",
+        "waits": {
+          "protection": "功能性审查后",
+          "texture": "检验团统计后",
+          "waterResistant": "取得试验报告后",
+          "container": "容器下单后"
+        },
+        "note": "尚未确定的项目就写作尚未确定。2026 年 12 月检验团统计结束后填入此表。",
+        "why": "因为这是在不断移动的一天里，需要最频繁、最多次重新涂抹的产品。"
+      }
     },
     "notify": {
       "hero": {

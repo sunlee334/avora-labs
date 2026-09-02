@@ -230,7 +230,20 @@
       "kicker": "First Product",
       "name": "Daily Sunscreen",
       "spec": "SPF50+ / PA++++ · 50ml tube",
-      "cta": "View product"
+      "cta": "View product",
+      "table": {
+        "confirmed": "Settled",
+        "pending": "Not settled yet",
+        "container": "Container",
+        "waits": {
+          "protection": "after functional review",
+          "texture": "after the panel tally",
+          "waterResistant": "after the test report",
+          "container": "after the tube order"
+        },
+        "note": "What is not settled is written as not settled. We fill this table in once the panel tally closes in December 2026.",
+        "why": "Because it is the product you reapply most often, and most times, in a day that keeps moving."
+      }
     },
     "notify": {
       "hero": {

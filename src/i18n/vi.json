@@ -230,7 +230,20 @@
       "kicker": "First Product",
       "name": "Daily Sunscreen",
       "spec": "SPF50+ / PA++++ · Tuýp 50ml",
-      "cta": "Xem sản phẩm"
+      "cta": "Xem sản phẩm",
+      "table": {
+        "confirmed": "Đã xác định",
+        "pending": "Chưa xác định",
+        "container": "Bao bì",
+        "waits": {
+          "protection": "sau thẩm định chức năng",
+          "texture": "sau khi tổng hợp điểm",
+          "waterResistant": "sau khi có báo cáo thử nghiệm",
+          "container": "sau khi đặt vỏ"
+        },
+        "note": "Những mục chưa xác định thì chúng tôi ghi là chưa xác định. Bảng này sẽ được điền khi việc tổng hợp điểm kết thúc vào tháng 12 năm 2026.",
+        "why": "Vì đây là sản phẩm phải thoa lại thường xuyên nhất và nhiều lần nhất trong một ngày luôn chuyển động."
+      }
     },
     "notify": {
       "hero": {
