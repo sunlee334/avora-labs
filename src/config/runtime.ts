@@ -91,3 +91,109 @@ export const ACCOUNTS_ENABLED =
     ? import.meta.env.PUBLIC_ACCOUNTS === 'on'
     : commerceConfig.accounts.enabled;
 
+
+/**
+ * 결제창을 띄울 PG 의 클라이언트 키. 없으면 null.
+ *
+ * ── 왜 이 값이 공개 상수인가 ────────────────────────────────
+ * 토스페이먼츠 주문서형의 클라이언트 키(`test_gck_` / `live_gck_`)는 **브라우저에 그대로
+ * 나가는 값** 입니다(문서: reference/using-api/authorization). 결제창을 여는
+ * 데 쓰이고, 승인은 서버가 시크릿 키로 따로 합니다. 그래서 저장소에 커밋해도
+ * 되고, 커밋하는 편이 낫습니다 — 어느 환경이 켜져 있는지가 코드에 남습니다.
+ *
+ * ⚠️ 시크릿 키(`test_gsk_` / `live_gsk_`)는 **여기에 절대 오지 않습니다.**
+ *    워커 환경변수로만 들어가고(`wrangler secret put TOSS_SECRET_KEY`),
+ *    `payment-secrets.spec.ts` 가 저장소에 새어 들어오는지 지킵니다.
+ *
+ * ── 비어 있으면 무슨 일이 일어나는가 ────────────────────────
+ * 결제창 SDK 를 아예 불러오지 않습니다. 체크아웃은 주문만 만들고 완료
+ * 화면으로 넘어갑니다 — 계약 전에도 주문 생성·승인 흐름 전체를 돌려볼 수
+ * 있게 하려는 것입니다. 키가 들어오는 순간 결제창이 그 사이에 낍니다.
+ *
+ *   PUBLIC_TOSS_CLIENT_KEY=test_gck_xxx npm run build
+ *
+ * 다른 오버라이드와 같은 규칙입니다 — 실제로 켤 때는 환경변수가 아니라
+ * `payment-config.json` 을 고치세요.
+ */
+const providerConfig = 'provider' in country ? country.provider : null;
+const clientKeyOverride = import.meta.env.PUBLIC_TOSS_CLIENT_KEY as string | undefined;
+
+/**
+ * 클라이언트 키의 생김새. 주문서형은 `gck`, API 개별 연동은 `ck` 입니다.
+ *
+ * ⚠️ **이 검사가 없으면 환경변수로 시크릿을 배포할 수 있습니다.**
+ *
+ * `payment-secrets.spec.ts` 는 저장소 파일만 훑습니다. 그래서 설정 파일은
+ * 지켜지지만 `PUBLIC_TOSS_CLIENT_KEY=test_gsk_… npm run build` 는 아무
+ * 저항 없이 지나가고, 시크릿이 **모든 HTML 에** 실려 나갑니다. 저장소
+ * 스캔은 `dist` 를 건너뛰므로 그것도 잡지 못합니다.
+ *
+ * 그래서 빌드를 멈춥니다. 잘못된 키로 배포되는 것보다 배포가 안 되는 편이
+ * 낫습니다.
+ */
+/*
+ * ⚠️ `g` 는 **선택이 아닙니다.**
+ *
+ * 처음에는 `g?` 로 두어 `test_ck_`(API 개별 연동 키)도 통과시켰습니다. 그런데
+ * SDK 번들이 그 키를 명시적으로 거부합니다 — 안에 이 문장이 들어 있습니다:
+ *
+ *   "주문서형, 결제창형 연동 키의 클라이언트 키로 SDK를 연동해주세요.
+ *    API 개별 연동 키는 지원하지 않습니다."   (NOT_SUPPORTED_API_INDIVIDUAL_KEY)
+ *
+ * 즉 헐거운 정규식이 **막으려던 실수를 그대로 통과시키고**, 오류 문구는
+ * 심지어 그걸 정상이라고 안내하고 있었습니다. 개발자센터에서 키를 잘못
+ * 골라 복사하면 빌드는 통과하고 배포도 되지만, 라이브 전환일에 결제수단이
+ * 뜨지 않습니다.
+ *
+ * 주문서형을 쓰는 한 `gck` 만 받습니다.
+ */
+const CLIENT_KEY = /^(test|live)_gck_[A-Za-z0-9]+$/;
+
+function checkedClientKey(value: string, where: string): string {
+  if (CLIENT_KEY.test(value)) return value;
+  throw new Error(
+    `[runtime] ${where} 의 값이 주문서형 클라이언트 키가 아닙니다: ${value.slice(0, 12)}…\n` +
+      '주문서형·결제창형 연동 키는 test_gck_ / live_gck_ 로 시작합니다.\n' +
+      'API 개별 연동 키(test_ck_ / live_ck_)는 SDK 가 거부합니다 — 빌드는 되지만 위젯이 뜨지 않습니다.\n' +
+      '시크릿 키(test_gsk_ / live_gsk_)라면 지금 개발자센터에서 재발급하고, ' +
+      'npx wrangler secret put TOSS_SECRET_KEY 로만 넣으세요.',
+  );
+}
+
+/*
+ * 끄는 신호는 **`off` 라고 적습니다.**
+ *
+ * 처음에는 빈 문자열을 "끄라" 로 읽었습니다. 그런데 빈 환경변수는 **실수로
+ * 만들어지기 쉽습니다** — CI 변수를 비워 두거나 러너에 `.env` 가 생기면
+ * 됩니다. 그러면 운영 빌드가 조용히 결제를 끄고, 아무 검사도 빨개지지
+ * 않습니다. 반대로 `off` 라는 글자는 손으로 적어야만 나옵니다.
+ *
+ * 이 스위치가 필요한 이유: 설정 파일에 테스트 키가 들어가면서, 그대로
+ * 빌드하면 E2E 의 체크아웃 검사들이 **실제 토스 SDK 를 부릅니다.**
+ * `playwright.config.ts` 가 `off` 를 넘겨 그것을 막습니다.
+ */
+const WIDGET_OFF = 'off';
+
+export const TOSS_CLIENT_KEY: string | null =
+  clientKeyOverride === WIDGET_OFF
+    ? null
+    : clientKeyOverride
+      ? checkedClientKey(clientKeyOverride, 'PUBLIC_TOSS_CLIENT_KEY')
+      : providerConfig?.clientKey
+        ? checkedClientKey(providerConfig.clientKey, 'payment-config.json 의 provider.clientKey')
+        : null;
+
+/*
+ * 설정에는 키가 있는데 이 빌드에서 꺼졌다면 **소리를 냅니다.**
+ *
+ * 조용히 꺼진 빌드는 체크아웃을 "계약 전" 갈래로 흘려보냅니다. 그 갈래는
+ * 완료 화면으로 넘기므로, 결제 없이 주문이 접수된 것처럼 보입니다.
+ * 의도한 것이라면 로그 한 줄은 값싸고, 의도하지 않았다면 이 줄이 유일한
+ * 단서입니다.
+ */
+if (providerConfig?.clientKey && TOSS_CLIENT_KEY === null) {
+  console.warn(
+    '[runtime] payment-config.json 에 클라이언트 키가 있는데 이 빌드에서는 꺼졌습니다 ' +
+      `(PUBLIC_TOSS_CLIENT_KEY=${WIDGET_OFF}). 결제위젯 없이 빌드됩니다.`,
+  );
+}

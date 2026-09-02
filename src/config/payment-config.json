@@ -11,6 +11,13 @@
       "sellable": true,
       "checkout": "external",
       "externalStoreUrl": "",
+      "provider": {
+        "$comment": "결제창을 띄우는 PG. clientKey 가 비어 있으면 SDK 를 아예 불러오지 않고, 체크아웃은 결제창 없이 완료 화면으로 넘어갑니다 — 계약 전에도 흐름 전체를 돌려볼 수 있게 하려는 것입니다.",
+        "$keyNote": "clientKey 는 주문서형 기준 test_gck_ 또는 live_gck_ 로 시작하며 브라우저에 그대로 나갑니다(문서: reference/using-api/authorization). 공개되어도 되는 값이라 저장소에 커밋합니다 — 무엇이 켜져 있는지가 코드에 남아야 합니다. 시크릿 키(test_gsk_ / live_gsk_)는 절대 여기에 넣지 마세요. wrangler secret put TOSS_SECRET_KEY 로만 넣습니다.",
+        "$blockedBy": "지금은 **테스트 키**입니다. 라이브 키(live_gck_)는 상점 개설·계약과 결제수단 심사 뒤에 나옵니다.",
+        "name": "tosspayments",
+        "clientKey": "test_gck_KNbdOvk5rkawk6YKd6643n07xlzm"
+      },
       "methods": [
         {
           "code": "card",

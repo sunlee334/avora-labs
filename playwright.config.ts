@@ -16,10 +16,21 @@ const MODE = (process.env.E2E_MODE ?? 'commerce') as 'commerce' | 'launch';
 /** 문턱을 직접 두드리는 테스트가 자기 요청 컨텍스트를 만들 때 씁니다. */
 export const PORT = 8787;
 
+/*
+ * ⚠️ `PUBLIC_TOSS_CLIENT_KEY=off` 가 붙는 이유.
+ *
+ * `payment-config.json` 에 토스 테스트 클라이언트 키가 들어 있습니다. 그대로
+ * 빌드하면 체크아웃이 **실제 토스 SDK 를 불러 결제위젯을 띄웁니다** — 검사가
+ * 외부 서비스에 매달리고, 위젯이 뜨느라 완료 화면으로 넘어가지 않아 기존
+ * 체크아웃 검사들이 깨집니다.
+ *
+ * `off` 는 "이 빌드에는 키를 넣지 마라" 라는 뜻입니다(`src/config/runtime.ts`).
+ * 위젯 자체는 `toss-widget.spec.ts` 가 응답 HTML 에 키를 끼워 넣어 확인합니다.
+ */
 const buildEnv =
   MODE === 'commerce'
-    ? 'PUBLIC_CHECKOUT_MODE=internal PUBLIC_PRODUCT_PRICE=32000 PUBLIC_ACCOUNTS=on'
-    : 'PUBLIC_CHECKOUT_MODE=external';
+    ? 'PUBLIC_CHECKOUT_MODE=internal PUBLIC_PRODUCT_PRICE=32000 PUBLIC_ACCOUNTS=on PUBLIC_TOSS_CLIENT_KEY=off'
+    : 'PUBLIC_CHECKOUT_MODE=external PUBLIC_TOSS_CLIENT_KEY=off';
 
 /** commerce 모드 관리 API 테스트가 쓰는 열쇠. 로컬·CI 안에서만 존재합니다. */
 export const ADMIN_DEV_TOKEN = 'e2e-admin-token';
