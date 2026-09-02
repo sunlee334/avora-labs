@@ -1,6 +1,24 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { LOCALES } from '../../src/config/site';
+import ko from '../../src/i18n/ko.json' with { type: 'json' };
+import en from '../../src/i18n/en.json' with { type: 'json' };
+import zh from '../../src/i18n/zh.json' with { type: 'json' };
+import th from '../../src/i18n/th.json' with { type: 'json' };
+import vi from '../../src/i18n/vi.json' with { type: 'json' };
+
+/*
+ * 언어별 사전. 다섯이 **구조는 같지만 타입은 다릅니다** — 리터럴 문자열
+ * 타입이 값마다 달라서, `Record<string, typeof ko>` 로 단언하면 tsc 가
+ * "겹치지 않는 타입" 이라며 거부합니다.
+ *
+ * 여기서 필요한 것은 머리말 문자열 하나뿐이라, 사전 전체의 타입을 맞추는
+ * 대신 **그 값만 꺼내는 함수** 를 둡니다.
+ */
+const DICTS: Record<string, { brand: Record<string, unknown> }> = { ko, en, zh, th, vi };
+
+const kickerOf = (dict: { brand: Record<string, unknown> }, key: string) =>
+  (dict.brand[key] as { kicker: string }).kicker.toUpperCase();
 
 /**
  * 브랜드 페이지.
@@ -12,8 +30,30 @@ import { LOCALES } from '../../src/config/site';
  */
 
 /** 여덟 자리. 순서가 곧 이야기의 순서입니다. */
-const ORDER = ['ORIGIN', 'THE QUESTION', 'THE NAME', 'BRAND CODES', 'WHO IT IS FOR',
-               'PHILOSOPHY', 'AVORA LABS', 'BRAND MESSAGE'];
+/*
+ * 브랜드 페이지의 자리 순서.
+ *
+ * 여덟이었다가 **사실을 담은 세 섹션이 사이에 들어와** 열하나가 됐습니다.
+ * 기존 여덟은 하나도 지우지 않았습니다 — 지시서가 "글이 좋다. 사이에 넣는다"
+ * 고 못 박았고, 새 자리는 각각 맥락이 있는 곳에 붙습니다:
+ *
+ *   만든 사람      The Question 뒤   — 왜 이 질문을 던졌는지 물으면 사람이 나온다
+ *   표기          The Name 뒤       — 이름을 말한 직후가 혼동을 푸는 자리다
+ *   어떻게 만드는가  Brand Codes 뒤    — 코드를 말한 다음이 방법을 말할 자리다
+ */
+/*
+ * ⚠️ 문구를 여기 베껴 적으면 **언어마다 다른 값** 을 하나로 못 박게 됩니다.
+ * 처음에 한국어 값을 적었다가 영어판에서 깨졌습니다 — 라틴 머리말은 다섯
+ * 언어가 같지만(`ORIGIN`), 새로 넣은 셋은 번역되기 때문입니다.
+ *
+ * 자리 순서는 **키** 로 못 박고 문구는 그 언어의 사전에서 가져옵니다.
+ */
+const ORDER_KEYS = ['origin', 'question', 'maker', 'island', 'naming',
+                    'elements', 'how', 'audience',
+                    'philosophy', 'company', 'message'] as const;
+
+const orderFor = (dict: { brand: Record<string, unknown> }) =>
+  ORDER_KEYS.map((key) => kickerOf(dict, key));
 
 async function bands(page: import('@playwright/test').Page) {
   return page.locator('section').evaluateAll((nodes) => {
@@ -33,7 +73,7 @@ test.describe('브랜드 페이지', () => {
       const kickers = await page
         .locator('.kicker')
         .evaluateAll((els) => els.map((e) => e.textContent?.trim().toUpperCase() ?? ''));
-      expect(kickers, `${locale} 브랜드 페이지 구성이 다릅니다`).toEqual(ORDER);
+      expect(kickers, `${locale} 브랜드 페이지 구성이 다릅니다`).toEqual(orderFor(DICTS[locale]));
     }
   });
 

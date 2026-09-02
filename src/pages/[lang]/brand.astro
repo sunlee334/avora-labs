@@ -19,6 +19,7 @@ import Base from '../../layouts/Base.astro';
 import { BUSINESS, LOCALES, type Locale } from '../../config/site';
 import { dict, localePath } from '../../i18n';
 import { breadcrumb } from '../../lib/jsonld';
+import { FOUNDER_STORY } from '../../config/company';
 
 export function getStaticPaths() {
   return LOCALES.map((lang) => ({ params: { lang } }));
@@ -27,6 +28,15 @@ export function getStaticPaths() {
 const locale = Astro.params.lang as Locale;
 const t = dict(locale);
 const b = t.brand;
+
+/*
+ * 창업 이야기. 담당자 원고가 오기 전까지 비어 있고, 비어 있으면 그 자리에
+ * 기다린다고 적습니다 — 홈의 `[2] 만든 사람` 과 같은 출처를 씁니다.
+ *
+ * 지시서는 여기가 홈보다 **길어야** 한다고 했습니다(홈은 요약, 브랜드는 본문).
+ * 원고가 하나뿐인 지금은 같은 값을 씁니다. 두 벌이 오면 설정에서 갈립니다.
+ */
+const founderStory = FOUNDER_STORY[locale] ?? null;
 ---
 
 <Base
@@ -110,6 +120,24 @@ const b = t.brand;
   </section>
 
   {/*
+    만든 사람.
+
+    **브랜드 페이지에 사람이 없었습니다.** 회사 이야기인데 형용사만 있습니다.
+
+    ⚠️ 이름·사진·창업 배경은 **담당자에게 받아야 하는 것** 이고 아직 오지
+    않았습니다(`src/config/company.ts`). 지어내지 않고 자리만 둡니다 —
+    홈의 요약본과 같은 원고를 쓰되, 여기는 본문이라 더 깁니다.
+
+    값이 오면 이 문단이 나타납니다. 그때까지는 기다린다고 적습니다.
+  */}
+  <section class="section section--alt wrap wrap--narrow rise">
+    <h2 class="kicker">{b.maker.kicker}</h2>
+    {founderStory
+      ? <p class="body" style="margin-top: 26px">{founderStory}</p>
+      : <p class="blocks__awaiting" style="margin-top: 26px">{t.home.company.awaiting}</p>}
+  </section>
+
+  {/*
     The Name — 섬의 의미.
 
     예전에는 The Question 의 마지막 문단이 이름의 유래를 한 문장으로 처리했습니다.
@@ -127,6 +155,20 @@ const b = t.brand;
     <p class="body" style="margin-top: 18px">{b.island.attitude}</p>
     <p class="body" style="margin-top: 18px">{b.island.stance}</p>
     <p class="body" style="margin-top: 18px">{b.island.note}</p>
+  </section>
+
+  {/*
+    표기.
+
+    검색엔진과 답변엔진이 브랜드를 **그리스 섬과 혼동하는 문제** 에 대응합니다.
+    `src/lib/jsonld.ts` 가 `@id` 로 기계에게 하는 말을, 여기서는 사람 말로
+    합니다 — 같은 목적을 다른 층에서 합니다.
+  */}
+  <section class="section section--attach wrap wrap--narrow rise">
+    <h2 class="kicker">{b.naming.kicker}</h2>
+    {b.naming.body.map((para) => (
+      <p class="body" style="margin-top: 22px">{para}</p>
+    ))}
   </section>
 
   {/*
@@ -151,6 +193,23 @@ const b = t.brand;
       }
     </dl>
     <p class="body" style="margin-top: 24px">{b.elements.note}</p>
+  </section>
+
+  {/*
+    어떻게 만드는가.
+
+    이 브랜드의 명제를 가장 직접적으로 말하는 자리입니다 — "저희가 더하는
+    것은 성분이 아니라 선별입니다." 그리고 그 선별이 무엇인지 보려면
+    배점표로 가야 하므로 `/panel` 로 잇습니다.
+  */}
+  <section class="section wrap wrap--narrow rise">
+    <h2 class="kicker">{b.how.kicker}</h2>
+    {b.how.body.map((para) => (
+      <p class="body" style="margin-top: 22px">{para}</p>
+    ))}
+    <p style="margin-top: 30px">
+      <a class="tapLink" href={localePath(locale, 'panel')}>{b.how.cta}</a>
+    </p>
   </section>
 
   {/*
