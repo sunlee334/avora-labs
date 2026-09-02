@@ -4390,3 +4390,28 @@ a {
   color: var(--color-text-muted);
   max-width: var(--size-measure);
 }
+
+/* ── 회사 소개의 세 블록 ────────────────────────────────────
+ *
+ * 회사 · 만든 사람 · 규모. 뒤의 둘은 담당자 원고를 기다리는 자리라, 값이
+ * 없으면 이름표만 남고 아래에 기다린다는 한 줄이 옵니다.
+ *
+ * ⚠️ 회색 플레이스홀더 상자를 놓지 않습니다(지시서 D5). 빈 사각형은 사진이
+ * 없는 것보다 허전해 보이고, 무엇을 기다리는지도 말해 주지 않습니다.
+ */
+.blocks {
+  display: grid;
+  gap: 26px;
+  margin-top: 26px;
+}
+.blocks__label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  margin-bottom: 8px;
+}
+.blocks__awaiting {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}

@@ -125,6 +125,13 @@
       "kicker": "AVORA LABS",
       "lead": "我们为行动中的人创造品牌。",
       "body": "PAROS 是 AVORA LABS 打造的第一个品牌。名字来自爱琴海的一座岛屿，为所有在动的人而做，不只是运动员。",
+      "etymology": "AVORA 由代表活动主体的 Athlete · Active 的 A，与代表肌肤本身生气的 Vitality & Aura 的 VORA 组合而成。",
+      "blocks": {
+        "company": "公司",
+        "founder": "创办的人",
+        "scale": "规模"
+      },
+      "awaiting": "正在等待负责人的文稿。",
       "instagram": "Instagram"
     },
     "faq": {

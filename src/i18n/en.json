@@ -125,6 +125,13 @@
       "kicker": "AVORA LABS",
       "lead": "We create brands for people in motion.",
       "body": "PAROS is the first brand from AVORA LABS. It takes its name from an island in the Aegean, and it is made for anyone who moves — not only athletes.",
+      "etymology": "AVORA joins the A of Athlete and Active — the one who moves — with the VORA of Vitality and Aura, the skin’s own liveliness.",
+      "blocks": {
+        "company": "The company",
+        "founder": "The people",
+        "scale": "The size"
+      },
+      "awaiting": "Waiting on copy from the team.",
       "instagram": "Instagram"
     },
     "faq": {

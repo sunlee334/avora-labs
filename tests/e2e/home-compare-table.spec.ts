@@ -127,3 +127,50 @@ test.describe('다섯 언어', () => {
     });
   }
 });
+
+test.describe('회사 소개가 기다리는 것을 숨기지 않는다', () => {
+  /*
+   * 창업 배경과 팀 규모는 담당자가 주어야 하는 것이고 아직 오지 않았습니다.
+   * 지시서 B2 는 문안 초안까지 줬지만, **같은 문서의 확인 항목이** 설립
+   * 연도와 팀 규모 공개 여부를 담당자 몫으로 남겼습니다.
+   *
+   * 그래서 자리를 만들되 값은 비워 둡니다. 섹션을 통째로 숨기면 그 자리가
+   * 있어야 한다는 사실 자체를 잊습니다 — 푸터의 통신판매업 번호가 오랫동안
+   * 비어 있던 방식과 같은 판단입니다.
+   */
+  test('세 블록이 이름표를 갖는다', async ({ page }) => {
+    await page.goto('/ko/');
+    const labels = await page.locator('.blocks__label').allInnerTexts();
+    expect(labels.map((s) => s.trim())).toEqual([
+      ko.home.company.blocks.company,
+      ko.home.company.blocks.founder,
+      ko.home.company.blocks.scale,
+    ]);
+  });
+
+  test('원고가 없는 블록은 기다린다고 말한다 — 회색 상자를 놓지 않는다', async ({ page }) => {
+    await page.goto('/ko/');
+    const awaiting = page.locator('.blocks__awaiting');
+    await expect(awaiting, '기다린다는 표시가 없습니다').not.toHaveCount(0);
+    for (const text of await awaiting.allInnerTexts()) {
+      expect(text.trim(), '빈 자리표가 있습니다').toBe(ko.home.company.awaiting);
+    }
+  });
+
+  test('없는 사실을 지어내지 않았다', async ({ page }) => {
+    /*
+     * 지시서가 준 초안 문구가 화면에 나가면 안 됩니다 — 확인되기 전까지는.
+     * 설립 연도와 팀 규모 둘 다입니다.
+     */
+    await page.goto('/ko/');
+    const body = await page.locator('main').innerText();
+    expect(body, '설립 연도가 확인 전에 나갔습니다').not.toMatch(/2026년\s*서울/);
+    expect(body, '팀 규모가 확인 전에 나갔습니다').not.toContain('두 사람이 시작');
+  });
+
+  test('브랜드 이름 풀이는 나온다', async ({ page }) => {
+    // 이것은 지시서가 문안까지 제공한 것이라 지어낸 것이 아닙니다.
+    await page.goto('/ko/');
+    await expect(page.locator('main')).toContainText('Vitality');
+  });
+});

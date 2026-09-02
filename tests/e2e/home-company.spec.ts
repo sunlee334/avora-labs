@@ -47,12 +47,34 @@ test.describe('회사 소개', () => {
       expect(images, `${locale} 사진 설정은 ${FOUNDER_PHOTO} 인데 img 가 ${images}개입니다`)
         .toBe(FOUNDER_PHOTO ? 1 : 0);
 
-      // 창업 이야기: 설정에 없으면 그 문단이 없어야 합니다.
+      /*
+       * 창업 이야기: 설정에 없으면 그 이야기가 화면에 없어야 합니다.
+       *
+       * ⚠️ 처음에는 섹션 전체의 `p.body` **개수** 를 셌습니다. 그런데 그것은
+       * 창업 이야기와 무관한 문단이 늘면 함께 깨지는 대리 지표였고, 실제로
+       * 회사 블록에 브랜드 이름 풀이가 붙자 깨졌습니다 — **화면은 옳은데
+       * 검사만 틀린** 상태입니다.
+       *
+       * 지키려는 것은 "설정이 비면 그 자리에 이야기가 없다" 이므로, 세는 대신
+       * **그 블록** 을 봅니다.
+       */
       const story = FOUNDER_STORY[locale];
-      const paragraphs = await section.locator('p.body').count();
-      expect(paragraphs, `${locale} 창업 이야기 문단 수가 설정과 어긋납니다`).toBe(story ? 2 : 1);
+      const founderBlock = section.locator('.blocks__item').nth(1);
+      await expect(founderBlock, `${locale} 만든 사람 블록이 없습니다`).toHaveCount(1);
+
       if (story) {
-        expect(await section.innerText(), `${locale} 설정한 이야기가 화면에 없습니다`).toContain(story);
+        await expect(founderBlock, `${locale} 설정한 이야기가 화면에 없습니다`).toContainText(story);
+        await expect(
+          founderBlock.locator('.blocks__awaiting'),
+          `${locale} 이야기가 있는데도 기다린다고 적혀 있습니다`,
+        ).toHaveCount(0);
+      } else {
+        // 비어 있으면 이야기 문단이 아니라 "기다리고 있습니다" 한 줄만 남습니다.
+        await expect(
+          founderBlock.locator('p.body'),
+          `${locale} 설정이 비었는데 이야기 문단이 있습니다`,
+        ).toHaveCount(0);
+        await expect(founderBlock.locator('.blocks__awaiting')).toHaveCount(1);
       }
     }
   });
