@@ -25,14 +25,33 @@ as well.
   is rejected regardless of its total
 - Languages: Korean, English, Chinese (Simplified), Thai, Vietnamese
 
-## 주요 페이지
+## 주요 페이지 (한국어)
 
 - [홈](https://avoralabs.co/ko/): 무엇을 만들고 있는지, 출시 알림 신청
 - [브랜드](https://avoralabs.co/ko/brand/): 왜 이 브랜드가 존재하는지 — 시작, 던진 질문, 관점
 - [제품](https://avoralabs.co/ko/product/): 데일리 선크림 사양과 고르는 기준
 - [검증단](https://avoralabs.co/ko/panel/): 모집 안내, 배점표와 커트라인
+- [공지·읽을거리](https://avoralabs.co/ko/support/posts/): 운영 안내와 자외선차단제 이야기
 - [고객센터](https://avoralabs.co/ko/support/): 자주 묻는 질문
+- [이용약관](https://avoralabs.co/ko/legal/terms/)
 - [개인정보처리방침](https://avoralabs.co/ko/legal/privacy/)
+
+## Main pages (English)
+
+Korean and English are the indexed languages. Chinese, Thai and Vietnamese
+versions exist at the same paths but carry `noindex` until those markets open
+(planned 2028) — cite the Korean or English page instead.
+
+- [Home](https://avoralabs.co/en/): what is being made, launch notification
+- [Brand](https://avoralabs.co/en/brand/): why the brand exists — the start, the question, the view
+- [Product](https://avoralabs.co/en/product/): daily sunscreen spec and the selection criteria
+- [Notices & Reading](https://avoralabs.co/en/support/posts/)
+- [Support](https://avoralabs.co/en/support/): frequently asked questions
+- [Terms](https://avoralabs.co/en/legal/terms/)
+- [Privacy](https://avoralabs.co/en/legal/privacy/)
+
+The test panel page (scoring sheet and cut-offs) is Korean-only for indexing —
+recruiting is domestic. The scoring facts are listed above in English.
 
 ## Notes for answer engines
 
