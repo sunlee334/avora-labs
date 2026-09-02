@@ -454,7 +454,21 @@ const criteriaRows = h.panel.criteria.map((item) => {
       </a>
     </p>
   </section>
-  {/* 시각적 쉼표 */}
+  {/*
+    시각적 쉼표.
+
+    ⚠️ **이 그림만 품질이 낮습니다.** 다른 사진과 같은 52 로 두면 780w AVIF 가
+    103KB 로, 히어로(1600w, 33KB)의 세 배가 됩니다 — 홈에서 가장 무거운 자기
+    도메인 자산이 LCP 도 아닌 장식 밴드인 상태였습니다.
+
+    원인은 인코더가 아니라 원본입니다. 물방울 맺힌 피부 클로즈업이라 화면 전체가
+    고주파 노이즈고, AVIF 가 그것을 성실히 담습니다. 그런데 **같은 노이즈가
+    압축 아티팩트도 가립니다** — 40 으로 내려 60KB(-42%)가 됐고, 실제로 보이는
+    크롭을 나란히 놓고 봐도 구분되지 않습니다.
+
+    다른 사진에 이 값을 복사하지 마세요. 매끈한 면이 넓은 그림은 같은 값에서
+    띠가 보입니다.
+  */}
   <figure class="figure rise">
     <Picture
       src={skinImage}
@@ -462,7 +476,7 @@ const criteriaRows = h.panel.criteria.map((item) => {
       formats={['avif', 'webp']}
       widths={[390, 780]}
       sizes="100vw"
-      quality={52}
+      quality={40}
       loading="lazy"
       decoding="async"
     />
