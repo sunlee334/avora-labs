@@ -55,16 +55,48 @@ export const SITEMAP_EXCLUDED = [
 export const SITEMAP_KO_ONLY = ['/panel'] as const;
 
 /**
+ * 후기가 존재할 수 없는 동안에는 사이트맵에서 뺄 경로.
+ *
+ * ── 내비는 이미 같은 판정을 하고 있었습니다 ─────────────────
+ * `nav.ts` 의 리뷰 항목에 `gate: 'checkout'` 이 붙어 있고, 그 주석이 이유를
+ * 적어 두었습니다 — "후기는 결제된 주문에서만 생긴다. 자사 결제가 꺼져 있으면
+ * 후기가 존재할 수 없어, 이 항목은 언제 눌러도 빈 페이지로 간다. 빈 상태
+ * 문구가 잘 쓰여 있어도 빈 페이지는 빈 페이지다."
+ *
+ * 그런데 사이트맵은 그 판정을 하지 않아서, 결제가 꺼진 빌드에서도 빈 후기
+ * 페이지 두 개(ko·en)가 **색인해 달라고 제출되고** 있었습니다. 색인하지 않는
+ * 언어를 사이트맵에서 빼는 것과 같은 이유입니다 — 갱신되지 않는 얇은 페이지가
+ * 색인되면 사이트 전체의 품질 신호를 끌어내립니다.
+ *
+ * 페이지는 그대로 둡니다. 제품 페이지에서 계속 갈 수 있고, 결제가 켜지는
+ * 순간 사이트맵에도 저절로 돌아옵니다.
+ */
+export const SITEMAP_WHEN_SELLING = ['/reviews'] as const;
+
+/**
  * 이 주소를 사이트맵에 넣을 것인가.
  *
  * `astro.config.ts` 의 filter 가 이것을 씁니다. 판정을 설정 파일이 아니라
  * 여기 두는 이유는 위 두 배열과 규칙이 한 파일에 모여 있어야 나중에 셋이
  * 따로 놀지 않기 때문입니다.
  */
-export function inSitemap(url: string, indexedLocales: readonly string[]): boolean {
+export function inSitemap(
+  url: string,
+  indexedLocales: readonly string[],
+  /**
+   * 자사 결제가 켜져 있는가. 꺼져 있으면 후기가 존재할 수 없습니다.
+   *
+   * 값을 import 하지 않고 **받는** 이유는 이 파일의 다른 인자와 같습니다 —
+   * `astro.config.mjs` 와 `scripts/check-slugs.mjs` 가 함께 쓰는데, 후자는
+   * Node 가 직접 읽으므로 `import.meta.env` 를 타는 모듈을 물릴 수 없습니다.
+   */
+  sellsDirectly = true,
+): boolean {
   if (SITEMAP_EXCLUDED.some((excluded) => url.includes(excluded))) return false;
   // 한국어판만 넣는 경로는 `/ko/` 를 지나야 통과합니다.
   if (SITEMAP_KO_ONLY.some((path) => url.includes(path))) return url.includes('/ko/');
+  // 팔지 않는 동안에는 후기가 있을 수 없으므로 색인을 요청하지 않습니다.
+  if (!sellsDirectly && SITEMAP_WHEN_SELLING.some((path) => url.includes(path))) return false;
   /*
    * 아직 색인하지 않는 언어는 사이트맵에도 넣지 않습니다. 넣으면 사이트맵은
    * "색인해 달라", 페이지는 "하지 말라" 고 서로 다른 말을 하게 됩니다 —

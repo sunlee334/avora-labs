@@ -4,8 +4,35 @@ import { satteri } from '@astrojs/markdown-satteri';
 import { hastTableScroll } from './src/hast/table-scroll';
 import { ORIGIN, LOCALES, DEFAULT_LOCALE, LOCALE_TAGS, INDEXED_LOCALES } from './src/config/site';
 import { inSitemap } from './src/config/reserved-paths';
+import { readdirSync, readFileSync } from 'node:fs';
 
 import sentry from '@sentry/astro';
+
+/** 자사 결제가 켜져 있는가. 꺼져 있으면 후기가 존재할 수 없어 사이트맵에서 뺍니다. */
+const SELLS_DIRECTLY = process.env.PUBLIC_CHECKOUT_MODE === 'internal'
+  && Boolean(process.env.PUBLIC_PRODUCT_PRICE);
+
+/**
+ * 글 주소 → 마지막으로 달라진 날.
+ *
+ * `getCollection` 을 쓸 수 없어(설정 파일이 콘텐츠 레이어보다 먼저 평가됩니다)
+ * 프론트매터를 직접 읽습니다. 스키마가 이미 `publishedAt`·`updatedAt` 을
+ * 강제하므로 형식은 믿을 수 있고, 여기서는 있는 값을 옮기기만 합니다.
+ *
+ * 고친 날이 있으면 그것을, 없으면 발행일을 씁니다 — `dateModified` 를
+ * 발행일로 채우지 않는 `jsonld.ts` 의 규칙과 어긋나지 않습니다. 저쪽은
+ * "고친 적 있는가" 를 말하고, 이쪽은 "언제까지의 내용인가" 를 말합니다.
+ */
+const POST_DATES = new Map<string, string>();
+for (const locale of readdirSync('./src/content/posts')) {
+  for (const file of readdirSync(`./src/content/posts/${locale}`)) {
+    if (!file.endsWith('.md')) continue;
+    const front = readFileSync(`./src/content/posts/${locale}/${file}`, 'utf8').split('---')[1] ?? '';
+    const pick = (key: string) => front.match(new RegExp(`^${key}:\\s*(\\S+)`, 'm'))?.[1];
+    const date = pick('updatedAt') ?? pick('publishedAt');
+    if (date) POST_DATES.set(`/${locale}/support/posts/${file.replace(/\.md$/, '')}/`, date);
+  }
+}
 
 /**
  * 언어별 라우팅은 `src/pages/[lang]/` 동적 라우트가 담당합니다.
@@ -70,7 +97,24 @@ export default defineConfig({
      * (tests/e2e/fonts-content.spec.ts 가 그걸 봅니다). 색인 대상 언어만
      * 넘겨줍니다.
      */
-    filter: (url: string) => inSitemap(url, INDEXED_LOCALES),
+    filter: (url: string) => inSitemap(url, INDEXED_LOCALES, SELLS_DIRECTLY),
+    /*
+     * `lastmod` — 이 주소가 마지막으로 달라진 날.
+     *
+     * 21개 주소에 이 값이 하나도 없었습니다. Google 은 일관되게 붙은 lastmod 를
+     * 재크롤 우선순위에 씁니다.
+     *
+     * ⚠️ **모든 주소에 빌드 시각을 똑같이 박으면 안 됩니다.** 배포할 때마다
+     * 사이트 전체가 바뀌었다고 말하는 셈이고, 그러면 이 값이 신호이기를
+     * 그칩니다. 실제로 날짜를 아는 것 — 글 — 에만 답니다.
+     *
+     * 날짜는 마크다운 프론트매터에서 직접 읽습니다. 이 파일은 콘텐츠 레이어보다
+     * 먼저 평가되어 `getCollection` 을 쓸 수 없습니다.
+     */
+    serialize: (item) => {
+      const lastmod = POST_DATES.get(new URL(item.url).pathname);
+      return lastmod ? { ...item, lastmod } : item;
+    },
   }), sentry({
     /*
      * 소스맵 업로드.

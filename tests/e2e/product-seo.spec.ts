@@ -362,3 +362,60 @@ test.describe('사이트맵과 색인 신호가 서로 어긋나지 않는다', 
 function escapeRegExp(value: string): string {
   return value.replace(/[.+?^${}()|[\]\\]/g, '\\$&');
 }
+
+/**
+ * 이 빌드가 자사 결제를 켠 채로 만들어졌는가.
+ *
+ * `playwright.config.ts` 가 commerce 모드에서만
+ * `PUBLIC_CHECKOUT_MODE=internal` 과 가격을 넘깁니다 — 그 둘이 모두 있어야
+ * `SELLS_DIRECTLY` 가 참이 됩니다. 여기서 값을 다시 계산하지 않고 같은
+ * 신호(모드)를 봅니다.
+ */
+const SELLS_IN_THIS_BUILD = process.env.E2E_MODE !== 'launch';
+
+test.describe('사이트맵이 아는 것만 말한다', () => {
+  test('글에는 lastmod 가 있고, 모르는 주소에는 없다', async ({ request }) => {
+    /*
+     * Google 은 일관되게 붙은 `lastmod` 를 재크롤 우선순위에 씁니다. 다만
+     * **모든 주소에 빌드 시각을 똑같이 박으면** 배포할 때마다 사이트 전체가
+     * 바뀌었다고 말하는 셈이고, 그러면 이 값이 신호이기를 그칩니다.
+     *
+     * 그래서 실제로 날짜를 아는 것 — 프론트매터를 가진 글 — 에만 답니다.
+     */
+    const xml = await (await request.get('/sitemap-0.xml')).text();
+    const entries = [...xml.matchAll(/<url>(.*?)<\/url>/gs)].map((m) => m[1]);
+    expect(entries.length, '사이트맵이 비었습니다').toBeGreaterThan(0);
+
+    const withDate = entries.filter((e) => e.includes('<lastmod>'));
+    expect(withDate.length, '글에 lastmod 가 없습니다').toBeGreaterThan(0);
+
+    for (const entry of withDate) {
+      expect(entry, 'lastmod 가 글이 아닌 주소에 붙었습니다').toContain('/support/posts/');
+      expect(entry, 'lastmod 가 날짜 형식이 아닙니다').toMatch(/<lastmod>\d{4}-\d{2}-\d{2}/);
+    }
+
+    expect(
+      withDate.length,
+      '모든 주소에 lastmod 가 붙었습니다 — 그러면 신호가 되지 않습니다',
+    ).toBeLessThan(entries.length);
+  });
+
+  test('후기가 존재할 수 없으면 색인을 요청하지 않는다', async ({ request }) => {
+    /*
+     * 내비는 이미 같은 판정을 합니다(`nav.ts` 의 `gate: 'checkout'`).
+     * 사이트맵만 그것을 하지 않아, 결제가 꺼진 빌드에서도 빈 후기 페이지가
+     * "색인해 달라" 고 제출되고 있었습니다.
+     *
+     * 결제가 켜진 빌드(commerce 모드)에서는 반대로 들어 있어야 합니다 —
+     * 그때는 후기가 존재할 수 있습니다.
+     */
+    const urls = await sitemapUrls(request);
+    const reviews = urls.filter((u) => u.includes('/reviews'));
+
+    if (SELLS_IN_THIS_BUILD) {
+      expect(reviews.length, '결제가 켜졌는데 후기 페이지가 사이트맵에 없습니다').toBeGreaterThan(0);
+    } else {
+      expect(reviews, '후기가 없을 수 있는 빌드인데 색인을 요청합니다').toEqual([]);
+    }
+  });
+});
