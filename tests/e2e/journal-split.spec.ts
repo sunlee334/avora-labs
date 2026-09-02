@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { LOCALES, INDEXED_LOCALES } from '../../src/config/site';
 import { visibleTop, type NavFlags } from '../../src/config/nav';
 import commerce from '../../src/config/commerce.json' with { type: 'json' };
@@ -146,5 +147,140 @@ test.describe('색인 신호가 새 주소를 가리킨다', () => {
       const canonical = html.match(/<link rel="canonical" href="([^"]+)"/)?.[1];
       expect(new URL(canonical!).pathname, `${path} 의 canonical`).toBe(path);
     }
+  });
+});
+
+test.describe('초안은 없는 페이지다', () => {
+  /*
+   * 저널 초안은 성분명과 작용 기전을 담고 있어 담당자 검수가 필요합니다.
+   * 검수 전에 공개하면 표시·광고 문제가 됩니다.
+   *
+   * 그래서 "숨긴 페이지" 가 아니라 **없는 페이지** 로 둡니다 — 링크를 아는
+   * 사람만 보는 자리를 만들지 않습니다. `draft: true` 면 주소 자체가
+   * 만들어지지 않습니다.
+   */
+  const DRAFTS = ['why-sunscreen-stings-eyes', 'what-spf-and-pa-mean'];
+
+  for (const slug of DRAFTS) {
+    test(`${slug} 는 주소로 가면 404 다`, async ({ request }) => {
+      const res = await request.get(`/ko/journal/${slug}/`);
+      expect(res.status(), '초안이 공개되어 있습니다').toBe(404);
+    });
+  }
+
+  test('초안이 목록에 없다', async ({ page }) => {
+    await page.goto('/ko/journal/');
+    for (const slug of DRAFTS) {
+      await expect(page.locator(`a[href*="${slug}"]`), `${slug} 가 목록에 있습니다`).toHaveCount(0);
+    }
+  });
+
+  test('초안이 사이트맵에 없다', async ({ request }) => {
+    const xml = await (await request.get('/sitemap-0.xml')).text();
+    for (const slug of DRAFTS) {
+      expect(xml, `${slug} 가 색인 요청에 실렸습니다`).not.toContain(slug);
+    }
+  });
+
+  test('초안 파일은 실제로 있다 — 검사가 파일 부재로 통과하지 않는다', () => {
+    /*
+     * 위 셋은 파일이 아예 없어도 전부 통과합니다. 그러면 "초안을 안전하게
+     * 두었다" 가 아니라 "쓰지 않았다" 인데 구분이 안 됩니다.
+     */
+    for (const slug of DRAFTS) {
+      const path = `src/content/posts/ko/${slug}.md`;
+      expect(existsSync(path), `${path} 가 없습니다`).toBe(true);
+      const source = readFileSync(path, 'utf8');
+      expect(source, `${path} 가 draft 가 아닙니다`).toContain('draft: true');
+    }
+  });
+});
+
+test.describe('저널 글이 규칙을 지킨다', () => {
+  const DRAFTS = ['why-sunscreen-stings-eyes', 'what-spf-and-pa-mean'];
+
+  for (const slug of DRAFTS) {
+    test(`${slug} 가 800~1,200자다`, () => {
+      const body = readFileSync(`src/content/posts/ko/${slug}.md`, 'utf8').split('---')[2];
+      const text = body.replace(/[#>|*`\-\n]/g, ' ').replace(/\s+/g, '');
+      expect(text.length, '분량이 범위를 벗어납니다').toBeGreaterThanOrEqual(800);
+      expect(text.length).toBeLessThanOrEqual(1200);
+    });
+
+    test(`${slug} 가 출처를 밝히고 단정하지 않는다`, () => {
+      const source = readFileSync(`src/content/posts/ko/${slug}.md`, 'utf8');
+      /*
+       * 줄바꿈을 지웁니다. 면책 문구는 인용구 안에 있어 여러 줄로 접히는데,
+       * 그 접히는 자리는 글을 다듬을 때마다 바뀝니다. 검사가 거기에 매이면
+       * **문구는 그대로인데 검사만 깨집니다.**
+       */
+      const flat = source.replace(/\n>\s*/g, ' ').replace(/\s+/g, ' ');
+
+      // 공개 자료 기반임을 밝힌다.
+      expect(flat, '출처를 밝히지 않았습니다').toMatch(/공개된 (자료|표기 기준)/);
+      // 진단·치료를 말하지 않는다.
+      expect(flat, '의학적 조언 면책이 없습니다').toContain('진단이나 치료를 대신하지 않');
+      // 특정 브랜드를 지목하지 않는다.
+      expect(flat, '특정 제품 지목 금지 문구가 없습니다').toContain('특정 제품이나 브랜드를 가리키지');
+
+      /*
+       * 기능성 심사 범위 밖 효능을 말하지 않는다. 이 낱말들이 본문에 있으면
+       * 표시·광고 문제가 됩니다.
+       */
+      for (const banned of ['미백', '주름 개선', '여드름', '아토피', '치료']) {
+        const body = source.split('---')[2].replace(/> .*/g, ''); // 면책 인용구는 제외
+        expect(body, `«${banned}» 이 본문에 있습니다`).not.toContain(banned);
+      }
+    });
+  }
+
+  test('여섯 편을 한 번에 쓰지 않았다', () => {
+    // 2인 체제에서 유지되지 않습니다. 빈 저널보다 나쁜 것은 멈춘 저널입니다.
+    const drafts = readdirSync('src/content/posts/ko').filter((f) =>
+      readFileSync(`src/content/posts/ko/${f}`, 'utf8').includes('category: journal'),
+    );
+    expect(drafts.length, '저널 글이 한 번에 너무 많습니다').toBeLessThanOrEqual(2);
+  });
+});
+
+test.describe('초안이 글꼴을 무겁게 하지 않는다', () => {
+  test('초안에만 있는 글자가 서브셋에 실리지 않는다', () => {
+    /*
+     * 초안은 페이지가 만들어지지 않으므로 그 글자는 화면 어디에도 나오지
+     * 않습니다. 그런데 서브셋 수집이 마크다운을 통째로 읽어서, 초안 두 편을
+     * 넣었을 때 `ko/body.woff2` 가 5KB 늘었습니다 — **아무도 볼 수 없는
+     * 글자를 모든 한국어 페이지가 받는** 상태였습니다.
+     *
+     * 글꼴은 `preload` 로 나가므로 LCP 와 직접 대역폭을 다툽니다.
+     *
+     * ⚠️ 이 검사는 "초안 글자가 하나도 없다" 를 보지 않습니다. 흔한 글자는
+     * 다른 문구에도 있어 당연히 들어 있습니다. 보는 것은 **초안에만 있고
+     * 다른 어디에도 없는 글자** 입니다.
+     */
+    const drafts = readdirSync('src/content/posts/ko')
+      .map((f) => readFileSync(`src/content/posts/ko/${f}`, 'utf8'))
+      .filter((s) => /^draft:\s*true\s*$/m.test(s));
+    expect(drafts.length, '초안이 없어 이 검사가 아무것도 재지 않습니다').toBeGreaterThan(0);
+
+    const draftChars = new Set([...drafts.join('')].filter((c) => /[가-힣]/.test(c)));
+
+    // 공개된 글과 번역 파일에 있는 글자는 어차피 서브셋에 있어야 합니다.
+    const publicSource =
+      readdirSync('src/content/posts/ko')
+        .map((f) => readFileSync(`src/content/posts/ko/${f}`, 'utf8'))
+        .filter((s) => !/^draft:\s*true\s*$/m.test(s))
+        .join('') + readFileSync('src/i18n/ko.json', 'utf8');
+    const publicChars = new Set([...publicSource].filter((c) => /[가-힣]/.test(c)));
+
+    const onlyInDrafts = [...draftChars].filter((c) => !publicChars.has(c));
+    expect(onlyInDrafts.length, '초안에만 있는 글자가 없어 이 검사가 무의미합니다').toBeGreaterThan(0);
+
+    const subset = readFileSync('public/fonts/ko/body.woff2');
+    // woff2 는 압축돼 있어 글자를 직접 찾을 수 없습니다. 크기로 봅니다 —
+    // 초안 글자가 실리면 눈에 띄게 커집니다(실측 +5KB).
+    expect(
+      subset.length,
+      `초안에만 있는 글자 ${onlyInDrafts.length}자가 서브셋에 실린 것으로 보입니다`,
+    ).toBeLessThan(123000);
   });
 });
