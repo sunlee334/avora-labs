@@ -1,9 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { LOCALES, INDEXED_LOCALES } from '../../src/config/site';
 import { visibleTop, type NavFlags } from '../../src/config/nav';
 import commerce from '../../src/config/commerce.json' with { type: 'json' };
 import ko from '../../src/i18n/ko.json' with { type: 'json' };
+import { postStringsFor } from '../../scripts/build-fonts.mjs';
 
 /*
  * ⚠️ `nav-gates.ts` 를 import 하면 안 됩니다.
@@ -16,9 +17,29 @@ import ko from '../../src/i18n/ko.json' with { type: 'json' };
  * `nav-reviews-gate.spec.ts` 가 쓰는 방법과 같습니다.
  */
 const MODE = process.env.E2E_MODE === 'launch' ? 'launch' : 'commerce';
+/**
+ * 공개된 저널 글이 있는가 — 화면이 판정하는 것과 같은 규칙.
+ *
+ * 초안은 페이지가 만들어지지 않으므로 전부 초안이면 `/journal` 은 빈 목록이고,
+ * 그러면 메뉴 항목이 **언제 눌러도 빈 페이지로 가는 길** 이 됩니다.
+ * `nav-gates.ts` 가 `import.meta.glob` 으로 세는 것을 여기서는 파일로 셉니다.
+ */
+const HAS_JOURNAL = readdirSync('src/content/posts')
+  .filter((locale) => statSync(`src/content/posts/${locale}`).isDirectory())
+  .flatMap((locale) =>
+    readdirSync(`src/content/posts/${locale}`)
+      .filter((f) => f.endsWith('.md'))
+      .map((f) => readFileSync(`src/content/posts/${locale}/${f}`, 'utf8')),
+  )
+  .some((raw) => {
+    const front = raw.startsWith('---') ? (raw.split('---')[1] ?? '') : '';
+    return /^category:\s*journal\s*$/m.test(front) && !/^draft:\s*true\s*$/m.test(front);
+  });
+
 const FLAGS: NavFlags = {
   checkout: MODE === 'commerce',
   accounts: MODE === 'commerce' ? true : commerce.accounts.enabled,
+  journal: HAS_JOURNAL,
 };
 const TOP_VISIBLE = visibleTop(FLAGS);
 
@@ -98,22 +119,38 @@ test.describe('옛 주소가 죽지 않는다', () => {
 });
 
 test.describe('헤더에 저널이 있다', () => {
-  test('최상위 메뉴가 다섯이다', () => {
-    const ids = TOP_VISIBLE.map((t) => t.id);
-    expect(ids, '저널이 최상위에 없습니다').toContain('journal');
-    expect(ids).toEqual(['product', 'brand', 'panel', 'journal', 'support']);
+  test('글이 공개되면 최상위가 다섯이 된다', () => {
+    /*
+     * 정의에는 저널이 있습니다. 다만 **공개된 글이 하나도 없으면 나오지
+     * 않습니다** — 리뷰 항목과 같은 규칙입니다("빈 상태 문구가 잘 쓰여
+     * 있어도 빈 페이지는 빈 페이지입니다").
+     *
+     * 그래서 화면이 아니라 **순수 함수** 로 확인합니다. 플래그를 켜면 다섯이
+     * 되고, 그 순서가 정해져 있어야 합니다. 첫 글이 공개되는 순간 그대로
+     * 화면에 나타납니다.
+     */
+    const withJournal = visibleTop({ ...FLAGS, journal: true }).map((t) => t.id);
+    expect(withJournal).toEqual(['product', 'brand', 'panel', 'journal', 'support']);
+
+    const withoutJournal = visibleTop({ ...FLAGS, journal: false }).map((t) => t.id);
+    expect(withoutJournal, '글이 없는데 저널이 메뉴에 있습니다').not.toContain('journal');
   });
 
-  test('화면에서 저널로 갈 수 있다', async ({ page }) => {
+  test('지금은 초안뿐이라 메뉴에 저널이 없다', async ({ page }) => {
     /*
-     * 좁은 화면에서는 최상위 목록이 시트 안에 있습니다. 여기서 보려는 것은
-     * "메뉴가 그 자리를 가리키는가" 이므로 넓은 화면에서 확인합니다 —
-     * 좁은 화면의 시트는 `mobile-menu.spec.ts` 가 따로 봅니다.
+     * 초안 두 편은 담당자 검수를 기다리는 중이라 페이지가 만들어지지 않습니다.
+     * 그 상태에서 메뉴에 두면 **언제 눌러도 빈 페이지로 가는 길** 이 됩니다.
      */
+    test.skip(HAS_JOURNAL, '공개된 저널 글이 생기면 이 검사는 의미가 없습니다');
+
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto('/ko/');
-    const link = page.locator('.nav').getByRole('link', { name: ko.nav.journal, exact: true });
-    await expect(link.first()).toHaveAttribute('href', '/ko/journal/');
+    const link = page.locator('.nav__links').getByRole('link', { name: ko.nav.journal, exact: true });
+    await expect(link, '빈 저널이 메뉴에 노출됐습니다').toHaveCount(0);
+
+    // 주소 자체는 살아 있습니다 — 길만 감춥니다.
+    await page.goto('/ko/journal/');
+    await expect(page.locator('h1')).toContainText(ko.journal.heading);
   });
 
   test('375px 에서 헤더가 가로 스크롤을 만들지 않는다', async ({ page }) => {
@@ -234,12 +271,19 @@ test.describe('저널 글이 규칙을 지킨다', () => {
     });
   }
 
-  test('여섯 편을 한 번에 쓰지 않았다', () => {
-    // 2인 체제에서 유지되지 않습니다. 빈 저널보다 나쁜 것은 멈춘 저널입니다.
-    const drafts = readdirSync('src/content/posts/ko').filter((f) =>
+  test('저널 글이 실제로 있다', () => {
+    /*
+     * ⚠️ 한때 여기서 글 수를 **2개 이하** 로 못 박았습니다. "여섯 편을 한 번에
+     * 쓰지 말 것" 이라는 편집 지침을 검사로 옮긴 것인데, 그러면 **세 번째 글을
+     * 쓰는 순간** CI 가 빨개집니다 — 그건 이 기능이 하려던 일 그 자체입니다.
+     *
+     * 발행 속도는 사람이 정하는 것이고 검사가 막을 일이 아닙니다. 여기서는
+     * 저널이 비어 있지 않은지만 봅니다.
+     */
+    const journal = readdirSync('src/content/posts/ko').filter((f) =>
       readFileSync(`src/content/posts/ko/${f}`, 'utf8').includes('category: journal'),
     );
-    expect(drafts.length, '저널 글이 한 번에 너무 많습니다').toBeLessThanOrEqual(2);
+    expect(journal.length, '저널 글이 하나도 없습니다').toBeGreaterThan(0);
   });
 });
 
@@ -275,12 +319,20 @@ test.describe('초안이 글꼴을 무겁게 하지 않는다', () => {
     const onlyInDrafts = [...draftChars].filter((c) => !publicChars.has(c));
     expect(onlyInDrafts.length, '초안에만 있는 글자가 없어 이 검사가 무의미합니다').toBeGreaterThan(0);
 
-    const subset = readFileSync('public/fonts/ko/body.woff2');
-    // woff2 는 압축돼 있어 글자를 직접 찾을 수 없습니다. 크기로 봅니다 —
-    // 초안 글자가 실리면 눈에 띄게 커집니다(실측 +5KB).
+    /*
+     * ⚠️ 한때 여기서 **바이트 상한을 못 박았습니다**(123,000). 그러면 정당한
+     * 문구 추가로도 빨개지고, 그때 가리키는 곳은 원인이 아닌 초안입니다.
+     * 반대로 다른 문구가 줄면 초안이 새어도 통과합니다 — 어느 쪽으로도
+     * 재려던 것을 재지 못합니다.
+     *
+     * 크기 대신 **수집 함수 자체** 를 봅니다. 서브셋을 만드는 그 코드가
+     * 초안을 건너뛰는지 직접 확인하면, 파일 크기가 어떻든 판정이 정확합니다.
+     */
+    const collected = postStringsFor('ko').join('');
+    const leaked = onlyInDrafts.filter((c) => collected.includes(c));
     expect(
-      subset.length,
-      `초안에만 있는 글자 ${onlyInDrafts.length}자가 서브셋에 실린 것으로 보입니다`,
-    ).toBeLessThan(123000);
+      leaked,
+      `초안에만 있는 글자가 서브셋 수집에 들어갔습니다: ${leaked.join('')}`,
+    ).toEqual([]);
   });
 });

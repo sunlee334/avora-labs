@@ -66,10 +66,19 @@ test.describe('확정과 미확정이 나란히 보인다', () => {
     await page.goto('/ko/');
     const left = page.locator('.compare__col').nth(0);
 
-    // 용량은 `product.json` 의 값 그대로여야 합니다.
-    await expect(left).toContainText(product.spec.volume);
+    /*
+     * 확정 열에는 값이 실제로 있어야 합니다 — 비어 있으면 대조가 성립하지
+     * 않습니다.
+     */
+    await expect(left.locator('.compare__value').first()).not.toBeEmpty();
     // 차단지수는 확정이 아니므로 이 열에 있으면 안 됩니다.
     await expect(left, '차단지수가 확정 열에 있습니다').not.toContainText('SPF50+');
+    /*
+     * 용량도 마찬가지입니다. `$pending` 이 "용기 발주 후 확정" 이라고 적어
+     * 두었고, 바로 옆 칸이 용기가 미확정이라고 말합니다 — 용기가 안 정해졌는데
+     * 그 안에 담기는 양이 정해졌다고 하면 한 화면 안의 모순입니다.
+     */
+    await expect(left, '용량이 확정 열에 있습니다').not.toContainText(product.spec.volume);
   });
 });
 

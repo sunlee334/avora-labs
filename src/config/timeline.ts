@@ -29,7 +29,43 @@
  * 않았습니다. 없는 달을 지어내는 대신 해 단위로 둡니다 — 그 해가 시작되면
  * 출시 기간에 들어선 것이 맞습니다.
  */
-export const TIMELINE_DATES = ['2026-10', '2026-11', '2026-12', '2027-02', '2027'] as const;
+export const TIMELINE = [
+  { datetime: '2026-10', startsAt: '2026-10' },
+  { datetime: '2026-11', startsAt: '2026-11' },
+  { datetime: '2026-12', startsAt: '2026-12' },
+  { datetime: '2027-02', startsAt: '2027-02' },
+  /*
+   * 출시는 **점이 아니라 창** 입니다 — "2027 상반기".
+   *
+   * ⚠️ 처음에는 표시값과 비교값을 같은 `'2027'` 하나로 썼습니다. 그런데
+   * 문자열 앞자리 비교에서 `'2027'` 은 `'2027-02'` **앞** 에 옵니다. 그래서
+   * 2027년 1월에 집계와 출시가 **동시에 진행중** 이 되고, 그 사이의 펀딩은
+   * 영영 진행중이 되지 못했습니다. 거짓말을 없애려던 코드가 새 거짓말을
+   * 만들고 있었습니다.
+   *
+   * 표시는 해 단위(`2027`)로 두고 — 달을 지어내지 않습니다 — 비교는 그 창이
+   * **닫히는** 때로 합니다. 상반기가 끝날 때까지 출시는 `예정` 입니다.
+   * 아직 출시하지 않았다는 것이 사실이기 때문입니다.
+   */
+  { datetime: '2027', startsAt: '2027-07' },
+] as const;
+
+/** `<time datetime>` 에 들어가는 값. 화면이 읽는 것은 이쪽입니다. */
+export const TIMELINE_DATES = TIMELINE.map((step) => step.datetime);
+
+/*
+ * 비교 시점이 오름차순인지 **모듈을 읽을 때** 확인합니다.
+ *
+ * 순서가 깨지면 위와 같은 사고(둘이 동시에 진행중, 하나는 영영 아님)가
+ * 조용히 돌아옵니다. 화면을 봐도 그날이 오기 전에는 드러나지 않습니다.
+ */
+for (let i = 1; i < TIMELINE.length; i += 1) {
+  if (TIMELINE[i].startsAt <= TIMELINE[i - 1].startsAt) {
+    throw new Error(
+      `타임라인 비교 시점이 오름차순이 아닙니다: ${TIMELINE[i - 1].startsAt} → ${TIMELINE[i].startsAt}`,
+    );
+  }
+}
 
 /** 한 단계의 진행 상태. `past` 는 배지를 그리지 않습니다 — 아래 주석 참조. */
 export type StepState = 'past' | 'active' | 'planned';
@@ -47,13 +83,18 @@ export type StepState = 'past' | 'active' | 'planned';
  * 적용합니다 — 지나간 단계에 배지가 없는 것은 읽는 데 문제가 되지 않습니다.
  */
 export function stepStates(today: Date): StepState[] {
-  // `2026-10` < `2026-11` 처럼 ISO 문자열은 사전순 비교가 곧 시간순 비교입니다.
-  const now = today.toISOString().slice(0, 10);
-  const startsAfter = (date: string) => date > now.slice(0, date.length);
+  /*
+   * ISO 문자열은 **길이가 같을 때만** 사전순 비교가 시간순 비교입니다.
+   * `startsAt` 을 전부 `YYYY-MM` 으로 맞춰 두었으므로 여기서 자르는 자리가
+   * 모든 항목에 같습니다 — 길이가 섞이면 `'2027'` 이 `'2027-02'` 앞에 서던
+   * 그 사고가 돌아옵니다.
+   */
+  const now = today.toISOString().slice(0, 7);
+  const startsAfter = (startsAt: string) => startsAt > now;
 
-  return TIMELINE_DATES.map((date, i) => {
-    if (startsAfter(date)) return 'planned';
-    const next = TIMELINE_DATES[i + 1];
-    return next && !startsAfter(next) ? 'past' : 'active';
+  return TIMELINE.map((step, i) => {
+    if (startsAfter(step.startsAt)) return 'planned';
+    const next = TIMELINE[i + 1];
+    return next && !startsAfter(next.startsAt) ? 'past' : 'active';
   });
 }

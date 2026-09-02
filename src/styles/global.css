@@ -4415,3 +4415,22 @@ a {
   font-size: 13px;
   color: var(--color-text-muted);
 }
+
+/* ── THE PROBLEM 의 장면 ────────────────────────────────────
+ * 세 줄이 한 문단이지만 각각 한 장면이라 줄로 끊어 읽히게 합니다. */
+.problem__scene {
+  margin-top: 18px;
+  display: grid;
+  gap: 2px;
+}
+
+/* ── 타임라인·여정의 설명 줄 ────────────────────────────────
+ * 앞 줄이 무엇인지 말하고, 이 줄이 왜 그것이 어려운지 말합니다.
+ * 값이 없으면 요소 자체가 렌더되지 않으므로 빈 줄이 생기지 않습니다. */
+.timeline__note,
+.journey__note {
+  display: block;
+  margin-top: 4px;
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+}

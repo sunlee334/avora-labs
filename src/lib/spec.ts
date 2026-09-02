@@ -41,7 +41,16 @@ export function specRows(t: Dict): SpecRow[] {
     { id: 'protection', key: s.labels.protection, value: product.spec.protection, target: true },
     { id: 'texture', key: s.labels.texture, value: null, target: true },
     { id: 'waterResistant', key: s.labels.waterResistant, value: s.values.waterResistant, target: true },
-    { id: 'volume', key: s.labels.volume, value: product.spec.volume, target: false },
+    /*
+     * 용량은 **용기에 매달려 있습니다.**
+     *
+     * 한때 이것을 확정으로 두었습니다. 그런데 `product.json` 의 `$pending` 이
+     * "disclosure.volume — 기획안은 50ml 튜브. 용기 발주 후 확정합니다" 라고
+     * 적어 두었고, 대조표는 바로 옆 칸에서 **용기가 미확정** 이라고 말합니다.
+     * 용기가 정해지지 않았는데 그 용기에 담기는 양이 정해졌다고 하는 것은
+     * 한 화면 안의 모순입니다.
+     */
+    { id: 'volume', key: s.labels.volume, value: product.spec.volume, target: true },
     { id: 'scent', key: s.labels.scent, value: s.values.scent, target: false },
     { id: 'tone', key: s.labels.tone, value: s.values.tone, target: false },
     { id: 'area', key: s.labels.area, value: s.values.area, target: false },
@@ -65,11 +74,16 @@ export function compareRows(t: Dict) {
   const rows = specRows(t);
 
   /*
-   * 대조표는 스펙표보다 짧습니다. 톤·사용 부위·분류처럼 제품을 고르는 데
-   * 직접 쓰이지 않는 줄은 제품 페이지에 남기고, 여기서는 사람이 "정해졌나
-   * 아직인가" 를 궁금해하는 것만 보여줍니다.
+   * 대조표는 스펙표보다 짧습니다. 분류(기능성화장품)처럼 고르는 데 쓰이지
+   * 않는 줄은 제품 페이지에 남기고, 여기서는 사람이 "정해졌나 아직인가" 를
+   * 궁금해하는 것만 보여줍니다.
+   *
+   * ⚠️ 확정 쪽을 너무 좁히면 표가 한쪽만 남아 대조가 되지 않습니다. 용량이
+   * 미확정으로 옮겨 가면서 확정 열에 향 하나만 남았는데, 그러면 "확정된 것도
+   * 있다" 는 사실이 보이지 않습니다. 실제로 정해진 것은 정해졌다고 보여주는
+   * 것도 정직함의 일부입니다.
    */
-  const SHOWN = ['protection', 'texture', 'waterResistant', 'volume', 'scent'];
+  const SHOWN = ['protection', 'texture', 'waterResistant', 'volume', 'scent', 'tone', 'area'];
   const shown = rows.filter((row) => SHOWN.includes(row.id));
 
   return {

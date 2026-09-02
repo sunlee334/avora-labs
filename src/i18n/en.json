@@ -87,6 +87,11 @@
       "kicker": "The Problem",
       "lead": "Sun care for moving bodies has been one of two things.",
       "body": "Beautiful, but undone by sweat.\nOr functional, but no pleasure to wear.",
+      "scene": [
+        "Run for thirty minutes and what you put on your forehead rides the sweat into your eyes.",
+        "So you rub them, and run the rest of the way like that.",
+        "Or you skip it altogether, worried about the white cast."
+      ],
       "close": "We are trying to make neither."
     },
     "origin": {
@@ -101,23 +106,28 @@
       "steps": [
         {
           "word": "Sun",
-          "body": "The first layer, under morning light"
+          "body": "The first layer, under morning light",
+          "note": "Fifteen minutes before you leave. It needs time to sink in."
         },
         {
           "word": "Move",
-          "body": "A finish that does not get in the way"
+          "body": "A finish that does not get in the way",
+          "note": "If it tugs or feels heavy, it stays on your mind all day."
         },
         {
           "word": "Sweat",
-          "body": "Holding through sweat and heat"
+          "body": "Holding through sweat and heat",
+          "note": "This is where most of them fail."
         },
         {
           "word": "Water",
-          "body": "Staying put after contact with water"
+          "body": "Staying put after contact with water",
+          "note": "Towel off and most of it comes away with the water."
         },
         {
           "word": "Reset",
-          "body": "Reapplied, and settled again"
+          "body": "Reapplied, and settled again",
+          "note": "If it pills on the second coat, nobody applies a second coat."
         }
       ]
     },
@@ -213,30 +223,34 @@
       "steps": [
         {
           "when": "Oct 2026",
-          "what": "Test panel recruiting"
+          "what": "Test panel recruiting",
+          "note": "We recruit from running crews, bouldering gyms and surf communities"
         },
         {
           "when": "Nov 2026",
-          "what": "Blind evaluation"
+          "what": "Blind evaluation",
+          "note": "Two or three samples with the maker hidden, compared on six criteria"
         },
         {
           "when": "Dec 2026",
-          "what": "Tally published · formula fixed"
+          "what": "Tally published · formula fixed",
+          "note": "Including the scores of the formulas that did not make it"
         },
         {
           "when": "Feb 2027",
-          "what": "Funding opens"
+          "what": "Funding opens",
+          "note": ""
         },
         {
           "when": "H1 2027",
-          "what": "Launch"
+          "what": "Launch",
+          "note": ""
         }
       ]
     },
     "product": {
       "kicker": "First Product",
       "name": "Daily Sunscreen",
-      "spec": "SPF50+ / PA++++ · 50ml tube",
       "cta": "View product",
       "table": {
         "confirmed": "Settled",
@@ -246,6 +260,7 @@
           "protection": "after functional review",
           "texture": "after the panel tally",
           "waterResistant": "after the test report",
+          "volume": "after the tube order",
           "container": "after the tube order"
         },
         "note": "What is not settled is written as not settled. We fill this table in once the panel tally closes in December 2026.",
@@ -282,6 +297,9 @@
       "belief": "We believe that walking, running, sweating, meeting water and moving again — every one of those moments is time spent looking after yourself.",
       "close": "The more you move, the more careful the care your skin needs; the more comfortably you are cared for, the more freely you can move again.\nMovement and care, living together naturally — that is why PAROS began."
     },
+    "maker": {
+      "kicker": "The people"
+    },
     "island": {
       "kicker": "The Name",
       "lead": "We did not simply borrow a name from a Greek island.",
@@ -289,6 +307,13 @@
       "attitude": "Paros is a place where the strength of nature and its beauty do not stand against each other. The sea stays clear under a hard sun, people move freely through rough wind, and stone worn by time only grows more beautiful.",
       "stance": "Strong but not coarse. Active but not heavy. Natural but not crude. That is the beauty PAROS has in mind.",
       "note": "So we do not copy the scenery over. What we keep is only the feeling of being there."
+    },
+    "naming": {
+      "kicker": "Naming",
+      "body": [
+        "The brand is PAROS, 파로스 in Korean.\nThe operating company is AVORA LABS (아보라랩스).",
+        "The name comes from the Greek island of Paros, but we are not\na travel brand for that island — we are a sun care brand made in Seoul."
+      ]
     },
     "elements": {
       "kicker": "Brand Codes",
@@ -311,6 +336,16 @@
         }
       ],
       "note": "These four run through the product, the design, the campaigns and the content."
+    },
+    "how": {
+      "kicker": "How it is made",
+      "body": [
+        "We do not develop a formula of our own.\nWe choose among formulas a manufacturer already holds — already tested, already reviewed.",
+        "Most Korean cosmetics brands are made the same way.\nWhat is rare is saying so, and publishing the criteria used to choose.",
+        "What we add is not an ingredient but a selection.\nSix criteria, their weights and their cut-offs are set and published first,\nand we follow the scores given by people who actually move.",
+        "We publish the scores of the formulas that did not make it.\nSaying only what was chosen, and not what was rejected,\nis not choosing — it is looking like choosing."
+      ],
+      "cta": "See the scoring sheet"
     },
     "audience": {
       "kicker": "Who It Is For",

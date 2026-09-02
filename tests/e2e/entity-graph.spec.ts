@@ -18,7 +18,12 @@ import { jsonLdOf, sitemapUrls } from '../support/sitemap';
 const ID = {
   organization: `${ORIGIN}/#organization`,
   brand: `${ORIGIN}/#brand`,
-  product: `${ORIGIN}/#product`,
+  /*
+   * 제품은 **언어마다 다른 노드** 입니다. `url`·`image`·`description` 이 전부
+   * 언어별이라 이름표 하나를 다섯이 공유하면 같은 개체가 서로 다른 정식
+   * 주소와 그림과 설명을 주장하게 됩니다 — 이름표가 없는 것보다 나쁩니다.
+   */
+  product: (locale: string) => `${ORIGIN}/${locale}/product/#product`,
 };
 
 /** 문서 하나의 JSON-LD 를 타입별로 찾아 줍니다. */
@@ -49,7 +54,7 @@ test.describe('브랜드가 하나의 개체로 모인다', () => {
     const { of } = await schemasOf(request, '/ko/product');
     const product = of('Product');
 
-    expect(product?.['@id']).toBe(ID.product);
+    expect(product?.['@id']).toBe(ID.product('ko'));
     expect(product?.brand?.['@id'], '제품이 이름만 반복하고 있습니다').toBe(ID.brand);
     expect(product?.manufacturer?.['@id']).toBe(ID.organization);
   });

@@ -34,7 +34,7 @@ import type { Dict } from '../i18n';
 type Label = (t: Dict) => string;
 
 /** 노출 여부를 가르는 빌드 사실. */
-export type Gate = 'checkout' | 'accounts';
+export type Gate = 'checkout' | 'accounts' | 'journal';
 
 /** 실제로 갈 수 있는 한 곳. */
 export interface NavLeaf {
@@ -101,6 +101,8 @@ export interface UtilityItem extends NavLeaf {
 export interface NavFlags {
   checkout: boolean;
   accounts: boolean;
+  /** 공개된 저널 글이 하나라도 있는가. 전부 초안이면 `/journal` 은 빈 목록입니다. */
+  journal: boolean;
 }
 
 /**
@@ -201,10 +203,18 @@ const NAV: readonly NavGroup[] = [
      * 이로써 메뉴가 다섯이 됩니다. 좁은 화면에서 넘치면 **햄버거로 되돌리지
      * 않고** 다른 방법을 찾습니다 — 지시서가 명시한 제약이고,
      * `mobile-ux.spec.ts` 가 375px 가로 스크롤을 봅니다.
+     *
+     * ⚠️ **글이 하나도 공개되기 전에는 이 항목이 나오지 않습니다.**
+     * 바로 아래 리뷰 항목과 같은 이유입니다 — "빈 상태 문구가 잘 쓰여 있어도
+     * 빈 페이지는 빈 페이지입니다." 지금 저널에 있는 두 편은 담당자 검수를
+     * 기다리는 초안이라 페이지가 만들어지지 않습니다. 첫 글이 공개되는
+     * 순간 이 항목이 저절로 돌아옵니다.
      */
     id: 'journal',
     label: (t) => t.nav.journal,
-    children: [{ id: 'journal', label: (t) => t.nav.journal, path: 'journal' }],
+    children: [
+      { id: 'journal', label: (t) => t.nav.journal, path: 'journal', gate: 'journal' },
+    ],
   },
   {
     id: 'support',

@@ -239,7 +239,13 @@ test.describe('구조화 데이터', () => {
     expect(schema.headline).toBe('배송 안내');
     expect(schema.datePublished).toBe('2026-08-27');
     expect(schema.inLanguage).toBe('ko');
-    expect(schema.author.name).toBe(BUSINESS.brandName);
+    /*
+     * 저자는 **회사** 입니다. 한때 브랜드 이름을 쓰면서 `@id` 로는 `#brand`
+     * 노드를 가리켰는데, 그 노드는 `organization()` 이 `Brand` 로 선언합니다.
+     * 합치면 Article 의 저자가 Brand 가 되고, Google 의 Article 안내는 저자를
+     * Person 또는 Organization 으로 요구합니다.
+     */
+    expect(schema.author.name).toBe(BUSINESS.companyName);
   });
 
   test('고치지 않은 글에는 dateModified 가 없다', async ({ request }) => {

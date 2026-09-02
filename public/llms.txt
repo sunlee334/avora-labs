@@ -31,7 +31,8 @@ as well.
 - [브랜드](https://avoralabs.co/ko/brand/): 왜 이 브랜드가 존재하는지 — 시작, 던진 질문, 관점
 - [제품](https://avoralabs.co/ko/product/): 데일리 선크림 사양과 고르는 기준
 - [검증단](https://avoralabs.co/ko/panel/): 모집 안내, 배점표와 커트라인
-- [공지·읽을거리](https://avoralabs.co/ko/support/posts/): 운영 안내와 자외선차단제 이야기
+- [공지](https://avoralabs.co/ko/support/notice/): 배송·정책 같은 운영 안내
+- [읽을거리](https://avoralabs.co/ko/journal/): 자외선차단제에 대해 알아두면 좋은 이야기
 - [고객센터](https://avoralabs.co/ko/support/): 자주 묻는 질문
 - [이용약관](https://avoralabs.co/ko/legal/terms/)
 - [개인정보처리방침](https://avoralabs.co/ko/legal/privacy/)
@@ -45,7 +46,8 @@ versions exist at the same paths but carry `noindex` until those markets open
 - [Home](https://avoralabs.co/en/): what is being made, launch notification
 - [Brand](https://avoralabs.co/en/brand/): why the brand exists — the start, the question, the view
 - [Product](https://avoralabs.co/en/product/): daily sunscreen spec and the selection criteria
-- [Notices & Reading](https://avoralabs.co/en/support/posts/)
+- [Notices](https://avoralabs.co/en/support/notice/): shipping and policy announcements
+- [Journal](https://avoralabs.co/en/journal/): reading about sunscreen
 - [Support](https://avoralabs.co/en/support/): frequently asked questions
 - [Terms](https://avoralabs.co/en/legal/terms/)
 - [Privacy](https://avoralabs.co/en/legal/privacy/)

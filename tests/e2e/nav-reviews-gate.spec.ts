@@ -1,3 +1,4 @@
+import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { test, expect } from '@playwright/test';
 import { visibleTop, allLeaves, type NavFlags } from '../../src/config/nav';
 import commerce from '../../src/config/commerce.json' with { type: 'json' };
@@ -14,9 +15,29 @@ import commerce from '../../src/config/commerce.json' with { type: 'json' };
  * 첫 후기가 쌓이는 순간(=결제가 켜지는 순간) 저절로 돌아옵니다.
  */
 const MODE = process.env.E2E_MODE === 'launch' ? 'launch' : 'commerce';
+/**
+ * 공개된 저널 글이 있는가 — 화면이 판정하는 것과 같은 규칙.
+ *
+ * 초안은 페이지가 만들어지지 않으므로 전부 초안이면 `/journal` 은 빈 목록이고,
+ * 그러면 메뉴 항목이 **언제 눌러도 빈 페이지로 가는 길** 이 됩니다.
+ * `nav-gates.ts` 가 `import.meta.glob` 으로 세는 것을 여기서는 파일로 셉니다.
+ */
+const HAS_JOURNAL = readdirSync('src/content/posts')
+  .filter((locale) => statSync(`src/content/posts/${locale}`).isDirectory())
+  .flatMap((locale) =>
+    readdirSync(`src/content/posts/${locale}`)
+      .filter((f) => f.endsWith('.md'))
+      .map((f) => readFileSync(`src/content/posts/${locale}/${f}`, 'utf8')),
+  )
+  .some((raw) => {
+    const front = raw.startsWith('---') ? (raw.split('---')[1] ?? '') : '';
+    return /^category:\s*journal\s*$/m.test(front) && !/^draft:\s*true\s*$/m.test(front);
+  });
+
 const FLAGS: NavFlags = {
   checkout: MODE === 'commerce',
   accounts: MODE === 'commerce' ? true : commerce.accounts.enabled,
+  journal: HAS_JOURNAL,
 };
 
 function hasReviews(flags: NavFlags): boolean {

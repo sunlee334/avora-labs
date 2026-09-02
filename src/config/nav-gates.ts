@@ -12,7 +12,32 @@
 import { SELLS_DIRECTLY, ACCOUNTS_ENABLED } from './runtime';
 import { visibleTop, visibleUtility, menuDestinations, type NavFlags } from './nav';
 
-export const FLAGS: NavFlags = { checkout: SELLS_DIRECTLY, accounts: ACCOUNTS_ENABLED };
+/*
+ * 공개된 저널 글이 하나라도 있는가.
+ *
+ * 초안은 페이지가 만들어지지 않으므로, 전부 초안이면 `/journal` 은 빈 목록
+ * 입니다. 그 상태로 최상위 메뉴에 두면 **언제 눌러도 빈 페이지로 가는 길** 이
+ * 되는데, 리뷰 항목을 감추는 것과 정확히 같은 이유로 그러면 안 됩니다.
+ *
+ * `import.meta.glob` 은 빌드 때 파일 목록을 정적으로 만듭니다 — 콘텐츠
+ * 컬렉션(`getCollection`)은 비동기라 이 모듈에서 쓸 수 없습니다.
+ */
+const journalFiles = import.meta.glob('../content/posts/*/*.md', {
+  eager: true,
+  query: '?raw',
+  import: 'default',
+}) as Record<string, string>;
+
+export const HAS_JOURNAL = Object.values(journalFiles).some((raw) => {
+  const front = raw.startsWith('---') ? (raw.split('---')[1] ?? '') : '';
+  return /^category:\s*journal\s*$/m.test(front) && !/^draft:\s*true\s*$/m.test(front);
+});
+
+export const FLAGS: NavFlags = {
+  checkout: SELLS_DIRECTLY,
+  accounts: ACCOUNTS_ENABLED,
+  journal: HAS_JOURNAL,
+};
 
 /** 헤더·시트가 쓰는 최상위 목록. 게이트를 지난 결과입니다. */
 export const TOP_VISIBLE = visibleTop(FLAGS);

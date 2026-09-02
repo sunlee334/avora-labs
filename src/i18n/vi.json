@@ -87,6 +87,11 @@
       "kicker": "The Problem",
       "lead": "Kem chống nắng cho lúc vận động lâu nay chỉ có hai kiểu.",
       "body": "Đẹp nhưng gục ngã trước mồ hôi,\nhoặc có chức năng nhưng da không dễ chịu ngay khi thoa.",
+      "scene": [
+        "Chạy ba mươi phút, thứ bôi trên trán theo mồ hôi chảy vào mắt.",
+        "Thế là dụi mắt, rồi chạy nốt quãng đường còn lại như vậy.",
+        "Có người vì ngại vệt trắng mà thôi không bôi."
+      ],
       "close": "Chúng tôi muốn làm thứ không thuộc về cả hai."
     },
     "origin": {
@@ -101,23 +106,28 @@
       "steps": [
         {
           "word": "Sun",
-          "body": "Lớp đầu tiên dưới nắng sớm"
+          "body": "Lớp đầu tiên dưới nắng sớm",
+          "note": "Mười lăm phút trước khi ra khỏi nhà. Nó cần thời gian để thấm."
         },
         {
           "word": "Move",
-          "body": "Lớp finish không cản trở chuyển động"
+          "body": "Lớp finish không cản trở chuyển động",
+          "note": "Nếu căng hay bí, cảm giác đó theo bạn cả ngày."
         },
         {
           "word": "Sweat",
-          "body": "Giữ vững trước mồ hôi và hơi nóng"
+          "body": "Giữ vững trước mồ hôi và hơi nóng",
+          "note": "Đây là đoạn thất bại nhiều nhất."
         },
         {
           "word": "Water",
-          "body": "Vẫn bám sau khi tiếp xúc với nước"
+          "body": "Vẫn bám sau khi tiếp xúc với nước",
+          "note": "Lau khăn một cái là phần lớn trôi theo nước."
         },
         {
           "word": "Reset",
-          "body": "Thoa lại, và chỉnh lại từ đầu"
+          "body": "Thoa lại, và chỉnh lại từ đầu",
+          "note": "Nếu bôi lại mà vón, sẽ không ai bôi lại lần hai."
         }
       ]
     },
@@ -213,30 +223,34 @@
       "steps": [
         {
           "when": "10/2026",
-          "what": "Bắt đầu tuyển nhóm thử nghiệm"
+          "what": "Bắt đầu tuyển nhóm thử nghiệm",
+          "note": "Chúng tôi tuyển từ các nhóm chạy, phòng leo núi và cộng đồng lướt sóng"
         },
         {
           "when": "11/2026",
-          "what": "Đánh giá ẩn danh"
+          "what": "Đánh giá ẩn danh",
+          "note": "Hai ba mẫu đã che tên nhà sản xuất, so sánh theo sáu tiêu chí"
         },
         {
           "when": "12/2026",
-          "what": "Công bố tổng hợp · chốt công thức"
+          "what": "Công bố tổng hợp · chốt công thức",
+          "note": "Công bố cả điểm của những công thức không được chọn"
         },
         {
           "when": "02/2027",
-          "what": "Mở gọi vốn"
+          "what": "Mở gọi vốn",
+          "note": ""
         },
         {
           "when": "Nửa đầu 2027",
-          "what": "Ra mắt"
+          "what": "Ra mắt",
+          "note": ""
         }
       ]
     },
     "product": {
       "kicker": "First Product",
       "name": "Daily Sunscreen",
-      "spec": "SPF50+ / PA++++ · Tuýp 50ml",
       "cta": "Xem sản phẩm",
       "table": {
         "confirmed": "Đã xác định",
@@ -246,6 +260,7 @@
           "protection": "sau thẩm định chức năng",
           "texture": "sau khi tổng hợp điểm",
           "waterResistant": "sau khi có báo cáo thử nghiệm",
+          "volume": "sau khi đặt vỏ",
           "container": "sau khi đặt vỏ"
         },
         "note": "Những mục chưa xác định thì chúng tôi ghi là chưa xác định. Bảng này sẽ được điền khi việc tổng hợp điểm kết thúc vào tháng 12 năm 2026.",
@@ -282,6 +297,9 @@
       "belief": "Chúng tôi tin rằng đi bộ, chạy, đổ mồ hôi, gặp nước rồi lại chuyển động — mỗi khoảnh khắc ấy đều là lúc ta chăm sóc chính mình.",
       "close": "Càng vận động nhiều, làn da càng cần sự chăm sóc tinh tế hơn; càng được chăm sóc dễ chịu, ta càng có thể tự do chuyển động trở lại.\nChuyển động và chăm sóc cùng tồn tại một cách tự nhiên — đó là lý do PAROS bắt đầu."
     },
+    "maker": {
+      "kicker": "Người làm ra"
+    },
     "island": {
       "kicker": "The Name",
       "lead": "Chúng tôi không chỉ mượn một cái tên từ hòn đảo Hy Lạp.",
@@ -289,6 +307,13 @@
       "attitude": "Paros là nơi sức mạnh của thiên nhiên và vẻ đẹp không đối lập nhau. Dưới nắng gắt biển vẫn trong, giữa gió mạnh người ta vẫn chuyển động tự do, và hòn đá bị thời gian mài mòn lại càng đẹp hơn.",
       "stance": "Mạnh nhưng không thô. Năng động nhưng không nặng nề. Tự nhiên nhưng không vụng về. Đó là vẻ đẹp mà PAROS nghĩ đến.",
       "note": "Vì vậy chúng tôi không bê nguyên phong cảnh nơi ấy về. Thứ giữ lại chỉ là cảm giác có được ở Paros."
+    },
+    "naming": {
+      "kicker": "Cách gọi tên",
+      "body": [
+        "Tên thương hiệu là PAROS, tiếng Hàn viết là 파로스.\nCông ty vận hành là AVORA LABS (아보라랩스).",
+        "Tên lấy từ đảo Paros của Hy Lạp, nhưng chúng tôi không phải\nthương hiệu du lịch của hòn đảo đó — chúng tôi là thương hiệu chống nắng làm tại Seoul."
+      ]
     },
     "elements": {
       "kicker": "Brand Codes",
@@ -311,6 +336,16 @@
         }
       ],
       "note": "Bốn yếu tố này xuyên suốt sản phẩm, thiết kế, chiến dịch và nội dung."
+    },
+    "how": {
+      "kicker": "Làm như thế nào",
+      "body": [
+        "Chúng tôi không tự phát triển công thức.\nChúng tôi chọn trong số công thức nhà sản xuất đã có, đã thử nghiệm và thẩm định.",
+        "Phần lớn thương hiệu mỹ phẩm Hàn Quốc đều làm như vậy.\nĐiều hiếm gặp là nói ra điều đó, và công bố cả tiêu chí để chọn.",
+        "Thứ chúng tôi thêm vào không phải thành phần mà là sự chọn lọc.\nSáu tiêu chí, điểm số và ngưỡng loại được định ra và công bố trước,\nrồi chúng tôi theo đúng điểm mà những người thực sự vận động chấm.",
+        "Chúng tôi công bố cả điểm của những công thức bị loại.\nChỉ nói đã chọn gì mà không nói đã loại gì\nthì đó không phải chọn, mà là làm ra vẻ đã chọn."
+      ],
+      "cta": "Xem bảng điểm"
     },
     "audience": {
       "kicker": "Who It Is For",

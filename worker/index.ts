@@ -1884,7 +1884,14 @@ async function route(request: Request, env: Env, ctx: ExecutionContext): Promise
 
     if (slug) {
       for (const base of [`/${lang}/journal`, `/${lang}/support/notice`]) {
-        const probe = await env.ASSETS.fetch(new URL(`${base}/${slug}/`, url).href);
+        /*
+         * `HEAD` 로 두드립니다. `GET` 이면 존재만 확인하려고 대상 HTML 을
+         * 통째로 받아 놓고 버리게 됩니다.
+         */
+        const probe = await env.ASSETS.fetch(
+          new URL(`${base}/${slug}/`, url).href,
+          { method: 'HEAD' },
+        );
         if (probe.ok) {
           target = `${base}/${slug}/`;
           break;
@@ -1892,7 +1899,16 @@ async function route(request: Request, env: Env, ctx: ExecutionContext): Promise
       }
     }
 
-    return Response.redirect(new URL(target, url).href, 301);
+    /*
+     * **쿼리를 그대로 옮깁니다.**
+     *
+     * 밖에 공유된 링크에는 대개 유입 파라미터가 붙어 있습니다
+     * (`?utm_source=kakao`). 경로만 새 주소로 바꾸고 쿼리를 버리면 그
+     * 클릭이 전부 "직접 유입" 으로 잡혀, 어디서 왔는지가 사라집니다.
+     */
+    const destination = new URL(target, url);
+    destination.search = url.search;
+    return Response.redirect(destination.href, 301);
   }
 
   // 5 — 그 외에는 정적 에셋에 넘깁니다.

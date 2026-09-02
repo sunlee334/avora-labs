@@ -303,6 +303,18 @@ const criteriaRows = h.panel.criteria.map((item) => {
     <p class="kicker">{h.problem.kicker}</p>
     <h2 class="display display--tight">{h.problem.lead}</h2>
     <p class="body" style="margin-top: 26px">{h.problem.body}</p>
+    {/*
+      구체적 장면.
+
+      앞 문단은 카테고리를 요약하고("둘 중 하나였습니다"), 이 문단은 그것이
+      **몸에서 어떻게 일어나는지** 를 말합니다. 형용사를 더하지 않고 장면을
+      더합니다 — 방문자가 확인하거나 반박할 수 있는 진술이어야 합니다.
+
+      ⚠️ 경쟁사를 지목하지 않습니다. 카테고리 전체에 대한 서술로 둡니다.
+    */}
+    <p class="body problem__scene">
+      {h.problem.scene.map((line) => <span>{line}</span>)}
+    </p>
     <p class="body" style="margin-top: 18px">{h.problem.close}</p>
   </section>
 
@@ -430,6 +442,12 @@ const criteriaRows = h.panel.criteria.map((item) => {
               <time class="timeline__when" datetime={TIMELINE_DATES[i]}>{step.when}</time>
               <span class="timeline__what">{step.what}</span>
               {/*
+                설명 한 줄. 아직 적을 것이 없는 단계는 비어 있고, 비면
+                줄이 나오지 않습니다 — 날짜를 앞당기거나 없는 계획을
+                지어내지 않습니다.
+              */}
+              {step.note && <span class="timeline__note">{step.note}</span>}
+              {/*
                 지나간 단계에는 배지를 그리지 않습니다 — "완료" 에 해당하는
                 문구가 다섯 언어 어디에도 없고, 지어내면 검수받지 않은 줄이
                 다섯 개 늘어납니다. 이유는 `config/timeline.ts` 에 있습니다.
@@ -547,6 +565,8 @@ const criteriaRows = h.panel.criteria.map((item) => {
             <div>
               <strong class="journey__word">{step.word}</strong>
               <span class="journey__body">{step.body}</span>
+              {/* 두 번째 줄 — 그 단계에서 실제로 무엇이 걸리는지. */}
+              {step.note && <span class="journey__note">{step.note}</span>}
             </div>
           </li>
         ))

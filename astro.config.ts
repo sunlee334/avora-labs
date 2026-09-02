@@ -4,13 +4,42 @@ import { satteri } from '@astrojs/markdown-satteri';
 import { hastTableScroll } from './src/hast/table-scroll';
 import { ORIGIN, LOCALES, DEFAULT_LOCALE, LOCALE_TAGS, INDEXED_LOCALES } from './src/config/site';
 import { inSitemap } from './src/config/reserved-paths';
-import { readdirSync, readFileSync } from 'node:fs';
+import { readdirSync, readFileSync, statSync } from 'node:fs';
+import paymentConfig from './src/config/payment-config.json' with { type: 'json' };
+import paymentProduct from './src/data/product.json' with { type: 'json' };
 
 import sentry from '@sentry/astro';
 
-/** 자사 결제가 켜져 있는가. 꺼져 있으면 후기가 존재할 수 없어 사이트맵에서 뺍니다. */
-const SELLS_DIRECTLY = process.env.PUBLIC_CHECKOUT_MODE === 'internal'
-  && Boolean(process.env.PUBLIC_PRODUCT_PRICE);
+/**
+ * 자사 결제가 켜져 있는가. 꺼져 있으면 후기가 존재할 수 없어 사이트맵에서 뺍니다.
+ *
+ * ⚠️ **환경변수만 보면 안 됩니다.** `src/config/runtime.ts` 는 환경변수를
+ * *덮어쓰기* 로만 쓰고, 없으면 `payment-config.json` 의 `checkout` 과
+ * `product.json` 의 `price` 를 봅니다. 그 파일 주석이 못 박아 두었습니다 —
+ * "운영 배포에서는 이 변수들을 설정하지 않습니다. 실제로 결제를 열 때는
+ * 환경변수가 아니라 payment-config.json 과 product.json 을 고치세요."
+ *
+ * 처음에는 여기서 환경변수만 읽었습니다. 그러면 문서가 시키는 대로 설정
+ * 파일을 고쳐 결제를 열었을 때 **화면은 후기를 보여주는데 사이트맵에서는
+ * 영영 빠진 채** 로 남습니다. `reserved-paths.ts` 가 "결제가 켜지는 순간
+ * 사이트맵에도 저절로 돌아옵니다" 라고 적어 둔 것이 거짓이 됩니다.
+ *
+ * 같은 규칙을 여기서 다시 씁니다 — `runtime.ts` 를 import 할 수는 없습니다
+ * (`import.meta.env` 를 타서 설정 파일 평가 시점에 로드되지 않습니다).
+ * 판정 순서와 기본값을 그쪽과 똑같이 맞춥니다.
+ */
+const priceOverride = process.env.PUBLIC_PRODUCT_PRICE;
+const PRICE_FOR_SITEMAP =
+  priceOverride !== undefined && priceOverride !== ''
+    ? Number(priceOverride)
+    : (paymentProduct.price as number | null);
+const CHECKOUT_FOR_SITEMAP =
+  process.env.PUBLIC_CHECKOUT_MODE ??
+  (paymentConfig.countries[paymentConfig.defaultCountry as 'KR'].checkout as string);
+const SELLS_DIRECTLY =
+  CHECKOUT_FOR_SITEMAP === 'internal' &&
+  PRICE_FOR_SITEMAP !== null &&
+  !Number.isNaN(PRICE_FOR_SITEMAP);
 
 /**
  * 글 주소 → 마지막으로 달라진 날.
@@ -25,9 +54,19 @@ const SELLS_DIRECTLY = process.env.PUBLIC_CHECKOUT_MODE === 'internal'
  */
 const POST_DATES = new Map<string, string>();
 for (const locale of readdirSync('./src/content/posts')) {
-  for (const file of readdirSync(`./src/content/posts/${locale}`)) {
+  /*
+   * 디렉터리인지 먼저 봅니다. macOS 가 만드는 `.DS_Store` 가 여기 있으면
+   * `readdirSync` 가 ENOTDIR 로 던지고, 설정 파일 평가 중이라 Astro 의 오류
+   * 처리를 거치지 못한 채 `npm run build` 와 `npm run dev` 가 통째로 죽습니다.
+   * `scripts/check-slugs.mjs` 가 같은 자리에서 이미 이 검사를 하고 있었는데,
+   * 이 반복문을 새로 쓰면서 빠뜨렸습니다.
+   */
+  const dir = `./src/content/posts/${locale}`;
+  if (!statSync(dir).isDirectory()) continue;
+
+  for (const file of readdirSync(dir)) {
     if (!file.endsWith('.md')) continue;
-    const front = readFileSync(`./src/content/posts/${locale}/${file}`, 'utf8').split('---')[1] ?? '';
+    const front = readFileSync(`${dir}/${file}`, 'utf8').split('---')[1] ?? '';
     const pick = (key: string) => front.match(new RegExp(`^${key}:\\s*(\\S+)`, 'm'))?.[1];
 
     // 초안은 페이지 자체가 만들어지지 않으므로 사이트맵에도 없습니다.

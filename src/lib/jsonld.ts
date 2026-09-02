@@ -32,7 +32,17 @@ import product from '../data/product.json';
 const ID = {
   organization: `${ORIGIN}/#organization`,
   brand: `${ORIGIN}/#brand`,
-  product: `${ORIGIN}/#product`,
+  /*
+   * ⚠️ **제품은 언어마다 다른 노드입니다.**
+   *
+   * 처음에는 회사·브랜드처럼 전역 이름표 하나를 줬습니다. 그런데 `url` 과
+   * `image` 와 `description` 은 전부 언어마다 다릅니다. 그러면 다섯 페이지가
+   * **같은 개체에 대해 서로 다른 정식 주소와 그림과 설명을 주장** 하게 되고,
+   * 그건 이름표가 아예 없는 것보다 나쁩니다.
+   *
+   * `website` 를 언어별로 둔 것과 같은 이유입니다.
+   */
+  product: (locale: Locale) => `${absoluteUrl(localePath(locale, 'product'))}#product`,
   website: (locale: Locale) => `${absoluteUrl(localePath(locale))}#website`,
 } as const;
 
@@ -144,7 +154,7 @@ export function productSchema(locale: Locale, name: string, description: string)
   const schema: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Product',
-    '@id': ID.product,
+    '@id': ID.product(locale),
     name,
     description,
     sku: product.sku,
@@ -238,9 +248,17 @@ export function article(input: {
      * 두 개의 다른 대표 그림을 말할 이유가 없습니다.
      */
     image: absoluteUrl(`/og/home.${input.locale}.jpg`),
-    // 글쓴이는 개인이 아니라 브랜드입니다. 1인 운영이라도 개인 이름을
-    // 구조화 데이터로 내보낼 이유가 없습니다.
-    author: { '@type': 'Organization', '@id': ID.brand, name: BUSINESS.brandName },
+    /*
+     * 글쓴이는 개인이 아니라 회사입니다. 1인 운영이라도 개인 이름을 구조화
+     * 데이터로 내보낼 이유가 없습니다.
+     *
+     * ⚠️ 한때 여기서 `#brand` 를 가리키면서 타입을 `Organization` 으로 적었습니다.
+     * 그런데 `organization()` 이 같은 이름표를 **`Brand`** 로 선언합니다. 합치면
+     * 한 노드가 Brand 이면서 Article 의 저자가 되는데, Google 의 Article 안내는
+     * 저자를 Person 또는 Organization 으로 요구합니다. 아래 `publisher` 와 같은
+     * 노드를 가리킵니다.
+     */
+    author: { '@type': 'Organization', '@id': ID.organization, name: BUSINESS.companyName },
     /*
      * 펴낸 곳에는 로고가 붙어야 합니다(Google Article 안내). 값은
      * `organization()` 이 쓰는 것과 같은 상수라, 브랜드 자산을 바꿀 때

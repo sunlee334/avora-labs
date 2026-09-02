@@ -43,5 +43,14 @@ const posts = await listFor(locale, 'notice');
     <p class="body">{page.intro}</p>
 
     <PostList locale={locale} category="notice" posts={posts} empty={page.empty} />
+
+    {/*
+      고객센터로 돌아가는 길. 이 목록은 최상위 메뉴에 없어서, 이 링크가
+      없으면 브라우저 뒤로가기 말고는 나갈 방법이 없습니다 — 옛 통합 목록이
+      갖고 있던 것을 나누면서 빠뜨렸습니다.
+    */}
+    <p class="postList__back">
+      <a class="tapLink" href={localePath(locale, 'support')}>{t.support.heading}</a>
+    </p>
   </section>
 </Base>
