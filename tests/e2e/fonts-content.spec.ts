@@ -20,6 +20,7 @@ import {
   POSTS_ROOT,
 } from '../../scripts/build-fonts.mjs';
 import { checkSlug, RESERVED_SLUG_PREFIXES } from '../../src/config/reserved-paths';
+import { BUSINESS, LOCALE_LABELS, LOCALES } from '../../src/config/site';
 
 /**
  * 글이 폰트를 깨뜨리지 않는지.
@@ -113,6 +114,41 @@ test.describe('글 글자 수집', () => {
     expect(POSTS_ROOT).toContain('src/content/posts');
     expect((charsFor('ko').body as Set<string>).has('착')).toBe(true);
   });
+});
+
+/**
+ * 사전 밖에 있으면서 모든 화면에 그려지는 글자.
+ *
+ * 서브셋은 오랫동안 `src/i18n/{locale}.json` 만 보고 만들어졌습니다. 그런데
+ * 두 덩어리가 그 밖에 있으면서 **모든 페이지에** 나옵니다 — 푸터의 법정
+ * 표시(`BUSINESS`)와 언어 전환기(`LOCALE_LABELS`).
+ *
+ * 실측한 구멍이었습니다. 한국어 서브셋에도 `랩`(아보라랩스)·`규`(이영규)·
+ * `컵`(월드컵북로)이 없었고, 나머지 네 언어에는 주소와 상호의 한글이 통째로
+ * 없었습니다. 언어 전환기는 더 나빠서, 어느 화면에서든 지금 보는 언어를 뺀
+ * 넷의 이름이 다른 서체로 떨어졌습니다.
+ *
+ * ── 왜 `charsFor` 가 아니라 여기서 요구하는가 ───────────────
+ * `charsFor` 에서 이 값들을 빼면 기대집합과 실제집합이 **함께** 줄어
+ * `fonts-coverage.spec.ts` 는 그대로 통과합니다. 그래서 요구를 이 파일에
+ * 적습니다 — 원본(`site.ts`)에서 직접 읽어 대조하므로, 수집을 지우면 여기가
+ * 막습니다. `panel.spec.ts` 가 목적지를 이름으로 못 박은 것과 같은 이유입니다.
+ */
+test.describe('사전 밖의 글자도 서브셋에 있다', () => {
+  const always = [...Object.values(BUSINESS), ...Object.values(LOCALE_LABELS)]
+    .filter((v): v is string => typeof v === 'string')
+    .join('');
+
+  for (const locale of LOCALES) {
+    test(`${locale}: 사업자 정보와 언어 이름이 전부 들어 있다`, () => {
+      const { body } = charsFor(locale);
+      const missing = [...new Set(always)].filter((ch) => ch !== ' ' && !body.has(ch));
+      expect(
+        missing,
+        `${locale} 서브셋에 없는 글자: ${missing.join('')} — 이 글자들은 시스템 서체로 떨어집니다`,
+      ).toEqual([]);
+    });
+  }
 });
 
 test.describe('마크다운이 렌더될 때만 나오는 글자', () => {

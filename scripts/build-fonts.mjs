@@ -45,6 +45,15 @@ import { createHash } from 'node:crypto';
 import { resolve, dirname, join, basename } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+/*
+ * 사전 밖에 있으면서 **모든 화면에 그려지는** 글자들.
+ *
+ * `site.ts` 는 import 가 하나도 없는 순수 상수 파일이라 여기서 그대로
+ * 읽을 수 있습니다(Node 22.18+ 는 타입 스트리핑이 기본입니다 — package.json
+ * 의 engines 가 그 하한을 잡고 있습니다). `nav.ts` 가 순수해야 하는 것과
+ * 같은 성질을 여기서도 씁니다.
+ */
+import { BUSINESS, LOCALE_LABELS } from '../src/config/site.ts';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT_ROOT = resolve(root, 'public/fonts');
@@ -430,6 +439,30 @@ export function charsFor(locale, postsRoot = POSTS_ROOT) {
 
   const bodyStrings = [];
   walkStrings(data, bodyStrings);
+  /*
+   * 사전에 없는데 화면에 나오는 글자들.
+   *
+   * 서브셋은 `src/i18n/{locale}.json` 만 보고 만들어졌는데, 두 덩어리가
+   * 그 밖에 있으면서 **모든 페이지에** 그려집니다.
+   *
+   *   BUSINESS       푸터의 법정 표시 — 상호·대표자·주소·신고번호
+   *   LOCALE_LABELS  언어 전환기 — 다섯 언어 이름을 **원어로** 나열합니다
+   *
+   * 실측한 구멍입니다. 한국어 서브셋에도 `랩`(아보라랩스)·`규`(이영규)·
+   * `컵`(월드컵북로) 셋이 없었고, 나머지 네 언어에는 주소와 상호의 한글이
+   * 통째로 없었습니다. 언어 전환기는 더 나빠서, 어느 화면에서든 지금 보는
+   * 언어를 뺀 넷의 이름이 전부 다른 서체로 떨어졌습니다 — 한국어 화면의
+   * `简体中文`·`ไทย` 가 그렇습니다.
+   *
+   * 빌드는 통과하고 화면도 "글자는 보이므로" 멀쩡해 보입니다. macOS 는
+   * 시스템 서체가 받아 주지만 Windows·Android 에서는 자간과 굵기가 눈에
+   * 띄게 어긋납니다 — 만든 사람 화면에서는 드러나지 않는 종류입니다.
+   *
+   * **언어와 무관하게 다섯 벌 모두에 넣습니다.** 이 값들은 사전이 아니라
+   * 설정에서 오므로 언어별로 달라지지 않습니다.
+   */
+  bodyStrings.push(...Object.values(BUSINESS));
+  bodyStrings.push(...Object.values(LOCALE_LABELS));
   // 글 본문은 번역 파일에 없습니다. 여기서 합치지 않으면 서브셋에 빠지고,
   // 빌드는 통과하는데 화면에서 한 문장 안의 서체가 섞입니다.
   bodyStrings.push(...postStringsFor(locale, postsRoot));
