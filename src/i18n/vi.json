@@ -198,31 +198,30 @@
     },
     "timeline": {
       "kicker": "Tiếp theo",
+      "states": {
+        "active": "đang diễn ra",
+        "planned": "dự kiến"
+      },
       "steps": [
         {
           "when": "10/2026",
-          "what": "Bắt đầu tuyển nhóm thử nghiệm",
-          "state": "đang diễn ra"
+          "what": "Bắt đầu tuyển nhóm thử nghiệm"
         },
         {
           "when": "11/2026",
-          "what": "Đánh giá ẩn danh",
-          "state": "dự kiến"
+          "what": "Đánh giá ẩn danh"
         },
         {
           "when": "12/2026",
-          "what": "Công bố tổng hợp · chốt công thức",
-          "state": "dự kiến"
+          "what": "Công bố tổng hợp · chốt công thức"
         },
         {
           "when": "02/2027",
-          "what": "Mở gọi vốn",
-          "state": "dự kiến"
+          "what": "Mở gọi vốn"
         },
         {
           "when": "Nửa đầu 2027",
-          "what": "Ra mắt",
-          "state": "dự kiến"
+          "what": "Ra mắt"
         }
       ]
     },

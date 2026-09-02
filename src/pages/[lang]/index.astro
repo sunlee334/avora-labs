@@ -17,6 +17,7 @@ import LaunchNotify from '../../components/LaunchNotify.astro';
 import StickyNotify from '../../components/StickyNotify.astro';
 import CriteriaTable from '../../components/CriteriaTable.astro';
 import { CAN_ORDER } from '../../config/runtime';
+import { TIMELINE_DATES, stepStates } from '../../config/timeline';
 
 export function getStaticPaths() {
   return LOCALES.map((lang) => ({ params: { lang } }));
@@ -25,6 +26,24 @@ export function getStaticPaths() {
 const locale = Astro.params.lang as Locale;
 const t = dict(locale);
 const h = t.home;
+
+/*
+ * 타임라인 진행 상태는 **빌드 시각 기준**으로 정합니다.
+ *
+ * 손으로 적으면 시간이 지나며 반드시 어긋납니다 — 그게 이 화면이 모집 전에
+ * "진행중" 이라고 말하고 있던 이유입니다. 배포할 때마다 다시 계산되므로,
+ * 남는 어긋남은 "마지막 배포 이후 지난 시간" 만큼입니다.
+ *
+ * 날짜와 문구가 따로 있으므로 개수가 어긋나면 다른 단계의 날짜가 붙습니다.
+ * 조용히 틀리느니 빌드를 멈춥니다.
+ */
+if (TIMELINE_DATES.length !== h.timeline.steps.length) {
+  throw new Error(
+    `타임라인 날짜 ${TIMELINE_DATES.length}개 ≠ ${locale} 문구 ${h.timeline.steps.length}개 ` +
+      '— config/timeline.ts 와 i18n 의 home.timeline.steps 를 함께 고치세요.',
+  );
+}
+const states = stepStates(new Date());
 
 /*
  * 배점과 커트라인은 **`/panel` 과 같은 원본을 읽습니다.**
@@ -377,17 +396,42 @@ const criteriaRows = h.panel.criteria.map((item) => {
     **숫자를 지어내지 않습니다.** 여기 있는 것은 일정뿐이고, 집계 결과는
     실제 데이터가 나온 뒤에 붙습니다(C4 의 집계판).
   */}
+  {/*
+    ⚠️ 진행 상태를 **손으로 적지 않습니다.**
+
+    전에는 i18n 에 `state: "진행중"` 이 박혀 있고 강조도 `i === 0` 이었습니다.
+    그래서 모집이 시작하지도 않은 2026년 9월에 화면이 "진행중" 이라고 말했고,
+    `llms.txt` 가 적어 둔 "Recruiting opens in October 2026" 을 정면으로
+    뒤집고 있었습니다. 답변엔진은 화면을 먼저 읽습니다.
+
+    날짜는 `config/timeline.ts` 에 한 벌만 두고 여기서 오늘과 비교합니다.
+    문구(`2026.10` · `Oct 2026`)는 언어마다 다르므로 i18n 에 남습니다.
+  */}
   <section class="section wrap rise" data-section="timeline">
     <p class="kicker">{h.timeline.kicker}</p>
     <ol class="timeline">
       {
-        h.timeline.steps.map((step, i) => (
-          <li class={i === 0 ? 'timeline__now' : undefined}>
-            <span class="timeline__when">{step.when}</span>
-            <span class="timeline__what">{step.what}</span>
-            <span class="timeline__state">{step.state}</span>
-          </li>
-        ))
+        h.timeline.steps.map((step, i) => {
+          const state = states[i];
+          return (
+            <li class={state === 'active' ? 'timeline__now' : undefined}>
+              {/*
+                `when` 은 언어마다 표기가 갈립니다. 기계가 읽는 값은
+                `datetime` 에 ISO 로 한 번만 적습니다.
+              */}
+              <time class="timeline__when" datetime={TIMELINE_DATES[i]}>{step.when}</time>
+              <span class="timeline__what">{step.what}</span>
+              {/*
+                지나간 단계에는 배지를 그리지 않습니다 — "완료" 에 해당하는
+                문구가 다섯 언어 어디에도 없고, 지어내면 검수받지 않은 줄이
+                다섯 개 늘어납니다. 이유는 `config/timeline.ts` 에 있습니다.
+              */}
+              {state !== 'past' && (
+                <span class="timeline__state">{h.timeline.states[state]}</span>
+              )}
+            </li>
+          );
+        })
       }
     </ol>
   </section>

@@ -198,31 +198,30 @@
     },
     "timeline": {
       "kicker": "What comes next",
+      "states": {
+        "active": "in progress",
+        "planned": "planned"
+      },
       "steps": [
         {
           "when": "Oct 2026",
-          "what": "Test panel recruiting",
-          "state": "in progress"
+          "what": "Test panel recruiting"
         },
         {
           "when": "Nov 2026",
-          "what": "Blind evaluation",
-          "state": "planned"
+          "what": "Blind evaluation"
         },
         {
           "when": "Dec 2026",
-          "what": "Tally published · formula fixed",
-          "state": "planned"
+          "what": "Tally published · formula fixed"
         },
         {
           "when": "Feb 2027",
-          "what": "Funding opens",
-          "state": "planned"
+          "what": "Funding opens"
         },
         {
           "when": "H1 2027",
-          "what": "Launch",
-          "state": "planned"
+          "what": "Launch"
         }
       ]
     },
