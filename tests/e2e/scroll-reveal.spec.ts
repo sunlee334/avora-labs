@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 
 /**
  * 빠르게 스크롤해도 화면이 백지가 되지 않는가.
@@ -137,26 +138,47 @@ test.describe('빠르게 스크롤해도 읽을 것이 남는다', () => {
      * 안전망을 모듈 안에 두면 소용이 없습니다 — 모듈이 죽을 때 함께 죽습니다.
      * 그래서 `.js` 를 붙이는 **같은 단위** 에 있어야 합니다.
      */
+    /*
+     * ⚠️ "처음에는 흐리다" 를 **살아 있는 값으로 확인하지 않습니다.**
+     *
+     * 처음에는 `domcontentloaded` 직후 `opacity` 를 읽어 흐린지 봤는데, 그
+     * 확인이 **자기 2초 타이머와 경합** 했습니다. 스위트가 부하를 받으면
+     * 로드가 2초를 넘고, 그때는 안전망이 이미 켜져 있어 "흐린 것이 없다" 가
+     * 됩니다 — 검사가 맞는데 실패합니다.
+     *
+     * 흐리게 시작한다는 것은 **CSS 선언** 의 사실이므로 규칙에서 읽습니다.
+     * 시점과 무관합니다.
+     */
+    /*
+     * 규칙을 **소스에서** 읽습니다.
+     *
+     * 브라우저에서 `link[rel=stylesheet]` 를 fetch 하려다 세 번 헛돌았습니다 —
+     * `goto` 전에 평가해 `about:blank` 를 보고, 순서를 고쳐도 이 저장소의
+     * 스타일 전달 방식 때문에 그 링크로는 못 읽었습니다. `sticky-cta-clearance`
+     * 가 이미 같은 이유로 파일 읽기를 쓰고 있으니 그쪽에 맞춥니다.
+     */
+    const css = readFileSync('src/styles/global.css', 'utf8');
+    const rule = css.slice(css.indexOf('.js .rise {'), css.indexOf('.js .rise.is-in'));
+    expect(rule, '.js .rise 규칙을 못 찾았습니다').toContain('opacity');
+    expect(rule, '시작 불투명도가 토큰에서 오지 않습니다').toContain('--motion-rise-opacity');
+
     await page.route('**/_astro/*.js', (route) => route.abort());
     await page.goto('/ko/', { waitUntil: 'domcontentloaded' });
 
-    const faded = () =>
-      page.evaluate(
-        () =>
-          [...document.querySelectorAll('.rise')].filter(
-            (el) => Number(getComputedStyle(el).opacity) < 0.9,
-          ).length,
-      );
-
-    // 모듈이 없으니 처음에는 흐립니다 — 그 상태가 아니면 이 검사가 무의미합니다.
-    expect(await faded(), '모듈을 막았는데도 흐린 요소가 없습니다').toBeGreaterThan(0);
-
+    // 모듈이 오지 않으면 안전망이 켜져야 합니다 — 이것이 이 검사의 주장입니다.
     await page.waitForFunction(
       () => document.documentElement.classList.contains('rise-fallback'),
       undefined,
-      { timeout: 6000 },
+      { timeout: 8000 },
     );
-    expect(await faded(), '안전망이 켜졌는데 아직 흐립니다').toBe(0);
+
+    const faded = await page.evaluate(
+      () =>
+        [...document.querySelectorAll('.rise')].filter(
+          (el) => Number(getComputedStyle(el).opacity) < 0.9,
+        ).length,
+    );
+    expect(faded, '안전망이 켜졌는데 아직 흐립니다').toBe(0);
   });
 
   test('정상 경로에서는 안전망이 연출을 지우지 않는다', async ({ page }) => {
