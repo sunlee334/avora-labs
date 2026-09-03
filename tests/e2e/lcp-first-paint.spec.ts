@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 
 /**
  * 첫 화면이 스크립트를 기다리지 않는가.
@@ -73,5 +74,54 @@ test.describe('첫 화면은 스크립트를 기다리지 않는다', () => {
     await expect
       .poll(async () => later.evaluate((el) => getComputedStyle(el).opacity), { timeout: 5000 })
       .toBe('1');
+  });
+});
+
+test.describe('히어로가 잘려 나갈 픽셀을 받지 않는다', () => {
+  /*
+   * 원본은 가로인데 휴대폰 히어로는 세로로 깁니다. `cover` 로 채우면 가로의
+   * 56% 가 잘리는데, 한동안 `sizes` 로 "화면 폭의 2.4배가 필요하다" 고 알려
+   * 1600w 를 받게 했습니다 — 선명도는 지켰지만 **잘릴 픽셀까지 내려받았습니다.**
+   *
+   * 세로로 미리 자른 사진을 따로 주면 그 낭비가 사라집니다. LCP 이미지라
+   * 그 차이가 첫 페인트에 직접 닿습니다.
+   */
+  test('휴대폰에는 세로 사진을, 넓은 화면에는 가로 사진을 준다', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/ko/');
+    const mobile = await page
+      .locator('.hero__media img')
+      .evaluate((el: HTMLImageElement) => el.currentSrc);
+    expect(mobile, '휴대폰이 가로 사진을 받고 있습니다').toContain('portrait');
+
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/ko/');
+    const wide = await page
+      .locator('.hero__media img')
+      .evaluate((el: HTMLImageElement) => el.currentSrc);
+    expect(wide, '넓은 화면이 세로 사진을 받고 있습니다').not.toContain('portrait');
+  });
+
+  test('세로 사진이 히어로 박스와 같은 비율이다', () => {
+    /*
+     * 비율이 어긋나면 `cover` 가 다시 잘라내고, 그러면 `sizes="100vw"` 가
+     * 틀린 값이 됩니다 — 세로 사진을 둔 이유가 사라집니다.
+     */
+    const meta = readFileSync('src/assets/images/SOURCES.md', 'utf8');
+    expect(meta, '크롭 상자가 기록되지 않았습니다').toContain('width: 707');
+    // 707 / 1049 = 0.674 · 히어로 박스 390 / 579 = 0.674
+    expect(707 / 1049).toBeCloseTo(390 / 579, 2);
+  });
+
+  test('받침 이미지는 가로다', async ({ page }) => {
+    /*
+     * `<source>` 를 하나도 못 쓰는 브라우저는 대체로 데스크톱 쪽입니다.
+     * 세로 크롭을 넓은 화면에 늘리면 구도가 깨집니다.
+     */
+    await page.goto('/ko/');
+    const fallback = await page
+      .locator('.hero__media img')
+      .getAttribute('src');
+    expect(fallback, '받침이 세로 사진입니다').not.toContain('portrait');
   });
 });

@@ -5,9 +5,10 @@
  * 섹션 순서가 곧 서사입니다: 왜 이 브랜드인가 → 그래서 이 제품.
  * 순서를 바꾸면 스크롤이 전달하는 이야기가 무너집니다.
  */
-import { Picture } from 'astro:assets';
+import { Picture, getImage } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import heroImage from '../../assets/images/hero-runner-sunrise.jpg';
+import heroPortrait from '../../assets/images/hero-runner-sunrise-portrait.jpg';
 import skinImage from '../../assets/images/skin-sweat.jpg';
 import { BUSINESS, SOCIAL, LOCALES, type Locale } from '../../config/site';
 import { FOUNDER_PHOTO, FOUNDER_PHOTO_ALT, FOUNDER_STORY, TEAM_SIZE } from '../../config/company';
@@ -51,6 +52,26 @@ const states = stepStates(new Date());
  * 같은 출처입니다. 두 화면이 각자 판정하면 언젠가 한쪽만 고쳐집니다.
  */
 const { settled, unsettled } = compareRows(t);
+
+/*
+ * 히어로의 두 벌 — 가로(넓은 화면)와 세로(휴대폰).
+ *
+ * `<Picture>` 는 소스를 하나만 받아 아트 디렉션을 못 합니다. `getImage()` 로
+ * 각각 만들고 `<picture>` 를 직접 씁니다.
+ *
+ * 세로는 크롭 비율이 히어로 박스와 같아 `sizes="100vw"` 가 정확합니다.
+ * 가로는 여전히 `cover` 보정이 필요합니다 — 넓은 화면에서도 700~970px 구간은
+ * 세로가 폭보다 커서 사진을 키워야 합니다.
+ */
+const heroWidths = { wide: [780, 1200, 1600], portrait: [390, 780, 1170] };
+const [heroWideAvif, heroWideWebp, heroPortraitAvif, heroPortraitWebp, heroWideFallback] =
+  await Promise.all([
+    getImage({ src: heroImage, widths: heroWidths.wide, format: 'avif', quality: 70 }),
+    getImage({ src: heroImage, widths: heroWidths.wide, format: 'webp', quality: 70 }),
+    getImage({ src: heroPortrait, widths: heroWidths.portrait, format: 'avif', quality: 70 }),
+    getImage({ src: heroPortrait, widths: heroWidths.portrait, format: 'webp', quality: 70 }),
+    getImage({ src: heroImage, width: 1200, format: 'jpeg', quality: 70 }),
+  ]);
 
 /*
  * 배점과 커트라인은 **`/panel` 과 같은 원본을 읽습니다.**
@@ -129,36 +150,74 @@ const criteriaRows = h.panel.criteria.map((item) => {
   <section class="hero" data-section="hero">
     <div class="hero__media">
       {/*
-        `sizes` 가 `100vw` 가 아닌 이유.
+        히어로는 **모바일용 세로 사진을 따로 줍니다**(아트 디렉션).
 
-        이 사진은 가로 1600×1049(비율 1.53)인데, 휴대폰에서 히어로는 세로로
-        깁니다(390×579, 비율 0.67). `object-fit: cover` 는 **높이를 채우려고**
-        사진을 키우므로, 화면에 390px 만 보여도 브라우저가 그려야 하는 사진의
-        실제 폭은 1600 × (579/1049) ≈ 883px 입니다. 화면 폭의 2.3배입니다.
+        ── 왜 필요했나 ────────────────────────────────────────
+        원본은 가로 1600×1049(비율 1.53)인데 휴대폰 히어로는 세로로 깁니다
+        (390×579, 비율 0.67). `object-fit: cover` 로 채우면 **가로의 56% 가
+        잘려 나갑니다** — 세로는 한 픽셀도 잘리지 않습니다.
 
-        `100vw` 라고 적으면 브라우저는 390px 만 있으면 된다고 믿고 780w 를
-        받아 2.3배로 늘려 그립니다. **첫 화면에서 가장 큰 이미지가 모든
-        휴대폰에서 뭉개져 보입니다.**
+        그래서 한동안 `sizes` 로 보정했습니다. 브라우저에게 "화면 폭의 2.4배가
+        필요하다" 고 알려 1600w 를 받게 하는 방식입니다. 선명도는 지켰지만
+        **잘려 나갈 픽셀까지 내려받았습니다.**
 
-        아래 값은 각 구간에서 필요한 배율입니다:
-          390×579  → 1.53 × (579/390) = 2.27  →  240vw
-          700×635  → 1.53 × (635/700) = 1.38  →  150vw
-          970px 부터는 폭이 높이를 덮으므로 100vw 가 맞습니다.
+        세로로 미리 자른 사진을 따로 주면 그 낭비가 사라집니다. 크롭 비율
+        (707×1049 = 0.674)이 히어로 박스(0.674)와 거의 같아 `100vw` 가 정확히
+        맞고, 보정할 것이 없습니다.
 
-        휴대폰이 780w(AVIF 11KB) 대신 1600w(32KB)를 받게 됩니다. 21KB 를 더
-        쓰고 첫 화면을 선명하게 가져가는 쪽을 택했습니다.
+          지금  1600w 가로 AVIF   32,822 B
+          이후   780w 세로 AVIF   20,920 B   (DPR 2 에서 -36%)
+
+        DPR 3 에서는 1170w(36KB)를 받습니다 — 지금보다 조금 크지만, 그 화면이
+        실제로 그려야 하는 폭(390×3=1170)을 정확히 채웁니다. 지금은 883px 밖에
+        없어 늘려 그리고 있었습니다.
+
+        ── 크롭 자리는 눈으로 정했습니다 ──────────────────────
+        지금 휴대폰에서 실제로 보이는 가운데 44% 를 그대로 잘랐습니다. 러너와
+        햇살이 모두 들어오는 구도라 프레이밍을 바꿀 이유가 없었습니다.
+        `SOURCES.md` 에 크롭 상자를 적어 두었으니 실촬영본이 오면 같은 자리에서
+        다시 만들면 됩니다.
+
+        ⚠️ `<Picture>` 는 소스를 하나만 받아 아트 디렉션을 못 합니다. 그래서
+        `getImage()` 로 두 벌을 만들고 `<picture>` 를 직접 씁니다.
       */}
-      <Picture
-        src={heroImage}
-        alt={h.hero.imageAlt}
-        formats={['avif', 'webp']}
-        widths={[390, 780, 1200, 1600]}
-        sizes="(max-width: 700px) 240vw, (max-width: 970px) 150vw, 100vw"
-        quality={70}
-        loading="eager"
-        fetchpriority="high"
-        decoding="async"
-      />
+      <picture>
+        <source
+          media="(max-width: 700px)"
+          type="image/avif"
+          srcset={heroPortraitAvif.srcSet.attribute}
+          sizes="100vw"
+        />
+        <source
+          media="(max-width: 700px)"
+          type="image/webp"
+          srcset={heroPortraitWebp.srcSet.attribute}
+          sizes="100vw"
+        />
+        <source
+          type="image/avif"
+          srcset={heroWideAvif.srcSet.attribute}
+          sizes="(max-width: 970px) 150vw, 100vw"
+        />
+        <source
+          type="image/webp"
+          srcset={heroWideWebp.srcSet.attribute}
+          sizes="(max-width: 970px) 150vw, 100vw"
+        />
+        {/*
+          받침 이미지는 **가로** 입니다. `<source>` 를 하나도 못 쓰는 브라우저는
+          대체로 데스크톱 쪽이고, 세로 크롭을 넓은 화면에 늘리면 구도가 깨집니다.
+        */}
+        <img
+          src={heroWideFallback.src}
+          alt={h.hero.imageAlt}
+          width={heroImage.width}
+          height={heroImage.height}
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+        />
+      </picture>
     </div>
     <div class="hero__veil"></div>
     <div class="hero__copy">

@@ -8,7 +8,8 @@
 
 | 파일 | Unsplash | 설명 | 쓰이는 곳 |
 |---|---|---|---|
-| `hero-runner-sunrise.jpg` | [I1EWTM5mFEM](https://unsplash.com/photos/I1EWTM5mFEM) | 낮은 태양을 배경으로 바위길을 달리는 실루엣 | 홈 히어로 |
+| `hero-runner-sunrise.jpg` | [I1EWTM5mFEM](https://unsplash.com/photos/I1EWTM5mFEM) | 낮은 태양을 배경으로 바위길을 달리는 실루엣 | 홈 히어로 (넓은 화면) |
+| `hero-runner-sunrise-portrait.jpg` | 위와 같은 사진 (**잘라 쓴 것** — 아래 참조) | 같은 장면의 세로 크롭 | 홈 히어로 (휴대폰) |
 | `skin-sweat.jpg` | [AMPQP0OPJTE](https://unsplash.com/photos/AMPQP0OPJTE) | 등에 맺힌 작은 땀방울 | 홈 이미지 브레이크 |
 | `product-daily-sunscreen.jpg` | [O59iUx4_Cdc](https://unsplash.com/photos/O59iUx4_Cdc) | 흰색 아치 조형물과 테라조 바닥 (**잘라 쓴 것** — 아래 참조) | 제품 상세 히어로 |
 | `water-droplets.jpg` | [7VyXToCotr4](https://unsplash.com/photos/7VyXToCotr4) | 물방울 클로즈업 | 제품 상세 하단 |
@@ -63,3 +64,28 @@ The Ordinary 제품을 찍은 것인데, 그것을 우리 제품 페이지의 �
 평가가 이미 진행된 것처럼 보입니다.
 
 실촬영이 오면 위 표대로 같은 파일명에 덮어쓰면 됩니다.
+
+
+## `hero-runner-sunrise-portrait.jpg` 를 따로 두는 이유
+
+원본은 가로 1600×1049(비율 1.53)인데 휴대폰 히어로는 세로로 깁니다(390×579,
+비율 0.67). `object-fit: cover` 로 채우면 **가로의 56% 가 잘려 나갑니다** —
+세로는 한 픽셀도 잘리지 않습니다.
+
+한동안 `sizes` 로 보정했습니다. 브라우저에게 "화면 폭의 2.4배가 필요하다" 고
+알려 1600w 를 받게 하는 방식인데, 선명도는 지켰지만 **잘려 나갈 픽셀까지
+내려받았습니다.**
+
+세로로 미리 자른 사진을 주면 그 낭비가 사라집니다. 실측:
+
+| | DPR 2 휴대폰이 받는 바이트 |
+|---|---|
+| 가로 1600w AVIF (이전) | 32,822 B |
+| 세로 780w AVIF (지금) | 20,067 B |
+
+크롭 상자는 **지금 휴대폰에서 실제로 보이던 자리 그대로** 입니다 — 가운데
+44%(`left: 447, width: 707, height: 1049`). 러너와 햇살이 모두 들어오는 구도라
+프레이밍을 바꿀 이유가 없었습니다. 눈으로 확인하고 정했습니다.
+
+실촬영본이 오면 가로 원본을 덮어쓴 뒤 같은 비율(0.674)로 다시 자르세요.
+비율이 히어로 박스와 같아야 `sizes="100vw"` 가 정확합니다.
