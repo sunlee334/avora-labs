@@ -4262,6 +4262,71 @@ html {
  * 수집 항목 안내는 동의 문구보다 한 단 더 작고 옅게 둡니다. 둘 다 같은 무게면
  * 폼 아래가 회색 글씨 벽이 되어 어느 쪽도 읽히지 않습니다.
  */
+/*
+ * 접히는 개인정보 안내.
+ *
+ * ── 접힌 것을 알 수 있어야 한다 ──────────────────────────
+ * 모바일에는 호버가 없습니다. 기본 마커(▶)는 브라우저마다 크기·위치가 다르고
+ * WebKit 에서는 아주 작습니다. 지우고 `+` 를 직접 그립니다 — 열리면 가로선만
+ * 남아 `−` 가 됩니다.
+ *
+ * ── 손가락으로 누를 수 있어야 한다 ──────────────────────
+ * 12px 글씨 한 줄은 높이가 20px 남짓입니다. `min-height` 로 44px 를 만듭니다.
+ */
+.notify__terms {
+  margin-top: 8px;
+  border-top: 1px solid var(--color-border);
+}
+.notify__terms-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: var(--size-tap-min);
+  font-size: 12px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  /* 기본 삼각형 제거 — WebKit 은 `::-webkit-details-marker` 로만 지워집니다. */
+  list-style: none;
+}
+.notify__terms-summary::-webkit-details-marker {
+  display: none;
+}
+/* `+` 를 두 획으로 그립니다. 열리면 세로획만 사라집니다. */
+.notify__terms-mark {
+  position: relative;
+  flex: none;
+  width: 11px;
+  height: 11px;
+}
+.notify__terms-mark::before,
+.notify__terms-mark::after {
+  content: '';
+  position: absolute;
+  inset: 50% 0 auto;
+  height: 1px;
+  background: currentColor;
+}
+.notify__terms-mark::after {
+  inset: 0 50% auto;
+  width: 1px;
+  height: 100%;
+  transition: opacity var(--motion-dur-fast) var(--motion-ease-out);
+}
+.notify__terms[open] .notify__terms-mark::after {
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .notify__terms-mark::after {
+    transition: none;
+  }
+}
+/* 펼친 뒤 첫 문단이 제목에 붙지 않도록. */
+.notify__terms[open] .notify__privacy {
+  margin-top: 0;
+  padding-bottom: 4px;
+}
+
 .notify__privacy {
   margin-top: 8px;
   font-size: 12px;

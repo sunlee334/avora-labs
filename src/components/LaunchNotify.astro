@@ -183,13 +183,37 @@ const trapId = `trap-${source}`;
     </span>
   </label>
 
-  <p class="notify__privacy">{n.privacy.summary}</p>
   {/*
-    링크를 문장 끝에 붙이지 않고 제 줄로 내보냅니다. 12px 글씨 안의 인라인
-    링크는 107×14px 짜리 과녁이 되어 손가락으로 정확히 누를 수 없었습니다
-    (mobile-ux 의 44×44 검사가 잡았습니다). 푸터의 작은 링크와 같은 처리입니다.
+    이 문단은 접어 둡니다.
+
+    폼의 안내문이 114단어였고 그중 33단어가 여기였습니다. 390px 에서 폼
+    하나가 665px 를 차지하고 이 블록만 121px 입니다. 이메일 한 칸을 적으러 온
+    사람에게 처음부터 보여 줄 분량이 아닙니다.
+
+    **지우지는 않습니다.** 무엇을 받아 어디에 쓰고 얼마나 두는지를 폼 옆에서
+    말하는 것이 요점이고, 처리방침 링크만 두면 "읽어 보라" 는 말이지 알린 것이
+    아닙니다. 한 번 눌러 펼치는 자리로 옮길 뿐입니다.
+
+    `<details>` 는 자바스크립트 없이 접힙니다 — 스크립트가 죽어도 내용은
+    열립니다.
   */}
-  <p class="notify__privacy notify__privacy--link">
-    <a href={localePath(locale, 'legal/privacy')}>{n.privacy.link}</a>
-  </p>
+  <details class="notify__terms">
+    {/*
+      기본 마커(▶)를 지우고 직접 그립니다. 모바일에는 호버가 없어, 접혔다는
+      **시각 신호가 없으면 그냥 제목인 줄 압니다.** 탭 영역은 44px 이상입니다.
+    */}
+    <summary class="notify__terms-summary">
+      <span>{n.privacy.heading}</span>
+      <span class="notify__terms-mark" aria-hidden="true"></span>
+    </summary>
+    <p class="notify__privacy">{n.privacy.summary}</p>
+    {/*
+      링크를 문장 끝에 붙이지 않고 제 줄로 내보냅니다. 12px 글씨 안의 인라인
+      링크는 107×14px 짜리 과녁이 되어 손가락으로 정확히 누를 수 없었습니다
+      (mobile-ux 의 44×44 검사가 잡았습니다). 푸터의 작은 링크와 같은 처리입니다.
+    */}
+    <p class="notify__privacy notify__privacy--link">
+      <a href={localePath(locale, 'legal/privacy')}>{n.privacy.link}</a>
+    </p>
+  </details>
 </form>
