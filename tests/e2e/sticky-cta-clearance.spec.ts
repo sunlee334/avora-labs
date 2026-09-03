@@ -82,6 +82,11 @@ test.describe('하단 고정 바', () => {
     /*
      * 사용자가 실제로 하는 일을 그대로 합니다 — 누르고 싶은 것을 화면
      * 가운데로 가져온 뒤, 그 자리에서 무엇이 잡히는지 봅니다.
+     *
+     * ⚠️ 이 검사는 `setViewportSize` 를 하지 않습니다. 두 폭이 확인되는 것은
+     * `playwright.config.ts` 의 mobile(iPhone 14)·desktop(1280×900) **두
+     * 프로젝트** 덕분입니다. 프로젝트 목록이 한쪽으로 줄면 이 검사도 조용히
+     * 한 폭만 보게 됩니다 — 그때 이 주석이 단서가 됩니다.
      */
     await page.goto('/ko/');
     const blocked = await page.evaluate(async () => {

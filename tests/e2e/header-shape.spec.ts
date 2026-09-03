@@ -188,7 +188,7 @@ test.describe('앵커로 이동해도 제목이 가리지 않는다', () => {
          * 하한만 두었더니 진짜 회귀를 놓쳤습니다. `scroll-padding-top` 을
          * 문서에 더하면서 요소별 `scroll-margin-top` 을 지우지 않아 둘이
          * 더해졌고, `#notify` 가 85+93=178px 아래에 착지했습니다. 헤더는
-         * 70px 인데 죽은 공간이 109px 이었습니다 — 화면 한 뭉치가 그냥
+         * 69px 인데 죽은 공간이 109px 이었습니다 — 화면 한 뭉치가 그냥
          * 비어 있는 상태인데 "가리지 않는다" 는 통과했습니다.
          *
          * 여유는 24px 을 의도한 값입니다. 렌더 오차와 Lenis 의 감속을
@@ -205,28 +205,32 @@ test.describe('앵커로 이동해도 제목이 가리지 않는다', () => {
     /*
      * 숫자를 따로 적어 두면 헤더 높이를 바꾸는 날 한쪽만 고쳐집니다.
      * 계산식이 `--nav-height` 를 지나는지 확인합니다.
+     *
+     * ⚠️ **두 화면을 봅니다.** `#story` 는 `/brand` 에만 있어서, 홈만 훑으면
+     * 거기에 `scroll-margin-top` 이 다시 붙어도 못 잡습니다 — 이 결함이
+     * 처음 생긴 자리가 정확히 `#story` 였습니다.
      */
+    for (const path of ['/ko/', '/ko/brand']) {
+      await page.goto(path);
+      const strays = await page.evaluate(() =>
+        [...document.querySelectorAll('[id]')]
+          .filter((el) => getComputedStyle(el).scrollMarginTop !== '0px')
+          .map((el) => `#${el.id}`),
+      );
+      expect(strays, `${path} 에 scroll-margin 을 가진 앵커: ${strays}`).toEqual([]);
+    }
+
     await page.goto('/ko/');
     const values = await page.evaluate(() => {
       const root = getComputedStyle(document.documentElement);
-      const strays = [...document.querySelectorAll('[id]')]
-        .filter((el) => getComputedStyle(el).scrollMarginTop !== '0px')
-        .map((el) => `#${el.id}`);
       return {
         pad: root.scrollPaddingTop,
         navVar: root.getPropertyValue('--nav-height').trim(),
         navReal: Math.round(document.querySelector('.nav')!.getBoundingClientRect().height),
-        strayMargins: strays,
       };
     });
     expect(values.pad, 'scroll-padding-top 이 없습니다').not.toBe('auto');
-    /*
-     * 요소별 `scroll-margin-top` 이 남아 있으면 두 값이 **더해집니다.**
-     * 출처가 한 곳이라는 말은 선언이 한 곳이라는 뜻입니다.
-     */
-    expect(values.strayMargins, `아직 scroll-margin 을 가진 앵커: ${values.strayMargins}`).toEqual(
-      [],
-    );
+
     // 변수와 실제 높이가 갈라지면 계산식이 맞아도 결과가 틀립니다.
     expect(
       Math.abs(Number.parseInt(values.navVar, 10) - values.navReal),

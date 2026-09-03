@@ -394,6 +394,25 @@ const criteriaRows = h.panel.criteria.map((item) => {
     <p class="body" style="margin-top: 18px">{h.problem.close}</p>
   </section>
 
+  {/*
+    ── 홈에서 `--lg`(강조)를 쓰는 자리 ────────────────────────
+    열두 섹션 중 **둘** 뿐입니다. 규칙은 이렇습니다.
+
+      **읽는 사람에게 무언가를 요구하는 섹션** 을 강조합니다.
+      THE CHOICE 는 판단을 요구하고("무엇을 고를 것인가"),
+      TEST PANEL 은 행동을 요구합니다("지원하시겠습니까").
+      앞뒤로 크게 띄워 두면 스크롤이 거기서 한 박자 쉽니다.
+
+      나머지는 **알리는 섹션** 이라 기본 여백입니다. 타임라인·첫 제품·
+      여정·회사·FAQ·하지 않기로 한 것 — 읽고 지나가면 되는 것들입니다.
+
+    `/brand` 는 다른 규칙을 씁니다(서사 vs 뒷받침). 그 페이지는 요구가
+    아니라 이야기가 목적이라 기준이 다릅니다 — `brand.astro` 머리말 참고.
+
+    새 섹션을 넣을 때 "이 섹션이 사람에게 무엇을 요구하는가" 를 먼저
+    정하세요. 지시서 05-UI수정 11절이 "규칙이 보이지 않는다" 고 적은 것은
+    이 규칙이 코드에 없었기 때문입니다.
+  */}
   <section class="section section--lg section--dark wrap wrap--narrow rise" data-section="the_choice">
     <p class="kicker">{h.choice.kicker}</p>
     <h2 class="display display--tight">{h.choice.lead}</h2>

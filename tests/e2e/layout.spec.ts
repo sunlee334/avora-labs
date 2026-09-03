@@ -467,10 +467,10 @@ test.describe('브랜드 페이지', () => {
     await page.waitForURL(/\/ko\/brand\/#story$/, { timeout: 5000 });
     await expect(page.locator('#story')).toBeVisible();
     /*
-     * 조각까지 따라와야 합니다. `/brand` 는 `id="story"` 와 그 자리를 스티키
-     * 헤더에서 떼어 놓는 `scroll-margin-top` 을 달아 두었는데, 조각을 버리면
-     * 둘 다 한 번도 쓰이지 않는 죽은 코드가 됩니다. 지금은 마침 그 섹션이 맨
-     * 위라 눈에 보이는 차이가 없어, 어긋나도 아무도 알아채지 못합니다.
+     * 조각까지 따라와야 합니다. `/brand` 가 착지점으로 달아 둔 `id="story"`
+     * 는 조각을 버리는 순간 한 번도 쓰이지 않는 죽은 코드가 됩니다. 지금은
+     * 마침 그 섹션이 맨 위라 눈에 보이는 차이가 없어, 어긋나도 아무도
+     * 알아채지 못합니다.
      */
     expect(new URL(page.url()).hash, '조각이 버려졌습니다').toBe('#story');
   });
