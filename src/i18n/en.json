@@ -279,7 +279,9 @@
       "name": "Daily Sunscreen",
       "cta": "View product",
       "table": {
-        "confirmed": "Settled",
+        "nonNegotiable": "Non-negotiable",
+        "required": "What we ask of the formula",
+        "outOf": "{score} points",
         "pending": "Not settled yet",
         "container": "Container",
         "waits": {
@@ -287,7 +289,7 @@
           "texture": "after the panel tally",
           "waterResistant": "after the test report",
           "volume": "after the tube order",
-          "container": "after the tube order"
+          "container": "Once ordered"
         },
         "note": "What is not settled is written as not settled. We fill this table in once the panel tally closes in December 2026.",
         "why": "Because it is the product you reapply most often, and most times, in a day that keeps moving."

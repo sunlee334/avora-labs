@@ -4602,16 +4602,26 @@ html {
  * 375px 에서는 2열이 무너지므로 세로로 쌓습니다 — 좁은 화면에서 억지로
  * 두 열을 유지하면 값이 두 줄씩 접혀 오히려 대조가 사라집니다.
  */
+/*
+ * 세 덩이 — 양보하지 않는 조건 / 요구 사양 / 아직 정해지지 않은 것.
+ *
+ * 좁은 화면에서는 **세로로 쌓습니다.** 390px 에 셋을 가로로 놓으면 한 칸이
+ * 110px 남짓이라 값이 줄줄이 접힙니다. 지시서가 "가로 스크롤을 만들지
+ * 않는다" 고 못 박은 자리이기도 합니다.
+ *
+ * `auto-fit` 을 쓰지 않습니다. 폭이 애매한 구간에서 2열이 되면 세 덩이가
+ * 2+1 로 갈려, 세 번째가 왜 아래 있는지 알 수 없게 됩니다.
+ */
 .compare {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 28px 40px;
+  grid-template-columns: 1fr;
+  gap: 26px;
   margin-top: 26px;
 }
-@media (max-width: 560px) {
+@media (min-width: 700px) {
   .compare {
-    grid-template-columns: 1fr;
-    gap: 22px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px 32px;
   }
 }
 .compare__head {
@@ -4622,6 +4632,19 @@ html {
   padding-bottom: 10px;
   border-bottom: 1px solid var(--color-border);
 }
+/*
+ * 커트라인은 배점 **아래 줄** 입니다.
+ *
+ * `눈 시림 없음  30점 만점 · 18점 미만 탈락` 을 한 줄로 두면 390px 를
+ * 넘습니다. 줄을 나누면 어느 항목의 커트라인인지도 더 분명해집니다.
+ */
+.compare__cut {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
 .compare__list {
   margin: 0;
 }

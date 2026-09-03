@@ -56,7 +56,7 @@ const states = stepStates(new Date());
  * 확정/미확정 판정은 `src/lib/spec.ts` 가 합니다 — 제품 페이지 스펙표와
  * 같은 출처입니다. 두 화면이 각자 판정하면 언젠가 한쪽만 고쳐집니다.
  */
-const { settled, unsettled } = compareRows(t);
+const { nonNegotiable, settled, unsettled } = compareRows(t);
 
 /*
  * 히어로의 두 벌 — 가로(넓은 화면)와 세로(휴대폰).
@@ -628,8 +628,34 @@ const criteriaRows = h.panel.criteria.map((item) => {
       표시·광고 문제가 됩니다(00-공통규칙 2-2).
     */}
     <div class="compare">
+      {/*
+        ── 1단: 양보하지 않는 조건 ──────────────────────────────
+        전에는 향·톤과 같은 칸에 있었습니다. 그런데 성격이 다릅니다 —
+        향·톤은 "이렇게 해 달라" 는 요구이고, 눈 시림·백탁은 **총점과 무관하게
+        떨어뜨리는 기준** 입니다.
+
+        숫자는 배점표에서 그대로 옵니다(기획안 5-5). 홈에 다시 적으면 언젠가
+        한쪽만 고쳐집니다.
+
+        배점과 커트라인을 **두 줄로 나눕니다.** 한 줄로 두면 390px 를 넘습니다.
+      */}
       <div class="compare__col">
-        <h3 class="compare__head">{h.product.table.confirmed}</h3>
+        <h3 class="compare__head">{h.product.table.nonNegotiable}</h3>
+        <dl class="compare__list">
+          {nonNegotiable.map((row) => (
+            <div class="compare__row">
+              <dt>{row.key}</dt>
+              <dd class="compare__value">
+                {row.score}
+                <span class="compare__cut">{row.cut}</span>
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+
+      <div class="compare__col">
+        <h3 class="compare__head">{h.product.table.required}</h3>
         <dl class="compare__list">
           {settled.map((row) => (
             <div class="compare__row">

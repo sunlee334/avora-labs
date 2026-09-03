@@ -18,13 +18,20 @@ import ko from '../../src/i18n/ko.json' with { type: 'json' };
  * 전의 단정이 되어 표시·광고 문제가 됩니다.
  */
 
-test.describe('확정과 미확정이 나란히 보인다', () => {
-  test('두 열이 다 있고 각각 항목을 갖는다', async ({ page }) => {
+test.describe('요구한 것과 미확정이 나란히 보인다', () => {
+  test('세 덩이가 다 있고 각각 항목을 갖는다', async ({ page }) => {
+    /*
+     * ⚠️ 두 덩이였다가 셋이 됐습니다. 첫 칸이 `지금 확정된 것` 이었는데
+     * **처방이 아직 선정되지 않았습니다.** 그리고 향·톤 같은 요구 사양과,
+     * 총점과 무관하게 떨어뜨리는 커트라인 항목은 성격이 다릅니다.
+     *
+     *   양보하지 않는 조건 / 처방에 요구하는 것 / 아직 정해지지 않은 것
+     */
     await page.goto('/ko/');
     const cols = page.locator('.compare__col');
-    await expect(cols, '대조표가 두 열이 아닙니다').toHaveCount(2);
+    await expect(cols, '대조표가 세 덩이가 아닙니다').toHaveCount(3);
 
-    for (let i = 0; i < 2; i += 1) {
+    for (let i = 0; i < 3; i += 1) {
       await expect(cols.nth(i).locator('.compare__row').first()).toBeVisible();
     }
   });
@@ -55,7 +62,8 @@ test.describe('확정과 미확정이 나란히 보인다', () => {
      * 아는 사실이 우선입니다.
      */
     await page.goto('/ko/');
-    const right = page.locator('.compare__col').nth(1);
+    // 세 덩이가 되면서 미확정은 **마지막** 칸입니다.
+    const right = page.locator('.compare__col').last();
     const labels = ko.product.spec.labels;
 
     for (const label of [labels.protection, labels.texture, labels.waterResistant]) {

@@ -59,7 +59,7 @@ export function specRows(t: Dict): SpecRow[] {
 }
 
 /**
- * 홈 대조표가 쓰는 두 덩이.
+ * 홈 대조표가 쓰는 세 덩이.
  *
  * ── 오른쪽 열은 값이 아닙니다 ──────────────────────────────
  * "아직 정해지지 않은 것" 칸에는 값 대신 **무엇을 기다리는지** 가 들어갑니다.
@@ -86,7 +86,28 @@ export function compareRows(t: Dict) {
   const SHOWN = ['protection', 'texture', 'waterResistant', 'volume', 'scent', 'tone', 'area'];
   const shown = rows.filter((row) => SHOWN.includes(row.id));
 
+  /*
+   * ── 1단: 양보하지 않는 조건 ────────────────────────────────
+   * 나머지 둘과 성격이 다릅니다. 향·톤은 "이렇게 해 달라" 는 요구이고,
+   * 눈 시림·백탁은 **총점과 무관하게 떨어뜨리는 기준** 입니다. 같은 칸에
+   * 섞어 두면 그 차이가 보이지 않습니다.
+   *
+   * 값은 배점표(`panel.criteria.rows`)에서 그대로 가져옵니다 — 기획안 5-5
+   * 가 정한 숫자이고, 홈에 다시 적으면 언젠가 한쪽만 고쳐집니다.
+   *
+   * ⚠️ **누가 매기는지는 여기서 말하지 않습니다.** 배점 체계는 누가 매기든
+   * 유효하고, 그 서술은 다른 문서(PART B)의 결정에 달려 있습니다.
+   */
+  const nonNegotiable = t.panel.criteria.rows
+    .filter((row) => row.cut && row.cut !== '—')
+    .map((row) => ({
+      key: row.item,
+      score: t.home.product.table.outOf.replace('{score}', row.score),
+      cut: row.cut,
+    }));
+
   return {
+    nonNegotiable,
     settled: shown
       .filter((row) => !row.target && row.value)
       .map((row) => ({ key: row.key, value: row.value! })),

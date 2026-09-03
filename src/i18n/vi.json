@@ -279,7 +279,9 @@
       "name": "Daily Sunscreen",
       "cta": "Xem sản phẩm",
       "table": {
-        "confirmed": "Đã xác định",
+        "nonNegotiable": "Điều kiện không nhân nhượng",
+        "required": "Yêu cầu với công thức",
+        "outOf": "{score} điểm tối đa",
         "pending": "Chưa xác định",
         "container": "Bao bì",
         "waits": {
@@ -287,7 +289,7 @@
           "texture": "sau khi tổng hợp điểm",
           "waterResistant": "sau khi có báo cáo thử nghiệm",
           "volume": "sau khi đặt vỏ",
-          "container": "sau khi đặt vỏ"
+          "container": "Sau khi đặt hàng"
         },
         "note": "Những mục chưa xác định thì chúng tôi ghi là chưa xác định. Bảng này sẽ được điền khi việc tổng hợp điểm kết thúc vào tháng 12 năm 2026.",
         "why": "Vì đây là sản phẩm phải thoa lại thường xuyên nhất và nhiều lần nhất trong một ngày luôn chuyển động."
