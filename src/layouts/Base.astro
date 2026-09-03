@@ -138,6 +138,29 @@ const xDefault = !wanted || wanted.includes(X_DEFAULT_LOCALE)
     */}
     <script is:inline>
       document.documentElement.classList.add('js');
+
+      /*
+       * ⚠️ 안전망 — **`.js` 와 같은 단위에 있어야 합니다.**
+       *
+       * `.js` 는 여기서 붙고 `is-in` 은 문서 끝의 번들 모듈이 붙입니다.
+       * 서로 다른 실패 단위라, 모듈이 죽으면 `.js .rise` 의 흐린
+       * 상태(opacity 0.65, 대비 3.2:1)가 **영구히** 남습니다. 눈에 띄는
+       * 고장 없이 글자만 계속 흐립니다.
+       *
+       * 전에는 같은 고장이 `opacity: 0` 이라 백지로 즉시 드러났습니다.
+       * 시작값을 올리면서 실패 모드가 조용해졌으므로 그 대가를 갚습니다.
+       *
+       * 안전망을 모듈 안에 두면 소용이 없습니다 — 모듈이 죽을 때 안전망도
+       * 함께 죽습니다(실측: 번들을 막으면 `.rise` 13개가 전부 흐린 채로
+       * 남았습니다). 그래서 여기입니다.
+       *
+       * 모듈이 살아 있으면 스스로 이 타이머를 지웁니다. 그래야 아직
+       * 스크롤하지 않은 섹션이 2초 만에 미리 드러나 **연출이 사라지는** 일이
+       * 없습니다 — 처음에 모듈 안에 두었을 때 정확히 그렇게 됐습니다.
+       */
+      window.__riseFallback = setTimeout(function () {
+        document.documentElement.classList.add('rise-fallback');
+      }, 2000);
     </script>
 
     <title>{title}</title>
@@ -408,6 +431,13 @@ const xDefault = !wanted || wanted.includes(X_DEFAULT_LOCALE)
       function revealAll() {
         document.querySelectorAll('.rise').forEach((el) => el.classList.add('is-in'));
       }
+
+      /*
+       * `<head>` 가 걸어 둔 안전망을 지웁니다. 이 줄이 도달했다는 것은 모듈이
+       * 살아 있다는 뜻이고, 그러면 `is-in` 은 관찰자가 제때 붙입니다.
+       * 지우지 않으면 2초 뒤 모든 섹션이 한꺼번에 드러나 연출이 사라집니다.
+       */
+      clearTimeout((window as unknown as { __riseFallback?: number }).__riseFallback);
 
       if (reduced.matches) {
         revealAll();
