@@ -162,7 +162,20 @@ test.describe('빠르게 스크롤해도 읽을 것이 남는다', () => {
     expect(rule, '.js .rise 규칙을 못 찾았습니다').toContain('opacity');
     expect(rule, '시작 불투명도가 토큰에서 오지 않습니다').toContain('--motion-rise-opacity');
 
-    await page.route('**/_astro/*.js', (route) => route.abort());
+    /*
+     * ⚠️ `route.abort()` 를 쓰지 않습니다.
+     *
+     * 요청을 끊으면 서버 쪽에 `Broken pipe` 가 쌓입니다. CI 로그에서 그
+     * 오류가 줄줄이 나온 뒤 세 샤드가 `ECONNREFUSED 8787` 로 무너졌습니다.
+     * 원인을 이 검사로 단정할 수는 없지만, 같은 목적을 연결을 끊지 않고
+     * 이룰 수 있으면 그쪽이 맞습니다.
+     *
+     * 빈 스크립트로 **정상 응답** 합니다 — 모듈이 오지 않은 것과 화면에서는
+     * 같고, 서버는 요청이 끝난 것으로 봅니다.
+     */
+    await page.route('**/_astro/*.js', (route) =>
+      route.fulfill({ status: 200, contentType: 'text/javascript', body: '' }),
+    );
     await page.goto('/ko/', { waitUntil: 'domcontentloaded' });
 
     // 모듈이 오지 않으면 안전망이 켜져야 합니다 — 이것이 이 검사의 주장입니다.
