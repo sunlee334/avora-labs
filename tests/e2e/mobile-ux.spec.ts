@@ -24,6 +24,15 @@ const LOCALES = ['ko', 'en', 'zh', 'th', 'vi'] as const;
  */
 const PAGES = LOCALES.flatMap((l) => [
   `/${l}/`,
+  /*
+   * ⚠️ `/panel` 이 빠져 있었습니다.
+   *
+   * 이 사이트에서 **폼이 가장 많은 화면** 인데(라디오 9개·체크박스 3개·
+   * 텍스트 2개) 탭 영역 검사 목록에 없었습니다. 홈의 신청 폼은 알림 모드
+   * 에서만 나오므로, 커머스 모드로 도는 실행에서는 체크박스가 한 번도
+   * 검사를 지나간 적이 없었습니다.
+   */
+  `/${l}/panel`,
   `/${l}/product`,
   `/${l}/support`,
   `/${l}/reviews`,
@@ -102,19 +111,49 @@ test.describe('모바일 레이아웃', () => {
    *
    * 요소마다 왕복하지 않고 페이지 안에서 한 번에 훑습니다.
    */
+  /*
+   * ⚠️ `input` 도 셉니다.
+   *
+   * 한동안 `a[href], button` 만 봤습니다. 그래서 **체크박스와 라디오가 이
+   * 검사를 한 번도 지나간 적이 없었습니다** — 시각 크기는 16~20px 입니다.
+   * 다행히 라벨이 감싸고 있어 실제 탭 영역은 44px 이상이었지만, 그건 이
+   * 검사가 확인한 것이 아니라 우연히 그랬던 것입니다.
+   *
+   * 그래서 **손가락이 실제로 닿는 상자** 를 잽니다. 체크박스처럼 라벨이
+   * 감싸는 컨트롤은 라벨이 곧 탭 영역입니다(라벨을 눌러도 값이 바뀝니다).
+   * 시각적으로 18px 인 체크박스를 44px 로 키우라는 뜻이 아닙니다.
+   */
   async function tooSmallTargets(page: import('@playwright/test').Page): Promise<string[]> {
     const result = await page.evaluate(() => {
       const out: string[] = [];
-      const all = document.querySelectorAll<HTMLElement>('a[href], button');
+      const all = document.querySelectorAll<HTMLElement>(
+        'a[href], button, input, select, textarea',
+      );
       for (const el of all) {
         const cs = getComputedStyle(el);
         // 숨은 것은 손가락이 닿지 않습니다. 투명도는 등장 연출이라 제외하지 않습니다.
         if (cs.display === 'none' || cs.visibility === 'hidden') continue;
-        const r = el.getBoundingClientRect();
-        if (r.width === 0 && r.height === 0) continue;
-        if (r.height < 44 || r.width < 44) {
-          const text = (el.textContent ?? '').trim().slice(0, 24);
-          out.push(`"${text}" ${Math.round(r.width)}×${Math.round(r.height)}`);
+        // 봇 함정은 화면 밖에 있고 사람이 누를 대상이 아닙니다.
+        if (el.closest('[aria-hidden="true"]')) continue;
+        if (el instanceof HTMLInputElement && el.type === 'hidden') continue;
+
+        const self = el.getBoundingClientRect();
+        if (self.width === 0 && self.height === 0) continue;
+
+        /*
+         * 감싸는 `<label>` 이 있으면 그것이 탭 영역입니다. 텍스트 입력처럼
+         * 라벨이 **위에 얹힌 설명** 인 경우에는 라벨이 오히려 작으므로,
+         * 둘 중 **큰 쪽** 을 손가락이 닿는 상자로 봅니다.
+         */
+        const label = el.closest('label');
+        const box = label ? label.getBoundingClientRect() : self;
+        const width = Math.max(self.width, box.width);
+        const height = Math.max(self.height, box.height);
+
+        if (height < 44 || width < 44) {
+          const name = el instanceof HTMLInputElement ? `${el.type} ${el.name}` : '';
+          const text = (el.textContent ?? '').trim().slice(0, 24) || name;
+          out.push(`"${text}" ${Math.round(width)}×${Math.round(height)}`);
         }
       }
       return { count: all.length, out };

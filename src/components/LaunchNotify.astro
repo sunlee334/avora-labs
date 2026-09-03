@@ -109,6 +109,11 @@ const trapId = `trap-${source}`;
         name="email"
         required
         autocomplete="email"
+        {/*
+          `type="email"` 만으로도 대부분 `@` 키를 내주지만, 안드로이드의
+          일부 키보드는 `inputmode` 를 함께 봐야 확실합니다. 한 줄입니다.
+        */}
+        inputmode="email"
         enterkeyhint="send"
         placeholder={n.emailPlaceholder}
         aria-label={n.emailLabel}
