@@ -1790,7 +1790,18 @@ html {
   font-size: clamp(14px, 3.6vw, 16px);
   line-height: calc(1.5 * var(--leading-scale));
   color: var(--color-accent);
-  max-width: 22ch;
+  /*
+   * 22ch(210px) 였을 때 한 문장이 어절 중간에서 끊겼습니다 —
+   * "기준은 공개하고, 점수는 / 맡깁니다." 한글은 `ch` 한 칸에 두 배 가까이
+   * 들어가서, 라틴 기준으로 잡은 22ch 가 한글에서는 11자쯤밖에 안 됩니다.
+   */
+  max-width: 34ch;
+  /*
+   * 폭만 넓히면 언어마다 다시 어긋납니다. 줄을 고르게 나누는 일은 브라우저가
+   * 글자 폭을 알고 하는 편이 낫습니다. 지원하지 않는 브라우저에서도 위
+   * `max-width` 가 남아 어절 중간에서 끊기지는 않습니다.
+   */
+  text-wrap: balance;
 }
 
 /*
