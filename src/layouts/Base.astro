@@ -419,7 +419,15 @@ const xDefault = !wanted || wanted.includes(X_DEFAULT_LOCALE)
               }
             }
           },
-          { threshold: 0.15, rootMargin: '0px 0px -8% 0px' },
+          /*
+           * ⚠️ 아래쪽 여백이 **양수** 입니다 — 화면에 들어오기 200px 전에
+           * 미리 켭니다. 전에는 `-8%` 로 **늦추고** 있었습니다.
+           *
+           * threshold 도 0 입니다. 0.15 는 "섹션의 15% 가 보일 때" 라, 화면보다
+           * 훨씬 큰 섹션일수록 늦게 켜집니다 — 정확히 백지가 되던 그 섹션들입니다.
+           * 미리 잡는 여백과 함께 쓰면 threshold 는 0 이 맞습니다.
+           */
+          { threshold: 0, rootMargin: '0px 0px 200px 0px' },
         );
         document.querySelectorAll('.rise').forEach((el) => io.observe(el));
 

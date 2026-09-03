@@ -65,10 +65,12 @@
   --radius-sheet: 18px;
   --radius-pill: 999px;
 
-  --motion-rise-duration: 700ms;
+  --motion-rise-duration: 200ms;
   --motion-rise-easing: cubic-bezier(0.2, 0.7, 0.3, 1);
   --motion-rule-duration: 800ms;
   --motion-dur-fast: 120ms;
   --motion-dur-base: 200ms;
   --motion-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-rise-opacity: 0.65;
+  --motion-rise-shift: 8px;
 }

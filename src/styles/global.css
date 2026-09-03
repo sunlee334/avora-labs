@@ -461,9 +461,24 @@ button {
     opacity var(--motion-rise-duration) var(--motion-rise-easing),
     transform var(--motion-rise-duration) var(--motion-rise-easing);
 }
+/*
+ * ⚠️ 시작값이 **0 이 아닙니다.**
+ *
+ * 0 이던 시절, 빠르게 스크롤하면 화면 전체가 백지가 됐습니다. 휠을 연속으로
+ * 굴리며 매 프레임을 재 보니 66프레임 중 56개가 화면의 절반도 못 채웠고
+ * **최악은 0%** 였습니다 — 방문자에게는 사이트가 고장 난 것으로 보입니다.
+ *
+ * 섹션 하나가 화면보다 큰데 통째로 `opacity: 0` 으로 대기하는 것이 원인이라,
+ * 관찰자를 아무리 앞당겨도 시작값이 0 인 한 그 순간은 남습니다. 그래서
+ * **연출을 없애지 않고 시작값만 올립니다** — 나타나는 것이 아니라
+ * 선명해지는 쪽으로.
+ *
+ * 한 번에 이 문제를 만드는 조합이었습니다: 시작 0 · 700ms · 16px 이동 ·
+ * 관찰자가 뷰포트 아래를 8% 잘라 늦게 트리거. 넷을 함께 고칩니다.
+ */
 .js .rise {
-  opacity: 0;
-  transform: translateY(16px);
+  opacity: var(--motion-rise-opacity);
+  transform: translateY(var(--motion-rise-shift));
 }
 .js .rise.is-in {
   opacity: 1;
