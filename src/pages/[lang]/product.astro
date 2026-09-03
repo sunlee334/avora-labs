@@ -8,7 +8,6 @@
  */
 import { Picture } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
-import productImage from '../../assets/images/product-daily-sunscreen.jpg';
 import waterImage from '../../assets/images/water-droplets.jpg';
 import { LOCALES, BUSINESS, type Locale } from '../../config/site';
 import { dict, localePath } from '../../i18n';
@@ -130,22 +129,45 @@ const rows = specRows(t);
 
         홈 히어로에 `.rise` 가 없는 것도 같은 이유입니다.
       */}
-      <div class="product-hero__media">
-        <Picture
-          src={productImage}
-          alt={p.hero.imageAlt}
-          formats={['avif', 'webp']}
-          widths={[390, 780, 1200]}
-          sizes="(min-width: 900px) 50vw, 100vw"
-          quality={72}
-          loading="eager"
-          fetchpriority="high"
-          decoding="async"
-        />
+      {/*
+        ── 사진이 있던 자리입니다 ────────────────────────────────
+        흰 석고 아치와 테라조 바닥 사진이었습니다. 원본에 다른 브랜드 제품이
+        담겨 있어 그 부분을 잘라내고 질감만 남긴 것이었는데, **남은 것이
+        하필 흰 아치** 였습니다. 기획안 5-8 이 "그리스풍 장식·지중해
+        일러스트" 를 명시적으로 금지합니다. PAROS 가 그리스 섬 이름이라
+        더더욱 피해야 하는 연상입니다.
+
+        ── 왜 다른 사진으로 바꾸지 않았나 ────────────────────────
+        **제품이 아직 없습니다.** 없는 제품의 상세 페이지 머리에 대체 사진을
+        놓는 것보다, 자리를 비우고 목표 사양을 보여 주는 편이 정직합니다.
+        기획서 13-1 에 2026년 11월 제품 촬영이 잡혀 있고 패키지도 같은 달
+        확정됩니다 — 그때 실물이 이 자리에 들어옵니다.
+
+        ── 값을 단정하지 않는다 ─────────────────────────────────
+        셋 다 아직 확정이 아닙니다. 기능성 심사·시험 성적서·용기 발주가
+        남아 있어 `목표` 배지를 답니다. 홈 사양 표와 같은 배지입니다.
+      */}
+      <div class="product-hero__spec">
+        <p class="product-hero__spec-kicker">{p.spec.kicker}</p>
+        {/*
+          값 하나가 통째로 접히도록 각각 묶습니다. 그냥 두면 390px 에서
+          `SPF50+ /` 로 끊겨 **`/` 가 줄 끝에 매달립니다.**
+        */}
+        <p class="product-hero__spec-values">
+          <span>{productData.spf}</span>
+          <span aria-hidden="true"> · </span>
+          <span>{productData.spec.volume}</span>
+        </p>
+        <p class="product-hero__spec-mark">
+          <span class="spec__target">{p.spec.values.target}</span>
+        </p>
       </div>
 
       <div class="rise">
-        <p class="kicker">{productData.spf}</p>
+        {/*
+          키커에 `SPF50+ / PA++++` 를 다시 적지 않습니다. 바로 옆 사양 판이
+          같은 값을 크게 보여 주고 있어, 같은 화면에서 두 번이 됩니다.
+        */}
         <h1 class="display display--tight">{productData.name}</h1>
         {
           /* 언제 나오는지 말하지 않으면 "확정 예정" 이 불확실로 읽힙니다. */

@@ -11,8 +11,8 @@
 | `hero-runner-sunrise.jpg` | [I1EWTM5mFEM](https://unsplash.com/photos/I1EWTM5mFEM) | 낮은 태양을 배경으로 바위길을 달리는 실루엣 | 홈 히어로 (넓은 화면) |
 | `hero-runner-sunrise-portrait.jpg` | 위와 같은 사진 (**잘라 쓴 것** — 아래 참조) | 같은 장면의 세로 크롭 | 홈 히어로 (휴대폰) |
 | `skin-sweat.jpg` | [AMPQP0OPJTE](https://unsplash.com/photos/AMPQP0OPJTE) | 등에 맺힌 작은 땀방울 | 홈 이미지 브레이크 |
-| `product-daily-sunscreen.jpg` | [O59iUx4_Cdc](https://unsplash.com/photos/O59iUx4_Cdc) | 흰색 아치 조형물과 테라조 바닥 (**잘라 쓴 것** — 아래 참조) | 제품 상세 히어로 |
-| `water-droplets.jpg` | [7VyXToCotr4](https://unsplash.com/photos/7VyXToCotr4) | 물방울 클로즈업 | 제품 상세 하단 |
+| `product-daily-sunscreen.jpg` | [O59iUx4_Cdc](https://unsplash.com/photos/O59iUx4_Cdc) | 흰색 아치 조형물과 테라조 바닥 (**잘라 쓴 것** — 아래 참조) | **더 이상 쓰지 않습니다** — 아래 「아치를 내린 이유」 |
+| `water-droplets.jpg` | [7VyXToCotr4](https://unsplash.com/photos/7VyXToCotr4) | 물방울 클로즈업 | 제품 상세 하단 · **공유 카드 · 장바구니 썸네일** |
 | `panel-skin.jpg` | [hZQLs0Pq2Qg](https://unsplash.com/photos/hZQLs0Pq2Qg) | 야외 운동 뒤 어깨에 맺힌 땀방울 | /panel 머리말 뒤 |
 | `panel-sample.jpg` | [PA6Ra3X-6_o](https://unsplash.com/photos/PA6Ra3X-6_o) | 상표 없는 흰 튜브 (3D 목업) | /panel "무엇을 하시게 되나요" 뒤 |
 | `panel-notes.jpg` | [IZj7vckPGiw](https://unsplash.com/photos/IZj7vckPGiw) | 펼쳐 놓은 빈 노트와 펜 | /panel 배점표 뒤 |
@@ -138,3 +138,26 @@ height: 1067` (1600×1067). 이러면 넓은 크롭에서도 좁은 크롭에서
 하는 것이라 지어낼 수 없습니다.** 자리는 `src/config/company.ts` 의
 `FOUNDER_PHOTO` 에 이미 있고, 비어 있는 동안에는 그 칸이 아예 나오지
 않습니다 — 회색 플레이스홀더를 놓지 않습니다.
+
+## 아치를 내린 이유
+
+`product-daily-sunscreen.jpg` 를 제품 상세 히어로에서 뺐습니다. 파일은 남겨
+두었지만 **어느 화면도 참조하지 않습니다.**
+
+원본에 다른 브랜드 제품이 담겨 있어 그 부분을 잘라내고 질감만 남긴 것이었는데,
+**남은 것이 하필 흰 석고 아치와 테라조** 였습니다. 기획안 5-8 이 "그리스풍
+장식 · 블루 타일 · 지중해 일러스트" 를 명시적으로 금지합니다. PAROS 가 그리스
+섬 이름이라 더더욱 피해야 하는 연상입니다.
+
+지시서 07 은 이 파일을 "제품 3D 렌더링" 으로 보고 컬러·표면·캡이 기획안 5-8 의
+패키지 사양과 어긋난다고 적었습니다. **그건 사실이 아닙니다** — 3D 렌더가
+아니라 조형물 사진이고, 용기를 보여 준 적이 없습니다. 교체 이유는 다릅니다.
+
+빈자리는 다른 사진이 아니라 **목표 사양 타이포** 가 채웁니다. 제품이 아직
+없으므로, 없는 제품의 상세 페이지 머리에 대체 사진을 놓는 것보다 정직합니다.
+기획서 13-1 에 2026년 11월 제품 촬영이 잡혀 있고 패키지도 같은 달 확정됩니다 —
+그때 실물이 이 자리에 들어옵니다.
+
+공유 카드(`og/product.*.jpg`)와 장바구니 썸네일(`/product/thumb.jpg`)은
+`water-droplets.jpg` 로 옮겼습니다. 제품 상세 하단에서 이미 쓰고 있어 화면과
+카드가 어긋나지 않고, WATER 축이라 기획안 9장의 5축 안에 있습니다.

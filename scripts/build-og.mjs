@@ -93,7 +93,9 @@ const PROMISE_FONTS = {
 /** 어떤 사진 위에 어떤 문구를 얹는가. */
 const SHEETS = [
   { name: 'home', image: 'hero-runner-sunrise.jpg', line: (t) => t.home.hero.promise },
-  { name: 'product', image: 'product-daily-sunscreen.jpg', line: (t) => t.product.hero.headline },
+  // 제품 상세의 사진을 뺐습니다(그리스풍 장식 연상). 공유 카드는 승인된 WATER 축
+  // 사진을 씁니다 — 제품 페이지 하단에서 이미 쓰고 있어 화면과 카드가 어긋나지 않습니다.
+  { name: 'product', image: 'water-droplets.jpg', line: (t) => t.product.hero.headline },
 ];
 
 const WORDMARK = 'PAROS';
@@ -479,7 +481,7 @@ function escapePango(s) {
 // ── 썸네일 ───────────────────────────────────────────────────
 
 const THUMB_DIR = resolve(root, 'public/product');
-const THUMB_TARGETS = [{ from: 'product-daily-sunscreen.jpg', to: 'thumb.jpg' }];
+const THUMB_TARGETS = [{ from: 'water-droplets.jpg', to: 'thumb.jpg' }];
 
 // ── 실행 ─────────────────────────────────────────────────────
 

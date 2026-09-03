@@ -11,7 +11,7 @@
   "images": {
     "$comment": "본문 이미지는 src/assets/images/ 에 있고 Astro 가 최적화합니다. 여기 경로는 브라우저 JS 가 직접 쓰는 고정 경로(장바구니 썸네일)입니다.",
     "thumb": "/product/thumb.jpg",
-    "source": "src/assets/images/product-daily-sunscreen.jpg"
+    "source": "src/assets/images/water-droplets.jpg"
   },
   "spec": {
     "protection": "SPF50+ / PA++++",
