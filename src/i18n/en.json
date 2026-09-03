@@ -103,6 +103,7 @@
     "journey": {
       "kicker": "The Journey",
       "lead": "Where the product lives",
+      "imageAlt": "Three surfers walking along an overcast shoreline, seen from behind",
       "steps": [
         {
           "word": "Sun",
@@ -212,6 +213,10 @@
         }
       ],
       "note": "We publish the tally as it comes out. We use the formula with the highest score, not the one we like. Recruiting opens in October 2026.",
+      "shots": {
+        "crewAlt": "Four runners seen from behind on a leaf-strewn dirt trail",
+        "boulderingAlt": "Two people sitting and watching a climber on an indoor bouldering wall"
+      },
       "cta": "Apply to the test panel"
     },
     "timeline": {
@@ -298,7 +303,8 @@
       "close": "The more you move, the more careful the care your skin needs; the more comfortably you are cared for, the more freely you can move again.\nMovement and care, living together naturally — that is why PAROS began."
     },
     "maker": {
-      "kicker": "The people"
+      "kicker": "The people",
+      "imageAlt": "Vine shadows falling across a sunlit wall"
     },
     "island": {
       "kicker": "The Name",
@@ -339,6 +345,7 @@
     },
     "how": {
       "kicker": "How it is made",
+      "imageAlt": "Morning light coming through a sheer curtain",
       "body": [
         "We do not develop a formula of our own.\nWe choose among formulas a manufacturer already holds — already tested, already reviewed.",
         "Most Korean cosmetics brands are made the same way.\nWhat is rare is saying so, and publishing the criteria used to choose.",

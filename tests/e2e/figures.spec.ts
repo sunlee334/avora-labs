@@ -18,8 +18,15 @@ import { LOCALES } from '../../src/config/site';
 
 /** 물체 사진 — 통째로 보여야 합니다. */
 const CONTAIN = ['SAMPLE', 'SCORE'];
-/** 질감 사진 — 잘라서 화면을 채웁니다. */
-const COVER = ['FIELD', 'SKIN', 'WATER'];
+/**
+ * 잘라서 채우는 사진 — 질감과 **장면** 둘 다입니다.
+ *
+ * 질감(SKIN·WATER)은 어디를 잘라도 그 사진입니다. 장면(SURF·LIGHT·ROOM)은
+ * 다릅니다 — 아무 데나 자르면 주인공이 프레임 밖으로 나갑니다. 그래서
+ * 원본을 **미리 잘라** 비율을 맞춰 두었습니다(`SOURCES.md` 참조). 그 준비가
+ * 되어 있으므로 여기서는 cover 가 맞습니다.
+ */
+const COVER = ['FIELD', 'SKIN', 'WATER', 'SURF', 'LIGHT', 'ROOM'];
 
 async function figures(page: import('@playwright/test').Page) {
   return page.locator('figure.figure').evaluateAll((nodes) =>
@@ -37,7 +44,7 @@ async function figures(page: import('@playwright/test').Page) {
 }
 
 test.describe('이미지 브레이크', () => {
-  for (const path of ['/ko/panel/', '/ko/product/', '/ko/']) {
+  for (const path of ['/ko/panel/', '/ko/product/', '/ko/', '/ko/brand/']) {
     test(`${path} — 물체 사진은 잘리지 않는다`, async ({ page }) => {
       await page.goto(path);
       const found = await figures(page);
@@ -59,7 +66,7 @@ test.describe('이미지 브레이크', () => {
   }
 
   test('그림은 전부 지연 로딩이고 설명이 붙어 있다', async ({ page }) => {
-    for (const path of ['/ko/panel/', '/ko/product/']) {
+    for (const path of ['/ko/panel/', '/ko/product/', '/ko/', '/ko/brand/']) {
       await page.goto(path);
       for (const f of await figures(page)) {
         // 히어로가 아니므로 첫 화면을 늦출 이유가 없습니다.

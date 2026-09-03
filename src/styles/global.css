@@ -1921,6 +1921,59 @@ a {
   background: var(--color-bg-raised);
 }
 
+/*
+ * 글 단 안에 앉히는 사진.
+ *
+ * 위의 58svh + cover 는 홈의 전면 브레이크용입니다. 브랜드 페이지는 좁은 한
+ * 단으로 끝까지 가는 글이라, 같은 걸 쓰면 사진이 페이지의 주인이 됩니다.
+ * 비율만 정해 두고 높이는 폭이 정하게 둡니다 — 화면이 좁아져도 잘라내지
+ * 않고 같은 구도로 줄어듭니다.
+ */
+.figure--inline img {
+  height: auto;
+  aspect-ratio: 3 / 2;
+  border-radius: 4px;
+}
+.figure--inline figcaption {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/*
+ * 검증단 모집 문장 아래의 두 장.
+ *
+ * 모집 문장이 "러닝 크루·클라이밍짐·서핑 커뮤니티" 라고 적는데 사진이 전부
+ * 러닝이면, 클라이머는 그 문장을 자기 이야기로 읽지 않습니다. 둘을 **나란히**
+ * 놓는 것이 요점이라, 넓어지면 한 줄에 섭니다.
+ *
+ * 좁은 화면에서는 세로로 쌓습니다. 두 장을 억지로 한 줄에 두면 각각이 손톱만
+ * 해져서 무엇을 하는 장면인지 알아볼 수 없습니다.
+ */
+.panelShots {
+  display: grid;
+  gap: 18px;
+  margin-top: 30px;
+}
+.panelShots img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 4px;
+}
+.panelShots figcaption {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+  padding-top: 10px;
+}
+@media (min-width: 720px) {
+  .panelShots {
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+}
+
 .figure figcaption {
   font-family: var(--font-mono);
   font-size: 11px;

@@ -15,7 +15,10 @@
  * 새로 지은 것은 메타(제목·설명)뿐입니다. 본문은 홈에 있던 것을 그대로
  * 가져왔으므로 5개 언어 번역이 이미 있습니다.
  */
+import { Picture } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
+import leavesImage from '../../assets/images/brand-light-leaves.jpg';
+import windowImage from '../../assets/images/brand-light-window.jpg';
 import { BUSINESS, LOCALES, type Locale } from '../../config/site';
 import { dict, localePath } from '../../i18n';
 import { breadcrumb } from '../../lib/jsonld';
@@ -138,6 +141,29 @@ const founderStory = FOUNDER_STORY[locale] ?? null;
   </section>
 
   {/*
+    이름과 원산지 이야기로 넘어가기 전에 한 번 쉽니다. 사람도 제품도 없는,
+    빛과 벽만 있는 사진입니다 — 브랜드 문서가 "풍경을 옮겨 오지 않는다" 고
+    적어 둔 그대로, 관광지가 아니라 볕이 드는 자리 하나입니다.
+
+    전면 브레이크가 아니라 **글 단 안** 입니다. 이 페이지는 좁은 한 단으로
+    끝까지 가는 글이고, 홈처럼 화면을 가득 채우는 사진을 넣으면 사진이
+    페이지의 주인이 됩니다. 여기서 주인은 글입니다.
+  */}
+  <figure class="figure figure--inline wrap wrap--narrow rise">
+    <Picture
+      src={leavesImage}
+      alt={b.maker.imageAlt}
+      formats={['avif', 'webp']}
+      widths={[390, 780]}
+      sizes="(min-width: 860px) 720px, 100vw"
+      quality={62}
+      loading="lazy"
+      decoding="async"
+    />
+    <figcaption>LIGHT</figcaption>
+  </figure>
+
+  {/*
     The Name — 섬의 의미.
 
     예전에는 The Question 의 마지막 문단이 이름의 유래를 한 문장으로 처리했습니다.
@@ -211,6 +237,29 @@ const founderStory = FOUNDER_STORY[locale] ?? null;
       <a class="tapLink" href={localePath(locale, 'panel')}>{b.how.cta}</a>
     </p>
   </section>
+
+  {/*
+    배점표 이야기 다음입니다. 앞 문단이 "고르는 기준을 먼저 공개한다" 로
+    끝나므로, 여기서 제형이나 용기 사진을 놓으면 아직 정해지지 않은 것을
+    보여 주는 셈입니다. 그래서 제품이 없는 사진입니다.
+
+    전면 브레이크가 아니라 **글 단 안** 입니다. 이 페이지는 좁은 한 단으로
+    끝까지 가는 글이고, 홈처럼 화면을 가득 채우는 사진을 넣으면 사진이
+    페이지의 주인이 됩니다. 여기서 주인은 글입니다.
+  */}
+  <figure class="figure figure--inline wrap wrap--narrow rise">
+    <Picture
+      src={windowImage}
+      alt={b.how.imageAlt}
+      formats={['avif', 'webp']}
+      widths={[390, 780]}
+      sizes="(min-width: 860px) 720px, 100vw"
+      quality={62}
+      loading="lazy"
+      decoding="async"
+    />
+    <figcaption>ROOM</figcaption>
+  </figure>
 
   {/*
     누구를 위한 브랜드인가.

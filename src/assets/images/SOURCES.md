@@ -16,6 +16,11 @@
 | `panel-skin.jpg` | [hZQLs0Pq2Qg](https://unsplash.com/photos/hZQLs0Pq2Qg) | 야외 운동 뒤 어깨에 맺힌 땀방울 | /panel 머리말 뒤 |
 | `panel-sample.jpg` | [PA6Ra3X-6_o](https://unsplash.com/photos/PA6Ra3X-6_o) | 상표 없는 흰 튜브 (3D 목업) | /panel "무엇을 하시게 되나요" 뒤 |
 | `panel-notes.jpg` | [IZj7vckPGiw](https://unsplash.com/photos/IZj7vckPGiw) | 펼쳐 놓은 빈 노트와 펜 | /panel 배점표 뒤 |
+| `home-panel-crew.jpg` | [LyORqx-3O-c](https://unsplash.com/photos/LyORqx-3O-c) | 낙엽 깔린 흙길을 달리는 네 사람의 뒷모습 | 홈 TEST PANEL |
+| `home-panel-bouldering.jpg` | [MCkknk6ghOU](https://unsplash.com/photos/MCkknk6ghOU) | 실내 클라이밍장, 벽에 붙은 사람을 지켜보는 두 사람 | 홈 TEST PANEL |
+| `home-journey-surf.jpg` | [f4UBbjjvkCg](https://unsplash.com/photos/f4UBbjjvkCg) | 보드를 들고 물로 들어가는 두 사람 (**잘라 쓴 것** — 아래 참조) | 홈 THE JOURNEY 뒤 |
+| `brand-light-leaves.jpg` | [t-7nQ-qH344](https://unsplash.com/photos/t-7nQ-qH344) | 덩굴 그림자가 드리운 볕 든 담벼락 | /brand 만든 사람 뒤 |
+| `brand-light-window.jpg` | [ninCiZ_k6jI](https://unsplash.com/photos/ninCiZ_k6jI) | 얇은 커튼을 통과해 들어온 아침 빛 | /brand 어떻게 만드는가 뒤 |
 
 ## 교체 방법
 1. 새 이미지를 위 파일명 그대로 이 폴더에 덮어쓰기 (원본 해상도 그대로 두세요 — 축소는 빌드가 합니다)
@@ -89,3 +94,47 @@ The Ordinary 제품을 찍은 것인데, 그것을 우리 제품 페이지의 �
 
 실촬영본이 오면 가로 원본을 덮어쓴 뒤 같은 비율(0.674)로 다시 자르세요.
 비율이 히어로 박스와 같아야 `sizes="100vw"` 가 정확합니다.
+
+## 활동 다양성 — 다섯 장을 더한 이유와, 한 장을 물린 이유
+
+모집 문장은 "러닝 크루·클라이밍짐·서핑 커뮤니티" 라고 적는데 사이트의 사진은
+전부 러닝 아니면 피부 클로즈업이었습니다. **클라이머와 서퍼가 그 문장을 자기
+이야기로 읽지 않습니다.**
+
+전부 Unsplash 무료 라이선스(상업적 이용 가능, 출처 표기 의무 없음)입니다.
+`plus.unsplash.com` 으로 오는 **Unsplash+ 는 유료 구독 라이선스라 쓰지
+않았습니다** — 검색 결과에 섞여 나오므로 고를 때 확인하세요. 촬영자는 각각
+Greg Rosenke · Beta Boulders · Ivo Sousa Martins · kuangkuang xia · 王 大洪.
+
+지시서 D3 대로 **얼굴이 정면으로 크게 나오지 않는 컷** 만 골랐습니다. 다섯 장
+모두 뒷모습이거나 사람이 없습니다.
+
+### 처음 고른 서핑 사진을 물렸다
+
+`AlloUWySfko`(보드를 들고 걷는 세 사람)를 먼저 넣었다가 화면에서 보고
+뺐습니다. **보드와 슈트에 다른 브랜드 로고가 크게 읽혔습니다** — 데스크톱
+폭에서 또렷했습니다.
+
+이 저장소는 같은 판단을 이미 한 번 했습니다(위 `product-daily-sunscreen.jpg`
+항목). 상표권은 저작권과 별개이고, Unsplash 라이선스는 사진에 담긴 상표까지
+허락하지 않습니다.
+
+지금 사진은 확대해서 보드를 봐도 제작자 마크 하나뿐이고, 실제 표시 크기에서는
+읽히지 않습니다.
+
+### `home-journey-surf.jpg` 도 잘라 썼다
+
+원본은 1600×2400 세로입니다. 전면 브레이크(`.figure`)는 넓은 화면에서
+2.76:1 로 잘리는데, 세로 원본을 가운데 기준으로 자르면 **두 사람이 프레임
+아래로 밀려 허리에서 잘립니다.**
+
+그래서 두 사람이 세로 가운데 오도록 미리 잘랐습니다 — `top: 971,
+height: 1067` (1600×1067). 이러면 넓은 크롭에서도 좁은 크롭에서도 같은
+사람이 남습니다. 눈으로 두 크롭을 다 확인했습니다.
+
+### 아직 없는 것 — 대표자 사진
+
+지시서 D2 는 홈 AVORA LABS 에 대표자 사진을 요구합니다. **담당자에게 받아야
+하는 것이라 지어낼 수 없습니다.** 자리는 `src/config/company.ts` 의
+`FOUNDER_PHOTO` 에 이미 있고, 비어 있는 동안에는 그 칸이 아예 나오지
+않습니다 — 회색 플레이스홀더를 놓지 않습니다.

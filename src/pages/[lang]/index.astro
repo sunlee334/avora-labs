@@ -10,6 +10,9 @@ import Base from '../../layouts/Base.astro';
 import heroImage from '../../assets/images/hero-runner-sunrise.jpg';
 import heroPortrait from '../../assets/images/hero-runner-sunrise-portrait.jpg';
 import skinImage from '../../assets/images/skin-sweat.jpg';
+import crewImage from '../../assets/images/home-panel-crew.jpg';
+import boulderingImage from '../../assets/images/home-panel-bouldering.jpg';
+import surfImage from '../../assets/images/home-journey-surf.jpg';
 import { BUSINESS, SOCIAL, LOCALES, type Locale } from '../../config/site';
 import { FOUNDER_PHOTO, FOUNDER_PHOTO_ALT, FOUNDER_STORY, TEAM_SIZE } from '../../config/company';
 import { dict, localePath } from '../../i18n';
@@ -426,6 +429,48 @@ const criteriaRows = h.panel.criteria.map((item) => {
     <p class="body" style="margin-top: 24px">{h.panel.note}</p>
 
     {/*
+      ── 활동이 하나가 아니라는 걸 보여 준다 ────────────────────
+      바로 위 문장이 "러닝 크루·클라이밍짐·서핑 커뮤니티" 라고 적는데,
+      사이트의 사진은 전부 러닝 아니면 피부 클로즈업이었습니다. 클라이머와
+      서퍼가 이 화면을 보고 **자기 이야기로 읽지 않습니다.**
+
+      그래서 모집 문장 바로 아래에 둘을 나란히 놓습니다. 서핑은 THE JOURNEY
+      뒤에 있습니다 — 셋을 여기 몰아넣으면 목록이 되고, 목록은 읽히지 않습니다.
+
+      전면 브레이크(`.figure`)가 아니라 글 단 안에 넣습니다. 이 사진들은
+      질감이 아니라 **장면** 이라, 화면을 가득 채워 잘라내면 누가 무엇을 하는
+      중인지가 프레임 밖으로 밀려납니다.
+    */}
+    <div class="panelShots">
+      <figure>
+        <Picture
+          src={crewImage}
+          alt={h.panel.shots.crewAlt}
+          formats={['avif', 'webp']}
+          widths={[390, 700]}
+          sizes="(min-width: 720px) 45vw, 100vw"
+          quality={62}
+          loading="lazy"
+          decoding="async"
+        />
+        <figcaption>RUN</figcaption>
+      </figure>
+      <figure>
+        <Picture
+          src={boulderingImage}
+          alt={h.panel.shots.boulderingAlt}
+          formats={['avif', 'webp']}
+          widths={[390, 700]}
+          sizes="(min-width: 720px) 45vw, 100vw"
+          quality={62}
+          loading="lazy"
+          decoding="async"
+        />
+        <figcaption>CLIMB</figcaption>
+      </figure>
+    </div>
+
+    {/*
       검증단 모집 페이지로 가는 길.
 
       **이 링크가 없으면 /panel 에 아무도 들어가지 못합니다.** 10월에 크루
@@ -632,6 +677,27 @@ const criteriaRows = h.panel.criteria.map((item) => {
       }
     </ol>
   </section>
+
+  {/*
+    THE JOURNEY 가 "제품이 놓이는 자리" 로 끝납니다. 그 자리를 글로만 두지
+    않고 한 장으로 받습니다 — 운동이 끝난 뒤, 아직 물기가 남은 시간.
+
+    뒷모습입니다. 얼굴이 크게 나오면 모델 사진이 되고, 그러면 "삶이 주인공"
+    이라던 앞의 다섯 단계와 어긋납니다.
+  */}
+  <figure class="figure rise">
+    <Picture
+      src={surfImage}
+      alt={h.journey.imageAlt}
+      formats={['avif', 'webp']}
+      widths={[390, 780, 1200]}
+      sizes="100vw"
+      quality={62}
+      loading="lazy"
+      decoding="async"
+    />
+    <figcaption>SURF</figcaption>
+  </figure>
 
   {/*
     브랜드 브릿지.

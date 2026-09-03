@@ -103,6 +103,7 @@
     "journey": {
       "kicker": "The Journey",
       "lead": "Nơi sản phẩm hiện diện",
+      "imageAlt": "Ba người lướt sóng đi dọc bờ biển trong ngày trời âm u, nhìn từ phía sau",
       "steps": [
         {
           "word": "Sun",
@@ -212,6 +213,10 @@
         }
       ],
       "note": "Chúng tôi công bố nguyên kết quả tổng hợp. Chúng tôi dùng công thức có điểm cao nhất, không phải công thức mình thích. Việc tuyển chọn bắt đầu vào tháng 10 năm 2026.",
+      "shots": {
+        "crewAlt": "Bốn người chạy bộ nhìn từ phía sau trên con đường đất phủ đầy lá",
+        "boulderingAlt": "Hai người ngồi nhìn một người leo trên tường bouldering trong nhà"
+      },
       "cta": "Đăng ký nhóm thử nghiệm"
     },
     "timeline": {
@@ -298,7 +303,8 @@
       "close": "Càng vận động nhiều, làn da càng cần sự chăm sóc tinh tế hơn; càng được chăm sóc dễ chịu, ta càng có thể tự do chuyển động trở lại.\nChuyển động và chăm sóc cùng tồn tại một cách tự nhiên — đó là lý do PAROS bắt đầu."
     },
     "maker": {
-      "kicker": "Người làm ra"
+      "kicker": "Người làm ra",
+      "imageAlt": "Bóng dây leo đổ trên bức tường có nắng"
     },
     "island": {
       "kicker": "The Name",
@@ -339,6 +345,7 @@
     },
     "how": {
       "kicker": "Làm như thế nào",
+      "imageAlt": "Ánh sáng ban mai xuyên qua tấm rèm mỏng",
       "body": [
         "Chúng tôi không tự phát triển công thức.\nChúng tôi chọn trong số công thức nhà sản xuất đã có, đã thử nghiệm và thẩm định.",
         "Phần lớn thương hiệu mỹ phẩm Hàn Quốc đều làm như vậy.\nĐiều hiếm gặp là nói ra điều đó, và công bố cả tiêu chí để chọn.",
