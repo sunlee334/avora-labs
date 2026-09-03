@@ -278,7 +278,21 @@ jobs:
           echo "  (자동으로 걸지 않는 이유: 마이그레이션은 되돌리기 어렵습니다)"
           exit 1
 
+      # ── 소스맵을 Sentry 로 올립니다 ──────────────────────────────
+      #
+      # 이게 없으면 Sentry 에 뜨는 스택이 `page.CfoeUBPN.js:1:4821` 처럼 압축된
+      # 자리만 가리켜, 어느 파일 어느 줄인지 알 수 없습니다.
+      #
+      # `astro.config.ts` 가 `enabled: Boolean(process.env.SENTRY_AUTH_TOKEN)`
+      # 으로 판정합니다. 그래서 secret 이 아직 없으면 **업로드만 조용히 건너뛰고**
+      # 빌드는 그대로 됩니다 — 토큰을 먼저 넣어야 배포가 도는 순서 의존이
+      # 생기지 않습니다.
+      #
+      # 빌드 게이트 잡에는 넣지 않습니다. 같은 커밋의 소스맵을 두 번 올릴
+      # 이유가 없고, 실제로 나가는 번들은 이쪽 빌드의 것입니다.
       - run: npm run build
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
       - name: 배포
         uses: cloudflare/wrangler-action@v3
