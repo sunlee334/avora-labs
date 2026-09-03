@@ -4638,6 +4638,26 @@ html {
  * `눈 시림 없음  30점 만점 · 18점 미만 탈락` 을 한 줄로 두면 390px 를
  * 넘습니다. 줄을 나누면 어느 항목의 커트라인인지도 더 분명해집니다.
  */
+/*
+ * 미확정 칸의 값 — `SPF50+ / PA++++ [목표]`.
+ *
+ * 배지가 값과 **같은 줄** 에 붙어야 어느 항목의 목표인지 알 수 있습니다.
+ * 떨어지면 배지만 떠 있는 꼴이 됩니다. 390px 에서 두 줄이 되면 값이 먼저
+ * 접히고 배지가 그 뒤를 따르도록 `inline` 으로 흘립니다.
+ */
+.compare__target {
+  display: block;
+  color: var(--color-text);
+}
+.compare__target .spec__target {
+  margin-left: 6px;
+}
+/* 기다리는 것은 값 아래 줄입니다 — 둘이 한 줄에 있으면 어느 쪽이 값인지 흐려집니다. */
+.compare__value .compare__wait {
+  display: block;
+  margin-top: 4px;
+}
+
 .compare__cut {
   display: block;
   margin-top: 4px;
@@ -4648,23 +4668,46 @@ html {
 .compare__list {
   margin: 0;
 }
+/*
+ * 좁은 화면에서는 **값이 키 아래** 입니다.
+ *
+ * 키와 값을 나란히 두면 `1fr auto` 에서 키가 폭의 절반 가까이를 가져갑니다.
+ * 390px 에서 값에 남는 자리가 173px 이었고, `Chỉ số chống nắng` 처럼 키가 긴
+ * 언어에서는 `SPF50+ / PA++++` 와 `목표` 배지가 함께 들어가지 못해 **배지만
+ * 다음 줄로 떨어졌습니다.** 어느 값의 목표인지 알 수 없는 모양입니다.
+ *
+ * 값을 아래로 내리면 폭을 350px 다 씁니다. 배지가 값 옆에 붙어 있을 수 있고,
+ * 커트라인도 여유가 늘어납니다. 700px 은 세 덩이가 가로로 서는 지점과 같은
+ * 값입니다 — 나란히 놓을 자리가 생기는 때와 값에 자리를 내줘야 하는 때가
+ * 같은 경계입니다.
+ */
 .compare__row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 12px;
-  align-items: baseline;
   padding-block: 11px;
   border-bottom: 1px solid var(--color-border);
+}
+@media (min-width: 700px) {
+  .compare__row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: baseline;
+  }
+  .compare__value,
+  .compare__wait {
+    margin-top: 0;
+    text-align: right;
+  }
 }
 .compare__row dt {
   font-size: 14px;
 }
 /* 확정된 값은 모노스페이스로 — 숫자와 규격이라는 것이 서체로도 읽힙니다. */
 .compare__value {
-  margin: 0;
+  margin: 4px 0 0;
   font-family: var(--font-mono);
   font-size: 13px;
-  text-align: right;
+  /* 값이 키 아래에 있는 동안은 왼쪽 정렬입니다 — 키와 같은 축에서 읽힙니다. */
+  text-align: left;
   font-variant-numeric: tabular-nums;
 }
 /* 미확정 칸에 들어가는 것은 값이 아니라 **무엇을 기다리는지** 입니다.
@@ -4673,7 +4716,7 @@ html {
   margin: 0;
   font-size: 12.5px;
   color: var(--color-text-muted);
-  text-align: right;
+  text-align: left;
 }
 .compare__note {
   margin-top: 18px;

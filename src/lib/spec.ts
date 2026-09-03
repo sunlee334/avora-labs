@@ -111,15 +111,33 @@ export function compareRows(t: Dict) {
     settled: shown
       .filter((row) => !row.target && row.value)
       .map((row) => ({ key: row.key, value: row.value! })),
+    /*
+     * ── 값도 함께 보여 줍니다 ────────────────────────────────
+     * 한동안 이 칸에 **무엇을 기다리는지만** 적었습니다. "비어 있는 것이
+     * 요점" 이라는 판단이었고, 값을 채우면 심사 전에 차단지수를 단정하게
+     * 된다는 걱정이 근거였습니다.
+     *
+     * 그 결과 **홈 전체에 `SPF50+`·`50ml` 이 한 번도 나오지 않았습니다.**
+     * 방문자가 이게 무슨 제품인지 알 수 없습니다.
+     *
+     * 걱정의 실체는 "값이 있다" 가 아니라 **"확정처럼 보인다"** 였습니다.
+     * 제품 페이지는 같은 값을 `목표` 배지와 함께 이미 보여 주고 있고, 그
+     * 방식이면 단정이 되지 않습니다. 같은 배지를 여기서도 씁니다.
+     *
+     * 값과 "무엇을 기다리는지" 를 **한 자리에** 둡니다. 따로 적으면 같은
+     * 항목이 화면에 두 번 나오고, 어느 쪽이 참인지 읽는 사람이 판단해야
+     * 합니다.
+     */
     unsettled: [
       ...shown
         .filter((row) => row.target)
         .map((row) => ({
           key: row.key,
+          value: row.value,
           wait: table.waits[row.id as keyof typeof table.waits],
         })),
       // 용기는 스펙표에 없지만 손님이 궁금해하는 항목이라 대조표에는 넣습니다.
-      { key: table.container, wait: table.waits.container },
+      { key: table.container, value: null, wait: table.waits.container },
     ],
   };
 }

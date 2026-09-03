@@ -672,7 +672,21 @@ const criteriaRows = h.panel.criteria.map((item) => {
           {unsettled.map((row) => (
             <div class="compare__row">
               <dt>{row.key}</dt>
-              <dd class="compare__wait">{row.wait}</dd>
+              <dd class="compare__value">
+                {/*
+                  값이 있으면 **`목표` 배지와 함께** 보여 줍니다. 제품
+                  페이지가 쓰는 것과 같은 배지입니다 — 값만 적으면 심사 전에
+                  차단지수를 단정한 것이 되고, 값을 아예 감추면 홈에서 이게
+                  무슨 제품인지 알 수 없습니다.
+                */}
+                {row.value && (
+                  <span class="compare__target">
+                    {row.value}
+                    <span class="spec__target">{t.product.spec.values.target}</span>
+                  </span>
+                )}
+                <span class="compare__wait">{row.wait}</span>
+              </dd>
             </div>
           ))}
         </dl>
