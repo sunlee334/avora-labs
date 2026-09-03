@@ -131,6 +131,21 @@ export const KEEP_ORIGINAL = [
   'SPF50+ / PA++++',
 ] as const;
 
+/**
+ * 브랜드명의 한글 표기.
+ *
+ * 번역이 아니라 **표기** 입니다. `/brand` 의 이름 섹션이 다섯 언어 모두에서
+ * "PAROS, 파로스" 를 함께 적습니다 — 그리스 섬과 혼동되지 않게 하려는
+ * 것이고, 한국에서 쓰이는 이름이 무엇인지가 그 문장의 내용입니다. 영어판에서
+ * 이 세 글자를 지우면 문장이 말하려던 것이 사라집니다.
+ *
+ * ⚠️ `KEEP_ORIGINAL` 에 넣으면 안 됩니다. 그 목록의 규칙은 "이 문구가 들어간
+ * 문장은 번역돼도 문구가 그대로여야 한다" 입니다. 넣어 보니 철학 문단과 제품
+ * FAQ 처럼 «파로스» 가 **그냥 브랜드명으로** 쓰인 자리까지 번역문에 한글을
+ * 강요했습니다 — 중국어판이 "帕罗斯" 라고 쓰는 것이 맞는 자리입니다.
+ */
+export const BRAND_KO = '파로스';
+
 /** 절대 URL 생성. OG·canonical·sitemap이 전부 이 함수를 지납니다. */
 export function absoluteUrl(path: string): string {
   return new URL(path, ORIGIN).href;

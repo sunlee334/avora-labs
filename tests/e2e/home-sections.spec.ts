@@ -24,10 +24,11 @@ const ORDER = [
   'the_journey',
   'company',
   'home_faq',
+  'limits',
   'brand_bridge',
 ];
 
-/** 히어로에 붙어 있는 폼. 역할 열한 가지에는 들어가지 않습니다. */
+/** 히어로에 붙어 있는 폼. 역할 열두 가지에는 들어가지 않습니다. */
 const ATTACHED = new Set(['hero_notify']);
 
 /*
@@ -63,7 +64,7 @@ async function sections(page: import('@playwright/test').Page) {
 }
 
 test.describe('홈 섹션', () => {
-  test('열한 자리가 정해진 순서대로 선다', async ({ page }) => {
+  test('열두 자리가 정해진 순서대로 선다', async ({ page }) => {
     for (const locale of LOCALES) {
       await page.goto(`/${locale}/`);
       const found = (await sections(page)).map((s) => s.name).filter((n) => !ATTACHED.has(n));

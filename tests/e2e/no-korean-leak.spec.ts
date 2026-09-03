@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { INDEXED_LOCALES, BUSINESS } from '../../src/config/site';
+import { INDEXED_LOCALES, BUSINESS, BRAND_KO } from '../../src/config/site';
 import payment from '../../src/config/payment-config.json' with { type: 'json' };
 import ko from '../../src/i18n/ko.json' with { type: 'json' };
 import en from '../../src/i18n/en.json' with { type: 'json' };
@@ -97,6 +97,17 @@ test.describe('색인 대상 화면 전수', () => {
         if (hangul.length < 2) continue; // 한 글자짜리 조각은 넘어갑니다
         if (legalNames.some((n) => sentence.includes(n))) continue; // 법정 표시
         if (KEEP_ORIGINAL.some((n) => sentence.includes(n))) continue; // 브랜드명
+        /*
+         * 브랜드명 한글 병기 — "PAROS, 파로스 in Korean".
+         *
+         * 이름 섹션이 다섯 언어 모두에서 둘을 **함께** 적습니다. 그리스 섬과
+         * 혼동되지 않게 하려는 것이라, 영어판에서 세 글자를 지우면 문장이
+         * 말하려던 것이 사라집니다.
+         *
+         * 둘이 **같이 있을 때만** 넘어갑니다. 병기가 아니라 번역이 빠져서
+         * 한글만 남은 문장은 그대로 걸려야 합니다.
+         */
+        if (sentence.includes(BRAND_KO) && sentence.includes(BUSINESS.brandName)) continue;
         leaks.push(`${path} — ${sentence.trim().slice(0, 80)}`);
       }
     }
