@@ -24,17 +24,34 @@ import { test, expect } from '@playwright/test';
  */
 
 /**
- * 화면 폭별로 허용되는 여백 조합. 이 밖의 값이 나오면 규칙 밖입니다.
+ * 허용되는 여백 조합을 **토큰에서 만듭니다.**
  *
- * ⚠️ `--attach` 는 **위쪽만** 좁힙니다 — 아래는 기본값 그대로(104/56)입니다.
+ * 픽셀 문자열로 적어 두었더니 토큰을 바꾸는 날 검사가 먼저 틀리는 구조였습니다.
+ * 값을 화면에서 읽어 조합을 세우면, 디자인이 바뀌어도 "규칙 밖 값이 없다" 는
+ * 뜻은 그대로 남습니다.
+ *
+ * ⚠️ `--attach` 는 **위쪽만** 좁힙니다 — 아래는 기본값 그대로입니다.
  * 처음에 홈에서 본 `56px/0px` 을 그 클래스의 값으로 착각해 목록에 넣었다가
  * `/brand` 에서 걸렸습니다. 홈의 0px 은 `.heroNotify` 가 따로 주는
- * 특수 사례이고, 규칙 자체는 `56px/104px` 입니다.
+ * 특수 사례이고, 규칙 자체는 `기본/기본` 의 위쪽만 좁힌 것입니다.
  */
-const ALLOWED = {
-  desktop: new Set(['104px/104px', '144px/144px', '56px/104px', '56px/0px']),
-  mobile: new Set(['56px/56px', '88px/88px', '32px/56px', '32px/0px']),
-};
+async function allowedPads(page: import('@playwright/test').Page) {
+  return page.evaluate(() => {
+    const root = getComputedStyle(document.documentElement);
+    const px = (name: string) => root.getPropertyValue(name).trim();
+    const wide = window.innerWidth >= 900;
+    const base = px(wide ? '--space-section-desktop' : '--space-section-mobile');
+    const lg = px(wide ? '--space-section-lg-desktop' : '--space-section-lg-mobile');
+    const sm = px(wide ? '--space-section-sm-desktop' : '--space-section-sm-mobile');
+    return [
+      `${base}/${base}`,
+      `${lg}/${lg}`,
+      `${sm}/${base}`,
+      // 홈의 히어로 폼만 아래를 0 으로 둡니다 — 다음 섹션이 여백을 냅니다.
+      `${sm}/0px`,
+    ];
+  });
+}
 
 const PAGES = ['/ko/', '/ko/brand', '/ko/panel', '/ko/product', '/ko/support'];
 
@@ -60,7 +77,7 @@ test.describe('섹션 리듬', () => {
       const rows = await paddings(page, path);
       expect(rows.length, `${path} 에 섹션이 없습니다`).toBeGreaterThan(0);
 
-      const allowed = isMobile ? ALLOWED.mobile : ALLOWED.desktop;
+      const allowed = new Set(await allowedPads(page));
       const strays = rows.filter((r) => !allowed.has(r.pad));
       expect(
         strays.map((r) => `${r.name}(${r.variants}) ${r.pad}`),

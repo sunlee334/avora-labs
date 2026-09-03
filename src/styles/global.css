@@ -1231,27 +1231,35 @@ a {
   --nav-height: 69px;
 }
 
-/* 착지점이 스티키 헤더에 가리지 않게 합니다.
-   `#story` 는 이제 `/brand` 페이지에 있습니다 — 헤더의 브랜드 항목이 실제
-   페이지가 되면서 옮겨 갔고, 밖에 공유된 옛 링크가 그리로 넘어옵니다
-   (src/lib/story-anchor.ts). 저장소에 scroll-margin 선언이 0건이었습니다. */
-#story,
-/* 건너뛰기 링크의 착지점도 같은 이유로 필요합니다. */
 /*
- * 앵커로 이동했을 때 제목이 헤더 뒤에 숨지 않게 합니다.
+ * 앵커로 이동했을 때 제목이 스티키 헤더에 가리지 않게 합니다.
  *
- * `#main` 하나만 `scroll-margin-top` 을 갖고 있어서, `#notify`·`#panel` 처럼
- * 밖에 공유되는 다른 앵커들은 헤더에 가렸습니다. 요소마다 붙이는 대신
- * **문서 전체에 한 번** 선언합니다 — 새 앵커가 생겨도 같이 지켜집니다.
+ * ── 요소마다 붙이지 않고 문서에 한 번 ──────────────────────
+ * 전에는 `#story`·`#main`·`#notify` 가 각자 `scroll-margin-top` 을 들고
+ * 있었습니다. 그래서 `#panel` 처럼 나중에 생긴 앵커는 아무도 챙기지
+ * 않았습니다. `scroll-padding-top` 은 **스크롤포트** 의 성질이라 한 번만
+ * 선언하면 지금 있는 앵커도 앞으로 생길 앵커도 함께 지켜집니다.
  *
- * 값은 `--nav-height` 한 곳에서 옵니다. 헤더 높이가 바뀌면 이 값도 함께
- * 따라옵니다 — 숫자를 여기 또 적으면 언젠가 한쪽만 고쳐집니다.
+ * ⚠️ **둘을 함께 두면 더해집니다.** scroll-into-view 는 대상의 scroll-margin
+ * 상자를 스크롤포트의 scroll-padding **안쪽** 모서리에 맞춥니다. 한동안
+ * 이 선언을 더하면서 요소별 선언을 지우지 않아, `#notify` 가 85+93=178px
+ * 아래에 착지했습니다 — 헤더가 70px 인데 죽은 공간이 109px 이었습니다.
+ * 그래서 요소별 `scroll-margin-top` 은 전부 지웠습니다.
+ *
+ * 24px 을 더 두는 이유: 섹션 첫 줄이 헤더에 딱 붙어 시작하면 답답합니다.
+ * (`#notify` 가 원래 갖고 있던 값을 여기로 옮긴 것입니다.)
+ *
+ * ── `--nav-height` 가 `:root` 에 있어야 하는 이유 ───────────
+ * 위 블록의 주석에 적힌 그대로입니다. `.nav` 에 두면 `<main>` 안의 앵커가
+ * 상속받지 못해 계산이 0px 으로 조용히 떨어집니다.
+ *
+ * ── `#story` ───────────────────────────────────────────────
+ * `/brand` 페이지에 있습니다. 헤더의 브랜드 항목이 실제 페이지가 되면서
+ * 옮겨 갔고, 밖에 공유된 옛 링크가 그리로 넘어옵니다
+ * (`src/lib/story-anchor.ts`). 이제 이 한 줄이 그것도 함께 챙깁니다.
  */
 html {
-  scroll-padding-top: calc(var(--nav-height) + 16px);
-}
-#main {
-  scroll-margin-top: var(--nav-height);
+  scroll-padding-top: calc(var(--nav-height) + 24px);
 }
 /* 착지했다는 사실만 알리면 되고, 테두리까지 그릴 필요는 없습니다. */
 #main:focus {
@@ -1859,14 +1867,6 @@ html {
     border-color: var(--color-accent-soft);
   }
 }
-/*
- * 착지점이 스티키 헤더에 가리지 않게. #story·#main 과 같은 처방입니다.
- * 24px 을 더 두는 이유는 섹션 첫 줄이 헤더에 붙어 시작하면 답답해서입니다.
- */
-#notify {
-  scroll-margin-top: calc(var(--nav-height) + 24px);
-}
-
 @media (min-width: 900px) {
   .hero {
     min-height: 88svh;
@@ -4031,9 +4031,19 @@ html {
   white-space: pre-wrap;
 }
 
+/*
+ * ⚠️ 읽기 폭 토큰을 쓰지 않습니다.
+ *
+ * `--size-measure` 는 **한 줄에 몇 글자가 들어가야 읽기 좋은가** 를 정하는
+ * 값입니다. 폼은 읽는 것이 아니라 채우는 것이라 그 근거가 닿지 않습니다.
+ * 한동안 같은 토큰을 쓰고 있어서, 본문 읽기 폭을 65ch → 71ch 로 올렸을 때
+ * 입력칸이 함께 54px 넓어졌습니다 — 아무도 의도하지 않은 변화입니다.
+ *
+ * 그때의 값(65ch ≈ 580px)을 그대로 고정합니다.
+ */
 .inquiryForm {
   margin-top: 24px;
-  max-width: var(--size-measure);
+  max-width: 580px;
 }
 .inquiryForm textarea {
   width: 100%;

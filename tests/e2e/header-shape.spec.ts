@@ -99,18 +99,44 @@ test.describe('헤더 모양', () => {
     expect(height).toBeLessThanOrEqual(72);
   });
 
-  test('스크롤해도 뒤 글자가 헤더에 비치지 않는다', async ({ page }) => {
+  test('본문 위로 스크롤해도 뒤 글자가 헤더에 비치지 않는다', async ({ page }) => {
     /*
      * 88% 였을 때 헤더 안에 뒤 글자의 잔상이 생겼습니다. 흐리게만 해서는
      * 글자 모양이 남습니다 — 덮는 양을 늘려야 합니다.
+     *
+     * **실제로 스크롤합니다.** 처음에는 계산된 스타일만 보고 이름을
+     * "스크롤해도" 라고 붙였는데, 그러면 헤더 아래에 글이 지나가는 상태를
+     * 한 번도 만들지 않은 채 통과합니다.
      */
     await page.goto('/ko/');
+    await page.evaluate(async () => {
+      const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+      for (let i = 0; i < 20; i += 1) {
+        window.scrollTo(0, 1200);
+        await sleep(80);
+        const prev = window.scrollY;
+        await sleep(90);
+        if (Math.abs(window.scrollY - prev) < 1) break;
+      }
+    });
+
     const paint = await page.locator('.nav').evaluate((el) => {
       const cs = getComputedStyle(el);
       const alpha = cs.backgroundColor.match(/[\d.]+\s*\)$/)?.[0].replace(')', '').trim();
-      return { alpha: alpha ? Number(alpha) : 1, blur: cs.backdropFilter };
+      const blur = Number.parseFloat(cs.backdropFilter.match(/blur\(([\d.]+)px\)/)?.[1] ?? '0');
+      // 헤더 아래에 실제로 본문이 깔려 있는지 — 아니면 이 검사는 아무것도 안 봅니다.
+      const nav = el.getBoundingClientRect();
+      const behind = [...document.querySelectorAll('main p, main h2, main li')].some((t) => {
+        const r = t.getBoundingClientRect();
+        return r.height > 0 && r.top < nav.bottom && r.bottom > nav.top;
+      });
+      return { alpha: alpha ? Number(alpha) : 1, blur, behind };
     });
+
+    expect(paint.behind, '헤더 아래에 본문이 지나가는 상태를 못 만들었습니다').toBe(true);
     expect(paint.alpha, `헤더 배경이 ${paint.alpha} 로 비칩니다`).toBeGreaterThanOrEqual(0.96);
+    // 불투명도만으로 통과시키지 않습니다 — 둘 중 하나만 지키면 잔상이 남습니다.
+    expect(paint.blur, `헤더 blur 가 ${paint.blur}px 입니다`).toBeGreaterThanOrEqual(12);
   });
 });
 
@@ -156,6 +182,21 @@ test.describe('앵커로 이동해도 제목이 가리지 않는다', () => {
 
         expect(gap, `${anchor} 대상을 못 찾았습니다`).not.toBeNull();
         expect(gap!, `${anchor} 이 헤더에 ${-gap!}px 가렸습니다`).toBeGreaterThanOrEqual(0);
+        /*
+         * ⚠️ **상한도 봅니다.**
+         *
+         * 하한만 두었더니 진짜 회귀를 놓쳤습니다. `scroll-padding-top` 을
+         * 문서에 더하면서 요소별 `scroll-margin-top` 을 지우지 않아 둘이
+         * 더해졌고, `#notify` 가 85+93=178px 아래에 착지했습니다. 헤더는
+         * 70px 인데 죽은 공간이 109px 이었습니다 — 화면 한 뭉치가 그냥
+         * 비어 있는 상태인데 "가리지 않는다" 는 통과했습니다.
+         *
+         * 여유는 24px 을 의도한 값입니다. 렌더 오차와 Lenis 의 감속을
+         * 감안해 그 두 배까지만 허용합니다.
+         */
+        expect(gap!, `${anchor} 아래에 ${gap}px 의 죽은 공간이 생겼습니다`).toBeLessThanOrEqual(
+          48,
+        );
       }
     });
   }
@@ -168,13 +209,24 @@ test.describe('앵커로 이동해도 제목이 가리지 않는다', () => {
     await page.goto('/ko/');
     const values = await page.evaluate(() => {
       const root = getComputedStyle(document.documentElement);
+      const strays = [...document.querySelectorAll('[id]')]
+        .filter((el) => getComputedStyle(el).scrollMarginTop !== '0px')
+        .map((el) => `#${el.id}`);
       return {
         pad: root.scrollPaddingTop,
         navVar: root.getPropertyValue('--nav-height').trim(),
         navReal: Math.round(document.querySelector('.nav')!.getBoundingClientRect().height),
+        strayMargins: strays,
       };
     });
     expect(values.pad, 'scroll-padding-top 이 없습니다').not.toBe('auto');
+    /*
+     * 요소별 `scroll-margin-top` 이 남아 있으면 두 값이 **더해집니다.**
+     * 출처가 한 곳이라는 말은 선언이 한 곳이라는 뜻입니다.
+     */
+    expect(values.strayMargins, `아직 scroll-margin 을 가진 앵커: ${values.strayMargins}`).toEqual(
+      [],
+    );
     // 변수와 실제 높이가 갈라지면 계산식이 맞아도 결과가 틀립니다.
     expect(
       Math.abs(Number.parseInt(values.navVar, 10) - values.navReal),
