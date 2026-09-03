@@ -14,34 +14,36 @@
  * 환경변수가 아니라 payment-config.json 과 product.json 을 고치세요 —
  * 그래야 무엇이 켜져 있는지가 저장소에 남습니다.
  */
+import { resolveCheckoutMode, resolvePrice, sellsDirectly } from './sells-directly';
 import paymentConfig from './payment-config.json';
 import commerceConfig from './commerce.json';
 import productData from './../data/product.json';
 
-type CheckoutMode = 'internal' | 'external' | 'none';
-
 const defaultCountry = paymentConfig.defaultCountry as keyof typeof paymentConfig.countries;
 const country = paymentConfig.countries[defaultCountry];
 
-const modeOverride = import.meta.env.PUBLIC_CHECKOUT_MODE as CheckoutMode | undefined;
+const modeOverride = import.meta.env.PUBLIC_CHECKOUT_MODE as string | undefined;
 const priceOverride = import.meta.env.PUBLIC_PRODUCT_PRICE;
 
+/*
+ * 판정 규칙은 `sells-directly.ts` 한 곳에 있습니다. 여기서는 **이 환경의
+ * 값을 들고 가서** 부르기만 합니다 — `astro.config.ts` 가 사이트맵을 만들 때
+ * 같은 함수를 자기 값으로 부릅니다. 규칙을 두 벌 적어 두었더니 세 자리에서
+ * 갈렸고, 그 목록이 그 파일 머리말에 있습니다.
+ */
 /** 이 빌드에서 쓰이는 결제 방식. */
-export const CHECKOUT_MODE: CheckoutMode =
-  modeOverride === 'internal' || modeOverride === 'external' || modeOverride === 'none'
-    ? modeOverride
-    : (country.checkout as CheckoutMode);
+export const CHECKOUT_MODE = resolveCheckoutMode(modeOverride, country.checkout as string);
 
 /** 이 빌드에서 쓰이는 가격. 아직 정해지지 않았으면 null. */
-export const PRICE: number | null =
-  priceOverride != null && priceOverride !== ''
-    ? Number(priceOverride)
-    : (productData.price as number | null);
+export const PRICE: number | null = resolvePrice(
+  priceOverride,
+  productData.price as number | null,
+);
 
 export const CURRENCY = productData.currency;
 
 /** 자사 결제 화면(장바구니·체크아웃)을 노출할지. 가격이 없으면 열 수 없습니다. */
-export const SELLS_DIRECTLY = CHECKOUT_MODE === 'internal' && PRICE != null;
+export const SELLS_DIRECTLY = sellsDirectly(CHECKOUT_MODE, PRICE);
 
 
 export const EXTERNAL_STORE_URL: string | null = country.externalStoreUrl || null;

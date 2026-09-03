@@ -24,6 +24,7 @@
  */
 import Base from '../../layouts/Base.astro';
 import { LOCALES, BUSINESS, type Locale } from '../../config/site';
+import { HAS_JOURNAL } from '../../config/nav-gates';
 import { dict, localePath } from '../../i18n';
 import { breadcrumb, faqPage } from '../../lib/jsonld';
 import { ACCOUNTS_ENABLED } from '../../config/runtime';
@@ -235,13 +236,23 @@ const schemaItems = items
       </p>
     </div>
 
-    <div class="support__card">
-      <h2>{t.journal.heading}</h2>
-      <p>{t.journal.intro}</p>
-      <p>
-        <a class="tapLink" href={localePath(locale, 'journal')}>{t.journal.heading}</a>
-      </p>
-    </div>
+    {/*
+      읽을거리 카드는 **글이 있을 때만** 나옵니다.
+
+      헤더는 `HAS_JOURNAL` 로 이 항목을 감추는데(빈 페이지로 가는 길을 두지
+      않으려고), 여기서는 그대로 내보내고 있었습니다. 한 사실을 두 곳이
+      반대로 판정하면 게이트를 둔 의미가 없습니다 — 헤더에서 감춘 자리로
+      가는 길이 고객센터에 남아 있었습니다.
+    */}
+    {HAS_JOURNAL && (
+      <div class="support__card">
+        <h2>{t.journal.heading}</h2>
+        <p>{t.journal.intro}</p>
+        <p>
+          <a class="tapLink" href={localePath(locale, 'journal')}>{t.journal.heading}</a>
+        </p>
+      </div>
+    )}
 
     <div class="support__card">
       <h2>{page.pending.heading}</h2>

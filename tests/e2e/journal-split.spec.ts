@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
-import { LOCALES, INDEXED_LOCALES } from '../../src/config/site';
+import { LOCALES, INDEXED_LOCALES, ORIGIN } from '../../src/config/site';
+import { isPublishedJournal } from '../../src/config/post-frontmatter';
 import { visibleTop, type NavFlags } from '../../src/config/nav';
 import commerce from '../../src/config/commerce.json' with { type: 'json' };
 import ko from '../../src/i18n/ko.json' with { type: 'json' };
@@ -31,10 +32,7 @@ const HAS_JOURNAL = readdirSync('src/content/posts')
       .filter((f) => f.endsWith('.md'))
       .map((f) => readFileSync(`src/content/posts/${locale}/${f}`, 'utf8')),
   )
-  .some((raw) => {
-    const front = raw.startsWith('---') ? (raw.split('---')[1] ?? '') : '';
-    return /^category:\s*journal\s*$/m.test(front) && !/^draft:\s*true\s*$/m.test(front);
-  });
+  .some(isPublishedJournal);
 
 const FLAGS: NavFlags = {
   checkout: MODE === 'commerce',
@@ -105,9 +103,19 @@ test.describe('옛 주소가 죽지 않는다', () => {
     expect(res.headers()['location']).toContain('/ko/support/notice/shipping-notice/');
   });
 
-  test('없는 글은 저널 목록으로 보낸다 — 404 로 떨어뜨리지 않는다', async ({ request }) => {
+  test('없는 글은 저널 목록으로 보내되 — 영구 이동이라고 말하지 않는다', async ({ request }) => {
+    /*
+     * 404 로 떨어뜨리지 않습니다. 그렇다고 301 을 주면 안 됩니다.
+     *
+     * 301 은 캐시가 무기한 기억합니다. 지금 저널 글 두 편이 다 초안이라
+     * 실제로 이 길로 갑니다 — 여기에 301 을 주면 **글이 공개된 뒤에도**
+     * 옛 링크를 한 번 따라간 사람은 영영 목록으로 갑니다.
+     *
+     * 아직 없는 것과 옮겨 간 것은 다릅니다. 목록 주소 자체(`/support/posts`)
+     * 는 진짜로 옮겨 갔으므로 위 검사대로 301 입니다.
+     */
     const res = await request.get('/ko/support/posts/없는글', { maxRedirects: 0 });
-    expect(res.status()).toBe(301);
+    expect(res.status(), '없는 글로 가는 길에 영구 이동을 붙였습니다').toBe(302);
     expect(res.headers()['location']).toContain('/ko/journal/');
   });
 
@@ -173,8 +181,22 @@ test.describe('색인 신호가 새 주소를 가리킨다', () => {
     const xml = await (await request.get('/sitemap-0.xml')).text();
     expect(xml, '사이트맵이 아직 옛 주소를 말합니다').not.toContain('/support/posts');
     for (const locale of INDEXED_LOCALES) {
-      expect(xml).toContain(`/${locale}/journal/`);
       expect(xml).toContain(`/${locale}/support/notice/`);
+    }
+
+    /*
+     * 읽을거리 목록은 **글이 있을 때만** 사이트맵에 넣습니다.
+     *
+     * 전부 초안이면 그 목록은 빈 페이지이고, `nav-gates.ts` 의 `HAS_JOURNAL`
+     * 이 이미 최상위 메뉴에서 감춥니다. 화면은 감추면서 사이트맵으로는
+     * "색인해 달라" 고 말하면 두 신호가 어긋납니다 — `/reviews` 를 뺀 것과
+     * 같은 이유입니다.
+     */
+    for (const locale of INDEXED_LOCALES) {
+      const listed = xml.includes(`<loc>${ORIGIN}/${locale}/journal/</loc>`);
+      expect(listed, `내보낸 글이 ${HAS_JOURNAL ? '있는' : '없는'}데 등재는 ${listed}`).toBe(
+        HAS_JOURNAL,
+      );
     }
   });
 

@@ -82,6 +82,24 @@ export type StepState = 'past' | 'active' | 'planned';
  * 값이 없으면 라벨도 그리지 않는 규칙(푸터의 사업자 정보와 같은 규칙)을 그대로
  * 적용합니다 — 지나간 단계에 배지가 없는 것은 읽는 데 문제가 되지 않습니다.
  */
+/**
+ * 서울 기준 `YYYY-MM`.
+ *
+ * ⚠️ `toISOString()` 은 **UTC** 입니다. 손님도 일정도 한국에 있는데 그 값으로
+ * 달을 읽으면, 한국 달이 바뀐 뒤 **아홉 시간 동안** 지난 달로 판정합니다.
+ *
+ * 2026-10-01 03:00 KST 에 화면을 그리면 UTC 로는 아직 9월 30일이라, 모집이
+ * 열리는 바로 그날 한국 방문자에게 "예정" 이라고 말합니다 — 이 모듈이 생긴
+ * 이유가 화면이 `llms.txt` 의 "October 2026" 을 뒤집지 않게 하려는 것이었는데
+ * 같은 사고가 아홉 시간짜리로 남아 있었습니다.
+ *
+ * 한국은 서머타임이 없으므로 고정 +9 가 정확합니다.
+ */
+const SEOUL_OFFSET_MS = 9 * 60 * 60 * 1000;
+export function seoulMonth(date: Date): string {
+  return new Date(date.getTime() + SEOUL_OFFSET_MS).toISOString().slice(0, 7);
+}
+
 export function stepStates(today: Date): StepState[] {
   /*
    * ISO 문자열은 **길이가 같을 때만** 사전순 비교가 시간순 비교입니다.
@@ -89,7 +107,7 @@ export function stepStates(today: Date): StepState[] {
    * 모든 항목에 같습니다 — 길이가 섞이면 `'2027'` 이 `'2027-02'` 앞에 서던
    * 그 사고가 돌아옵니다.
    */
-  const now = today.toISOString().slice(0, 7);
+  const now = seoulMonth(today);
   const startsAfter = (startsAt: string) => startsAt > now;
 
   return TIMELINE.map((step, i) => {

@@ -1881,6 +1881,7 @@ async function route(request: Request, env: Env, ctx: ExecutionContext): Promise
   if (oldPost && (LOCALES as readonly string[]).includes(oldPost[1])) {
     const [, lang, slug] = oldPost;
     let target = `/${lang}/journal/`;
+    let resolved = false;
 
     if (slug) {
       for (const base of [`/${lang}/journal`, `/${lang}/support/notice`]) {
@@ -1894,6 +1895,7 @@ async function route(request: Request, env: Env, ctx: ExecutionContext): Promise
         );
         if (probe.ok) {
           target = `${base}/${slug}/`;
+          resolved = true;
           break;
         }
       }
@@ -1908,7 +1910,22 @@ async function route(request: Request, env: Env, ctx: ExecutionContext): Promise
      */
     const destination = new URL(target, url);
     destination.search = url.search;
-    return Response.redirect(destination.href, 301);
+
+    /*
+     * **302 는 딱 한 경우뿐입니다 — slug 를 받았는데 못 찾았을 때.**
+     *
+     * 301 은 브라우저와 중간 캐시가 무기한 기억합니다. 목록 주소
+     * (`/support/posts`)는 실제로 영구히 옮겨 갔으니 그 성질이 맞습니다.
+     *
+     * 그런데 **글을 찾다 실패해서** 목록으로 보내는 것은 다릅니다. 지금 두
+     * 글이 다 초안이라 실제로 그 길로 갑니다. 여기에 301 을 주면, 글이
+     * 나중에 공개돼도 옛 링크를 한 번이라도 따라간 사람은 영영 목록으로
+     * 갑니다 — 검색엔진에도 "그 주소는 목록이다" 라고 영구히 말한 셈입니다.
+     *
+     * 아직 없는 것과 옮겨 간 것은 다릅니다.
+     */
+    const permanent = !slug || resolved;
+    return Response.redirect(destination.href, permanent ? 301 : 302);
   }
 
   // 5 — 그 외에는 정적 에셋에 넘깁니다.

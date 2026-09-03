@@ -96,9 +96,23 @@ test.describe('브랜드가 하나의 개체로 모인다', () => {
 });
 
 test.describe('공유 태그가 페이지 성격을 말한다', () => {
+  /*
+   * ⚠️ 제품 페이지가 `product` 가 **아닌** 이유.
+   *
+   * `og:type="product"` 는 OGP 기본 타입이 아니라 Facebook 의 수직 타입이고,
+   * 쓰려면 `product:price:amount`·`product:price:currency`·
+   * `product:availability` 가 함께 나가야 합니다. **가격이 아직 확정되지
+   * 않았습니다** — 제품 페이지의 스펙 표가 화면에서 그렇게 말합니다.
+   *
+   * 없는 값을 지어내지 않으면 반쪽짜리 선언이 되고, 그 타입을 모르는
+   * 파서에서는 큰 이미지 카드가 아니라 밋밋한 링크로 떨어집니다. 국내
+   * 공유가 대부분 카카오라 그 손실이 실제입니다.
+   *
+   * 가격이 확정되면 `product` 로 바꾸고 `product:*` 를 함께 붙입니다.
+   */
   const cases = [
     { path: '/ko/', type: 'website' },
-    { path: '/ko/product', type: 'product' },
+    { path: '/ko/product', type: 'website' },
     { path: '/ko/support/notice/shipping-notice', type: 'article' },
   ];
 
@@ -108,6 +122,20 @@ test.describe('공유 태그가 페이지 성격을 말한다', () => {
       expect(html).toContain(`<meta property="og:type" content="${type}">`);
     });
   }
+
+  test('product 타입을 쓴다면 값도 함께 나간다', async ({ request }) => {
+    /*
+     * 언젠가 가격이 확정되어 `product` 로 바꿀 때, `product:*` 를 빠뜨린 채
+     * 타입만 바꾸는 것을 막습니다. 지금은 `website` 라 이 검사가 조용히
+     * 지나가고, 바꾸는 날 한 번 소리를 냅니다.
+     */
+    const html = await (await request.get('/ko/product')).text();
+    if (html.includes('<meta property="og:type" content="product">')) {
+      expect(html, 'product 인데 가격이 없습니다').toContain('product:price:amount');
+      expect(html, 'product 인데 통화가 없습니다').toContain('product:price:currency');
+      expect(html, 'product 인데 재고 상태가 없습니다').toContain('product:availability');
+    }
+  });
 
   test('글에는 발행 시각이 함께 나간다', async ({ request }) => {
     const html = await (await request.get('/ko/support/notice/shipping-notice')).text();

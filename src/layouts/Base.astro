@@ -336,6 +336,24 @@ const xDefault = !wanted || wanted.includes(X_DEFAULT_LOCALE)
         // 이미 끝난 뒤에 이 코드가 도는 경우(bfcache 복원 등)를 위해 상태를 봅니다.
         if (document.readyState === 'complete') afterLoad();
         else window.addEventListener('load', afterLoad, { once: true });
+
+        /*
+         * ⚠️ **떠나기 전에 한 번 더 부릅니다.**
+         *
+         * 위의 큐(`dataLayer`)는 즉시 쌓이지만, 그걸 비우는 것은 gtag.js
+         * 입니다. load 뒤로 미뤄 두면 **로딩 중에 떠난 사람은 계측이 늦는
+         * 것이 아니라 아예 없습니다** — 큐가 문서와 함께 사라집니다.
+         *
+         * 그런데 로딩 중 이탈은 바로 이 지연이 줄이려던 그 이탈입니다.
+         * 줄이려는 것을 보이지 않게 만들면 남는 것은 좋아진 숫자뿐입니다.
+         *
+         * `pagehide` 는 뒤로가기 캐시로 들어갈 때도 옵니다. `fetchGtag` 가
+         * 자기 스크립트 태그를 먼저 보므로 두 번 붙지 않습니다.
+         */
+        window.addEventListener('pagehide', fetchGtag, { once: true });
+        document.addEventListener('visibilitychange', function () {
+          if (document.visibilityState === 'hidden') fetchGtag();
+        });
       }
     </script>
 

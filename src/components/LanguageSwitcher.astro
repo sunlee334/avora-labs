@@ -13,8 +13,8 @@
  * JS 가 없으면 이 시트는 열리지 않습니다. 그 경우를 위해 푸터에 5개 언어 링크를
  * 항상 평문으로 두었습니다 — 언어 전환 자체는 JS 없이도 가능합니다.
  */
-import { LOCALE_LABELS, LOCALE_TAGS, type Locale } from '../config/site';
-import { dict } from '../i18n';
+import { LOCALES, LOCALE_LABELS, LOCALE_TAGS, type Locale } from '../config/site';
+import { dict, localePath } from '../i18n';
 
 interface Props {
   locale: Locale;
@@ -35,6 +35,26 @@ interface Props {
 }
 const { locale, langs } = Astro.props;
 const t = dict(locale);
+
+/*
+ * ── 그런데 좁히기만 하면 이번엔 나갈 길이 없어집니다 ────────
+ * 한 언어로만 쓴 글에서는 `langs` 가 **한 줄** 입니다. 그러면 이 버튼은
+ * 지금 보고 있는 언어 하나만 담은 시트를 열고, 그 항목에는
+ * `aria-current="true"` 가 붙습니다 — 누를 수는 있는데 아무 데도 가지
+ * 않는 컨트롤입니다. 404 는 면했지만 이번엔 가둡니다.
+ *
+ * 그래서 **보여 주는 것은 언제나 다섯 언어** 이고, 이 글이 없는 언어는 그
+ * 언어의 첫 화면으로 보냅니다. 푸터의 언어 목록이 이미 그렇게 동작하고
+ * 있어서, 사용자가 배울 규칙이 늘지 않습니다.
+ *
+ * ⚠️ hreflang 은 **좁은 채로** 둡니다. 그건 "이 페이지의 다른 언어판" 을
+ * 말하는 자리라, 없는 번역을 있다고 하면 안 됩니다. 화면의 링크와 기계에게
+ * 하는 말은 여기서 갈라지는 것이 맞습니다.
+ */
+const destinations = LOCALES.map((l) => {
+  const here = langs.find((entry) => entry.locale === l);
+  return { locale: l, path: here?.path ?? localePath(l), translated: here !== undefined };
+});
 ---
 
 <div class="lang">
@@ -57,7 +77,7 @@ const t = dict(locale);
     </div>
     <ul class="lang__list">
       {
-        langs.map(({ locale: l, path: href }) => (
+        destinations.map(({ locale: l, path: href, translated }) => (
           <li>
             <a
               class="lang__item"
@@ -65,6 +85,7 @@ const t = dict(locale);
               hreflang={LOCALE_TAGS[l]}
               lang={LOCALE_TAGS[l]}
               aria-current={l === locale ? 'true' : undefined}
+              data-translated={translated ? undefined : 'false'}
             >
               {LOCALE_LABELS[l]}
               <span aria-hidden="true">{l.toUpperCase()}</span>

@@ -10,6 +10,7 @@
  * `nav.ts` 에 있고, 여기 있는 것은 **플래그를 한 번 읽어 묶는 세 줄** 뿐입니다.
  */
 import { SELLS_DIRECTLY, ACCOUNTS_ENABLED } from './runtime';
+import { isPublishedJournal } from './post-frontmatter';
 import { visibleTop, visibleUtility, menuDestinations, type NavFlags } from './nav';
 
 /*
@@ -28,10 +29,7 @@ const journalFiles = import.meta.glob('../content/posts/*/*.md', {
   import: 'default',
 }) as Record<string, string>;
 
-export const HAS_JOURNAL = Object.values(journalFiles).some((raw) => {
-  const front = raw.startsWith('---') ? (raw.split('---')[1] ?? '') : '';
-  return /^category:\s*journal\s*$/m.test(front) && !/^draft:\s*true\s*$/m.test(front);
-});
+export const HAS_JOURNAL = Object.values(journalFiles).some(isPublishedJournal);
 
 export const FLAGS: NavFlags = {
   checkout: SELLS_DIRECTLY,

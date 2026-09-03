@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { TIMELINE_DATES, stepStates } from '../../src/config/timeline';
+import { TIMELINE_DATES, stepStates, seoulMonth } from '../../src/config/timeline';
 import ko from '../../src/i18n/ko.json' with { type: 'json' };
 
 /**
@@ -52,7 +52,11 @@ test.describe('진행 상태를 손으로 적지 않는다', () => {
      */
     await page.goto('/ko/');
 
-    const today = new Date().toISOString().slice(0, 10);
+    /*
+     * 서울 기준입니다. UTC 로 재면 한국 달이 바뀐 뒤 아홉 시간 동안 이
+     * 검사가 화면을 틀렸다고 말합니다 — 틀린 것은 검사 쪽입니다.
+     */
+    const today = seoulMonth(new Date());
     const rows = await page.locator('.timeline li').evaluateAll((els) =>
       els.map((el) => ({
         datetime: el.querySelector('time')!.getAttribute('datetime')!,
@@ -78,6 +82,37 @@ test.describe('진행 상태를 손으로 적지 않는다', () => {
     await page.goto('/ko/');
     const first = page.locator('.timeline li').first();
     await expect(first.locator('time')).toHaveAttribute('datetime', '2026-10');
+  });
+
+  test('한국 달이 바뀌는 그 순간부터 진행중이다', () => {
+    /*
+     * ⚠️ 여기가 아홉 시간짜리 거짓말이 있던 자리입니다.
+     *
+     * `toISOString()` 은 **UTC** 입니다. 손님도 일정도 한국에 있는데 그 값으로
+     * 달을 읽으면, 한국 달이 바뀐 뒤 아홉 시간 동안 지난 달로 판정합니다.
+     *
+     * 2026-10-01 03:00 KST 는 UTC 로 아직 9월 30일 18시입니다. 그 시각에
+     * 화면을 그리면 모집이 열리는 바로 그날 한국 방문자에게 "예정" 이라고
+     * 말합니다 — 이 모듈이 생긴 이유가 화면이 `llms.txt` 의 "October 2026"
+     * 을 뒤집지 않게 하려는 것이었는데, 같은 사고가 작게 남아 있었습니다.
+     */
+    const kst = (iso: string) => new Date(`${iso}+09:00`);
+
+    // 한국의 9월 마지막 순간 — 아직 모집 전입니다.
+    expect(seoulMonth(kst('2026-09-30T23:59:59'))).toBe('2026-09');
+    expect(stepStates(kst('2026-09-30T23:59:59'))[0]).toBe('planned');
+
+    // 한국의 10월 첫 순간 — 그 즉시 모집이 진행중입니다.
+    expect(seoulMonth(kst('2026-10-01T00:00:00'))).toBe('2026-10');
+    expect(stepStates(kst('2026-10-01T00:00:00'))[0]).toBe('active');
+
+    // UTC 로 재던 시절 어긋나던 창(한국 10월 1일 0~9시)을 통째로 봅니다.
+    for (const hour of ['00:00', '03:00', '06:00', '08:59']) {
+      expect(
+        stepStates(kst(`2026-10-01T${hour}:00`))[0],
+        `한국 10월 1일 ${hour} 에 모집이 진행중이 아닙니다`,
+      ).toBe('active');
+    }
   });
 
   test('계산식이 경계에서 갈린다', () => {

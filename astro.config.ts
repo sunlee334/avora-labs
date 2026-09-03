@@ -4,6 +4,9 @@ import { satteri } from '@astrojs/markdown-satteri';
 import { hastTableScroll } from './src/hast/table-scroll';
 import { ORIGIN, LOCALES, DEFAULT_LOCALE, LOCALE_TAGS, INDEXED_LOCALES } from './src/config/site';
 import { inSitemap } from './src/config/reserved-paths';
+import { resolveCheckoutMode, resolvePrice, sellsDirectly } from './src/config/sells-directly';
+import { frontmatterOf, field, isDraft, categoryOf } from './src/config/post-frontmatter';
+import { loadEnv } from 'vite';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import paymentConfig from './src/config/payment-config.json' with { type: 'json' };
 import paymentProduct from './src/data/product.json' with { type: 'json' };
@@ -28,18 +31,33 @@ import sentry from '@sentry/astro';
  * (`import.meta.env` 를 타서 설정 파일 평가 시점에 로드되지 않습니다).
  * 판정 순서와 기본값을 그쪽과 똑같이 맞춥니다.
  */
-const priceOverride = process.env.PUBLIC_PRODUCT_PRICE;
-const PRICE_FOR_SITEMAP =
-  priceOverride !== undefined && priceOverride !== ''
-    ? Number(priceOverride)
-    : (paymentProduct.price as number | null);
-const CHECKOUT_FOR_SITEMAP =
-  process.env.PUBLIC_CHECKOUT_MODE ??
-  (paymentConfig.countries[paymentConfig.defaultCountry as 'KR'].checkout as string);
-const SELLS_DIRECTLY =
-  CHECKOUT_FOR_SITEMAP === 'internal' &&
-  PRICE_FOR_SITEMAP !== null &&
-  !Number.isNaN(PRICE_FOR_SITEMAP);
+/*
+ * ⚠️ `.env` 는 `process.env` 에 오지 않습니다.
+ *
+ * Vite 는 root·envDir·mode 를 정한 뒤에야 `.env` 를 읽어 `import.meta.env` 에
+ * 넣습니다. 설정 파일은 그보다 먼저 평가되므로, 여기서 `process.env` 만 보면
+ * `.env` 에 `PUBLIC_CHECKOUT_MODE` 를 적어 둔 사람에게 **화면과 사이트맵이
+ * 서로 다른 값을 보게 됩니다.** `loadEnv` 가 Vite 와 같은 방식으로 읽어
+ * `process.env` 의 값과 합쳐 줍니다.
+ */
+const ENV = loadEnv(
+  process.env.NODE_ENV === 'development' ? 'development' : 'production',
+  process.cwd(),
+  'PUBLIC_',
+);
+
+/*
+ * 판정 규칙은 `src/config/sells-directly.ts` 한 곳에 있습니다. 여기서는
+ * Node 쪽 값을 들고 가서 부르기만 합니다 — 화면(`runtime.ts`)이 같은 함수를
+ * 자기 값으로 부릅니다.
+ */
+const SELLS_DIRECTLY = sellsDirectly(
+  resolveCheckoutMode(
+    ENV.PUBLIC_CHECKOUT_MODE,
+    paymentConfig.countries[paymentConfig.defaultCountry as 'KR'].checkout as string,
+  ),
+  resolvePrice(ENV.PUBLIC_PRODUCT_PRICE, paymentProduct.price as number | null),
+);
 
 /**
  * 글 주소 → 마지막으로 달라진 날.
@@ -52,6 +70,14 @@ const SELLS_DIRECTLY =
  * 발행일로 채우지 않는 `jsonld.ts` 의 규칙과 어긋나지 않습니다. 저쪽은
  * "고친 적 있는가" 를 말하고, 이쪽은 "언제까지의 내용인가" 를 말합니다.
  */
+/*
+ * 내보낸 읽을거리가 하나라도 있는가.
+ *
+ * `nav-gates.ts` 의 `HAS_JOURNAL` 과 **같은 사실** 인데, 그쪽은
+ * `import.meta.glob` 이라 설정 파일에서 쓸 수 없습니다. 판정 자체는
+ * `post-frontmatter.ts` 의 같은 함수를 부르므로 규칙은 한 벌입니다.
+ */
+let HAS_JOURNAL = false;
 const POST_DATES = new Map<string, string>();
 for (const locale of readdirSync('./src/content/posts')) {
   /*
@@ -66,15 +92,15 @@ for (const locale of readdirSync('./src/content/posts')) {
 
   for (const file of readdirSync(dir)) {
     if (!file.endsWith('.md')) continue;
-    const front = readFileSync(`${dir}/${file}`, 'utf8').split('---')[1] ?? '';
-    const pick = (key: string) => front.match(new RegExp(`^${key}:\\s*(\\S+)`, 'm'))?.[1];
+    const front = frontmatterOf(readFileSync(`${dir}/${file}`, 'utf8'));
 
     // 초안은 페이지 자체가 만들어지지 않으므로 사이트맵에도 없습니다.
-    if (pick('draft') === 'true') continue;
+    if (isDraft(front)) continue;
+    if (categoryOf(front) === 'journal') HAS_JOURNAL = true;
 
-    const date = pick('updatedAt') ?? pick('publishedAt');
+    const date = field(front, 'updatedAt') ?? field(front, 'publishedAt');
     // 주소는 카테고리가 정합니다 — `src/lib/posts.ts` 의 BASE 와 같은 표입니다.
-    const base = pick('category') === 'journal' ? 'journal' : 'support/notice';
+    const base = categoryOf(front) === 'journal' ? 'journal' : 'support/notice';
     if (date) POST_DATES.set(`/${locale}/${base}/${file.replace(/\.md$/, '')}/`, date);
   }
 }
@@ -142,7 +168,8 @@ export default defineConfig({
      * (tests/e2e/fonts-content.spec.ts 가 그걸 봅니다). 색인 대상 언어만
      * 넘겨줍니다.
      */
-    filter: (url: string) => inSitemap(url, INDEXED_LOCALES, SELLS_DIRECTLY),
+    filter: (url: string) =>
+      inSitemap(url, INDEXED_LOCALES, { sellsDirectly: SELLS_DIRECTLY, hasJournal: HAS_JOURNAL }),
     /*
      * `lastmod` — 이 주소가 마지막으로 달라진 날.
      *

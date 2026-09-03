@@ -7,7 +7,9 @@
  * 원칙: 확정되지 않은 값은 넣지 않습니다. 가격이 없는데 offers 를 만들어
  * 0원이나 빈 문자열을 넣으면 검색엔진에 잘못된 사실을 주게 됩니다.
  */
-import { ORIGIN, absoluteUrl, BUSINESS, SOCIAL, type Locale } from '../config/site';
+import { FOUNDED } from '../config/company';
+import { ORIGIN, absoluteUrl, BUSINESS, SOCIAL, type Locale, BRAND_KO, COMPANY_KO,
+} from '../config/site';
 import { localePath } from '../i18n';
 import { PRICE, CURRENCY } from '../config/runtime';
 import product from '../data/product.json';
@@ -87,11 +89,16 @@ export function organization() {
       '@type': 'Brand',
       '@id': ID.brand,
       name: BUSINESS.brandName,
-      alternateName: '파로스',
+      alternateName: BRAND_KO,
       description: 'Active lifestyle sun care brand. 액티브 라이프스타일 선케어 브랜드.',
       ...(SOCIAL.instagramUrl ? { sameAs: [SOCIAL.instagramUrl] } : {}),
     },
-    alternateName: '아보라랩스',
+    alternateName: COMPANY_KO,
+    /*
+     * 설립 시점은 확인되면 나갑니다. 비어 있는 동안에는 항목 자체가
+     * 없습니다 — 빈 문자열을 내보내면 "모른다" 가 아니라 "없다" 가 됩니다.
+     */
+    ...(FOUNDED ? { foundingDate: FOUNDED } : {}),
     /*
      * 카테고리를 제목·llms.txt 와 같은 말로 적습니다. 여기만 "beauty" 로
      * 남아 있으면 기계가 읽는 세 곳(제목·구조화 데이터·llms.txt)이 서로
@@ -227,6 +234,8 @@ export function article(input: {
   locale: Locale;
   publishedAt: string;
   updatedAt?: string;
+  /** 이 화면이 실제로 내보내는 og:image 이름. `Base.astro` 의 `ogImage` 와 같은 값을 넘기세요. */
+  ogImage?: string;
 }) {
   return {
     '@context': 'https://schema.org',
@@ -246,8 +255,14 @@ export function article(input: {
      * 권장하는 항목이 빠집니다. **지어내지 않고**, 이 글의 화면이 이미
      * `og:image` 로 내보내고 있는 것과 같은 그림을 가리킵니다 — 한 페이지가
      * 두 개의 다른 대표 그림을 말할 이유가 없습니다.
+     *
+     * ⚠️ 그 "같은 그림" 을 **여기서 정하지 않습니다.** 한동안 이 줄이
+     * `og/home` 을 직접 적어 두고 `Base.astro` 의 기본값과 우연히 같기를
+     * 기대했습니다. 호출부가 언젠가 `ogImage` 를 바꾸면 화면과 구조화
+     * 데이터가 조용히 다른 파일을 가리킵니다 — 어긋나도 아무 신호가 없는
+     * 종류입니다. 그래서 이름을 **받습니다.**
      */
-    image: absoluteUrl(`/og/home.${input.locale}.jpg`),
+    image: absoluteUrl(`/og/${input.ogImage ?? 'home'}.${input.locale}.jpg`),
     /*
      * 글쓴이는 개인이 아니라 회사입니다. 1인 운영이라도 개인 이름을 구조화
      * 데이터로 내보낼 이유가 없습니다.

@@ -71,7 +71,31 @@ export const SITEMAP_KO_ONLY = ['/panel'] as const;
  * 페이지는 그대로 둡니다. 제품 페이지에서 계속 갈 수 있고, 결제가 켜지는
  * 순간 사이트맵에도 저절로 돌아옵니다.
  */
-export const SITEMAP_WHEN_SELLING = ['/reviews'] as const;
+/**
+ * 조건이 맞을 때만 사이트맵에 넣는 경로.
+ *
+ * `/reviews` 는 위 이유로, `/journal` 은 **같은 이유** 로 여기 있습니다 —
+ * 글이 전부 초안이면 그 목록은 빈 페이지이고, `nav-gates.ts` 의
+ * `HAS_JOURNAL` 이 이미 최상위 메뉴에서 그것을 감춥니다. 화면은 감추면서
+ * 사이트맵으로는 "색인해 달라" 고 말하면 두 신호가 어긋납니다.
+ *
+ * ⚠️ 여기 넣는 경로는 **아래 `RESERVED_SLUG_PREFIXES` 에도 들어갑니다.**
+ * 판정이 부분 문자열이라, 그러지 않으면 `reviews-...` 라는 slug 의 글이
+ * 사이트맵에서 조용히 빠집니다 — 경고도 없이. 이 파일이 존재하는 이유가
+ * 정확히 그 사고입니다.
+ */
+export const SITEMAP_CONDITIONAL = [
+  { path: '/reviews', when: 'sellsDirectly' },
+  { path: '/journal', when: 'hasJournal' },
+] as const;
+
+/** 사이트맵 판정이 알아야 하는 이 빌드의 사실들. */
+export interface SitemapConditions {
+  /** 자사 결제가 켜져 있는가. 꺼져 있으면 후기가 존재할 수 없습니다. */
+  sellsDirectly: boolean;
+  /** 내보낸 읽을거리가 하나라도 있는가. 없으면 목록은 빈 페이지입니다. */
+  hasJournal: boolean;
+}
 
 /**
  * 이 주소를 사이트맵에 넣을 것인가.
@@ -84,19 +108,23 @@ export function inSitemap(
   url: string,
   indexedLocales: readonly string[],
   /**
-   * 자사 결제가 켜져 있는가. 꺼져 있으면 후기가 존재할 수 없습니다.
+   * 이 빌드의 사실들. 값을 import 하지 않고 **받는** 이유는 이 파일의 다른
+   * 인자와 같습니다 — `astro.config.ts` 와 `scripts/check-slugs.mjs` 가 함께
+   * 쓰는데, 후자는 Node 가 직접 읽으므로 `import.meta.env` 를 타는 모듈을
+   * 물릴 수 없습니다.
    *
-   * 값을 import 하지 않고 **받는** 이유는 이 파일의 다른 인자와 같습니다 —
-   * `astro.config.mjs` 와 `scripts/check-slugs.mjs` 가 함께 쓰는데, 후자는
-   * Node 가 직접 읽으므로 `import.meta.env` 를 타는 모듈을 물릴 수 없습니다.
+   * 기본값은 **전부 참** 입니다. slug 검사처럼 조건을 모르는 호출부는 "가장
+   * 많이 담기는" 상태로 봐야, 어느 조건에서든 막힐 slug 를 미리 잡습니다.
    */
-  sellsDirectly = true,
+  conditions: SitemapConditions = { sellsDirectly: true, hasJournal: true },
 ): boolean {
   if (SITEMAP_EXCLUDED.some((excluded) => url.includes(excluded))) return false;
   // 한국어판만 넣는 경로는 `/ko/` 를 지나야 통과합니다.
   if (SITEMAP_KO_ONLY.some((path) => url.includes(path))) return url.includes('/ko/');
-  // 팔지 않는 동안에는 후기가 있을 수 없으므로 색인을 요청하지 않습니다.
-  if (!sellsDirectly && SITEMAP_WHEN_SELLING.some((path) => url.includes(path))) return false;
+  // 조건이 아직 아닌 것은 빈 페이지입니다 — 색인을 요청하지 않습니다.
+  for (const { path, when } of SITEMAP_CONDITIONAL) {
+    if (!conditions[when] && url.includes(path)) return false;
+  }
   /*
    * 아직 색인하지 않는 언어는 사이트맵에도 넣지 않습니다. 넣으면 사이트맵은
    * "색인해 달라", 페이지는 "하지 말라" 고 서로 다른 말을 하게 됩니다 —
@@ -116,7 +144,15 @@ export function inSitemap(
  * `checkSlug()` 가 **접두 일치**로 봅니다 — 완전 일치로 하면 `checkout-tips` 가
  * 통과해 버리고, 그게 정확히 위에서 말한 조용한 사고입니다.
  */
-export const RESERVED_SLUG_PREFIXES = SITEMAP_EXCLUDED.map((path) => {
+export const RESERVED_SLUG_PREFIXES = [
+  ...SITEMAP_EXCLUDED,
+  /*
+   * 조건부 경로도 부분 문자열로 걸러집니다. `/reviews` 가 목록에 없던 동안
+   * `reviews-of-spf-claims` 라는 글은 사이트맵에서 조용히 빠지면서 slug
+   * 검사는 통과했습니다 — 이 파일 머리말이 경고한 그 사고 그대로입니다.
+   */
+  ...SITEMAP_CONDITIONAL.map((entry) => entry.path),
+].map((path) => {
   /*
    * 접두 일치가 사이트맵의 부분 문자열 일치와 대응하는 **근거**는 모든
    * 항목이 `/` 로 시작한다는 것입니다. 주소가 `/ko/journal/{slug}/`

@@ -30,6 +30,7 @@
  *      `npm run fonts` 후 그 줄이 바뀌어 diff 에 드러납니다.
  *   python3 -m venv .fontsrc/venv && .fontsrc/venv/bin/pip install fonttools brotli
  */
+import { frontmatterOf, isDraft } from '../src/config/post-frontmatter.ts';
 import {
   readFileSync,
   writeFileSync,
@@ -431,8 +432,7 @@ export function postStringsFor(locale, postsRoot = POSTS_ROOT) {
      * 값만 보기 때문입니다. `draft: true` 는 한 줄이라 이 형태로 충분하고,
      * 아니면(값이 없거나 false) 포함하는 쪽으로 기웁니다.
      */
-    const frontmatter = raw.startsWith('---') ? (raw.split('---')[1] ?? '') : '';
-    if (/^draft:\s*true\s*$/m.test(frontmatter)) continue;
+    if (isDraft(frontmatterOf(raw))) continue;
 
     /*
      * 프론트매터를 파싱하지 않고 **원문을 통째로** 넣습니다.

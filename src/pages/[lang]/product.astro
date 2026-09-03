@@ -94,7 +94,19 @@ const rows = specRows(t);
   description={p.meta.description}
   ogImage="product"
   ogImageAlt={p.meta.ogAlt}
-  ogType="product"
+  {/*
+    ⚠️ `og:type="product"` 를 쓰지 않습니다.
+
+    그건 OGP 기본 타입이 아니라 Facebook 의 수직 타입이고, 쓰려면
+    `product:price:amount`·`product:price:currency`·`product:availability`
+    가 함께 나가야 합니다. **가격이 아직 확정되지 않았습니다** — 스펙 표가
+    화면에서 그렇게 말하고 있습니다. 없는 값을 지어내지 않으면 반쪽짜리
+    선언이 되고, 그 타입을 모르는 파서(카카오·네이버)에서는 큰 이미지
+    카드가 아니라 밋밋한 링크로 떨어집니다.
+
+    가격이 확정되면 그때 `product` 로 바꾸고 `product:*` 를 함께 붙입니다.
+  */}
+  ogType="website"
   jsonLd={[
     productSchema(locale, productData.name, p.meta.description),
     breadcrumb([

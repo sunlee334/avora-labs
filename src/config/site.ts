@@ -146,6 +146,15 @@ export const KEEP_ORIGINAL = [
  */
 export const BRAND_KO = '파로스';
 
+/**
+ * 회사명의 한글 표기. `BRAND_KO` 와 같은 이유로 여기 둡니다.
+ *
+ * 구조화 데이터의 `alternateName` 이 이 값을 씁니다 — 전에는 그 파일이
+ * 문자열을 따로 들고 있었습니다. 한 벌이던 이름이 두 벌이 되는 순간,
+ * 화면과 기계가 서로 다른 이름을 말하기 시작합니다.
+ */
+export const COMPANY_KO = '아보라랩스';
+
 /** 절대 URL 생성. OG·canonical·sitemap이 전부 이 함수를 지납니다. */
 export function absoluteUrl(path: string): string {
   return new URL(path, ORIGIN).href;
