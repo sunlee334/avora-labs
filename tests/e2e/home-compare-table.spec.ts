@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { FOUNDER_STORY, TEAM_SIZE } from '../../src/config/company';
 import { LOCALES } from '../../src/config/site';
 import product from '../../src/data/product.json' with { type: 'json' };
 import ko from '../../src/i18n/ko.json' with { type: 'json' };
@@ -137,33 +138,58 @@ test.describe('다섯 언어', () => {
   }
 });
 
-test.describe('회사 소개가 기다리는 것을 숨기지 않는다', () => {
+test.describe('회사 소개가 없는 것을 있다고 하지 않는다', () => {
   /*
    * 창업 배경과 팀 규모는 담당자가 주어야 하는 것이고 아직 오지 않았습니다.
-   * 지시서 B2 는 문안 초안까지 줬지만, **같은 문서의 확인 항목이** 설립
-   * 연도와 팀 규모 공개 여부를 담당자 몫으로 남겼습니다.
    *
-   * 그래서 자리를 만들되 값은 비워 둡니다. 섹션을 통째로 숨기면 그 자리가
-   * 있어야 한다는 사실 자체를 잊습니다 — 푸터의 통신판매업 번호가 오랫동안
-   * 비어 있던 방식과 같은 판단입니다.
+   * ⚠️ **판단이 한 번 뒤집혔습니다.** 전에는 "자리를 만들되 값은 비워 두고
+   * 기다린다고 적는" 방식이었습니다 — 자리가 있어야 한다는 사실을 잊지
+   * 않으려는 장치였습니다. 그런데 그 문장이 **실제 사이트에 게시되고
+   * 있었습니다.** 방문자에게 "담당자 원고를 기다리고 있습니다" 는 아무 뜻이
+   * 없습니다.
+   *
+   * 이제 값이 있을 때만 그립니다. 자리를 기억하는 일은 코드 주석과
+   * `config/company.ts` 가 합니다 — 화면이 할 일이 아닙니다.
    */
-  test('세 블록이 이름표를 갖는다', async ({ page }) => {
+  test('값이 있는 블록만 이름표를 갖는다', async ({ page }) => {
     await page.goto('/ko/');
-    const labels = await page.locator('.blocks__label').allInnerTexts();
-    expect(labels.map((s) => s.trim())).toEqual([
-      ko.home.company.blocks.company,
-      ko.home.company.blocks.founder,
-      ko.home.company.blocks.scale,
-    ]);
+    const labels = (await page.locator('.blocks__label').allInnerTexts()).map((s) => s.trim());
+    const b = ko.home.company.blocks;
+
+    // 운영사(어원 한 줄)는 늘 값이 있습니다.
+    expect(labels, '운영사 블록이 없습니다').toContain(b.company);
+    // 사업 기획서 1-2 대로 운영사는 **맨 뒤** 입니다.
+    expect(labels.at(-1), '운영사가 맨 앞에 있습니다').toBe(b.company);
+
+    for (const [label, value] of [
+      [b.founder, FOUNDER_STORY.ko],
+      [b.scale, TEAM_SIZE.ko],
+    ] as const) {
+      if (value) expect(labels, `${label} 값이 있는데 블록이 없습니다`).toContain(label);
+      else expect(labels, `${label} 값이 없는데 블록이 나왔습니다`).not.toContain(label);
+    }
   });
 
-  test('원고가 없는 블록은 기다린다고 말한다 — 회색 상자를 놓지 않는다', async ({ page }) => {
+  test('원고가 없는 블록은 아예 나오지 않는다', async ({ page }) => {
+    /*
+     * 전에는 "담당자 원고를 기다리고 있습니다" 를 적었습니다. 회색 상자보다는
+     * 나았지만 **그 문장 자체가 게시되고 있었습니다** — 방문자에게는 내부
+     * 메모입니다.
+     *
+     * 회사 섹션에 남는 것은 값이 있는 블록뿐입니다. 지금은 운영사 한 블록
+     * (어원 한 줄)이고, 원고가 오면 만든 사람·규모가 앞에 붙습니다.
+     */
     await page.goto('/ko/');
-    const awaiting = page.locator('.blocks__awaiting');
-    await expect(awaiting, '기다린다는 표시가 없습니다').not.toHaveCount(0);
-    for (const text of await awaiting.allInnerTexts()) {
-      expect(text.trim(), '빈 자리표가 있습니다').toBe(ko.home.company.awaiting);
-    }
+    const section = page.locator('[data-section="company"]');
+    const text = await section.innerText();
+    expect(text, '안내 문구가 게시되고 있습니다').not.toContain('기다리고 있습니다');
+    expect(text, '안내 문구가 게시되고 있습니다').not.toContain('준비 중');
+
+    // 빈 블록을 남기지 않습니다 — 라벨만 있고 내용이 없는 자리가 없어야 합니다.
+    const empty = await section.locator('.blocks__item').evaluateAll((els) =>
+      els.filter((el) => !el.querySelector('p')).length,
+    );
+    expect(empty, '내용 없는 블록이 남아 있습니다').toBe(0);
   });
 
   test('없는 사실을 지어내지 않았다', async ({ page }) => {

@@ -133,16 +133,15 @@
       ]
     },
     "company": {
-      "kicker": "AVORA LABS",
+      "kicker": "WHO WE ARE",
       "lead": "Chúng tôi tạo ra thương hiệu cho những người luôn chuyển động.",
       "body": "PAROS là thương hiệu đầu tiên của AVORA LABS. Tên gọi đến từ một hòn đảo ở biển Aegean, và được làm cho tất cả những ai vận động — không chỉ vận động viên.",
       "etymology": "AVORA ghép chữ A của Athlete và Active — người chuyển động — với VORA của Vitality và Aura, sức sống vốn có của làn da.",
       "blocks": {
-        "company": "Công ty",
+        "company": "Công ty vận hành",
         "founder": "Người làm ra",
         "scale": "Quy mô"
       },
-      "awaiting": "Đang chờ bản thảo từ người phụ trách.",
       "instagram": "Instagram"
     },
     "faq": {

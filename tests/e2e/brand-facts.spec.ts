@@ -31,9 +31,14 @@ test.describe('사실 섹션이 들어왔다', () => {
     const headings = await page.locator('.kicker').allInnerTexts();
     const trimmed = headings.map((s) => s.trim().toUpperCase());
 
+    /*
+     * ⚠️ `만든 사람`(C1)은 원고가 있을 때만 나옵니다. 전에는 빈 자리에
+     * "기다리고 있습니다" 를 적어 늘 존재했는데, 그 내부 메모가 실제 사이트에
+     * 게시되고 있어 값이 없으면 섹션 자체를 그리지 않도록 바꿨습니다.
+     */
     const order = [
       ko.brand.question.kicker,
-      ko.brand.maker.kicker, // C1 — The Question 뒤
+      ...(FOUNDER_STORY.ko ? [ko.brand.maker.kicker] : []), // C1 — The Question 뒤
       ko.brand.island.kicker,
       ko.brand.naming.kicker, // C3 — The Name 뒤
       ko.brand.elements.kicker,
@@ -55,6 +60,7 @@ test.describe('사실 섹션이 들어왔다', () => {
     const text = await page.locator('main').innerText();
     for (const key of ['origin', 'question', 'island', 'elements', 'audience',
                        'philosophy', 'company', 'message'] as const) {
+      // `maker` 는 원고가 있을 때만 나오므로 이 목록에 없습니다.
       const kicker = (ko.brand[key] as { kicker: string }).kicker;
       // 화면은 대문자로 그립니다(.kicker 의 text-transform).
       expect(text.toUpperCase(), `«${kicker}» 섹션이 사라졌습니다`).toContain(kicker.toUpperCase());
@@ -109,13 +115,26 @@ test.describe('표기', () => {
 });
 
 test.describe('만든 사람', () => {
-  test('원고가 없으면 기다린다고 적는다 — 지어내지 않는다', async ({ page }) => {
-    test.skip(Boolean(FOUNDER_STORY.ko), '원고가 들어오면 이 검사는 의미가 없습니다');
-
+  test('원고가 없으면 섹션 자체가 없다 — 안내 문구를 게시하지 않는다', async ({ page }) => {
+    /*
+     * 전에는 빈 자리에 "담당자 원고를 기다리고 있습니다" 를 적었습니다. 자리를
+     * 잊지 않으려는 장치였는데, **그 내부 메모가 실제 사이트에 게시되고
+     * 있었습니다.** 방문자에게는 아무 뜻이 없는 문장입니다.
+     *
+     * 이제 값이 있을 때만 그립니다. 자리를 기억하는 일은 코드 주석과
+     * `config/company.ts` 가 합니다.
+     */
     await page.goto('/ko/brand');
-    const section = page.locator('section').filter({ hasText: ko.brand.maker.kicker }).last();
-    await expect(section.locator('.blocks__awaiting')).toHaveCount(1);
-    await expect(section).toContainText(ko.home.company.awaiting);
+    const text = await page.locator('main').innerText();
+    expect(text, '안내 문구가 게시되고 있습니다').not.toContain('기다리고 있습니다');
+    expect(text, '안내 문구가 게시되고 있습니다').not.toContain('준비 중');
+
+    const section = page.locator('section').filter({ hasText: ko.brand.maker.kicker });
+    if (FOUNDER_STORY.ko) {
+      await expect(section, '원고가 있는데 섹션이 없습니다').not.toHaveCount(0);
+    } else {
+      await expect(section, '원고가 없는데 섹션이 나왔습니다').toHaveCount(0);
+    }
   });
 
   test('창업 배경을 지어내지 않았다', async ({ page }) => {

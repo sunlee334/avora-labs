@@ -4679,10 +4679,6 @@ html {
   color: var(--color-text-muted);
   margin-bottom: 8px;
 }
-.blocks__awaiting {
-  font-size: 13px;
-  color: var(--color-text-muted);
-}
 
 /* ── THE PROBLEM 의 장면 ────────────────────────────────────
  * 세 줄이 한 문단이지만 각각 한 장면이라 줄로 끊어 읽히게 합니다. */

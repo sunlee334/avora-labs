@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { LOCALES, SOCIAL } from '../../src/config/site';
 import { FOUNDER_PHOTO, FOUNDER_STORY } from '../../src/config/company';
+import ko from '../../src/i18n/ko.json' with { type: 'json' };
 
 /**
  * 홈의 회사 소개 — 지어내지 않았는가.
@@ -21,7 +22,18 @@ test.describe('회사 소개', () => {
       const section = page.locator('[data-section="company"]');
       await expect(section, `${locale} 에 회사 섹션이 없습니다`).toHaveCount(1);
       const text = await section.innerText();
-      expect(text, `${locale} 회사 섹션이 비었습니다`).toContain('AVORA LABS');
+      expect(text.trim().length, `${locale} 회사 섹션이 비었습니다`).toBeGreaterThan(30);
+
+      /*
+       * ⚠️ 전에는 이 자리에서 `AVORA LABS` 를 찾았습니다. 사업 기획서 1-2 가
+       * 운영사를 "소비자 접점에서는 전면에 나서지 않음" 으로 규정하므로, 그
+       * 이름이 **섹션 라벨이나 헤드라인이면 안 됩니다.** 검색을 위한 표기
+       * (`<title>`·JSON-LD·브랜드 페이지)는 그대로 둡니다.
+       */
+      const kicker = (await section.locator('.kicker').innerText()).trim();
+      expect(kicker, `${locale} 라벨이 운영사 이름입니다`).not.toContain('AVORA LABS');
+      const lead = (await section.locator('h2').innerText()).trim();
+      expect(lead, `${locale} 헤드라인이 운영사 이름입니다`).not.toContain('AVORA LABS');
     }
   });
 
@@ -58,24 +70,28 @@ test.describe('회사 소개', () => {
        * 지키려는 것은 "설정이 비면 그 자리에 이야기가 없다" 이므로, 세는 대신
        * **그 블록** 을 봅니다.
        */
+      /*
+       * ⚠️ 규칙이 바뀌었습니다. 전에는 비면 "기다리고 있습니다" 한 줄을
+       * 남겼는데, **그 내부 메모가 실제 사이트에 게시되고 있었습니다.**
+       * 이제 값이 없으면 **블록 자체가 나오지 않습니다.**
+       */
       const story = FOUNDER_STORY[locale];
-      const founderBlock = section.locator('.blocks__item').nth(1);
-      await expect(founderBlock, `${locale} 만든 사람 블록이 없습니다`).toHaveCount(1);
+      const blocks = section.locator('.blocks__item');
+      const labels = await blocks.locator('.blocks__label').allInnerTexts();
+      const dict = locale === 'ko' ? ko : null;
 
       if (story) {
-        await expect(founderBlock, `${locale} 설정한 이야기가 화면에 없습니다`).toContainText(story);
-        await expect(
-          founderBlock.locator('.blocks__awaiting'),
-          `${locale} 이야기가 있는데도 기다린다고 적혀 있습니다`,
-        ).toHaveCount(0);
-      } else {
-        // 비어 있으면 이야기 문단이 아니라 "기다리고 있습니다" 한 줄만 남습니다.
-        await expect(
-          founderBlock.locator('p.body'),
-          `${locale} 설정이 비었는데 이야기 문단이 있습니다`,
-        ).toHaveCount(0);
-        await expect(founderBlock.locator('.blocks__awaiting')).toHaveCount(1);
+        await expect(section, `${locale} 설정한 이야기가 화면에 없습니다`).toContainText(story);
+      } else if (dict) {
+        expect(
+          labels.map((l) => l.trim()),
+          `${locale} 원고가 없는데 만든 사람 블록이 나왔습니다`,
+        ).not.toContain(dict.home.company.blocks.founder);
       }
+
+      // 라벨만 있고 내용이 없는 블록이 남으면 안 됩니다.
+      const empty = await blocks.evaluateAll((els) => els.filter((el) => !el.querySelector('p')).length);
+      expect(empty, `${locale} 내용 없는 블록이 ${empty}개 남았습니다`).toBe(0);
     }
   });
 

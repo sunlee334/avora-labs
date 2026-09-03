@@ -768,36 +768,38 @@ const criteriaRows = h.panel.criteria.map((item) => {
         <h2 class="display display--tight">{h.company.lead}</h2>
 
         {/*
-          세 블록 — 회사 · 만든 사람 · 규모.
+          ── 값이 없으면 블록 자체가 없습니다 ────────────────────
+          전에는 빈 자리에 "담당자 원고를 기다리고 있습니다" 를 적었습니다.
+          그 자리가 있어야 한다는 것을 잊지 않으려는 장치였는데, **그 문장이
+          실제 사이트에 게시되고 있었습니다.** 방문자에게는 내부 메모입니다.
 
-          ⚠️ **[2] 와 [3] 은 담당자 원고를 기다리는 자리입니다.** 창업 배경과
-          팀 규모는 지어낼 수 없고, 지시서도 그 둘을 확인 항목으로 남겼습니다.
-          값이 없으면 이름표만 남기고 "기다리고 있습니다" 를 적습니다 —
-          섹션을 통째로 숨기면 그 자리가 있어야 한다는 사실 자체를 잊습니다.
+          이제 값이 있을 때만 그립니다. 자리를 기억하는 일은 이 주석과
+          `config/company.ts` 가 합니다 — 화면이 할 일이 아닙니다.
 
-          설립 연도도 같은 이유로 비어 있습니다(`config/company.ts` 의
-          `FOUNDED`). "2026년 서울" 은 지시서에 있지만 같은 문서가 그것을
-          확인 항목으로 두었습니다.
+          ── 순서를 사람 먼저로 ──────────────────────────────────
+          사업 기획서 1-2 가 AVORA LABS 를 "소비자 접점에서는 전면에 나서지
+          않음" 으로 규정합니다. 그래서 라벨이 `WHO WE ARE` 이고, 운영사
+          이야기는 **맨 뒤에 한 줄** 입니다. `<title>`·JSON-LD·브랜드 페이지의
+          표기는 검색을 위해 그대로 둡니다.
         */}
         <div class="blocks">
+          {founderStory && (
+            <div class="blocks__item">
+              <h3 class="blocks__label">{h.company.blocks.founder}</h3>
+              <p class="body">{founderStory}</p>
+            </div>
+          )}
+
+          {teamSize && (
+            <div class="blocks__item">
+              <h3 class="blocks__label">{h.company.blocks.scale}</h3>
+              <p class="body">{teamSize}</p>
+            </div>
+          )}
+
           <div class="blocks__item">
             <h3 class="blocks__label">{h.company.blocks.company}</h3>
-            <p class="body">{h.company.body}</p>
-            <p class="body" style="margin-top: 12px">{h.company.etymology}</p>
-          </div>
-
-          <div class="blocks__item">
-            <h3 class="blocks__label">{h.company.blocks.founder}</h3>
-            {founderStory
-              ? <p class="body">{founderStory}</p>
-              : <p class="blocks__awaiting">{h.company.awaiting}</p>}
-          </div>
-
-          <div class="blocks__item">
-            <h3 class="blocks__label">{h.company.blocks.scale}</h3>
-            {teamSize
-              ? <p class="body">{teamSize}</p>
-              : <p class="blocks__awaiting">{h.company.awaiting}</p>}
+            <p class="body">{h.company.etymology}</p>
           </div>
         </div>
 

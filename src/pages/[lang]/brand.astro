@@ -148,12 +148,20 @@ const founderStory = FOUNDER_STORY[locale] ?? null;
 
     값이 오면 이 문단이 나타납니다. 그때까지는 기다린다고 적습니다.
   */}
-  <section class="section section--alt wrap wrap--narrow rise">
-    <h2 class="kicker">{b.maker.kicker}</h2>
-    {founderStory
-      ? <p class="body" style="margin-top: 26px">{founderStory}</p>
-      : <p class="blocks__awaiting" style="margin-top: 26px">{t.home.company.awaiting}</p>}
-  </section>
+  {/*
+    ── 값이 없으면 섹션 자체가 없습니다 ──────────────────────
+    전에는 "담당자 원고를 기다리고 있습니다" 를 적었습니다. 그건 내부
+    메모인데 **실제 사이트에 게시되고 있었습니다.**
+
+    원고가 오면 이 섹션이 제자리에 나타납니다. 자리를 기억하는 일은 이
+    주석과 `config/company.ts` 가 합니다 — 화면이 할 일이 아닙니다.
+  */}
+  {founderStory && (
+    <section class="section section--alt wrap wrap--narrow rise">
+      <h2 class="kicker">{b.maker.kicker}</h2>
+      <p class="body" style="margin-top: 26px">{founderStory}</p>
+    </section>
+  )}
 
   {/*
     이름과 원산지 이야기로 넘어가기 전에 한 번 쉽니다. 사람도 제품도 없는,

@@ -133,16 +133,15 @@
       ]
     },
     "company": {
-      "kicker": "AVORA LABS",
+      "kicker": "WHO WE ARE",
       "lead": "움직이는 사람을 위한 브랜드를 만듭니다.",
       "body": "PAROS 는 AVORA LABS 가 만든 첫 브랜드입니다. 이름은 그리스 에게해의 섬에서 왔고, 운동선수만이 아니라 움직이는 모든 사람을 위해 만듭니다.",
       "etymology": "AVORA 는 활동적인 주체를 뜻하는 Athlete · Active 의 A 와, 피부 본연의 생기를 뜻하는 Vitality & Aura 의 VORA 를 합친 이름입니다.",
       "blocks": {
-        "company": "회사",
+        "company": "운영사",
         "founder": "만든 사람",
         "scale": "규모"
       },
-      "awaiting": "담당자 원고를 기다리고 있습니다.",
       "instagram": "인스타그램"
     },
     "faq": {
