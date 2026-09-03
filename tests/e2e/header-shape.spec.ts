@@ -160,19 +160,26 @@ test.describe('앵커로 이동해도 제목이 가리지 않는다', () => {
        * `#panel` 은 언제나 있습니다.
        */
       const anchors = process.env.E2E_MODE === 'launch' ? ['#notify', '#panel'] : ['#panel'];
+      /*
+       * ⚠️ **모션 최소화로 재야 결정적입니다.**
+       *
+       * 이 사이트는 Lenis 로 스크롤을 부드럽게 만드는데, `reduced.matches`
+       * 일 때는 **아예 불러오지 않습니다**(`Base.astro`). 그러면 `scroll-padding`
+       * 이 네이티브 즉시 스크롤로 적용돼 값이 흔들리지 않습니다.
+       *
+       * 처음에는 "scrollY 가 멎을 때까지" 기다리는 식으로 쟀는데, 그 판정이
+       * 두 번만 비교해서 **감속 구간의 <1px 변화를 정지로 착각** 했습니다.
+       * 로컬에서는 15px 로 나오던 값이 CI 에서 66 / 118 / 142px 로 재시도마다
+       * 달라져 배포를 막았습니다. 느린 기계에서 훨씬 자주 걸립니다.
+       *
+       * 앵커 여백은 `scroll-padding-top` 이라는 **CSS 속성** 이고 모션과
+       * 무관하므로, 이 조건에서 재는 것이 옳습니다.
+       */
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+
       for (const anchor of anchors) {
         await page.goto(`/ko/${anchor}`);
-        // 이 사이트는 Lenis 로 스크롤을 부드럽게 만듭니다 — 멎기를 기다립니다.
-        await page.waitForFunction(
-          () => {
-            const w = window as unknown as { __prev?: number };
-            const settled = w.__prev !== undefined && Math.abs(window.scrollY - w.__prev) < 1;
-            w.__prev = window.scrollY;
-            return settled;
-          },
-          undefined,
-          { polling: 120, timeout: 5000 },
-        );
+        await page.waitForLoadState('load');
 
         const gap = await page.evaluate((a) => {
           const el = document.querySelector(a);
@@ -192,8 +199,8 @@ test.describe('앵커로 이동해도 제목이 가리지 않는다', () => {
          * 69px 인데 죽은 공간이 109px 이었습니다 — 화면 한 뭉치가 그냥
          * 비어 있는 상태인데 "가리지 않는다" 는 통과했습니다.
          *
-         * 여유는 24px 을 의도한 값입니다. 렌더 오차와 Lenis 의 감속을
-         * 감안해 그 두 배까지만 허용합니다.
+         * 여유는 24px 을 의도한 값입니다. 렌더 오차를 감안해 그 두 배까지만
+         * 허용합니다 — Lenis 는 위에서 껐으므로 감속 오차는 없습니다.
          */
         expect(gap!, `${anchor} 아래에 ${gap}px 의 죽은 공간이 생겼습니다`).toBeLessThanOrEqual(
           48,

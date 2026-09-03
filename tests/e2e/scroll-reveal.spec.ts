@@ -121,6 +121,75 @@ test.describe('빠르게 스크롤해도 읽을 것이 남는다', () => {
     expect(heroOpacity).toBe(1);
   });
 
+  test('스크립트가 죽어도 흐린 채로 남지 않는다', async ({ page }) => {
+    /*
+     * ⚠️ 이 결함은 **시작값을 올리면서 새로 생겼습니다.**
+     *
+     * `.js` 표식은 `<head>` 인라인이 붙이고 `is-in` 은 문서 끝의 번들 모듈이
+     * 붙입니다 — 서로 다른 실패 단위입니다. 모듈이 죽으면 `.js .rise` 의 흐린
+     * 상태(대비 3.2:1)가 **영구히** 남습니다. 눈에 띄는 고장 없이 글자만 계속
+     * 흐립니다.
+     *
+     * 전에는 같은 고장이 `opacity: 0` 이라 백지로 즉시 드러났습니다. 결함은
+     * 고쳤지만 실패 모드는 더 조용해졌고, 그 대가를 `<head>` 의 2초 안전망이
+     * 갚습니다.
+     *
+     * 안전망을 모듈 안에 두면 소용이 없습니다 — 모듈이 죽을 때 함께 죽습니다.
+     * 그래서 `.js` 를 붙이는 **같은 단위** 에 있어야 합니다.
+     */
+    await page.route('**/_astro/*.js', (route) => route.abort());
+    await page.goto('/ko/', { waitUntil: 'domcontentloaded' });
+
+    const faded = () =>
+      page.evaluate(
+        () =>
+          [...document.querySelectorAll('.rise')].filter(
+            (el) => Number(getComputedStyle(el).opacity) < 0.9,
+          ).length,
+      );
+
+    // 모듈이 없으니 처음에는 흐립니다 — 그 상태가 아니면 이 검사가 무의미합니다.
+    expect(await faded(), '모듈을 막았는데도 흐린 요소가 없습니다').toBeGreaterThan(0);
+
+    await page.waitForFunction(
+      () => document.documentElement.classList.contains('rise-fallback'),
+      undefined,
+      { timeout: 6000 },
+    );
+    expect(await faded(), '안전망이 켜졌는데 아직 흐립니다').toBe(0);
+  });
+
+  test('정상 경로에서는 안전망이 연출을 지우지 않는다', async ({ page }) => {
+    /*
+     * 안전망을 모듈 안에 `setTimeout(revealAll, 2000)` 으로 두었을 때, 2초
+     * 뒤 **아직 스크롤하지 않은 섹션까지 전부 켜졌습니다.** 지시서가 금지한
+     * "리빌 통째 제거" 에 사실상 해당합니다.
+     *
+     * 지금은 모듈이 살아 있으면 스스로 타이머를 지웁니다.
+     */
+    await page.goto('/ko/');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2600);
+
+    const state = await page.evaluate(() => {
+      const rise = [...document.querySelectorAll('.rise')];
+      const below = rise.filter((el) => el.getBoundingClientRect().top > window.innerHeight);
+      return {
+        fallback: document.documentElement.classList.contains('rise-fallback'),
+        belowFold: below.length,
+        stillFaded: below.filter((el) => Number(getComputedStyle(el).opacity) < 0.9).length,
+      };
+    });
+
+    expect(state.fallback, '정상인데 안전망이 켜졌습니다').toBe(false);
+    if (state.belowFold > 0) {
+      expect(
+        state.stillFaded,
+        '화면 아래 섹션이 미리 드러났습니다 — 연출이 사라진 것입니다',
+      ).toBeGreaterThan(0);
+    }
+  });
+
   test('모션을 줄이면 즉시 보인다', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/ko/');

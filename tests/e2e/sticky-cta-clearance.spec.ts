@@ -37,23 +37,39 @@ const SELLS = process.env.E2E_MODE !== 'launch';
  * 뻔했습니다.
  */
 
-/** Lenis 가 스크롤을 lerp 합니다. 값이 멎을 때까지 밀어 둡니다. */
+/**
+ * 스크롤을 목표 지점에 세웁니다.
+ *
+ * ⚠️ **모션 최소화 아래에서 돕니다**(아래 `beforeEach`). 그러면 Lenis 를
+ * 아예 불러오지 않아(`Base.astro`) `scrollTo` 가 즉시 반영되고, 기다릴
+ * 것이 없습니다.
+ *
+ * 처음에는 "scrollY 가 멎을 때까지" 기다렸는데 두 판정 모두 나빴습니다.
+ * 두 번만 비교하면 감속 구간의 <1px 변화를 정지로 착각해 CI 가 불안정해지고
+ * (`header-shape` 에서 같은 값이 66 / 118 / 142px), 연속 안정으로 강화하면
+ * 조작 요소마다 최대 6초씩 기다려 이 검사가 시간을 넘깁니다.
+ *
+ * 재는 대상이 모션과 무관한 자리(고정 바의 위치와 억제)라 모션을 끄는 것이
+ * 옳습니다.
+ */
 async function settleAt(page: import('@playwright/test').Page, target: number | 'bottom') {
-  await page.evaluate(async (t) => {
-    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-    for (let i = 0; i < 25; i += 1) {
-      const y = t === 'bottom' ? document.body.scrollHeight : (t as number);
-      window.scrollTo(0, y);
-      await sleep(80);
-      const prev = window.scrollY;
-      await sleep(90);
-      if (Math.abs(window.scrollY - prev) < 1) break;
-    }
+  await page.evaluate((t) => {
+    window.scrollTo(0, t === 'bottom' ? document.body.scrollHeight : (t as number));
   }, target);
+  // 억제 판정은 IntersectionObserver 라 한 틱이 필요합니다.
+  await page.waitForTimeout(250);
 }
 
 test.describe('하단 고정 바', () => {
   test.skip(SELLS, '팔기 시작하면 하단 알림 바가 존재하지 않습니다');
+
+  /*
+   * Lenis 를 끕니다 — 위 `settleAt` 머리말 참고. 이 묶음이 재는 것은 고정
+   * 바의 위치와 억제이고, 둘 다 모션과 무관합니다.
+   */
+  test.beforeEach(async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+  });
 
   test('페이지 맨 아래에서는 내려간다', async ({ page }) => {
     await page.goto('/ko/');
@@ -97,14 +113,10 @@ test.describe('하단 고정 바', () => {
     await page.goto('/ko/');
     const blocked = await page.evaluate(async () => {
       const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+      // 모션 최소화라 Lenis 가 없습니다 — 즉시 반영되므로 한 틱만 줍니다.
       const settle = async (t: number) => {
-        for (let i = 0; i < 25; i += 1) {
-          window.scrollTo(0, t);
-          await sleep(80);
-          const prev = window.scrollY;
-          await sleep(90);
-          if (Math.abs(window.scrollY - prev) < 1) break;
-        }
+        window.scrollTo(0, t);
+        await sleep(60);
       };
       const bar = document.querySelector('.stickyCta')!;
       const out: string[] = [];
