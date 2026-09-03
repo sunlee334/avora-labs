@@ -1,4 +1,5 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { isPublishedJournal } from '../../src/config/post-frontmatter';
 import { test, expect, type Page } from '@playwright/test';
 import { visibleTop, allLeaves, menuDestinations } from '../../src/config/nav';
 import { LOCALES } from '../../src/config/site';
@@ -40,10 +41,7 @@ const HAS_JOURNAL = readdirSync('src/content/posts')
       .filter((f) => f.endsWith('.md'))
       .map((f) => readFileSync(`src/content/posts/${locale}/${f}`, 'utf8')),
   )
-  .some((raw) => {
-    const front = raw.startsWith('---') ? (raw.split('---')[1] ?? '') : '';
-    return /^category:\s*journal\s*$/m.test(front) && !/^draft:\s*true\s*$/m.test(front);
-  });
+  .some(isPublishedJournal);
 
 const FLAGS = {
   checkout: MODE === 'commerce',

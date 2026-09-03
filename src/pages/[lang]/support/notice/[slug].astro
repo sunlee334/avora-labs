@@ -27,6 +27,15 @@ const { Content } = await render(post);
 // 값이 없으면 `support/notice/undefined` 가 canonical·JSON-LD 에 조용히 실립니다.
 const path = pathOf('notice', slugOf(post));
 const isoDate = (date: Date) => date.toISOString().slice(0, 10);
+/*
+ * 이 화면의 대표 그림을 **한 번만** 정합니다.
+ *
+ * 아래에서 `<Base>` 의 `og:image` 와 `article()` 의 `image` 가 둘 다 이 값을
+ * 받습니다. 전에는 `article()` 이 `og/home` 을 스스로 적어 두고 호출부의
+ * 기본값과 우연히 같기를 기대했습니다 — 여기서 그림을 바꾸는 날 화면과
+ * 구조화 데이터가 조용히 다른 파일을 가리킵니다.
+ */
+const ogImage = 'home' as const;
 ---
 
 <Base
@@ -36,6 +45,7 @@ const isoDate = (date: Date) => date.toISOString().slice(0, 10);
   title={`${post.data.title} — ${BUSINESS.brandName}`}
   description={post.data.summary}
   ogType="article"
+  ogImage={ogImage}
   publishedTime={isoDate(post.data.publishedAt)}
   modifiedTime={post.data.updatedAt ? isoDate(post.data.updatedAt) : undefined}
   jsonLd={[
@@ -44,6 +54,7 @@ const isoDate = (date: Date) => date.toISOString().slice(0, 10);
       description: post.data.summary,
       path: localePath(locale, path),
       locale,
+      ogImage,
       publishedAt: isoDate(post.data.publishedAt),
       ...(post.data.updatedAt ? { updatedAt: isoDate(post.data.updatedAt) } : {}),
     }),

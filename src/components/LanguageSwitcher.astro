@@ -53,7 +53,7 @@ const t = dict(locale);
  */
 const destinations = LOCALES.map((l) => {
   const here = langs.find((entry) => entry.locale === l);
-  return { locale: l, path: here?.path ?? localePath(l), translated: here !== undefined };
+  return { locale: l, path: here?.path ?? localePath(l) };
 });
 ---
 
@@ -77,7 +77,7 @@ const destinations = LOCALES.map((l) => {
     </div>
     <ul class="lang__list">
       {
-        destinations.map(({ locale: l, path: href, translated }) => (
+        destinations.map(({ locale: l, path: href }) => (
           <li>
             <a
               class="lang__item"
@@ -85,7 +85,6 @@ const destinations = LOCALES.map((l) => {
               hreflang={LOCALE_TAGS[l]}
               lang={LOCALE_TAGS[l]}
               aria-current={l === locale ? 'true' : undefined}
-              data-translated={translated ? undefined : 'false'}
             >
               {LOCALE_LABELS[l]}
               <span aria-hidden="true">{l.toUpperCase()}</span>

@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { LOCALES } from '../../src/config/site';
 import { readdirSync, readFileSync } from 'node:fs';
+import { isPublishedJournal } from '../../src/config/post-frontmatter';
 import ko from '../../src/i18n/ko.json' with { type: 'json' };
 
 /**
@@ -10,15 +11,15 @@ import ko from '../../src/i18n/ko.json' with { type: 'json' };
  * 로더는 그 스킴을 모릅니다 — 스위트 전체가 수집조차 되지 않습니다. 같은
  * 함정을 `nav-reviews-gate.spec.ts` 가 이미 한 번 밟았습니다.
  *
- * 프론트매터만 보면 되는 일이라 파일을 직접 읽습니다.
+ * 판정 자체는 `post-frontmatter.ts` 를 부릅니다. 정규식을 여기 또 적어
+ * 두었더니 여섯 벌이 되었고, 이미 서로 갈려 있었습니다.
  */
 function journalPosts(locale: string) {
   const dir = `src/content/posts/${locale}`;
   return readdirSync(dir)
     .filter((f) => f.endsWith('.md'))
     .map((f) => readFileSync(`${dir}/${f}`, 'utf8'))
-    .map((raw) => (raw.startsWith('---') ? (raw.split('---')[1] ?? '') : ''))
-    .filter((fm) => /^category:\s*journal\s*$/m.test(fm) && !/^draft:\s*true\s*$/m.test(fm));
+    .filter(isPublishedJournal);
 }
 
 /**
