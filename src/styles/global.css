@@ -1237,6 +1237,19 @@ a {
    (src/lib/story-anchor.ts). 저장소에 scroll-margin 선언이 0건이었습니다. */
 #story,
 /* 건너뛰기 링크의 착지점도 같은 이유로 필요합니다. */
+/*
+ * 앵커로 이동했을 때 제목이 헤더 뒤에 숨지 않게 합니다.
+ *
+ * `#main` 하나만 `scroll-margin-top` 을 갖고 있어서, `#notify`·`#panel` 처럼
+ * 밖에 공유되는 다른 앵커들은 헤더에 가렸습니다. 요소마다 붙이는 대신
+ * **문서 전체에 한 번** 선언합니다 — 새 앵커가 생겨도 같이 지켜집니다.
+ *
+ * 값은 `--nav-height` 한 곳에서 옵니다. 헤더 높이가 바뀌면 이 값도 함께
+ * 따라옵니다 — 숫자를 여기 또 적으면 언젠가 한쪽만 고쳐집니다.
+ */
+html {
+  scroll-padding-top: calc(var(--nav-height) + 16px);
+}
 #main {
   scroll-margin-top: var(--nav-height);
 }
@@ -1264,8 +1277,12 @@ a {
    */
   padding-block: 12px;
   padding-inline: var(--pad-container);
-  background: color-mix(in srgb, var(--color-bg) 88%, transparent);
-  backdrop-filter: blur(12px);
+  /*
+   * 88% 였을 때 스크롤하면 헤더 안에 뒤 글자의 잔상이 비쳤습니다. 흐리게만
+   * 해서는 글자 모양이 남습니다 — 덮는 양을 늘려야 합니다.
+   */
+  background: color-mix(in srgb, var(--color-bg) 97%, transparent);
+  backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -1455,13 +1472,8 @@ a {
   }
   .nav {
     padding-block: 14px;
-    /* 두 행 — 위는 유틸리티, 아래는 기본 메뉴. row-gap 은 0 입니다:
-       두 행이 각자 44px 를 갖고 유틸리티 줄에 hairline 이 이미 있어,
-       그 사이 죽은 공간은 스티키 헤더에서 순손실입니다. */
     display: grid;
     grid-template-columns: auto 1fr;
-    /* 메뉴 줄이 두 열을 다 씁니다 — 워드마크가 왼쪽 열을 차지한 채로
-       가운데 정렬하면 그 열 너비의 절반(47px)만큼 늘 치우칩니다. */
     grid-template-areas:
       'brand util'
       'links links';
@@ -1469,6 +1481,10 @@ a {
     column-gap: 16px;
     align-items: center;
   }
+  /*
+   * 두 행일 때의 자리. 아래 1100px 블록이 같은 이름(brand·links·util)으로
+   * 배치만 바꾸므로, 이 세 줄은 두 레이아웃이 함께 씁니다.
+   */
   .nav__wordmark {
     grid-area: brand;
   }
@@ -1480,6 +1496,59 @@ a {
     grid-area: links;
     justify-self: center;
     display: flex;
+  }
+}
+
+/*
+ * ── 한 행은 1100px 부터입니다 ─────────────────────────────
+ *
+ * 지시서는 "항목이 넷뿐이니 1행으로 충분하다" 고 적었고, 1280px 에서는
+ * 맞습니다. 그런데 **900px 에서는 담기지 않습니다.**
+ *
+ * 유틸리티(장바구니·주문조회·언어)가 베트남어에서 219px 입니다. 메뉴를 화면
+ * 가운데 두려면 양옆 열이 같은 폭이어야 하는데, 900px 의 가용 폭 804px 에서
+ * 메뉴 404px 를 빼고 남는 것을 반씩 나누면 한쪽이 184px 뿐이라 유틸리티가
+ * 자기 열을 넘칩니다. 그러면 헤더가 다시 두 행이 됩니다 — 고치려던 것이
+ * 그대로 돌아옵니다.
+ *
+ * 그래서 1100px 부터입니다. 그 아래(태블릿 가로 포함)는 지금까지 잘 돌던
+ * 두 행을 그대로 둡니다. 두 엔진 × 다섯 언어로 확인했습니다.
+ */
+@media (min-width: 1100px) {
+  :root {
+    /* padding(12+12) + 한 행(44) + border(1) = 69 — 모바일과 같은 높이입니다. */
+    --nav-height: 69px;
+  }
+  .nav {
+    /*
+     * 한 행입니다.
+     *
+     * 전에는 두 행(117px)이었습니다. 워드마크가 윗줄, 메뉴가 아랫줄 가운데.
+     * 항목이 넷뿐인데 스티키 헤더가 세로를 두 배로 쓰고 있었고, 모바일은
+     * 이미 한 행 69px 로 잘 돌고 있었습니다.
+     *
+     * ── 가운데 열이 진짜 화면 가운데다 ──────────────────────
+     * 두 행이던 이유는 "워드마크가 왼쪽 열을 차지한 채로 메뉴를 가운데
+     * 정렬하면 그 열 너비의 절반만큼 치우친다" 였습니다. 맞는 관찰인데,
+     * 해법이 행을 늘리는 것일 필요는 없습니다.
+     *
+     * 양옆을 **같은 `1fr`** 로 두면 가운데 열의 중심이 화면 중심과 정확히
+     * 같습니다. 워드마크와 유틸리티의 폭이 서로 달라도 그렇습니다.
+     */
+    padding-block: 12px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    grid-template-areas: 'brand links util';
+    column-gap: 16px;
+    align-items: center;
+  }
+  .nav__wordmark {
+    justify-self: start;
+  }
+  .nav__links {
+    /* 한 행이 됐으므로 항목이 접히면 헤더 높이가 다시 늘어납니다. */
+    flex-wrap: nowrap;
+    white-space: nowrap;
   }
 }
 
