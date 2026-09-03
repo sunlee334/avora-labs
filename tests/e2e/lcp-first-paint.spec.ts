@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import sharp from 'sharp';
 import { readFileSync } from 'node:fs';
 
 /**
@@ -124,4 +125,83 @@ test.describe('히어로가 잘려 나갈 픽셀을 받지 않는다', () => {
       .getAttribute('src');
     expect(fallback, '받침이 세로 사진입니다').not.toContain('portrait');
   });
+});
+
+test.describe('첫 화면에 그림이 실제로 그려진다', () => {
+  /**
+   * ⚠️ **CSS 가 완벽해도 픽셀이 없을 수 있습니다.**
+   *
+   * 지시서 03 이 이 증상을 보고했습니다 — 히어로가 회색 면으로 보이는데,
+   * 그 순간 측정한 값은 전부 정상이었습니다.
+   *
+   *   img.complete: true · naturalWidth: 1440 · opacity: 1
+   *   visibility: visible · transform: none · 박스 1440x634
+   *
+   * 조상도 `content-visibility: visible`, `contain: none`, `filter: none`.
+   * 스크롤을 조금 내렸다 올리면 그제야 나타났습니다.
+   *
+   * ── 속성으로는 못 잡는다. 캔버스로도 못 잡는다 ─────────────
+   * 처음에는 `<img>` 를 캔버스에 그려 색 가짓수를 셌습니다. 잡히지
+   * 않았습니다 — `drawImage` 는 **원본 이미지** 를 그리지, 화면에 실제로
+   * 칠해진 것을 그리지 않습니다. 그림에 `filter: contrast(0)` 을 걸어
+   * 회색 면으로 만드는 사보타주에서 그대로 통과했습니다.
+   *
+   * 브리프가 보고한 상태가 바로 "디코드는 됐는데 안 그려짐" 이므로, 그
+   * 검사는 **이미 정상이라고 적힌 것을 재고 있었습니다.**
+   *
+   * 그래서 **화면을 찍습니다.** 렌더된 픽셀만이 이 질문에 답합니다.
+   *
+   * ⚠️ **스크롤하지 않습니다.** 지시서가 못 박은 대로입니다 — 스크롤한
+   * 상태로 확인하면 통과한 것처럼 보입니다.
+   */
+  for (const width of [390, 768, 1280, 1440]) {
+    test(`${width}px — 히어로가 회색 면이 아니다`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto('/ko/');
+      await page.waitForLoadState('load');
+      // 한 프레임만 줍니다. 기다릴수록 이 검사가 무의미해집니다.
+      await page.evaluate(
+        () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
+      );
+
+      /*
+       * `.hero` 가 아니라 `.hero__media` 를 찍습니다. `.hero` 에는 제목·베일·
+       * 버튼이 함께 들어와, 그림이 사라져도 그것들의 색으로 통과합니다 —
+       * 실제로 `visibility: hidden` 사보타주가 그렇게 빠져나갔습니다.
+       */
+      const shot = await page.locator('.hero__media').screenshot({ animations: 'disabled' });
+      const { data, info } = await sharp(shot)
+        .resize(48, 48, { fit: 'fill' })
+        .raw()
+        .toBuffer({ resolveWithObject: true });
+      const { width: w, height: h, channels } = info;
+
+      const seen = new Set<string>();
+      for (let i = 0; i < data.length; i += channels) {
+        // 4비트로 뭉개 미세한 노이즈를 같은 색으로 셉니다.
+        seen.add(`${data[i] >> 4},${data[i + 1] >> 4},${data[i + 2] >> 4}`);
+      }
+      expect(w * h, '화면을 못 찍었습니다').toBeGreaterThan(0);
+
+      /*
+       * 경계는 실측으로 정했습니다(48×48 로 줄인 뒤 4비트로 뭉갠 색 가짓수).
+       *
+       *   정상      48 ~ 116   (두 엔진 × 390·768·1280·1440)
+       *   회색 면   20 ~  27
+       *   그림 숨김 24 ~  29
+       *
+       * 36 은 최저 정상값의 75%, 최고 실패값의 124% 입니다. 양쪽으로 24%
+       * 넘게 떨어져 있습니다 — 이 저장소에서 여유 0.5% 짜리 단언이 CI 를
+       * 세 번 막은 적이 있어, 경계는 넉넉히 둡니다.
+       *
+       * ⚠️ 휘도 편차는 쓰지 않습니다. 그림을 숨기면 베일 너머로 배경이
+       * 드러나 오히려 편차가 **커집니다**(정상 23~50 vs 숨김 68~77).
+       * 지표를 고를 때 실패 상태를 함께 재지 않으면 이런 것을 놓칩니다.
+       */
+      expect(
+        seen.size,
+        `히어로가 ${seen.size} 색뿐입니다 — 회색 면일 수 있습니다`,
+      ).toBeGreaterThan(36);
+    });
+  }
 });
