@@ -165,6 +165,28 @@
       "panelLink": "About joining the panel",
       "more": "Other questions about the product"
     },
+    "limits": {
+      "kicker": "WHAT WE WON’T DO",
+      "heading": "What we have decided not to do",
+      "items": [
+        {
+          "claim": "We won’t headline claims like \"no sting\" or \"no white cast.\"",
+          "why": "Plenty of brands say this already. It is a baseline requirement, not an achievement."
+        },
+        {
+          "claim": "We won’t print a single figure before the test report exists.",
+          "why": "Numbers like wear time or satisfaction only mean something when there is evidence behind them."
+        },
+        {
+          "claim": "We won’t define ourselves as \"sunscreen for working out.\"",
+          "why": "It has to be a product you use on the days you do not train."
+        },
+        {
+          "claim": "We won’t push a formula just because we like it.",
+          "why": "We use the one that scores higher — even when it is not our favourite."
+        }
+      ]
+    },
     "break": {
       "imageAlt": "Close-up of sweat beading on skin right after activity"
     },
@@ -1550,6 +1572,7 @@
   "journal": {
     "heading": "Reading",
     "intro": "Things worth knowing about sunscreen.",
+    "more": "See all reading",
     "empty": "Nothing here yet. We will post as things are ready.",
     "backToList": "Back to list",
     "meta": {

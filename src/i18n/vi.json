@@ -165,6 +165,28 @@
       "panelLink": "Hướng dẫn tham gia nhóm thử nghiệm",
       "more": "Các câu hỏi khác về sản phẩm"
     },
+    "limits": {
+      "kicker": "WHAT WE WON’T DO",
+      "heading": "Những điều chúng tôi quyết định không làm",
+      "items": [
+        {
+          "claim": "Chúng tôi không đưa những câu như “không cay mắt” hay “không vệt trắng” lên tiêu đề.",
+          "why": "Nhiều thương hiệu đã nói vậy rồi. Đó là yêu cầu cơ bản, không phải điều đáng khoe."
+        },
+        {
+          "claim": "Trước khi có phiếu kiểm nghiệm, chúng tôi không viết bất kỳ con số nào.",
+          "why": "Những con số như thời gian bám hay mức hài lòng chỉ có nghĩa khi có căn cứ."
+        },
+        {
+          "claim": "Chúng tôi không tự định nghĩa mình là “kem chống nắng để tập luyện”.",
+          "why": "Nó phải là sản phẩm dùng được cả vào ngày không tập."
+        },
+        {
+          "claim": "Chúng tôi không đẩy một công thức chỉ vì chúng tôi thích nó.",
+          "why": "Chúng tôi dùng công thức có điểm cao hơn, kể cả khi đó không phải lựa chọn ưa thích."
+        }
+      ]
+    },
     "break": {
       "imageAlt": "Cận cảnh những giọt mồ hôi đọng trên da ngay sau khi vận động"
     },
@@ -1550,6 +1572,7 @@
   "journal": {
     "heading": "Bài viết",
     "intro": "Những điều nên biết về kem chống nắng.",
+    "more": "Xem tất cả bài viết",
     "empty": "Chưa có nội dung nào. Chúng tôi sẽ đăng tại đây khi sẵn sàng.",
     "backToList": "Về danh sách",
     "meta": {

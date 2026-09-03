@@ -1869,6 +1869,39 @@ a {
   line-height: calc(1.7 * var(--leading-scale));
 }
 
+/* ── 우리가 하지 않기로 한 것 ─────────────────────────────── */
+/*
+ * 번호를 붙이지 않습니다. 넷은 **순서가 없는 네 가지 태도** 이고, 번호는
+ * 없는 순서를 있는 것처럼 만듭니다(.journey 의 01~05 는 진짜 순서라 붙습니다).
+ *
+ * 규칙선만으로 나눕니다. 각 항목이 두 줄인데, 첫 줄이 약속이고 둘째 줄이
+ * 이유입니다. 둘의 무게가 같으면 무엇이 약속인지 흐려집니다.
+ */
+.limits {
+  display: grid;
+  margin-top: 26px;
+}
+.limits li {
+  padding-block: 20px;
+  border-top: 1px solid var(--color-border);
+}
+.limits li:last-child {
+  border-bottom: 1px solid var(--color-border);
+}
+.limits__claim {
+  display: block;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: calc(1.6 * var(--leading-scale));
+}
+.limits__why {
+  display: block;
+  margin-top: 7px;
+  color: var(--color-text-muted);
+  font-size: 13.5px;
+  line-height: calc(1.7 * var(--leading-scale));
+}
+
 @media (min-width: 900px) {
   .journey {
     grid-template-columns: repeat(5, 1fr);
