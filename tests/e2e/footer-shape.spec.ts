@@ -82,6 +82,55 @@ test.describe('푸터 모양', () => {
     });
   }
 
+  for (const width of [320, 360, 390]) {
+    test(`${width}px — 글자가 화면 끝에서 여유를 둔다`, async ({ page }) => {
+      /*
+       * ⚠️ **넘침 0 은 안전하다는 뜻이 아닙니다.**
+       *
+       * `@avora_labs` 가 320px 에서 오른쪽 끝까지 **2.7px** 만 남긴 적이
+       * 있습니다. 로컬에서는 넘침이 0 이라 통과했지만, 리눅스(CI)의 글꼴이
+       * 조금 더 넓어 1px 을 넘겼습니다. 두 데스크톱 샤드가 모두 깨졌고 재실행
+       * 해도 같았습니다.
+       *
+       * 그래서 여기서는 **여유** 를 잽니다. 8px 은 관측된 렌더 차이(약 1.5%,
+       * 79px 문자열 기준 1.2px)보다 충분히 큽니다.
+       */
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto('/ko/');
+      await page.evaluate(() => document.fonts.ready);
+
+      const tight = await page.evaluate(() => {
+        const edge = document.documentElement.clientWidth;
+        const walker = document.createTreeWalker(
+          document.querySelector('.footer')!,
+          NodeFilter.SHOW_TEXT,
+        );
+        const found: { text: string; gap: number }[] = [];
+        let node: Node | null;
+        while ((node = walker.nextNode())) {
+          const text = (node as Text).data.trim();
+          if (!text) continue;
+          const range = document.createRange();
+          range.selectNodeContents(node);
+          for (const box of range.getClientRects()) {
+            // 컨테이너가 아니라 **글자가 그려진 자리** 를 봅니다.
+            if (box.width < 1) continue;
+            const gap = edge - box.right;
+            if (gap < 8) found.push({ text: text.slice(0, 24), gap: Math.round(gap * 10) / 10 });
+          }
+        }
+        return found;
+      });
+
+      expect(
+        tight,
+        `화면 끝에 8px 도 안 남은 글자가 있습니다: ${tight
+          .map((t) => `«${t.text}» ${t.gap}px`)
+          .join(', ')}`,
+      ).toEqual([]);
+    });
+  }
+
   test('가로로 넘치지 않는다', async ({ page }) => {
     // 4열로 좁아진 칸에 긴 항목이 들어가도 화면을 밀지 않아야 합니다.
     for (const width of [900, 1024]) {

@@ -3238,6 +3238,11 @@ html {
   padding-top: 26px;
   border-top: 1px solid var(--color-border-inverse);
 }
+/* 격자 칸의 기본값 `min-width: auto` 는 긴 항목이 칸을 넓히도록 둡니다.
+   그러면 칸이 아니라 화면이 밀립니다. */
+.footer__col {
+  min-width: 0;
+}
 .footer__col h2 {
   font-family: var(--font-mono);
   font-size: 10.5px;
@@ -3258,6 +3263,18 @@ html {
   min-height: var(--size-tap-min);
   display: flex;
   align-items: center;
+  /*
+   * ⚠️ **접힐 수 있어야 합니다.**
+   *
+   * `Instagram` 과 `@avora_labs` 는 flex 항목 둘이라, 그대로 두면 한 줄에
+   * 묶여 칸보다 넓어집니다. 320px 에서 오른쪽 끝까지 **2.7px** 만 남았고,
+   * 리눅스(CI)의 글꼴이 조금 더 넓어 1px 을 넘겼습니다. 로컬에서는 넘침이
+   * 0 이라 보이지 않았습니다.
+   *
+   * 왼쪽 칸에 있을 때는 끝에서 멀어 드러나지 않던 문제입니다. 자리를 옮겨서
+   * 생긴 것이 아니라, 자리를 옮겨서 **보인** 것입니다.
+   */
+  flex-wrap: wrap;
 }
 .footer__col li a:hover {
   text-decoration: underline;
