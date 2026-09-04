@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { LOCALES } from '../../src/config/site';
-import ko from '../../src/i18n/ko.json' with { type: 'json' };
+import { LOCALES } from '../../../src/config/site';
+import ko from '../../../src/i18n/ko.json' with { type: 'json' };
 
 /**
  * 신청 폼의 개인정보 안내가 **접혀 있고, 접힌 줄 안다.**
@@ -13,6 +13,11 @@ import ko from '../../src/i18n/ko.json' with { type: 'json' };
  * ── 지우지 않은 이유 ───────────────────────────────────────
  * 무엇을 받아 어디에 쓰고 얼마나 두는지를 폼 옆에서 말하는 것이 요점입니다.
  * 처리방침 링크만 두면 "읽어 보라" 는 말이지 알린 것이 아닙니다.
+ *
+ * ── 왜 `launch/` 아래인가 ──────────────────────────────────
+ * 이 폼은 **launch 모드에만 있습니다.** 자사 결제가 켜지면 홈에서 사라지고
+ * 구매 흐름이 그 자리를 대신합니다. `tests/e2e/` 에 두었더니 commerce 모드
+ * CI 가 없는 요소를 30초 동안 기다리다 죽었습니다.
  *
  * ── 모바일이 급소다 ────────────────────────────────────────
  * 호버가 없어 **접혔다는 시각 신호가 없으면 그냥 제목인 줄 압니다.** 그리고

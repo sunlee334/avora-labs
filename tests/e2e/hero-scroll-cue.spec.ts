@@ -19,6 +19,13 @@ import { LOCALES } from '../../src/config/site';
 
 const CUE = '.hero__cue';
 
+/*
+ * 하단 고정 바는 **알림 신청을 받는 동안에만** 존재합니다(`!CAN_ORDER`).
+ * 팔기 시작하면 바가 사라지므로 겹칠 대상도 없습니다.
+ * `sticky-cta-clearance.spec.ts` 와 같은 관용구입니다.
+ */
+const SELLS = process.env.E2E_MODE !== 'launch';
+
 /** 두 사각형이 실제로 겹치는가. */
 const overlaps = `(a, b) =>
   !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom)`;
@@ -43,7 +50,8 @@ test.describe('히어로 스크롤 큐', () => {
   }
 
   for (const width of [360, 390, 1280]) {
-    test(`${width}px — 고정 CTA 바와도 히어로 버튼과도 겹치지 않는다`, async ({ page }) => {
+    test(`${width}px — 하단 고정 CTA 바에 겹치지 않는다`, async ({ page }) => {
+      test.skip(SELLS, '팔기 시작하면 하단 알림 바가 존재하지 않습니다');
       await page.setViewportSize({ width, height: width < 400 ? 844 : 900 });
       await page.goto('/ko/');
       await page.evaluate(() => document.fonts.ready);
@@ -52,7 +60,6 @@ test.describe('히어로 스크롤 큐', () => {
         ([sel, fnSource]) => {
           const hits = new Function(`return ${fnSource}`)() as (a: DOMRect, b: DOMRect) => boolean;
           const cue = document.querySelector(sel)!.getBoundingClientRect();
-          const heroCta = document.querySelector('.hero__cta')!.getBoundingClientRect();
           const sticky = document.querySelector('.stickyCta') as HTMLElement;
           /*
            * 바는 평소 화면 밖에 있습니다. 숨어 있을 때 재면 "안 겹친다" 는
@@ -70,7 +77,6 @@ test.describe('히어로 스크롤 큐', () => {
           const bar = sticky.getBoundingClientRect();
           return {
             sticky: hits(cue, bar),
-            heroCta: hits(cue, heroCta),
             barHeight: Math.round(bar.height),
             barTop: Math.round(bar.top),
             viewport: window.innerHeight,
@@ -88,8 +94,52 @@ test.describe('히어로 스크롤 큐', () => {
         hit.viewport,
       );
       expect(hit.sticky, '큐가 하단 고정 CTA 바에 겹칩니다').toBe(false);
-      expect(hit.heroCta, '큐가 히어로 버튼에 겹칩니다 — 버튼의 일부로 보입니다').toBe(false);
       expect(hit.gap, `큐와 바 사이가 ${hit.gap}px 입니다`).toBeGreaterThan(0);
+    });
+  }
+
+  for (const width of [360, 390, 1280]) {
+    test(`${width}px — 큐가 히어로 글자와 버튼을 비켜 선다`, async ({ page }) => {
+      /*
+       * 위 검사는 하단 고정 바가 있는 모드에서만 돕니다. 이 검사는 **두
+       * 모드에서 모두** 돌아야 합니다 — 그러지 않으면 자사 결제가 켜진
+       * 상태에서는 큐 위치를 아무도 확인하지 않습니다.
+       *
+       * ⚠️ 그래서 히어로 **버튼** 을 기준으로 삼으면 안 됩니다. 그 버튼은
+       * `{!CAN_ORDER && …}` 안이라 commerce 모드에는 없습니다. 처음에 그렇게
+       * 썼다가 `getBoundingClientRect of null` 로 죽었습니다.
+       *
+       * 대신 히어로 카피의 **모든 자식** 을 봅니다. launch 에서는 버튼이 그
+       * 안에 있고, commerce 에서는 태그라인·부제·2차 메시지가 남습니다.
+       * 어느 쪽이든 큐가 글자 위에 얹히면 안 된다는 요구는 같습니다.
+       */
+      await page.setViewportSize({ width, height: width < 400 ? 844 : 900 });
+      await page.goto('/ko/');
+      await page.evaluate(() => document.fonts.ready);
+
+      const overlapping = await page.evaluate(
+        ([sel, fnSource]) => {
+          const hits = new Function(`return ${fnSource}`)() as (a: DOMRect, b: DOMRect) => boolean;
+          const cue = document.querySelector(sel)!.getBoundingClientRect();
+          const parts = [...document.querySelectorAll('.hero__copy > *')].filter(
+            (el) => el.getBoundingClientRect().height > 0,
+          );
+          return {
+            count: parts.length,
+            hit: parts
+              .filter((el) => hits(cue, el.getBoundingClientRect()))
+              .map((el) => `${el.className || el.tagName}`),
+          };
+        },
+        [CUE, overlaps] as const,
+      );
+
+      // 볼 것이 없으면 이 검사는 아무것도 지키지 못합니다.
+      expect(overlapping.count, '히어로 카피에 요소가 없습니다').toBeGreaterThan(0);
+      expect(
+        overlapping.hit,
+        `큐가 «${overlapping.hit.join(', ')}» 위에 얹혔습니다`,
+      ).toEqual([]);
     });
   }
 
