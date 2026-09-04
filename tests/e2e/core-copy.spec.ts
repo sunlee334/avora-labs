@@ -10,8 +10,14 @@ import { LOCALES } from '../../src/config/site';
  * 없었습니다.** 제품에 문제가 생기면 "검증단이 골랐다" 로 읽힐 여지가 있고,
  * 한국어 "고르다" 는 영어 choose 보다 훨씬 가벼워 물건 고르듯 들립니다.
  *
- * 새 문장은 역할을 나눠 적습니다 — **기준은 저희가, 점수는 달리는 사람이.**
+ * 새 문장은 역할을 나눠 적습니다 — **기준은 저희가, 결정은 점수가.**
  * 이건 문구 취향이 아니라 책임 소재라, 되살아나면 안 됩니다.
+ *
+ * ── 한 번 더 바뀐 이유 ─────────────────────────────────────
+ * 한동안 "점수는 실제로 달리는 사람들이 매깁니다" 였습니다. 그런데 제품
+ * 기획안 v09 5-5 의 평가는 **두 사람이 각각 독립적으로 진행** 하는 것이고,
+ * 검증단은 기획안 어디에도 없습니다. 책임을 바깥으로 옮기는 문장이라 더더욱
+ * 사실이어야 했습니다. 역할 분담은 남기되 주어를 사람에서 점수로 옮겼습니다.
  *
  * ── 왜 사전이 아니라 화면을 보는가 ──────────────────────────
  * 사전만 보면 "키는 고쳤는데 화면이 옛 키를 그린다" 를 놓칩니다.
@@ -19,8 +25,8 @@ import { LOCALES } from '../../src/config/site';
 
 /** 되살리면 안 되는 표현. `00-공통규칙.md` 이 명시적으로 금지합니다. */
 const RETIRED: Record<string, RegExp> = {
-  ko: /만들지 않았|골랐습니다|고릅니다|고르지 않/,
-  en: /didn't make|we chose|chosen by/i,
+  ko: /만들지 않았|골랐습니다|고르지 않|달리는 사람들이 매|검증단/,
+  en: /didn't make|we chose|chosen by|people who actually run give/i,
 };
 
 /** 역할 분담이 문장에 남아 있는가. 지우면 무책임한 문장으로 되돌아갑니다. */
@@ -64,10 +70,12 @@ test.describe('핵심 카피', () => {
      * 어긋난다. 전부를 한 번에 교체할 것" 이라고 못 박은 자리입니다.
      */
     await page.goto('/ko/');
-    expect(await page.locator('.hero__promise').innerText()).toContain('기준은 공개하고');
+    expect(await page.locator('.hero__promise').innerText()).toContain('기준은 먼저 공개하고');
 
     await page.goto('/en/');
-    expect(await page.locator('.hero__promise').innerText()).toMatch(/we set the standard/i);
+    expect(await page.locator('.hero__promise').innerText()).toMatch(
+      /publish the standard first/i,
+    );
 
     await page.goto('/ko/panel/');
     expect(await page.locator('h1').innerText()).toContain('기준을 먼저');

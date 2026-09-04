@@ -8,7 +8,7 @@
     "story": "Story",
     "brand": "Brand",
     "product": "Product",
-    "panel": "Test Panel",
+    "panel": "How we choose",
     "journal": "Reading",
     "cart": "Cart",
     "language": "Language",
@@ -32,7 +32,7 @@
     "consent": "I agree to receive marketing email. Every message carries an unsubscribe link.",
     "activities": {
       "heading": "What do you mostly do? (optional)",
-      "why": "So that when we recruit the test panel in October 2026, we can write to the people who actually do it first.",
+      "why": "Running and hiking need different things. It lets us send what fits what you do.",
       "options": [
         {
           "value": "running",
@@ -62,7 +62,7 @@
     },
     "privacy": {
       "heading": "What we collect and why",
-      "summary": "We ask for your email address, and the activity you mostly do if you choose to tell us. We use them only to tell you about the panel results, the funding launch and the release, and if you unsubscribe you come off the list at once. We keep the address so that we do not write to it again.",
+      "summary": "We ask for your email address, and the activity you mostly do if you choose to tell us. We use them only to tell you about the scores, the funding launch and the release, and if you unsubscribe you come off the list at once. We keep the address so that we do not write to it again.",
       "link": "Read the privacy policy"
     },
     "night": {
@@ -73,7 +73,7 @@
   "home": {
     "meta": {
       "title": "PAROS — active lifestyle sun care | AVORA LABS",
-      "description": "PAROS is an active lifestyle skincare brand where athletic energy meets gentle care. For our first product, Daily Sunscreen SPF50+ / PA++++, we publish the standard first and hand the scoring to people who actually run. Launching in the first half of 2027.",
+      "description": "PAROS is an active lifestyle skincare brand where athletic energy meets gentle care. For our first product, Daily Sunscreen SPF50+ / PA++++, we publish the standard first — six items out of 100, compared with the manufacturer hidden and the conditions the same. The scores decide. Launching in the first half of 2027.",
       "ogAlt": "Silhouette of a runner against a low sun"
     },
     "notice": {
@@ -82,7 +82,7 @@
     },
     "hero": {
       "imageAlt": "Silhouette of a runner on a rocky trail against a low sun",
-      "promise": "We set the standard. They score it."
+      "promise": "We publish the standard first. The scores decide."
     },
     "problem": {
       "kicker": "The Problem",
@@ -151,18 +151,18 @@
       "items": [
         {
           "q": "If you do not make it yourselves, how are you different?",
-          "a": "Most cosmetics brands use a manufacturer’s formula. Few of them publish that fact together with the standard they judge by.\n\nWe publish the six criteria, the points and the cutoffs first, and we follow the tally as it comes. That includes the scores of the formulas that failed."
+          "a": "Most Korean beauty brands use a manufacturer’s formula. Few publish that fact together with the standard they judge by.\n\nWe publish the six items, the points and the cut-offs first, then follow the scores. We publish the scores of the formulas we reject too."
         },
         {
           "q": "Does an existing formula mean lower quality?",
           "a": "The candidates are formulas that have already passed testing and review.\n\nWhat we add is not an ingredient but a selection. We compare several candidates under the same conditions and filter them."
         },
         {
-          "q": "How do you pick the test panel?",
-          "a": "We recruit from running crews, climbing gyms and surfing communities. You keep doing the exercise you already do, and compare against a fixed set of criteria.\n\nIt starts in October 2026."
+          "q": "Who does the scoring?",
+          "a": "The two of us score separately, then compare results. Samples are unbranded, judged on the same day under the same conditions.\n\nScoring together makes opinions converge, and the differences stop showing."
         }
       ],
-      "panelLink": "About joining the panel",
+      "panelLink": "See how we choose",
       "more": "Other questions about the product"
     },
     "limits": {
@@ -195,12 +195,12 @@
       "lead": "We publish the standard before the product.",
       "body": "Most brands show you a finished product and explain why it is good. We reversed the order.\nNothing is decided yet, and this is exactly when we publish what passes and what gets cut.",
       "body2": "Six criteria, 100 points in total. Eye sting is 30, white cast is 25.\nMiss the cutoff on either one and we will not use it, however high the total.",
-      "body3": "We set the standard. The people who actually run give the scores.\nThe candidates are existing formulas — not something we developed, and we say so here."
+      "body3": "We set the standard. The scores decide.\nThe candidates are existing formulas — not something we developed, and we say so here."
     },
     "panel": {
-      "kicker": "Test Panel",
-      "lead": "The people choosing are the people running.",
-      "body": "We are inviting a test panel from running crews, climbing gyms and surf communities. They receive two or three samples with the manufacturer's name hidden, and compare them against the same criteria during real activity.",
+      "kicker": "How We Choose",
+      "lead": "We set the standard before we looked.",
+      "body": "Two or three candidate formulas, manufacturer hidden, compared against the same standard after 30 minutes of exercise with sweat running. Each of us scores alone, then we compare.",
       "criteriaHeading": "What they compare",
       "criteria": [
         {
@@ -234,12 +234,12 @@
           "body": "Until it has fully sunk in"
         }
       ],
-      "note": "We publish the tally as it comes out. We use the formula with the highest score, not the one we like. Recruiting opens in October 2026.",
+      "note": "We publish the scores as they are. Not the formula we like — the one that scores highest. Scoring starts in October 2026.",
       "shots": {
         "crewAlt": "Four runners seen from behind on a leaf-strewn dirt trail",
         "boulderingAlt": "Two people sitting and watching a climber on an indoor bouldering wall"
       },
-      "cta": "Apply to the test panel"
+      "cta": "See how we choose"
     },
     "timeline": {
       "kicker": "What comes next",
@@ -250,17 +250,17 @@
       "steps": [
         {
           "when": "Oct 2026",
-          "what": "Test panel recruiting",
+          "what": "Sample scoring begins",
           "note": "We recruit from running crews, bouldering gyms and surf communities"
         },
         {
           "when": "Nov 2026",
-          "what": "Blind evaluation",
+          "what": "Standard published",
           "note": "Two or three samples with the maker hidden, compared on six criteria"
         },
         {
           "when": "Dec 2026",
-          "what": "Tally published · formula fixed",
+          "what": "Scores published · formula set",
           "note": "Including the scores of the formulas that did not make it"
         },
         {
@@ -287,23 +287,23 @@
         "container": "Container",
         "waits": {
           "protection": "after functional review",
-          "texture": "after the panel tally",
+          "texture": "After sample scoring",
           "waterResistant": "after the test report",
           "volume": "after the tube order",
           "container": "Once ordered"
         },
-        "note": "What is not settled is written as not settled. We fill this table in once the panel tally closes in December 2026.",
+        "note": "What isn’t decided is written as undecided. We fill this table in once the formula is set in December 2026.",
         "why": "Because it is the product you reapply most often, and most times, in a day that keeps moving."
       }
     },
     "notify": {
       "hero": {
         "heading": "You'll be the first to know.",
-        "body": "We don't write often. What's planned: the panel results, the funding launch, and the release."
+        "body": "We don't write often. What's planned: the scores, the funding launch, and the release."
       },
       "end": {
-        "heading": "Shall we send you the panel recruitment news too?",
-        "body": "We'll write to this address on the day recruiting opens and the day the product launches."
+        "heading": "Want to follow how we choose?",
+        "body": "We’ll write to this address the day the formula is set and the day the product ships."
       }
     }
   },
@@ -421,13 +421,14 @@
   "product": {
     "meta": {
       "title": "PAROS Daily Sunscreen SPF50+ / PA++++ — active lifestyle sun care",
-      "description": "PAROS Daily Sunscreen. SPF50+ / PA++++ UV protection, a functional cosmetic. We publish the standard first; people who actually run score the candidates blind, with the manufacturer hidden. We publish the tally, including the formulas that failed.",
+      "description": "PAROS Daily Sunscreen. SPF50+ / PA++++ sunscreen. We publish the standard and the points first, then compare unbranded samples under the same conditions. Scores of rejected formulas are published too.",
       "ogAlt": "PAROS Daily Sunscreen on a bright surface"
     },
     "hero": {
       "imageAlt": "PAROS Daily Sunscreen bottle on a bright surface",
       "headline": "Through every movement, skin still breathes easy.",
       "priceUnknown": "Price to be announced",
+      "priceNote": "list price",
       "ctaExternal": "Buy on Smart Store",
       "ctaCart": "Add to cart",
       "added": "Added to your cart",
@@ -435,7 +436,7 @@
       "launchWindow": "Launching in the first half of 2027",
       "notify": {
         "heading": "We'll tell you when it's out",
-        "body": "We don't write often. What's planned: the panel results, the funding launch, and the release."
+        "body": "We don't write often. What's planned: the scores, the funding launch, and the release."
       }
     },
     "principles": {
@@ -520,7 +521,7 @@
         },
         {
           "q": "Did you develop the formula yourselves?",
-          "a": "No. The candidates are formulas the manufacturer already holds, ones that have passed testing and review. Instead of developing a new one, we publish the standard first and hand the scoring to people who actually train. The panel compares samples with the manufacturer's name hidden, against the same criteria, and we publish the tally as it comes."
+          "a": "No. The candidates are formulas the factory already holds, already tested and reviewed. Instead of developing one, we decided first what we would not give up and published it. We compare unbranded samples against that standard and publish the scores as they are."
         },
         {
           "q": "What is the SPF rating of Daily Sunscreen?",
@@ -532,7 +533,7 @@
         },
         {
           "q": "Does it leave a white cast?",
-          "a": "Leaving no white cast is a condition we do not trade away when choosing the formula. The panel checks it right after application and 30 seconds later under the same light, and a formula that misses the mark here is not used even if its total score is higher."
+          "a": "No white cast is a condition we don’t trade away. We check right after application and 30 seconds later under the same light, and a formula that misses this one isn’t used no matter how high its total."
         },
         {
           "q": "Is it fragranced?",
@@ -566,7 +567,7 @@
     "standards": {
       "kicker": "The standard",
       "lead": "There are two things we won't give up.",
-      "body": "It must not sting when sweat runs into the eyes, and it must not leave a white cast on any skin tone. A formula that fails either one is dropped from the shortlist however good the rest of it looks. The judgement is not ours — it comes from the panel's tally."
+      "body": "It must not sting when sweat runs into your eyes, and it must not go white on any skin tone. A formula that misses either is out, however good everything else is. The call is made by points and cut-offs set in advance, not by impressions."
     },
     "figures": {
       "water": {
@@ -797,7 +798,7 @@
           },
           {
             "item": "Main activity",
-            "purpose": "Telling you first when the test panel opens",
+            "purpose": "Sending news that matches what you do",
             "when": "When signing up for launch news (optional)"
           }
         ],
@@ -825,7 +826,7 @@
       },
       "rights": {
         "heading": "Your rights and how to exercise them",
-        "body": "You may ask us at any time to show, correct, delete, or stop processing your personal data. Tell us at the contact below and we will act without delay and let you know the result.\n\nEvery launch-notification and test-panel email carries an unsubscribe link that works immediately. We do not ask you to identify yourself for that.\n\nIf a legal representative or an authorised person asks on your behalf, we need a document showing that authority.\n\nIf you have an account, you can delete it yourself from My Page. Deleting it removes your email, name, and saved address. Order records stay for the five years Korean e-commerce law requires, and remain searchable by order number and phone number."
+        "body": "You may ask us at any time to show, correct, delete, or stop processing your personal data. Tell us at the contact below and we will act without delay and let you know the result.\n\nEvery launch-notification email carries an unsubscribe link that works immediately. We do not ask you to identify yourself for that.\n\nIf a legal representative or an authorised person asks on your behalf, we need a document showing that authority.\n\nIf you have an account, you can delete it yourself from My Page. Deleting it removes your email, name, and saved address. Order records stay for the five years Korean e-commerce law requires, and remain searchable by order number and phone number."
       },
       "entrust": {
         "heading": "Processing entrusted to others, and transfer abroad",
@@ -1024,7 +1025,7 @@
     "heading": "This path does not exist yet.",
     "body": "The address may have changed, or the page may have been removed.",
     "cta": "Back to home",
-    "panelCta": "See the test panel"
+    "panelCta": "See how we choose"
   },
   "a11y": {
     "skipToContent": "Skip to content",
@@ -1307,13 +1308,13 @@
   },
   "panel": {
     "meta": {
-      "title": "PAROS Test Panel — the people who score the formulas",
-      "description": "You receive samples with the manufacturer’s name hidden and compare them against set criteria. The tally decides the formula, and the scores of the ones that did not make it are published too."
+      "title": "How PAROS chooses — what we won’t give up",
+      "description": "We compare unbranded samples against a fixed standard. The scores decide the formula, and the rejected ones are published too."
     },
     "heading": "We show you the standard first.",
     "lead": [
-      "Many brands send a finished product to runners and ask what they thought.\nWe reversed the order.",
-      "First we decide and publish what passes and what gets cut.\nThen we send the candidate formulas exactly as they are, with nothing settled.\nWhich one becomes the product is decided by your scores."
+      "The usual way is to pick from what the factory offers, going by price and lead time.\nWe changed the order.",
+      "We decide and publish what passes and what fails first.\nThen we compare candidate formulas — nothing settled yet — against that standard.\nThe scores decide which one becomes the product."
     ],
     "figures": {
       "skin": {
@@ -1327,8 +1328,8 @@
       }
     },
     "what": {
-      "heading": "What you would be doing",
-      "body": "You receive two or three samples with the manufacturer’s name hidden.\nYou keep doing the activity you already do, and compare them against the six criteria below.\nThe evaluation runs from October to November 2026."
+      "heading": "How we compare",
+      "body": "Two or three samples arrive with the manufacturer’s name hidden.\nAfter 30 minutes of exercise, with sweat running, we compare them on the six items below.\nEach of us scores alone, then we compare results."
     },
     "criteria": {
       "heading": "The criteria",
@@ -1386,7 +1387,7 @@
     },
     "rejected": {
       "heading": "We publish the ones that did not make it",
-      "body": "When the tally is done we publish not only the chosen formula but the scores of the rejected ones.\n\nSaying what you chose without saying what you turned down\nis not choosing. It is looking like you chose."
+      "body": "When scoring ends we publish the scores of the rejected formulas, not only the chosen one.\n\nSaying what you picked without saying what you turned down\nisn’t choosing. It’s looking like you chose."
     },
     "form": {
       "heading": "Apply",

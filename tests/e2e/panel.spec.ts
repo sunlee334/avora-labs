@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { PANEL_APPLICATIONS_OPEN } from '../../src/config/panel';
 import ko from '../../src/i18n/ko.json' with { type: 'json' };
 
 /**
@@ -58,7 +59,7 @@ test.describe('가는 길이 있다', () => {
     await page.goto('/ko/');
     await expect(
       page.locator('.nav__links a[href="/ko/panel/"]'),
-      '헤더에 검증단 링크가 없습니다 — 10월 모집의 착지점에 진입로가 없습니다',
+      '헤더에 고르는 기준 링크가 없습니다 — 기준을 보여 주는 유일한 페이지에 진입로가 없습니다',
     ).toHaveCount(1);
   });
 
@@ -66,7 +67,7 @@ test.describe('가는 길이 있다', () => {
     await page.goto('/ko/');
     await expect(
       page.locator('[data-footer-menu] a[href="/ko/panel/"]'),
-      '푸터에 검증단 링크가 없습니다',
+      '푸터에 고르는 기준 링크가 없습니다',
     ).toHaveCount(1);
   });
 
@@ -76,7 +77,7 @@ test.describe('가는 길이 있다', () => {
     await page.locator('[data-menu-open]').click();
     await expect(
       page.locator('.menu__sheet a[href="/ko/panel/"]'),
-      '메뉴 시트에 검증단 링크가 없습니다',
+      '메뉴 시트에 고르는 기준 링크가 없습니다',
     ).toHaveCount(1);
   });
 
@@ -86,7 +87,7 @@ test.describe('가는 길이 있다', () => {
       await page.goto(`/${lang}/`);
       await expect(
         page.locator(`.nav__links a[href="/${lang}/panel/"]`),
-        `${lang}: 헤더에 검증단 링크가 없습니다`,
+        `${lang}: 헤더에 고르는 기준 링크가 없습니다`,
       ).toHaveCount(1);
     }
   });
@@ -172,6 +173,15 @@ test.describe('브랜드가 다른 지점', () => {
 });
 
 test.describe('지원 폼', () => {
+  /*
+   * 모집을 닫으면 폼 자체가 없습니다(`PANEL_APPLICATIONS_OPEN`).
+   *
+   * 지우지 않고 껐습니다 — 다시 열면 폼·API·처리방침 항목이 그대로 필요하고,
+   * 그때 이 검사들도 함께 돌아와야 합니다. 그래서 파일을 지우는 대신 조건을
+   * 답니다. **닫힌 동안 이 묶음이 도는 것은 없는 화면을 30초 기다리는 것뿐입니다.**
+   */
+  test.skip(!PANEL_APPLICATIONS_OPEN, '지금은 지원자를 모집하지 않습니다');
+
   test('필수 항목이 비면 어느 칸인지 각각 알려 준다', async ({ page }) => {
     /*
      * "지원되지 않았습니다" 만 보여주면 지원자는 어느 칸을 고쳐야 할지

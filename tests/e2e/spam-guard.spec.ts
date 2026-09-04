@@ -1,4 +1,8 @@
 import { test, expect } from '@playwright/test';
+import { PANEL_APPLICATIONS_OPEN } from '../../src/config/panel';
+
+/* 홈의 알림 폼은 알림을 받는 동안에만 있습니다. `sticky-cta-clearance.spec.ts` 와 같은 관용구입니다. */
+const SELLS = process.env.E2E_MODE !== 'launch';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { MIN_FILL_MS, HONEYPOT_FIELD } from '../../worker/spam';
@@ -17,7 +21,17 @@ import { MIN_FILL_MS, HONEYPOT_FIELD } from '../../worker/spam';
  *    잃는데, 잃었다는 사실이 어디에도 남지 않습니다.
  */
 
-const ENDPOINTS = ['/api/launch-notify', '/api/panel'] as const;
+/*
+ * 덫을 확인할 엔드포인트.
+ *
+ * `/api/panel` 은 모집이 열려 있을 때만 존재합니다(`PANEL_APPLICATIONS_OPEN`).
+ * 닫혀 있으면 404 를 돌려주므로 덫 검사가 성립하지 않습니다 — 목록에서 빼되,
+ * 아래 «목록에 있다» 검사가 **열렸는데 빠뜨린 경우** 를 계속 잡습니다.
+ */
+const ENDPOINTS = [
+  '/api/launch-notify',
+  ...(PANEL_APPLICATIONS_OPEN ? (['/api/panel'] as const) : []),
+] as const;
 
 function panelBody(extra: Record<string, unknown> = {}) {
   return {
@@ -100,7 +114,16 @@ test.describe('사람을 막지 않는다', () => {
 
 test.describe('덫이 사람 눈에 띄지 않는다', () => {
   test('화면 밖에 있고 탭으로 닿지 않는다', async ({ page }) => {
-    await page.goto('/ko/panel/');
+    /*
+     * 홈의 알림 폼을 봅니다. 전에는 `/ko/panel/` 의 지원 폼이었는데, 모집을
+     * 닫으면서 그 폼이 사라졌습니다(`PANEL_APPLICATIONS_OPEN`). 덫은 같은
+     * 처리를 쓰므로 어느 폼에서 확인하든 같습니다.
+     *
+     * ⚠️ 그 알림 폼은 **launch 모드에만** 있습니다. 팔기 시작하면 홈에서
+     * 사라지므로 덫도 함께 사라집니다 — 확인할 대상이 없습니다.
+     */
+    test.skip(SELLS, '팔기 시작하면 홈에 알림 폼이 없습니다');
+    await page.goto('/ko/');
     const trap = page.locator(`input[name="${HONEYPOT_FIELD}"]`).first();
     await expect(trap).toHaveCount(1);
     await expect(trap).toHaveAttribute('tabindex', '-1');

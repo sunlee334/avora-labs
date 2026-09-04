@@ -1,5 +1,6 @@
 import { test, expect, type APIRequestContext } from '@playwright/test';
 import { ADMIN_DEV_TOKEN, TEST_HEADERS } from '../../../playwright.config';
+import { PANEL_APPLICATIONS_OPEN } from '../../../src/config/panel';
 
 /**
  * 같은 사람에게 확인 메일을 두 번 보내지 않기 위한 조건.
@@ -28,6 +29,8 @@ async function rows<T>(request: APIRequestContext, path: string): Promise<T[]> {
 
 test.describe('다시 낸 것은 새 행이 아니다', () => {
   test('검증단 지원', async ({ request }) => {
+    test.skip(!PANEL_APPLICATIONS_OPEN, '지금은 지원자를 모집하지 않습니다');
+
     const email = `again-${Date.now()}@example.com`;
     const base = {
       name: '테스트', email, activity: 'running', frequency: 'weekly_2_3',

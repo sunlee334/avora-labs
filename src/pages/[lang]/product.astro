@@ -177,7 +177,20 @@ const rows = specRows(t);
         }
         <p class="body" style="margin-top: 18px">{p.hero.headline}</p>
 
-        {priceLabel && <p class="product-hero__price">{priceLabel}</p>}
+        {/*
+          정가입니다. 제품 기획안 6-1 이 32,000원으로 **확정** 했습니다
+          (결정 대기 항목에도 없습니다).
+
+          `<small>` 로 «정가» 를 붙이는 이유: 판매 개시는 2027년 5월이고 그
+          전에 펀딩이 21,000~25,500원으로 먼저 열립니다. 숫자만 두면 지금
+          그 값에 살 수 있다는 뜻으로 읽힙니다. 무엇의 가격인지 말합니다.
+        */}
+        {priceLabel && (
+          <p class="product-hero__price">
+            {priceLabel}
+            <small>{p.hero.priceNote}</small>
+          </p>
+        )}
 
         {
           sellsDirectly ? (

@@ -46,10 +46,17 @@ test.describe('활동 선택 — 화면', () => {
   });
 
   test('왜 묻는지 화면에 적혀 있다', async ({ page }) => {
-    // 이유 없이 칸만 늘리면 그냥 귀찮은 질문입니다.
+    /*
+     * 이유 없이 칸만 늘리면 그냥 귀찮은 질문입니다.
+     *
+     * 전에는 "검증단을 모실 때 먼저 알려드리려고" 였습니다. 기획안 v09 에
+     * 검증단이 없어 그 이유가 사라졌고, 지금은 **활동마다 다른 소식** 을
+     * 보내기 위해서입니다(기획안 8-1 의 커뮤니티 접점).
+     */
     await page.goto('/ko/');
     const why = await page.locator('.notify__acts-why').first().innerText();
-    expect(why).toMatch(/검증단/);
+    expect(why, '왜 묻는지가 적혀 있지 않습니다').toMatch(/활동/);
+    expect(why, '없는 검증단을 이유로 들고 있습니다').not.toMatch(/검증단/);
   });
 
   test('탭 영역이 44px 이상이다', async ({ page }) => {

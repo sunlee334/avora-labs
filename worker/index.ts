@@ -68,6 +68,7 @@ import {
 } from './mailer';
 import { runWeeklyDigest } from './digest';
 import { ORIGIN } from '../src/config/site.ts';
+import { PANEL_APPLICATIONS_OPEN } from '../src/config/panel.ts';
 import {
   apply as applyPanel,
   unsubscribe as unsubscribePanel,
@@ -1698,6 +1699,14 @@ async function route(request: Request, env: Env, ctx: ExecutionContext): Promise
 
   // 검증단 지원 — 10월 크루 접촉 때 링크를 걸 자리(/panel)가 여기로 보냅니다.
   if (pathname === '/api/panel' && request.method === 'POST') {
+    /*
+     * 모집을 닫아 두면 받지 않습니다.
+     *
+     * 화면에서 폼을 지우는 것만으로는 부족합니다 — 주소를 아는 사람은 그대로
+     * 보낼 수 있고, 그러면 **처리방침에 적지 않은 항목을 받게 됩니다.**
+     * 고지와 수집을 한 스위치에 묶어 두는 이유입니다.
+     */
+    if (!PANEL_APPLICATIONS_OPEN) return json({ error: 'PANEL_CLOSED' }, 404);
     return handlePanelApply(request, env, ctx);
   }
   if (pathname === '/api/panel/unsubscribe' && request.method === 'GET') {

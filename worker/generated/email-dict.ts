@@ -25,15 +25,15 @@ export const EMAIL_DICT: Record<Locale, EmailDict> = {
         "steps": [
           {
             "when": "2026.10",
-            "what": "검증단 모집 시작"
+            "what": "샘플 평가 시작"
           },
           {
             "when": "2026.11",
-            "what": "블라인드 평가"
+            "what": "고르는 기준 공개"
           },
           {
             "when": "2026.12",
-            "what": "집계 공개 · 처방 확정"
+            "what": "점수 공개 · 처방 확정"
           },
           {
             "when": "2027.02",
@@ -64,15 +64,15 @@ export const EMAIL_DICT: Record<Locale, EmailDict> = {
         "steps": [
           {
             "when": "Oct 2026",
-            "what": "Test panel recruiting"
+            "what": "Sample scoring begins"
           },
           {
             "when": "Nov 2026",
-            "what": "Blind evaluation"
+            "what": "Standard published"
           },
           {
             "when": "Dec 2026",
-            "what": "Tally published · formula fixed"
+            "what": "Scores published · formula set"
           },
           {
             "when": "Feb 2027",
@@ -103,15 +103,15 @@ export const EMAIL_DICT: Record<Locale, EmailDict> = {
         "steps": [
           {
             "when": "2026.10",
-            "what": "测评团招募开始"
+            "what": "样品评比开始"
           },
           {
             "when": "2026.11",
-            "what": "盲测评估"
+            "what": "公开挑选标准"
           },
           {
             "when": "2026.12",
-            "what": "统计公开 · 配方确定"
+            "what": "公开分数 · 确定配方"
           },
           {
             "when": "2027.02",
@@ -142,15 +142,15 @@ export const EMAIL_DICT: Record<Locale, EmailDict> = {
         "steps": [
           {
             "when": "ต.ค. 2026",
-            "what": "เริ่มรับสมัครทีมทดสอบ"
+            "what": "เริ่มประเมินตัวอย่าง"
           },
           {
             "when": "พ.ย. 2026",
-            "what": "การประเมินแบบปิดชื่อ"
+            "what": "เปิดเผยเกณฑ์การเลือก"
           },
           {
             "when": "ธ.ค. 2026",
-            "what": "เปิดเผยผลรวม · กำหนดสูตร"
+            "what": "เปิดเผยคะแนน · สรุปสูตร"
           },
           {
             "when": "ก.พ. 2027",
@@ -181,15 +181,15 @@ export const EMAIL_DICT: Record<Locale, EmailDict> = {
         "steps": [
           {
             "when": "10/2026",
-            "what": "Bắt đầu tuyển nhóm thử nghiệm"
+            "what": "Bắt đầu đánh giá mẫu"
           },
           {
             "when": "11/2026",
-            "what": "Đánh giá ẩn danh"
+            "what": "Công bố tiêu chí chọn"
           },
           {
             "when": "12/2026",
-            "what": "Công bố tổng hợp · chốt công thức"
+            "what": "Công bố điểm · chốt công thức"
           },
           {
             "when": "02/2027",

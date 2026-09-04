@@ -8,7 +8,7 @@
     "story": "Câu chuyện thương hiệu",
     "brand": "Thương hiệu",
     "product": "Sản phẩm",
-    "panel": "Nhóm thử nghiệm",
+    "panel": "Tiêu chí chọn",
     "journal": "Bài viết",
     "cart": "Giỏ hàng",
     "language": "Chọn ngôn ngữ",
@@ -32,7 +32,7 @@
     "consent": "Tôi đồng ý nhận email quảng cáo. Mỗi email đều có liên kết hủy nhận.",
     "activities": {
       "heading": "Bạn chủ yếu vận động thế nào? (không bắt buộc)",
-      "why": "Để khi tuyển nhóm thử nghiệm vào tháng 10 năm 2026, chúng tôi báo trước cho những người thật sự làm việc đó.",
+      "why": "Chạy bộ và leo núi cần những thứ khác nhau. Nhờ vậy chúng tôi gửi trước tin phù hợp với hoạt động của bạn.",
       "options": [
         {
           "value": "running",
@@ -62,7 +62,7 @@
     },
     "privacy": {
       "heading": "Thông tin thu thập và mục đích",
-      "summary": "Chúng tôi xin địa chỉ email của bạn, và hoạt động bạn thường làm nếu bạn chọn cho biết. Chỉ dùng để báo kết quả thử nghiệm, mở gọi vốn và ra mắt chính thức; nếu bạn hủy nhận, bạn sẽ được đưa khỏi danh sách ngay. Chúng tôi giữ lại địa chỉ để không gửi trùng lần nữa.",
+      "summary": "Chúng tôi xin địa chỉ email của bạn, và hoạt động bạn thường làm nếu bạn chọn cho biết. Chỉ dùng để báo công bố điểm, mở gọi vốn và ra mắt chính thức; nếu bạn hủy nhận, bạn sẽ được đưa khỏi danh sách ngay. Chúng tôi giữ lại địa chỉ để không gửi trùng lần nữa.",
       "link": "Xem chính sách quyền riêng tư"
     },
     "night": {
@@ -73,7 +73,7 @@
   "home": {
     "meta": {
       "title": "PAROS — chống nắng cho lối sống năng động | AVORA LABS",
-      "description": "PAROS là thương hiệu chăm sóc da theo phong cách sống năng động, kết hợp sức sống của vận động với sự chăm sóc dịu nhẹ. Với sản phẩm đầu tiên Daily Sunscreen SPF50+ / PA++++, chúng tôi công bố tiêu chí trước và giao việc chấm điểm cho những người thật sự chạy bộ. Dự kiến ra mắt nửa đầu năm 2027.",
+      "description": "PAROS là thương hiệu chăm sóc da theo phong cách sống năng động, kết hợp sức sống của vận động với sự chăm sóc dịu nhẹ. Với sản phẩm đầu tiên Daily Sunscreen SPF50+ / PA++++, chúng tôi công bố tiêu chí trước: sáu hạng mục trên thang 100 điểm, so sánh khi che tên nhà sản xuất trong cùng điều kiện. Điểm số quyết định. Dự kiến ra mắt nửa đầu năm 2027.",
       "ogAlt": "Bóng người chạy in trên nền mặt trời thấp"
     },
     "notice": {
@@ -82,7 +82,7 @@
     },
     "hero": {
       "imageAlt": "Bóng một người đang chạy trên đường mòn đá dưới ánh mặt trời thấp",
-      "promise": "Tiêu chí chúng tôi công bố, điểm số để người chạy chấm."
+      "promise": "Tiêu chí công bố trước, điểm số quyết định."
     },
     "problem": {
       "kicker": "The Problem",
@@ -151,18 +151,18 @@
       "items": [
         {
           "q": "Không tự phát triển thì khác gì các thương hiệu khác?",
-          "a": "Phần lớn thương hiệu mỹ phẩm đều dùng công thức của nhà máy. Chỉ là ít nơi công bố điều đó cùng với tiêu chí đánh giá.\n\nChúng tôi công bố trước sáu hạng mục, thang điểm và mức sàn, rồi theo đúng kết quả tổng. Kể cả điểm của những công thức bị loại."
+          "a": "Phần lớn thương hiệu mỹ phẩm Hàn Quốc dùng công thức của nhà sản xuất. Nhưng hiếm nơi công bố điều đó cùng với tiêu chí đánh giá.\n\nChúng tôi công bố trước sáu hạng mục, thang điểm và mức loại, rồi làm theo đúng điểm số. Điểm của những công thức bị loại cũng được công bố."
         },
         {
           "q": "Công thức có sẵn thì chất lượng có kém hơn không?",
           "a": "Ứng viên là những công thức đã qua kiểm nghiệm và thẩm định.\n\nThứ chúng tôi thêm vào không phải thành phần mà là sự sàng lọc. So sánh nhiều ứng viên trong cùng điều kiện rồi loại dần."
         },
         {
-          "q": "Nhóm thử nghiệm được chọn thế nào?",
-          "a": "Chúng tôi tuyển từ các nhóm chạy bộ, phòng leo núi và cộng đồng lướt sóng. Bạn cứ tập như thường lệ và so sánh theo bộ tiêu chí đã định.\n\nBắt đầu từ tháng 10 năm 2026."
+          "q": "Ai chấm điểm?",
+          "a": "Hai chúng tôi chấm riêng, sau đó đối chiếu kết quả. Mẫu được che tên nhà sản xuất, so sánh trong cùng một ngày và cùng điều kiện.\n\nNếu chấm cùng nhau, ý kiến sẽ nghiêng về một phía và khác biệt không còn lộ ra."
         }
       ],
-      "panelLink": "Hướng dẫn tham gia nhóm thử nghiệm",
+      "panelLink": "Xem tiêu chí chọn",
       "more": "Các câu hỏi khác về sản phẩm"
     },
     "limits": {
@@ -195,12 +195,12 @@
       "lead": "Chúng tôi công bố tiêu chí trước, sản phẩm sau.",
       "body": "Thông thường người ta đưa ra sản phẩm hoàn thiện rồi giải thích vì sao nó tốt. Chúng tôi đảo ngược thứ tự.\nNgay lúc chưa có gì được quyết định, chúng tôi công bố trước điều gì được chọn và điều gì bị loại.",
       "body2": "Sáu hạng mục, thang điểm 100. Cay mắt 30 điểm, vệt trắng 25 điểm.\nChỉ cần không đạt mức sàn ở một trong hai, tổng điểm cao đến mấy chúng tôi cũng không dùng.",
-      "body3": "Tiêu chí do chúng tôi đặt ra, điểm số do những người thực sự chạy chấm.\nỨng viên là các công thức sẵn có — không phải do chúng tôi phát triển mới, và chúng tôi ghi rõ điều đó."
+      "body3": "Tiêu chí do chúng tôi đặt ra, điểm số quyết định.\nỨng viên là các công thức sẵn có — không phải do chúng tôi phát triển mới, và chúng tôi ghi rõ điều đó."
     },
     "panel": {
-      "kicker": "Test Panel",
-      "lead": "Người chọn chính là người chạy.",
-      "body": "Chúng tôi mời nhóm thử nghiệm từ các nhóm chạy bộ, phòng leo núi và cộng đồng lướt sóng. Họ nhận hai đến ba mẫu đã ẩn tên nhà sản xuất và so sánh theo cùng một bộ tiêu chí trong tình huống vận động thật.",
+      "kicker": "How We Choose",
+      "lead": "Chúng tôi đặt tiêu chí trước khi chọn.",
+      "body": "Hai đến ba công thức ứng viên, che tên nhà sản xuất, được so sánh theo cùng một tiêu chí sau 30 phút vận động khi mồ hôi đang chảy. Mỗi người chấm riêng rồi đối chiếu kết quả.",
       "criteriaHeading": "Những gì được so sánh",
       "criteria": [
         {
@@ -234,12 +234,12 @@
           "body": "Cho đến khi thấm hoàn toàn"
         }
       ],
-      "note": "Chúng tôi công bố nguyên kết quả tổng hợp. Chúng tôi dùng công thức có điểm cao nhất, không phải công thức mình thích. Việc tuyển chọn bắt đầu vào tháng 10 năm 2026.",
+      "note": "Chúng tôi công bố nguyên điểm số. Không phải công thức chúng tôi thích, mà là công thức điểm cao nhất. Việc đánh giá bắt đầu từ tháng 10 năm 2026.",
       "shots": {
         "crewAlt": "Bốn người chạy bộ nhìn từ phía sau trên con đường đất phủ đầy lá",
         "boulderingAlt": "Hai người ngồi nhìn một người leo trên tường bouldering trong nhà"
       },
-      "cta": "Đăng ký nhóm thử nghiệm"
+      "cta": "Xem tiêu chí chọn"
     },
     "timeline": {
       "kicker": "Tiếp theo",
@@ -250,17 +250,17 @@
       "steps": [
         {
           "when": "10/2026",
-          "what": "Bắt đầu tuyển nhóm thử nghiệm",
+          "what": "Bắt đầu đánh giá mẫu",
           "note": "Chúng tôi tuyển từ các nhóm chạy, phòng leo núi và cộng đồng lướt sóng"
         },
         {
           "when": "11/2026",
-          "what": "Đánh giá ẩn danh",
+          "what": "Công bố tiêu chí chọn",
           "note": "Hai ba mẫu đã che tên nhà sản xuất, so sánh theo sáu tiêu chí"
         },
         {
           "when": "12/2026",
-          "what": "Công bố tổng hợp · chốt công thức",
+          "what": "Công bố điểm · chốt công thức",
           "note": "Công bố cả điểm của những công thức không được chọn"
         },
         {
@@ -287,23 +287,23 @@
         "container": "Bao bì",
         "waits": {
           "protection": "sau thẩm định chức năng",
-          "texture": "sau khi tổng hợp điểm",
+          "texture": "Sau khi đánh giá mẫu",
           "waterResistant": "sau khi có báo cáo thử nghiệm",
           "volume": "sau khi đặt vỏ",
           "container": "Sau khi đặt hàng"
         },
-        "note": "Những mục chưa xác định thì chúng tôi ghi là chưa xác định. Bảng này sẽ được điền khi việc tổng hợp điểm kết thúc vào tháng 12 năm 2026.",
+        "note": "Điều chưa quyết thì chúng tôi ghi là chưa quyết. Khi công thức được chốt vào tháng 12 năm 2026, bảng này sẽ được điền.",
         "why": "Vì đây là sản phẩm phải thoa lại thường xuyên nhất và nhiều lần nhất trong một ngày luôn chuyển động."
       }
     },
     "notify": {
       "hero": {
         "heading": "Bạn sẽ là người biết đầu tiên.",
-        "body": "Chúng tôi không gửi thường xuyên. Những tin đã lên kế hoạch: kết quả thử nghiệm, mở gọi vốn, và ra mắt chính thức."
+        "body": "Chúng tôi không gửi thường xuyên. Những tin đã lên kế hoạch: công bố điểm, mở gọi vốn, và ra mắt chính thức."
       },
       "end": {
-        "heading": "Bạn có muốn nhận cả tin tuyển nhóm thử nghiệm không?",
-        "body": "Ngày mở tuyển và ngày sản phẩm ra mắt, chúng tôi sẽ gửi tin đến địa chỉ này."
+        "heading": "Bạn muốn theo dõi cả quá trình chọn chứ?",
+        "body": "Ngày công thức được chốt và ngày sản phẩm ra mắt, chúng tôi sẽ gửi tới địa chỉ này."
       }
     }
   },
@@ -421,13 +421,14 @@
   "product": {
     "meta": {
       "title": "PAROS Daily Sunscreen SPF50+ / PA++++ — chống nắng cho lối sống năng động",
-      "description": "Daily Sunscreen — sản phẩm đầu tiên của PAROS. Chống nắng SPF50+ / PA++++, mỹ phẩm chức năng. Chúng tôi công bố tiêu chí trước; điểm số do những người thật sự chạy bộ chấm với tên nhà sản xuất được ẩn đi. Công bố cả kết quả tổng và điểm của các công thức bị loại.",
+      "description": "PAROS Daily Sunscreen. Kem chống nắng SPF50+ / PA++++. Chúng tôi công bố tiêu chí và thang điểm trước, rồi so sánh các mẫu che tên nhà sản xuất trong cùng điều kiện. Điểm của những công thức bị loại cũng được công bố.",
       "ogAlt": "PAROS Daily Sunscreen đặt trên bề mặt sáng"
     },
     "hero": {
       "imageAlt": "Chai PAROS Daily Sunscreen đặt trên bề mặt sáng",
       "headline": "Qua mọi chuyển động, làn da vẫn thở thật dễ chịu.",
       "priceUnknown": "Giá sẽ được công bố",
+      "priceNote": "giá niêm yết",
       "ctaExternal": "Mua tại Smart Store",
       "ctaCart": "Thêm vào giỏ",
       "added": "Đã thêm vào giỏ",
@@ -435,7 +436,7 @@
       "launchWindow": "Dự kiến ra mắt nửa đầu năm 2027",
       "notify": {
         "heading": "Chúng tôi sẽ báo khi sản phẩm ra mắt",
-        "body": "Chúng tôi không gửi thường xuyên. Những tin đã lên kế hoạch: kết quả thử nghiệm, mở gọi vốn, và ra mắt chính thức."
+        "body": "Chúng tôi không gửi thường xuyên. Những tin đã lên kế hoạch: công bố điểm, mở gọi vốn, và ra mắt chính thức."
       }
     },
     "principles": {
@@ -520,7 +521,7 @@
         },
         {
           "q": "Công thức do các bạn tự phát triển phải không?",
-          "a": "Không. Ứng viên là những công thức nhà máy đã có sẵn và đã qua kiểm nghiệm, thẩm định. Thay vì phát triển công thức mới, chúng tôi công bố tiêu chí trước và giao việc chấm điểm cho những người thật sự tập luyện. Nhóm thử nghiệm so sánh các mẫu đã ẩn tên nhà sản xuất theo cùng một bộ tiêu chí, và chúng tôi công bố nguyên kết quả tổng."
+          "a": "Không. Ứng viên là những công thức nhà máy đã có sẵn, đã qua kiểm nghiệm và thẩm định. Thay vì phát triển mới, chúng tôi xác định trước điều mình không nhượng bộ và công bố nó. Chúng tôi so sánh các mẫu che tên nhà sản xuất theo cùng tiêu chí và công bố nguyên điểm số."
         },
         {
           "q": "Daily Sunscreen có chỉ số chống nắng bao nhiêu?",
@@ -532,7 +533,7 @@
         },
         {
           "q": "Có để lại vệt trắng không?",
-          "a": "Không để lại vệt trắng là điều kiện chúng tôi không nhân nhượng khi chọn công thức. Nhóm thử nghiệm kiểm tra ngay sau khi thoa và 30 giây sau dưới cùng một ánh sáng; công thức không đạt ở hạng mục này sẽ không được dùng dù tổng điểm có cao hơn."
+          "a": "Không để lại vệt trắng là điều kiện chúng tôi không nhượng bộ. Chúng tôi kiểm tra ngay sau khi thoa và 30 giây sau dưới cùng một nguồn sáng; công thức không đạt hạng mục này sẽ không được dùng dù tổng điểm có cao đến đâu."
         },
         {
           "q": "Sản phẩm có mùi hương không?",
@@ -566,7 +567,7 @@
     "standards": {
       "kicker": "Tiêu chí đạt",
       "lead": "Có hai điều chúng tôi không nhân nhượng.",
-      "body": "Không được cay mắt khi mồ hôi chảy vào, và không được để lại vệt trắng trên bất kỳ tông da nào. Công thức không đạt một trong hai điều này sẽ bị loại, dù những điểm khác có tốt đến đâu. Phán quyết không thuộc về chúng tôi mà thuộc về kết quả tổng hợp của nhóm thử nghiệm."
+      "body": "Không cay mắt khi mồ hôi chảy vào, và không bị trắng bệch trên bất kỳ tông da nào. Công thức không đạt một trong hai điều này sẽ bị loại, dù mọi thứ khác tốt đến đâu. Phán quyết dựa trên thang điểm và mức loại đặt sẵn, không dựa vào cảm nhận."
     },
     "figures": {
       "water": {
@@ -797,7 +798,7 @@
           },
           {
             "item": "Hoạt động chính",
-            "purpose": "Báo trước khi mở tuyển nhóm thử nghiệm",
+            "purpose": "Gửi tin phù hợp với hoạt động của bạn",
             "when": "Khi đăng ký nhận tin ra mắt (tùy chọn)"
           }
         ],
@@ -825,7 +826,7 @@
       },
       "rights": {
         "heading": "Quyền của chủ thể dữ liệu và cách thực hiện",
-        "body": "Bạn có thể yêu cầu xem, sửa, xoá hoặc dừng xử lý dữ liệu cá nhân của mình bất cứ lúc nào. Hãy báo cho chúng tôi theo liên hệ bên dưới; chúng tôi sẽ xử lý ngay và thông báo kết quả.\n\nMỗi email thông báo ra mắt và email nhóm thử nghiệm đều có liên kết huỷ nhận, có hiệu lực ngay và không cần xác minh danh tính.\n\nNếu người đại diện theo pháp luật hoặc người được uỷ quyền yêu cầu thay bạn, cần có giấy tờ chứng minh việc uỷ quyền.\n\nNếu bạn có tài khoản, bạn có thể tự xoá tại Trang của tôi. Khi xoá, email, tên và địa chỉ giao hàng đã lưu sẽ bị xoá. Hồ sơ đơn hàng vẫn được giữ trong năm năm theo luật thương mại điện tử Hàn Quốc và vẫn tra cứu được bằng mã đơn hàng và số điện thoại."
+        "body": "Bạn có thể yêu cầu xem, sửa, xoá hoặc dừng xử lý dữ liệu cá nhân của mình bất cứ lúc nào. Hãy báo cho chúng tôi theo liên hệ bên dưới; chúng tôi sẽ xử lý ngay và thông báo kết quả.\n\nMỗi email thông báo ra mắt đều có liên kết huỷ nhận, có hiệu lực ngay và không cần xác minh danh tính.\n\nNếu người đại diện theo pháp luật hoặc người được uỷ quyền yêu cầu thay bạn, cần có giấy tờ chứng minh việc uỷ quyền.\n\nNếu bạn có tài khoản, bạn có thể tự xoá tại Trang của tôi. Khi xoá, email, tên và địa chỉ giao hàng đã lưu sẽ bị xoá. Hồ sơ đơn hàng vẫn được giữ trong năm năm theo luật thương mại điện tử Hàn Quốc và vẫn tra cứu được bằng mã đơn hàng và số điện thoại."
       },
       "entrust": {
         "heading": "Uỷ thác xử lý và chuyển dữ liệu ra nước ngoài",
@@ -1024,7 +1025,7 @@
     "heading": "Đường dẫn này chưa tồn tại.",
     "body": "Địa chỉ có thể đã thay đổi, hoặc trang đã bị xoá.",
     "cta": "Về trang chủ",
-    "panelCta": "Xem tuyển nhóm thử nghiệm"
+    "panelCta": "Xem tiêu chí chọn"
   },
   "a11y": {
     "skipToContent": "Chuyển đến nội dung",
@@ -1307,13 +1308,13 @@
   },
   "panel": {
     "meta": {
-      "title": "PAROS tuyển nhóm thử nghiệm — những người chấm điểm công thức",
-      "description": "Bạn nhận các mẫu đã ẩn tên nhà sản xuất và so sánh theo bộ tiêu chí định sẵn. Kết quả tổng hợp quyết định công thức, và điểm của những công thức bị loại cũng được công bố."
+      "title": "Tiêu chí chọn của PAROS — điều chúng tôi không nhượng bộ",
+      "description": "Chúng tôi so sánh các mẫu che tên nhà sản xuất theo một tiêu chí cố định. Điểm số quyết định công thức, và những công thức bị loại cũng được công bố."
     },
     "heading": "Chúng tôi cho bạn xem tiêu chí trước.",
     "lead": [
-      "Nhiều thương hiệu gửi sản phẩm đã hoàn thiện cho người chạy bộ rồi hỏi cảm nhận.\nChúng tôi đảo ngược thứ tự.",
-      "Trước hết chúng tôi quyết định và công bố điều gì được chọn, điều gì bị loại.\nSau đó gửi đi các công thức ứng viên đúng như hiện trạng, chưa quyết định gì.\nCông thức nào thành sản phẩm là do điểm số của bạn định đoạt."
+      "Cách thường thấy là chọn trong những gì nhà máy đề xuất, dựa vào đơn giá và thời gian giao.\nChúng tôi đảo lại thứ tự đó.",
+      "Chúng tôi quyết định và công bố trước điều gì đạt và điều gì bị loại.\nSau đó mới so sánh các công thức ứng viên — chưa có gì được chốt — theo tiêu chí ấy.\nĐiểm số quyết định công thức nào trở thành sản phẩm."
     ],
     "figures": {
       "skin": {
@@ -1327,8 +1328,8 @@
       }
     },
     "what": {
-      "heading": "Bạn sẽ làm gì",
-      "body": "Bạn nhận hai đến ba mẫu đã ẩn tên nhà sản xuất.\nCứ tập luyện như thường lệ, rồi so sánh theo sáu tiêu chí dưới đây.\nViệc đánh giá diễn ra từ tháng 10 đến tháng 11 năm 2026."
+      "heading": "Chúng tôi so sánh thế nào",
+      "body": "Chúng tôi nhận hai đến ba mẫu đã che tên nhà sản xuất.\nSau 30 phút vận động, khi mồ hôi đang chảy, chúng tôi so sánh theo sáu tiêu chí bên dưới.\nMỗi người chấm riêng rồi đối chiếu kết quả."
     },
     "criteria": {
       "heading": "Các tiêu chí so sánh",
@@ -1386,7 +1387,7 @@
     },
     "rejected": {
       "heading": "Chúng tôi công bố cả những công thức bị loại",
-      "body": "Khi tổng hợp xong, chúng tôi công bố không chỉ công thức được chọn mà cả điểm của những công thức bị loại.\n\nChỉ nói đã chọn gì mà không nói đã loại gì\nthì đó không phải là chọn, mà là làm ra vẻ đã chọn."
+      "body": "Khi việc đánh giá kết thúc, chúng tôi công bố cả điểm của những công thức bị loại, không chỉ công thức được chọn.\n\nChỉ nói mình đã chọn gì mà không nói đã loại gì\nthì đó không phải là chọn, mà là làm ra vẻ đã chọn."
     },
     "form": {
       "heading": "Đăng ký",

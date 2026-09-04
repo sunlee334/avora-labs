@@ -1,5 +1,6 @@
 import { test, expect, type APIRequestContext } from '@playwright/test';
 import { ADMIN_DEV_TOKEN, TEST_HEADERS } from '../../../playwright.config';
+import { PANEL_APPLICATIONS_OPEN } from '../../../src/config/panel';
 import { HONEYPOT_FIELD, MIN_FILL_MS } from '../../../worker/spam';
 
 /**
@@ -51,6 +52,8 @@ test.describe('덫에 걸린 것은 저장되지 않는다', () => {
   });
 
   test('검증단 지원', async ({ request }) => {
+    test.skip(!PANEL_APPLICATIONS_OPEN, '지금은 지원자를 모집하지 않습니다');
+
     const base = {
       name: '테스트', activity: 'running', frequency: 'weekly_2_3',
       region: 'seoul', locale: 'ko', consent: true,
@@ -87,6 +90,8 @@ test.describe('너무 빨리 낸 것은 저장되지 않는다', () => {
   });
 
   test('검증단 지원', async ({ request }) => {
+    test.skip(!PANEL_APPLICATIONS_OPEN, '지금은 지원자를 모집하지 않습니다');
+
     /*
      * 이 짝이 빠져 있었습니다. `/api/panel` 의 시간 문턱은 응답만 보는 검사가
      * 있었을 뿐 저장 여부를 보는 짝이 없어, 판별을 통째로 지워도 통과했습니다.

@@ -1,13 +1,14 @@
 ---
 /**
- * 검증단 모집.
+ * 고르는 기준.
  *
  * ── 이 페이지가 존재하는 이유 ───────────────────────────────
- * 2026년 10월에 러닝 크루 담당자에게 DM 을 보낼 때 **링크 하나만 던지면
- * 지원이 완결되어야** 합니다. 홈의 알림 폼은 "출시하면 알려 주세요" 이지
- * "저를 뽑아 주세요" 가 아니라, 단톡방에 걸 링크로는 쓸 수 없습니다.
+ * 무엇을 통과시키고 무엇을 떨어뜨릴지를 **제품보다 먼저** 보여 주는 자리입니다.
+ * 여섯 항목과 배점, 커트라인이 여기 있고, 홈과 제품 상세가 이곳을 가리킵니다.
  *
- * 이 사이트에서 날짜가 걸린 유일한 페이지입니다.
+ * 한동안 이 페이지는 검증단 모집이었습니다. 기획안 v09 어디에도 검증단이
+ * 없어(5-5 는 두 사람이 각각 따로 평가한다고 적습니다) 모집 부분만 닫았습니다
+ * — `PANEL_APPLICATIONS_OPEN` 참고. **기준 자체는 사실이라 그대로 남습니다.**
  *
  * ── 왜 한국어 말고도 만드는가 ───────────────────────────────
  * 모집은 국내 러닝 크루 대상이라 한국어판만 있으면 됩니다. 그런데 이
@@ -19,6 +20,7 @@
  * 전환되지 않고, 얇은 페이지가 사이트 품질 신호를 끌어내립니다.
  */
 import { Picture } from 'astro:assets';
+import { PANEL_APPLICATIONS_OPEN } from '../../config/panel';
 import skinImage from '../../assets/images/panel-skin.jpg';
 import sampleImage from '../../assets/images/panel-sample.jpg';
 import notesImage from '../../assets/images/panel-notes.jpg';
@@ -173,150 +175,157 @@ const indexable = locale === 'ko';
     {p.rejected.body.split('\n\n').map((para) => <p class="body panel__lead">{para}</p>)}
   </section>
 
-  <section class="section wrap" id="apply">
-    <h2 class="display display--tight">{f.heading}</h2>
-
-    <form
-      class="panelForm"
-      data-panel-form
-      data-locale={locale}
-      {/*
-        문구는 화면이 이미 갖고 있습니다. 스크립트에 다시 적으면 5개 언어가
-        어긋나므로 여기서 넘깁니다.
-      */}
-      data-copy={JSON.stringify({
-        required: f.required,
-        invalid: f.invalid,
-        // 동의만 빠졌을 때는 다른 말이 필요합니다 — 빈 칸은 하나도 없습니다.
-        consentRequired: f.consentRequired,
-        error: f.error,
-        done: f.done,
-      })}
-      novalidate
-    >
   {/*
-    봇 덫.
-
-    사람에게는 보이지도, 탭으로 닿지도, 스크린리더에 읽히지도 않습니다.
-    값이 차 있으면 폼을 기계가 채웠다는 뜻이라 워커가 조용히 버립니다.
-
-    `display: none` 을 쓰지 않는 이유: 요즘 봇은 숨겨진 칸을 건너뜁니다.
-    화면 밖으로 밀어내는 편이 더 오래 갑니다.
-
-    이름이 `website` 인 이유는 봇이 흔한 이름을 채우기 때문입니다 —
-    `honeypot` 이라고 적으면 건너뜁니다(worker/spam.ts).
+    지원 폼은 **모집을 하는 동안에만** 있습니다(`PANEL_APPLICATIONS_OPEN`).
+    지금은 꺼져 있습니다 — 기획안 5-5 의 평가는 두 사람이 각각 따로 하는
+    것이라 바깥에서 모실 자리가 없습니다. 자세한 이유는 그 설정 파일에.
   */}
-  <div class="honeypot" aria-hidden="true">
-    <label for={"trap-panel"}>Website</label>
-    <input id="trap-panel" type="text" name="website" tabindex="-1" autocomplete="off" />
-  </div>
+  {PANEL_APPLICATIONS_OPEN && (
+    <section class="section wrap" id="apply">
+      <h2 class="display display--tight">{f.heading}</h2>
 
-      <Field
-        id="name"
-        label={f.name.label}
-        hint={f.name.hint}
-        autocomplete="name"
-        required
-      />
-      <Field
-        id="email"
-        label={f.email.label}
-        type="email"
-        inputmode="email"
-        autocomplete="email"
-        placeholder={f.email.placeholder}
-        required
-      />
-
-      {/*
-        단일 선택은 라디오입니다. `<select>` 로 하면 여섯 개를 보려고 한 번 더
-        눌러야 하고, 모바일에서는 화면 절반을 덮는 목록이 뜹니다.
-        지역은 열여덟 개라 반대로 `<select>` 가 맞습니다.
-      */}
-      <fieldset class="panelForm__group">
-        <legend>{f.activity.label}</legend>
-        <div class="panelForm__choices">
-          {
-            f.activity.options.map((o) => (
-              <label class="choice">
-                <input type="radio" name="activity" value={o.value} required />
-                <span>{o.label}</span>
-              </label>
-            ))
-          }
-        </div>
-      </fieldset>
-
-      <fieldset class="panelForm__group">
-        <legend>{f.frequency.label}</legend>
-        <div class="panelForm__choices">
-          {
-            f.frequency.options.map((o) => (
-              <label class="choice">
-                <input type="radio" name="frequency" value={o.value} required />
-                <span>{o.label}</span>
-              </label>
-            ))
-          }
-        </div>
-      </fieldset>
-
-      <div class="field">
-        <label for="region">{f.region.label}</label>
+      <form
+        class="panelForm"
+        data-panel-form
+        data-locale={locale}
         {/*
-          힌트와 오류를 입력에 묶습니다. 없으면 스크린리더 사용자에게는
-          "샘플 발송 권역을 가늠하는 데만 씁니다" 도, 오류 문구도 존재하지
-          않는 것과 같습니다. Field.astro 는 이미 이렇게 합니다.
+          문구는 화면이 이미 갖고 있습니다. 스크립트에 다시 적으면 5개 언어가
+          어긋나므로 여기서 넘깁니다.
         */}
-        <select id="region" name="region" required aria-describedby="region-hint region-error">
-          <option value="">{f.region.placeholder}</option>
-          {f.region.options.map((o) => <option value={o.value}>{o.label}</option>)}
-        </select>
-        <p class="field__hint" id="region-hint">{f.region.hint}</p>
-        <p class="field__error" id="region-error" role="alert" aria-live="polite" hidden></p>
-      </div>
+        data-copy={JSON.stringify({
+          required: f.required,
+          invalid: f.invalid,
+          // 동의만 빠졌을 때는 다른 말이 필요합니다 — 빈 칸은 하나도 없습니다.
+          consentRequired: f.consentRequired,
+          error: f.error,
+          done: f.done,
+        })}
+        novalidate
+      >
+    {/*
+      봇 덫.
 
-      {/*
-        동의는 **두 갈래**입니다. 필수와 선택을 한 칸으로 묶으면 "지원하려면
-        광고도 받아야 한다" 가 되고, 그건 동의를 받은 것이 아닙니다.
-        홈 폼의 문구를 그대로 쓰지 않는 이유: 이 폼은 이름과 지역까지 받으므로
-        고지 내용이 달라야 합니다.
-      */}
-      <div class="agree">
-        <label class="agree__row">
-          <input type="checkbox" name="consent" required />
-          <span>{f.consent.label}</span>
-        </label>
-        <p class="agree__body">{f.consent.body}</p>
-      </div>
+      사람에게는 보이지도, 탭으로 닿지도, 스크린리더에 읽히지도 않습니다.
+      값이 차 있으면 폼을 기계가 채웠다는 뜻이라 워커가 조용히 버립니다.
 
-      <div class="agree agree--optional">
-        <label class="agree__row">
-          <input type="checkbox" name="marketing" />
-          <span>{f.marketing.label}</span>
-        </label>
-        <p class="agree__body">{f.marketing.body}</p>
-      </div>
+      `display: none` 을 쓰지 않는 이유: 요즘 봇은 숨겨진 칸을 건너뜁니다.
+      화면 밖으로 밀어내는 편이 더 오래 갑니다.
 
-      {/*
-        야간 수신은 광고 수신과 **별도 동의** 입니다(정보통신망법 제50조 3항).
-        선택이고 기본으로 꺼져 있습니다.
-      */}
-      <div class="agree agree--optional">
-        <label class="agree__row">
-          <input type="checkbox" name="night" />
-          <span>{f.night.label}</span>
-        </label>
-        <p class="agree__body">{f.night.body}</p>
-      </div>
+      이름이 `website` 인 이유는 봇이 흔한 이름을 채우기 때문입니다 —
+      `honeypot` 이라고 적으면 건너뜁니다(worker/spam.ts).
+    */}
+    <div class="honeypot" aria-hidden="true">
+      <label for={"trap-panel"}>Website</label>
+      <input id="trap-panel" type="text" name="website" tabindex="-1" autocomplete="off" />
+    </div>
 
-      <Button variant="primary" type="submit" block loadingLabel={f.sending}>
-        {f.submit}
-      </Button>
+        <Field
+          id="name"
+          label={f.name.label}
+          hint={f.name.hint}
+          autocomplete="name"
+          required
+        />
+        <Field
+          id="email"
+          label={f.email.label}
+          type="email"
+          inputmode="email"
+          autocomplete="email"
+          placeholder={f.email.placeholder}
+          required
+        />
 
-      <p class="panelForm__state" data-panel-state role="status" aria-live="polite" hidden></p>
-    </form>
-  </section>
+        {/*
+          단일 선택은 라디오입니다. `<select>` 로 하면 여섯 개를 보려고 한 번 더
+          눌러야 하고, 모바일에서는 화면 절반을 덮는 목록이 뜹니다.
+          지역은 열여덟 개라 반대로 `<select>` 가 맞습니다.
+        */}
+        <fieldset class="panelForm__group">
+          <legend>{f.activity.label}</legend>
+          <div class="panelForm__choices">
+            {
+              f.activity.options.map((o) => (
+                <label class="choice">
+                  <input type="radio" name="activity" value={o.value} required />
+                  <span>{o.label}</span>
+                </label>
+              ))
+            }
+          </div>
+        </fieldset>
+
+        <fieldset class="panelForm__group">
+          <legend>{f.frequency.label}</legend>
+          <div class="panelForm__choices">
+            {
+              f.frequency.options.map((o) => (
+                <label class="choice">
+                  <input type="radio" name="frequency" value={o.value} required />
+                  <span>{o.label}</span>
+                </label>
+              ))
+            }
+          </div>
+        </fieldset>
+
+        <div class="field">
+          <label for="region">{f.region.label}</label>
+          {/*
+            힌트와 오류를 입력에 묶습니다. 없으면 스크린리더 사용자에게는
+            "샘플 발송 권역을 가늠하는 데만 씁니다" 도, 오류 문구도 존재하지
+            않는 것과 같습니다. Field.astro 는 이미 이렇게 합니다.
+          */}
+          <select id="region" name="region" required aria-describedby="region-hint region-error">
+            <option value="">{f.region.placeholder}</option>
+            {f.region.options.map((o) => <option value={o.value}>{o.label}</option>)}
+          </select>
+          <p class="field__hint" id="region-hint">{f.region.hint}</p>
+          <p class="field__error" id="region-error" role="alert" aria-live="polite" hidden></p>
+        </div>
+
+        {/*
+          동의는 **두 갈래**입니다. 필수와 선택을 한 칸으로 묶으면 "지원하려면
+          광고도 받아야 한다" 가 되고, 그건 동의를 받은 것이 아닙니다.
+          홈 폼의 문구를 그대로 쓰지 않는 이유: 이 폼은 이름과 지역까지 받으므로
+          고지 내용이 달라야 합니다.
+        */}
+        <div class="agree">
+          <label class="agree__row">
+            <input type="checkbox" name="consent" required />
+            <span>{f.consent.label}</span>
+          </label>
+          <p class="agree__body">{f.consent.body}</p>
+        </div>
+
+        <div class="agree agree--optional">
+          <label class="agree__row">
+            <input type="checkbox" name="marketing" />
+            <span>{f.marketing.label}</span>
+          </label>
+          <p class="agree__body">{f.marketing.body}</p>
+        </div>
+
+        {/*
+          야간 수신은 광고 수신과 **별도 동의** 입니다(정보통신망법 제50조 3항).
+          선택이고 기본으로 꺼져 있습니다.
+        */}
+        <div class="agree agree--optional">
+          <label class="agree__row">
+            <input type="checkbox" name="night" />
+            <span>{f.night.label}</span>
+          </label>
+          <p class="agree__body">{f.night.body}</p>
+        </div>
+
+        <Button variant="primary" type="submit" block loadingLabel={f.sending}>
+          {f.submit}
+        </Button>
+
+        <p class="panelForm__state" data-panel-state role="status" aria-live="polite" hidden></p>
+      </form>
+    </section>
+  )}
 
   {/*
     아직 정하지 못한 것.

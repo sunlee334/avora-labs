@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { PANEL_APPLICATIONS_OPEN } from '../../../src/config/panel';
 import { ADMIN_DEV_TOKEN, TEST_HEADERS } from '../../../playwright.config';
 
 /**
@@ -17,6 +18,14 @@ import { ADMIN_DEV_TOKEN, TEST_HEADERS } from '../../../playwright.config';
  */
 
 const admin = { ...TEST_HEADERS, 'X-Admin-Dev-Token': ADMIN_DEV_TOKEN };
+
+
+/*
+ * 지원 접수는 모집이 열려 있을 때만 존재합니다(`PANEL_APPLICATIONS_OPEN`).
+ * 기획안 v09 에 검증단이 없어 지금은 닫혀 있고, API 는 404 를 돌려줍니다.
+ * 파일을 지우지 않는 이유는 다시 열면 이 검사들이 그대로 필요해서입니다.
+ */
+test.skip(!PANEL_APPLICATIONS_OPEN, '지금은 지원자를 모집하지 않습니다');
 
 test('브라우저로 낸 지원서가 명단에 남는다', async ({ page, request }) => {
   const email = `browser-${Date.now()}@example.com`;
