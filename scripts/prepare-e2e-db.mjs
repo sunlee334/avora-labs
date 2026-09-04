@@ -27,6 +27,16 @@
  */
 import { execFileSync } from 'node:child_process';
 
+/*
+ * ⚠️ **stdout 이 아니라 stderr 입니다.**
+ *
+ * Playwright 는 webServer 의 stdout 을 기본으로 버리고 stderr 만 `[WebServer]`
+ * 로 전달합니다. 처음에 stdout 으로 적었더니 CI 로그에 한 줄도 남지 않았고,
+ * 그러면 **재시도가 걸린 날에도 아무도 모릅니다** — 조용한 실패를 조용한
+ * 재시도로 바꾼 것뿐입니다.
+ */
+const log = (message) => process.stderr.write(`[e2e-db] ${message}\n`);
+
 const DB = 'avora-orders';
 /** 이 표가 없으면 주문·후기·계정이 전부 무너집니다. 준비됐다는 것의 기준입니다. */
 const REQUIRED = ['orders', 'reviews', 'launch_notify'];
@@ -64,15 +74,15 @@ function missing() {
 }
 
 for (let attempt = 1; attempt <= 2; attempt += 1) {
-  process.stdout.write(`[e2e-db] 마이그레이션 적용 (${attempt}/2)\n`);
+  log(`마이그레이션 적용 (${attempt}/2)`);
   wrangler(['d1', 'migrations', 'apply', DB, '--local']);
 
   const gone = missing();
   if (gone.length === 0) {
-    process.stdout.write('[e2e-db] 표 확인 완료 — ' + REQUIRED.join(', ') + '\n');
+    log(`표 확인 완료 — ${REQUIRED.join(', ')}${attempt > 1 ? ' (재시도로 복구)' : ''}`);
     process.exit(0);
   }
-  process.stdout.write(`[e2e-db] 적용 뒤에도 없는 표: ${gone.join(', ')}\n`);
+  log(`⚠️ 적용 뒤에도 없는 표: ${gone.join(', ')}`);
 }
 
 process.stderr.write(
