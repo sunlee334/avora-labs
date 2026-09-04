@@ -22,7 +22,6 @@
 import { Picture } from 'astro:assets';
 import { PANEL_APPLICATIONS_OPEN } from '../../config/panel';
 import skinImage from '../../assets/images/panel-skin.jpg';
-import sampleImage from '../../assets/images/panel-sample.jpg';
 import notesImage from '../../assets/images/panel-notes.jpg';
 import Base from '../../layouts/Base.astro';
 import Button from '../../components/Button.astro';
@@ -109,22 +108,18 @@ const indexable = locale === 'ko';
   </section>
 
   {/*
-    무엇을 받는가. 본문이 "제조사 이름을 가린 샘플" 이라고 말하는 그 상태입니다 —
-    상표가 없어야 블라인드 평가가 성립합니다.
+    ── 여기 있던 사진을 뺐습니다 ─────────────────────────────
+    상표 없는 흰 튜브 세 개였습니다. "제조사 이름을 가린 샘플" 이라는 본문과
+    맞는 그림처럼 보였지만, **3D 목업** 이었습니다.
+
+    제품 상세의 아치 사진을 내린 것과 같은 이유입니다. 용기는 아직 정해지지
+    않았고(기획안 5-8, 결정 대기), 튜브 형태를 그려 보이면 그 자리에서
+    정해진 것처럼 읽힙니다. 기획안이 유광·메탈릭을 지양한다고 적은 것과도
+    어긋납니다.
+
+    2026년 11월에 제품 촬영이 잡혀 있습니다(사업 기획서 13-1). 그때 실물이
+    이 자리에 들어옵니다. 그때까지는 비워 둡니다.
   */}
-  <figure class="figure figure--contain rise">
-    <Picture
-      src={sampleImage}
-      alt={p.figures.sample.alt}
-      formats={['avif', 'webp']}
-      widths={[390, 780]}
-      sizes="100vw"
-      quality={52}
-      loading="lazy"
-      decoding="async"
-    />
-    <figcaption>SAMPLE</figcaption>
-  </figure>
 
   {/*
     배점표.
@@ -333,10 +328,12 @@ const indexable = locale === 'ko';
     참여 보상은 기획안에 확정되어 있지 않습니다. **임의로 만들어 넣지 마세요** —
     "굿즈 증정" 같은 문구 하나가 확정되지 않은 약속이 됩니다.
   */}
-  <section class="section section--alt wrap">
-    <h2 class="kicker">{p.pending.heading}</h2>
-    <p class="body panel__lead">{p.pending.body}</p>
-  </section>
+  {PANEL_APPLICATIONS_OPEN && (
+    <section class="section section--alt wrap">
+      <h2 class="kicker">{p.pending.heading}</h2>
+      <p class="body panel__lead">{p.pending.body}</p>
+    </section>
+  )}
 </Base>
 
 <script>

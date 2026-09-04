@@ -145,13 +145,17 @@ test.describe('브랜드가 다른 지점', () => {
   test('탈락 공개 약속이 있다', async ({ page }) => {
     /*
      * **이 섹션을 빼면 안 됩니다.** 경쟁 브랜드도 러너 만족도 조사를 하고
-     * 수치를 게시합니다. 만족도 조사에는 실패가 없습니다 — 떨어진 처방의
-     * 점수까지 공개하는 것이 이 브랜드가 다른 지점입니다.
+     * 수치를 게시합니다. 만족도 조사에는 실패가 없습니다 — 떨어뜨린 것을
+     * 함께 말하는 것이 이 브랜드가 다른 지점입니다.
+     *
+     * 「점수」에서 「이유」로 바꿨습니다. 평가는 두 사람이 하는 것이라(기획안
+     * 5-5) 점수를 집계처럼 내보이는 것보다, 왜 떨어졌는지를 말하는 편이
+     * 정확합니다. **약속의 무게는 그대로입니다.**
      */
     await page.goto('/ko/panel/');
     const text = await page.locator('main').innerText();
     expect(text).toContain(ko.panel.rejected.heading);
-    expect(text, '탈락 점수 공개 약속').toMatch(/탈락한 처방의 점수/);
+    expect(text, '탈락 공개 약속').toMatch(/탈락한 처방과 그 이유/);
   });
 
   test('인원수를 적지 않는다', async ({ page }) => {
@@ -165,6 +169,12 @@ test.describe('브랜드가 다른 지점', () => {
   });
 
   test('정하지 않은 보상을 지어내지 않는다', async ({ page }) => {
+    /*
+     * 모집을 닫으면 참여도 보상도 없습니다. 그 섹션 자체가 사라집니다 —
+     * 없는 참여에 대한 보상을 «아직 정하지 못했습니다» 라고 적어 두면
+     * 모집이 열려 있는 것처럼 읽힙니다.
+     */
+    test.skip(!PANEL_APPLICATIONS_OPEN, '지금은 지원자를 모집하지 않습니다');
     await page.goto('/ko/panel/');
     const text = await page.locator('main').innerText();
     expect(text).toContain(ko.panel.pending.heading);

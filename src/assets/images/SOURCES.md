@@ -14,7 +14,7 @@
 | `product-daily-sunscreen.jpg` | [O59iUx4_Cdc](https://unsplash.com/photos/O59iUx4_Cdc) | 흰색 아치 조형물과 테라조 바닥 (**잘라 쓴 것** — 아래 참조) | **더 이상 쓰지 않습니다** — 아래 「아치를 내린 이유」 |
 | `water-droplets.jpg` | [7VyXToCotr4](https://unsplash.com/photos/7VyXToCotr4) | 물방울 클로즈업 | 제품 상세 하단 · **공유 카드 · 장바구니 썸네일** |
 | `panel-skin.jpg` | [hZQLs0Pq2Qg](https://unsplash.com/photos/hZQLs0Pq2Qg) | 야외 운동 뒤 어깨에 맺힌 땀방울 | /panel 머리말 뒤 |
-| `panel-sample.jpg` | [PA6Ra3X-6_o](https://unsplash.com/photos/PA6Ra3X-6_o) | 상표 없는 흰 튜브 (3D 목업) | /panel "무엇을 하시게 되나요" 뒤 |
+| `panel-sample.jpg` | [PA6Ra3X-6_o](https://unsplash.com/photos/PA6Ra3X-6_o) | 상표 없는 흰 튜브 (3D 목업) | **더 이상 쓰지 않습니다** — 아래 「튜브를 내린 이유」 |
 | `panel-notes.jpg` | [IZj7vckPGiw](https://unsplash.com/photos/IZj7vckPGiw) | 펼쳐 놓은 빈 노트와 펜 | /panel 배점표 뒤 |
 | `home-panel-crew.jpg` | [LyORqx-3O-c](https://unsplash.com/photos/LyORqx-3O-c) | 낙엽 깔린 흙길을 달리는 네 사람의 뒷모습 | 홈 TEST PANEL |
 | `home-panel-bouldering.jpg` | [MCkknk6ghOU](https://unsplash.com/photos/MCkknk6ghOU) | 실내 클라이밍장, 벽에 붙은 사람을 지켜보는 두 사람 | 홈 TEST PANEL |
@@ -161,3 +161,19 @@ height: 1067` (1600×1067). 이러면 넓은 크롭에서도 좁은 크롭에서
 공유 카드(`og/product.*.jpg`)와 장바구니 썸네일(`/product/thumb.jpg`)은
 `water-droplets.jpg` 로 옮겼습니다. 제품 상세 하단에서 이미 쓰고 있어 화면과
 카드가 어긋나지 않고, WATER 축이라 기획안 9장의 5축 안에 있습니다.
+
+## 튜브를 내린 이유
+
+`panel-sample.jpg` 를 `/panel` 에서 뺐습니다. 파일은 남겨 두었지만 어느 화면도
+참조하지 않습니다.
+
+상표 없는 흰 튜브 세 개라 "제조사 이름을 가린 샘플" 이라는 본문과 맞는
+그림처럼 보였습니다. 그런데 **3D 목업** 입니다.
+
+아치 사진을 내린 것과 같은 이유입니다. 용기는 아직 정해지지 않았고(기획안
+5-8, 결정 대기 항목), 튜브 형태를 그려 보이면 그 자리에서 정해진 것처럼
+읽힙니다. 기획안이 유광·메탈릭을 지양한다고 적은 것과도 어긋납니다.
+
+사업 기획서 13-1 에 **2026년 11월 제품 촬영(약 80만원)** 이 잡혀 있습니다.
+그때 실물이 이 자리에 들어옵니다. 그때까지는 비워 둡니다 — 없는 것을 그린
+그림보다 빈자리가 정직합니다.

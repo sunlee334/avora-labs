@@ -158,8 +158,8 @@
           "a": "Ứng viên là những công thức đã qua kiểm nghiệm và thẩm định.\n\nThứ chúng tôi thêm vào không phải thành phần mà là sự sàng lọc. So sánh nhiều ứng viên trong cùng điều kiện rồi loại dần."
         },
         {
-          "q": "Ai chấm điểm?",
-          "a": "Hai chúng tôi chấm riêng, sau đó đối chiếu kết quả. Mẫu được che tên nhà sản xuất, so sánh trong cùng một ngày và cùng điều kiện.\n\nNếu chấm cùng nhau, ý kiến sẽ nghiêng về một phía và khác biệt không còn lộ ra."
+          "q": "Vậy ai chọn công thức?",
+          "a": "Chúng tôi chọn. Chỉ là trước khi chọn, chúng tôi đã đặt ra và công bố tiêu chí.\n\nSáu hạng mục, thang điểm và ngưỡng loại chính là tiêu chí đó. Cay mắt và vệt trắng có ngưỡng loại, bất kể tổng điểm cao đến đâu."
         }
       ],
       "panelLink": "Xem tiêu chí chọn",
@@ -198,9 +198,9 @@
       "body3": "Tiêu chí do chúng tôi đặt ra, điểm số quyết định.\nỨng viên là các công thức sẵn có — không phải do chúng tôi phát triển mới, và chúng tôi ghi rõ điều đó."
     },
     "panel": {
-      "kicker": "How We Choose",
-      "lead": "Chúng tôi đặt tiêu chí trước khi chọn.",
-      "body": "Hai đến ba công thức ứng viên, che tên nhà sản xuất, được so sánh theo cùng một tiêu chí sau 30 phút vận động khi mồ hôi đang chảy. Mỗi người chấm riêng rồi đối chiếu kết quả.",
+      "kicker": "Standard",
+      "lead": "Chúng tôi xác định trước điều mình không nhượng bộ.",
+      "body": "Cách thường thấy là chọn trong những gì nhà máy đề xuất, dựa vào đơn giá và thời gian giao. Chúng tôi đảo lại thứ tự đó. Trước hết chúng tôi viết ra cảm giác dùng mà mình muốn và điều không thể nhượng bộ; công thức không đạt tiêu chí đó thì dù điều kiện tốt đến đâu cũng không nhận.\n\nNhà máy nhận cùng bản tiêu chí ấy từ trước. Chúng tôi không giấu mình sẽ đánh giá bằng gì.",
       "criteriaHeading": "Những gì được so sánh",
       "criteria": [
         {
@@ -234,7 +234,7 @@
           "body": "Cho đến khi thấm hoàn toàn"
         }
       ],
-      "note": "Chúng tôi công bố nguyên điểm số. Không phải công thức chúng tôi thích, mà là công thức điểm cao nhất. Việc đánh giá bắt đầu từ tháng 10 năm 2026.",
+      "note": "Chúng tôi công bố các công thức bị loại và lý do. Không phải công thức chúng tôi thích, mà là công thức vượt qua tiêu chí. Việc so sánh bắt đầu từ tháng 10 năm 2026.",
       "shots": {
         "crewAlt": "Bốn người chạy bộ nhìn từ phía sau trên con đường đất phủ đầy lá",
         "boulderingAlt": "Hai người ngồi nhìn một người leo trên tường bouldering trong nhà"
@@ -250,17 +250,17 @@
       "steps": [
         {
           "when": "10/2026",
-          "what": "Bắt đầu đánh giá mẫu",
+          "what": "So sánh mẫu từ nhà máy",
           "note": "Chúng tôi tuyển từ các nhóm chạy, phòng leo núi và cộng đồng lướt sóng"
         },
         {
           "when": "11/2026",
-          "what": "Công bố tiêu chí chọn",
+          "what": "Công bố tiêu chí · chốt bao bì",
           "note": "Hai ba mẫu đã che tên nhà sản xuất, so sánh theo sáu tiêu chí"
         },
         {
           "when": "12/2026",
-          "what": "Công bố điểm · chốt công thức",
+          "what": "Chốt công thức",
           "note": "Công bố cả điểm của những công thức không được chọn"
         },
         {
@@ -1387,7 +1387,7 @@
     },
     "rejected": {
       "heading": "Chúng tôi công bố cả những công thức bị loại",
-      "body": "Khi việc đánh giá kết thúc, chúng tôi công bố cả điểm của những công thức bị loại, không chỉ công thức được chọn.\n\nChỉ nói mình đã chọn gì mà không nói đã loại gì\nthì đó không phải là chọn, mà là làm ra vẻ đã chọn."
+      "body": "Khi việc đánh giá kết thúc, chúng tôi công bố các công thức bị loại kèm lý do, không chỉ công thức được chọn.\n\nChỉ nói mình đã chọn gì mà không nói đã loại gì\nthì đó không phải là chọn, mà là làm ra vẻ đã chọn."
     },
     "form": {
       "heading": "Đăng ký",

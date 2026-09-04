@@ -36,7 +36,7 @@ const PANEL_WORDS: Record<string, RegExp> = {
 
 /** 바꾸면 안 되는 사실. 기획안 5-5 가 그대로 적고 있습니다. */
 const KEPT: Record<string, RegExp[]> = {
-  ko: [/제조사 이름을 가린/, /커트라인/, /탈락한 처방의 점수/],
+  ko: [/제조사 이름을 가린/, /커트라인/, /탈락한 처방과 그 이유/],
   en: [/manufacturer hidden|manufacturer’s name hidden|unbranded/i, /cut-off/i, /rejected/i],
 };
 

@@ -158,8 +158,8 @@
           "a": "The candidates are formulas that have already passed testing and review.\n\nWhat we add is not an ingredient but a selection. We compare several candidates under the same conditions and filter them."
         },
         {
-          "q": "Who does the scoring?",
-          "a": "The two of us score separately, then compare results. Samples are unbranded, judged on the same day under the same conditions.\n\nScoring together makes opinions converge, and the differences stop showing."
+          "q": "So who picks the formula?",
+          "a": "We do. But we set the standard and published it before we looked.\n\nSix items, their points and their cut-offs. Stinging and white cast have cut-offs that fail a formula no matter what its total is."
         }
       ],
       "panelLink": "See how we choose",
@@ -198,9 +198,9 @@
       "body3": "We set the standard. The scores decide.\nThe candidates are existing formulas — not something we developed, and we say so here."
     },
     "panel": {
-      "kicker": "How We Choose",
-      "lead": "We set the standard before we looked.",
-      "body": "Two or three candidate formulas, manufacturer hidden, compared against the same standard after 30 minutes of exercise with sweat running. Each of us scores alone, then we compare.",
+      "kicker": "Standard",
+      "lead": "We decided what we wouldn’t give up first.",
+      "body": "The usual way is to pick from what the factory offers, going by unit price and lead time. We changed the order. We wrote down first what the product should feel like and what we would not give up, and a formula that misses that standard isn’t taken however good the terms.\n\nThe factory gets the same document in advance. We don’t hide what we will judge by.",
       "criteriaHeading": "What they compare",
       "criteria": [
         {
@@ -234,7 +234,7 @@
           "body": "Until it has fully sunk in"
         }
       ],
-      "note": "We publish the scores as they are. Not the formula we like — the one that scores highest. Scoring starts in October 2026.",
+      "note": "We publish the rejected formulas and why. Not the formula we like — the one that clears the standard. Comparison starts in October 2026.",
       "shots": {
         "crewAlt": "Four runners seen from behind on a leaf-strewn dirt trail",
         "boulderingAlt": "Two people sitting and watching a climber on an indoor bouldering wall"
@@ -250,17 +250,17 @@
       "steps": [
         {
           "when": "Oct 2026",
-          "what": "Sample scoring begins",
+          "what": "Factory samples compared",
           "note": "We recruit from running crews, bouldering gyms and surf communities"
         },
         {
           "when": "Nov 2026",
-          "what": "Standard published",
+          "what": "Standard published · package set",
           "note": "Two or three samples with the maker hidden, compared on six criteria"
         },
         {
           "when": "Dec 2026",
-          "what": "Scores published · formula set",
+          "what": "Formula decided",
           "note": "Including the scores of the formulas that did not make it"
         },
         {
@@ -1387,7 +1387,7 @@
     },
     "rejected": {
       "heading": "We publish the ones that did not make it",
-      "body": "When scoring ends we publish the scores of the rejected formulas, not only the chosen one.\n\nSaying what you picked without saying what you turned down\nisn’t choosing. It’s looking like you chose."
+      "body": "When scoring ends we publish the rejected formulas and why, not only the chosen one.\n\nSaying what you picked without saying what you turned down\nisn’t choosing. It’s looking like you chose."
     },
     "form": {
       "heading": "Apply",
