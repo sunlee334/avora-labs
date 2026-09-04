@@ -3278,9 +3278,21 @@ html {
   min-width: var(--size-tap-min);
   padding-inline: 2px;
 }
-@media (min-width: 720px) {
+/*
+ * 넷을 **한 줄에** 세웁니다.
+ *
+ * 3열이었습니다. 묶음이 넷이라 마지막(채널)이 둘째 줄로 내려가고, 그 줄의
+ * 오른쪽 3분의 2 가 통째로 비었습니다. 1280px 에서 푸터가 **962px** —
+ * 화면 한 장보다 컸습니다.
+ *
+ * 900px 는 넷이 들어갈 수 있는 지점입니다. `배송 및 교환·반품 안내` 가 가장
+ * 긴 항목이고, 그보다 좁으면 두 줄로 접혀 오히려 키가 큽니다. 그 아래에서는
+ * 3열을 거치지 않고 바로 2열로 갑니다 — 3열은 넷을 담지 못해 어느 폭에서도
+ * 이득이 없습니다.
+ */
+@media (min-width: 900px) {
   .footer__cols {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 

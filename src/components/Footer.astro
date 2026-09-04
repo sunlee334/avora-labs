@@ -46,6 +46,36 @@ const businessRows = [
         </ul>
       </div>
 
+      {/*
+        ── 왜 이 순서인가 ──────────────────────────────────────
+        길이가 6·5·3·1 이라 어떻게 놓느냐로 빈 자리가 크게 달라집니다.
+        좁은 화면은 2열이므로 긴 것끼리(메뉴 6 · 언어 5), 짧은 것끼리
+        (약관 3 · 채널 1) 나란히 서야 합니다. 전에는 6과 3, 1과 5 가 짝이 되어
+        **308px 이 비어 있었습니다.**
+
+        뜻으로도 맞습니다 — 앞의 둘은 어디로 갈지, 뒤의 둘은 무엇을 알아야
+        하는지입니다.
+      */}
+      <div class="footer__col">
+        <h2>{t.footer.language}</h2>
+        <ul>
+          {
+            LOCALES.map((l) => (
+              <li>
+                <a
+                  href={localePath(l)}
+                  hreflang={LOCALE_TAGS[l]}
+                  lang={LOCALE_TAGS[l]}
+                  aria-current={l === locale ? 'true' : undefined}
+                >
+                  {LOCALE_LABELS[l]}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
       <div class="footer__col">
         <h2>{t.footer.legal.heading}</h2>
         <ul>
@@ -74,25 +104,6 @@ const businessRows = [
         )
       }
 
-      <div class="footer__col">
-        <h2>{t.footer.language}</h2>
-        <ul>
-          {
-            LOCALES.map((l) => (
-              <li>
-                <a
-                  href={localePath(l)}
-                  hreflang={LOCALE_TAGS[l]}
-                  lang={LOCALE_TAGS[l]}
-                  aria-current={l === locale ? 'true' : undefined}
-                >
-                  {LOCALE_LABELS[l]}
-                </a>
-              </li>
-            ))
-          }
-        </ul>
-      </div>
     </div>
 
     {/*
