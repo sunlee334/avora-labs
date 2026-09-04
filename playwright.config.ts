@@ -171,13 +171,26 @@ export default defineConfig({
 
   webServer: [
     {
-      // 매번 해당 모드로 새로 빌드합니다 — 이전 모드의 dist 로 도는 사고를 막습니다.
-      // D1 마이그레이션도 함께 돌립니다. CI 는 .wrangler 상태가 비어 있어
-      // 이걸 빼면 로컬에서만 통과하는 테스트가 됩니다.
+      /*
+       * 매번 해당 모드로 새로 빌드합니다 — 이전 모드의 dist 로 도는 사고를 막습니다.
+       * D1 마이그레이션도 함께 돌립니다. CI 는 .wrangler 상태가 비어 있어
+       * 이걸 빼면 로컬에서만 통과하는 테스트가 됩니다.
+       *
+       * ⚠️ 마이그레이션을 **직접 부르지 않습니다.**
+       *
+       * 전에는 `wrangler d1 migrations apply … &&` 였습니다. 그 줄은 명령이
+       * 성공했다고 말하고 아무것도 안 했을 때를 걸러내지 못합니다. 서버는
+       * 정상적으로 뜨고, 테스트가 한참 돌다가 `no such table: orders` 로
+       * 무너집니다 — 2026년 9월 한 세션에서 네 번 났고, 매번 재실행으로만
+       * 넘겼습니다.
+       *
+       * `prepare-e2e-db.mjs` 는 적용한 뒤 **표가 실제로 있는지 물어봅니다.**
+       * 없으면 한 번 더 걸고, 그래도 없으면 서버가 뜨기 전에 멈춥니다.
+       */
       command: [
         buildEnv,
         'npm run build &&',
-        'npx wrangler d1 migrations apply avora-orders --local &&',
+        'node scripts/prepare-e2e-db.mjs &&',
         `npx wrangler dev --port ${PORT} --local ${workerVars}`,
       ].join(' '),
       url: `http://127.0.0.1:${PORT}/ko/`,
