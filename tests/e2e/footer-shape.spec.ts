@@ -54,11 +54,27 @@ test.describe('푸터 모양', () => {
       const height = await page
         .locator('.footer')
         .evaluate((el) => el.getBoundingClientRect().height);
+
       /*
        * 962px 이었습니다. 900px 은 "화면 한 장" 의 기준이고, 넘으면 푸터만
-       * 보이는 화면이 생깁니다. 지금 값은 685px 입니다.
+       * 보이는 화면이 생깁니다.
+       *
+       * ── 한계선이 둘인 이유 ──────────────────────────────────
+       * 링크 줄 높이가 입력 장치에 따라 다릅니다. 44px 은 손가락 기준이라
+       * 마우스가 달린 넓은 화면에서는 36px 로 내려갑니다(global.css). 여덟
+       * 줄이니 그 차이만으로 64px 입니다.
+       *
+       *   마우스   709px + 운영사 표기 81 = 790px
+       *   손가락   773px + 운영사 표기 81 = 854px   ← 설계상 더 높습니다
+       *
+       * 넓은 화면을 손가락으로 보는 경우(큰 터치 화면)가 없지는 않으므로
+       * 건너뛰지 않고, 그 환경의 실제 한계선으로 잽니다.
+       *
+       * 기준값이 685 에서 709 로 오른 것은 푸터 메뉴가 여섯에서 여덟로
+       * 늘었기 때문입니다 — 배치 문제가 아니라 항목이 는 것입니다.
        */
-      expect(height, `푸터가 ${Math.round(height)}px 입니다`).toBeLessThan(800);
+      const coarse = await page.evaluate(() => matchMedia('(pointer: coarse)').matches);
+      expect(height, `푸터가 ${Math.round(height)}px 입니다`).toBeLessThan(coarse ? 880 : 800);
     });
   }
 

@@ -25,6 +25,22 @@ const businessRows = [
     <p class="footer__wordmark">{BUSINESS.brandName}</p>
     <p class="footer__tagline">{t.footer.tagline}</p>
 
+    {/*
+      운영사 표기.
+
+      푸터 로고는 PAROS 단독으로 둡니다. 여기에도 락업을 넣으면 AVORA LABS 가
+      푸터에 두 번 나옵니다 — 76px 워드마크 바로 아래에서 그건 보증이 아니라
+      중복으로 읽힙니다. 회사명은 이 블록에만 씁니다.
+
+      상호·대표자·주소는 아래 사업자 정보에 이미 있습니다. 여기서 되풀이하지
+      않고, 회사가 무엇을 하는 곳인지만 두 문장으로 적습니다.
+    */}
+    <div class="footer__operator">
+      <p class="footer__operatorLabel">Operated by</p>
+      <p class="footer__operatorName">{BUSINESS.companyName}</p>
+      <p class="footer__operatorNote">{t.footer.operatorNote}</p>
+    </div>
+
     <div class="footer__cols">
       {/*
         목적지 목록을 여기서 적지 않습니다 — `src/config/nav.ts` 하나가 정의하고

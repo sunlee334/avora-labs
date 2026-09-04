@@ -1345,7 +1345,15 @@ html {
 
 .nav__wordmark {
   display: flex;
-  align-items: center;
+  /*
+   * 보증 표기라 두 줄입니다(Nav.astro 주석 참조). 세로로 쌓되 왼쪽 끝을
+   * 맞춥니다 — 자간 때문에 생기는 여백은 글자 뒤에 붙으므로 왼쪽 정렬은
+   * 흐트러지지 않습니다.
+   */
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 3px;
   min-height: var(--size-tap-min);
 }
 /*
@@ -1360,6 +1368,21 @@ html {
   letter-spacing: 0.14em;
   text-decoration: none;
   color: var(--color-text);
+}
+/*
+ * 회사는 브랜드보다 작아야 합니다 — 보증 표기의 핵심 규칙입니다.
+ * 17px 의 59%. 자간은 PAROS(0.14em)보다 넓혀 표식처럼 읽히게 합니다.
+ */
+.nav__wordmarkBy {
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  line-height: 1;
+}
+.nav__wordmarkBrand {
+  line-height: 1;
 }
 
 .nav__links {
@@ -3245,6 +3268,49 @@ html {
   margin-bottom: 30px;
 }
 /*
+ * 운영사 표기. 푸터가 이미 길어 설명은 두 문장으로 묶고 폭을 제한합니다 —
+ * 넓은 화면에서 한 줄로 늘어지면 각주가 아니라 본문처럼 읽힙니다.
+ */
+.footer__operator {
+  /*
+   * 한 줄로 눕힙니다.
+   *
+   * 세 줄로 쌓았더니 148px 이었고, 푸터가 949px 이 됐습니다. 지시서도
+   * "푸터가 크게 길어지면 설명을 한 줄로 줄인다" 고 했습니다. 좁은 화면에서는
+   * 자연스럽게 접힙니다.
+   */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 12px;
+  row-gap: 4px;
+  padding-block: 12px;
+  border-block: 1px solid var(--color-border);
+  margin-bottom: 20px;
+}
+.footer__operatorLabel {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+.footer__operatorName {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+}
+.footer__operatorNote {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--color-text-muted);
+  /* 남는 폭을 받아 한 줄로 서고, 좁아지면 아래로 내려갑니다. */
+  flex: 1 1 24ch;
+}
+/*
  * 링크 묶음을 2×2 로 둡니다.
  *
  * 넷이 세로로 쌓이면 모바일에서 푸터가 화면 두 개를 넘습니다. 그러면 마지막
@@ -3297,6 +3363,21 @@ html {
 }
 .footer__col li a:hover {
   text-decoration: underline;
+}
+
+/*
+ * 44px 은 손가락 기준입니다.
+ *
+ * 마우스가 달린 넓은 화면에서도 그 높이를 쓰면 여덟 줄이 352px 를 먹고,
+ * 푸터가 화면 한 장을 넘습니다. 포인터가 정밀한 곳에서만 36px 로 내립니다 —
+ * WCAG 2.5.8 이 요구하는 24px 을 넉넉히 넘습니다.
+ *
+ * 390px 의 44px 검사(mobile-ux)는 손가락 환경이라 그대로입니다.
+ */
+@media (min-width: 900px) and (pointer: fine) {
+  .footer__col li a {
+    min-height: 36px;
+  }
 }
 .footer__meta {
   margin-top: 30px;

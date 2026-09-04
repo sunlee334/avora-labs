@@ -32,7 +32,22 @@ const utility = UTILITY_VISIBLE.filter((item) => item.badge !== 'cart');
     임시입니다 — 제대로 그린 워드마크가 나오면 <img> 로 되돌립니다.
     AVORA LABS 워드마크 파일은 회사 마크로 그대로 남겨 두었습니다.
   */}
-  <a class="nav__wordmark" href={localePath(locale)}>{BUSINESS.brandName}</a>
+  {/*
+    보증 표기 — 브랜드가 주인공이고 회사는 서명처럼 따라붙습니다.
+
+    회사가 브랜드보다 커 보이면 안 됩니다. `BY AVORA LABS` 는 PAROS 의
+    59%(17px → 10px)이고 색도 본문색이 아니라 보조색입니다.
+
+    회사명이라 다섯 언어 모두 영문 그대로 둡니다. 홈의 `WHO WE ARE` 같은
+    구역 라벨이 이미 전 언어 영문이라 조판도 어긋나지 않습니다.
+
+    두 줄이지만 합쳐 33px 남짓이라 44px 탭 영역 안에 들어갑니다 —
+    모바일 헤더 높이(68px)는 그대로입니다.
+  */}
+  <a class="nav__wordmark" href={localePath(locale)}>
+    <span class="nav__wordmarkBrand">{BUSINESS.brandName}</span>
+    <span class="nav__wordmarkBy">by {BUSINESS.companyName}</span>
+  </a>
 
   {/*
     항목은 `src/config/nav.ts` 하나가 정합니다. 하위가 하나뿐인 그룹은
