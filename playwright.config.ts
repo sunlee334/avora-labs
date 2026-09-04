@@ -191,7 +191,19 @@ export default defineConfig({
         buildEnv,
         'npm run build &&',
         'node scripts/prepare-e2e-db.mjs &&',
-        `npx wrangler dev --port ${PORT} --local ${workerVars}`,
+        /*
+         * ⚠️ wrangler 를 **직접 부르지 않습니다.**
+         *
+         * CI 에서 workerd 가 실행 도중 크래시하고, 그 뒤 모든 요청이
+         * ECONNREFUSED 가 됩니다. `retries: 2` 가 있어도 서버가 돌아오지
+         * 않으면 소용이 없습니다.
+         *
+         * `e2e-server.mjs` 가 이 포트를 잡고 wrangler 를 옆 포트에 둡니다.
+         * 죽으면 다시 띄우고, 다시 뜨는 동안 들어온 요청은 거절하지 않고
+         * 붙잡습니다 — 재기동이 검사 눈에 보이지 않도록. 되살린 사실은
+         * stderr 로 남깁니다.
+         */
+        `node scripts/e2e-server.mjs dev --port ${PORT} --local ${workerVars}`,
       ].join(' '),
       url: `http://127.0.0.1:${PORT}/ko/`,
       reuseExistingServer: false,
