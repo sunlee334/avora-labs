@@ -20,12 +20,20 @@ import { LOCALES } from '../../src/config/site';
  * 후기가 있는데도 없다고 말하는 문장이 됩니다.
  */
 
+/*
+ * 우리가 직접 파는가(`SELLS_DIRECTLY`). 후기는 우리 주문에 매달려 있어
+ * **`CAN_ORDER` 가 아니라 이 값** 을 따라갑니다.
+ *
+ * 빌드 시점 값이라 검사 프로세스에서 그대로 import 할 수 없습니다. 대신
+ * 모드로 읽습니다 — launch 빌드는 `PUBLIC_CHECKOUT_MODE=external` 이라
+ * `SELLS_DIRECTLY` 가 거짓입니다(`sticky-cta-clearance.spec.ts` 와 같은 관용구).
+ */
 const SELLS = process.env.E2E_MODE !== 'launch';
 
 test.describe('출시 전 후기 부재', () => {
   for (const locale of LOCALES) {
     test(`${locale} — 후기 링크 앞에서 먼저 밝힌다`, async ({ page }) => {
-      test.skip(SELLS, '살 수 있게 되면 이 문장은 사라집니다');
+      test.skip(SELLS, '우리가 팔기 시작하면 이 문장은 사라집니다');
       await page.goto(`/${locale}/product/`);
 
       const note = page.locator('.product__reviewsNote');
@@ -38,18 +46,22 @@ test.describe('출시 전 후기 부재', () => {
        * 누르기 전에 아는 것은 다릅니다.
        */
       const order = await page.evaluate(() => {
-        const n = document.querySelector('.product__reviewsNote')!;
-        const link = [...document.querySelectorAll('a')].find((a) =>
-          (a.getAttribute('href') ?? '').includes('/reviews'),
-        )!;
-        return n.compareDocumentPosition(link) & Node.DOCUMENT_POSITION_FOLLOWING ? 'before' : 'after';
+        const note = document.querySelector('.product__reviewsNote');
+        const link = document.querySelector('main a[href$="/reviews/"]');
+        // 못 찾으면 그 사실을 돌려줍니다. `!` 로 단정하면 evaluate 안에서
+        // TypeError 가 나고, 화면에는 "스크립트가 죽었다" 만 남습니다.
+        if (!note) return 'note-missing';
+        if (!link) return 'link-missing';
+        return note.compareDocumentPosition(link) & Node.DOCUMENT_POSITION_FOLLOWING
+          ? 'before'
+          : 'after';
       });
       expect(order, '후기 링크보다 뒤에 있습니다 — 누른 다음에야 알게 됩니다').toBe('before');
     });
   }
 
   test('살 수 있으면 이 문장은 없다', async ({ page }) => {
-    test.skip(!SELLS, 'launch 모드에서는 살 수 없습니다');
+    test.skip(!SELLS, 'launch 모드에서는 우리가 팔지 않습니다');
     await page.goto('/ko/product/');
     await expect(
       page.locator('.product__reviewsNote'),

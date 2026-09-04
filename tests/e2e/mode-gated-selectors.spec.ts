@@ -41,7 +41,14 @@ import { join } from 'node:path';
  */
 
 /** 홈의 `{!CAN_ORDER && …}` 안에서만 그려지는 것들. */
-const LAUNCH_ONLY = ['stickyCta', 'hero__cta', 'data-launch-notify', 'heroNotify'];
+const LAUNCH_ONLY = [
+  'stickyCta',
+  'hero__cta',
+  'data-launch-notify',
+  'heroNotify',
+  // 제품 상세의 "아직 후기가 없습니다" — 우리가 팔기 시작하면 사라집니다.
+  'product__reviewsNote',
+];
 
 /** 이 아래는 해당 모드 실행에서 통째로 제외됩니다(`testIgnore`). */
 const MODE_DIRS = new Set(['launch', 'commerce']);
@@ -98,5 +105,18 @@ test.describe('모드 전용 요소', () => {
     for (const sel of ['hero__cta', 'heroNotify']) {
       expect(home, `«${sel}» 이 홈에 없습니다 — 목록이 낡았습니다`).toContain(sel);
     }
+
+    /*
+     * 제품 상세의 것은 게이트가 다릅니다 — 후기는 우리 주문에 매달려 있어
+     * `SELLS_DIRECTLY` 를 봅니다. 목록에 넣어 두고 그 게이트도 함께 지킵니다.
+     */
+    const product = readFileSync('src/pages/[lang]/product.astro', 'utf8');
+    expect(product, '«product__reviewsNote» 이 제품 상세에 없습니다').toContain(
+      'product__reviewsNote',
+    );
+    expect(
+      product,
+      '후기 문구가 SELLS_DIRECTLY 가 아닌 것으로 가려져 있습니다 — 외부몰만 켜면 빈 페이지로 갑니다',
+    ).toContain('!SELLS_DIRECTLY && <p class="product__reviewsNote"');
   });
 });

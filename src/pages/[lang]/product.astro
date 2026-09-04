@@ -364,10 +364,20 @@ const rows = specRows(t);
       **여전히 브랜드의 주장** 입니다. 후기를 찾으러 온 사람이 빈 페이지를
       만나기 전에 먼저 말합니다.
 
-      살 수 있게 되면 이 문장은 사라집니다(`!CAN_ORDER`). 그때는 후기가
-      쌓이기 시작하고, 없다고 말할 이유도 없어집니다.
+      ⚠️ **`CAN_ORDER` 가 아니라 `SELLS_DIRECTLY` 입니다.**
+
+      후기는 `orders.status = 'paid'` 에 매달려 있어(worker/reviews.ts) 우리
+      DB 에 주문이 생기지 않으면 존재할 수 없습니다. 외부몰만 켠 빌드에서는
+      `CAN_ORDER` 가 참이지만 후기는 여전히 한 건도 없습니다 — 그때 이 문장이
+      사라지면, 바로 아래 리뷰 링크가 **아무 설명 없는 빈 페이지** 로 갑니다.
+      이 커밋이 막으려던 바로 그 상황입니다.
+
+      `runtime.ts` 가 이 구분을 경고로 적어 두었는데 놓쳤습니다.
+
+      우리가 팔기 시작하면 사라집니다. 그때는 후기가 쌓이기 시작하고, 없다고
+      말할 이유도 없어집니다.
     */}
-    {!CAN_ORDER && <p class="product__reviewsNote">{p.reviewsNote}</p>}
+    {!SELLS_DIRECTLY && <p class="product__reviewsNote">{p.reviewsNote}</p>}
 
     <p style="margin-top: 36px; display: flex; flex-wrap: wrap; gap: 12px">
       <a class="cta cta--ghost" href={localePath(locale, 'reviews')}>{t.nav.reviews}</a>
