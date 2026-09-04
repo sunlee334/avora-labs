@@ -105,6 +105,8 @@
       "kicker": "The Journey",
       "lead": "产品所处的场景",
       "imageAlt": "三名冲浪者背对镜头走在阴天的海岸上",
+      "prev": "上一步",
+      "next": "下一步",
       "steps": [
         {
           "word": "Sun",

@@ -105,6 +105,8 @@
       "kicker": "The Journey",
       "lead": "Where the product lives",
       "imageAlt": "Three surfers walking along an overcast shoreline, seen from behind",
+      "prev": "Previous step",
+      "next": "Next step",
       "steps": [
         {
           "word": "Sun",

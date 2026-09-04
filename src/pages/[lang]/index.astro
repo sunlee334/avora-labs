@@ -757,21 +757,60 @@ const criteriaRows = h.panel.criteria.map((item) => {
     <div class="wrap">
     <p class="kicker">{h.journey.kicker}</p>
     <h2 class="display display--tight">{h.journey.lead}</h2>
-    <ol class="journey">
-      {
-        h.journey.steps.map((step, i) => (
-          <li>
-            <span class="journey__step">{String(i + 1).padStart(2, '0')}</span>
-            <div>
-              <strong class="journey__word">{step.word}</strong>
-              <span class="journey__body">{step.body}</span>
-              {/* 두 번째 줄 — 그 단계에서 실제로 무엇이 걸리는지. */}
-              {step.note && <span class="journey__note">{step.note}</span>}
-            </div>
-          </li>
-        ))
-      }
-    </ol>
+    {/*
+      다섯 단계를 가로로 넘깁니다.
+
+      세로로 쌓으면 이 섹션도 앞뒤와 같은 결이라 페이지 열 장 내내 리듬이
+      한 가지입니다. `01 Sun → 05 Reset` 은 **순서가 있는** 내용이라 가로
+      흐름과 맞고, 나중에 단계마다 사진을 붙일 자리도 생깁니다.
+
+      ── 왜 <ol> 에 role 을 걸지 않는가 ──────────────────────
+      `role="region"` 을 목록에 직접 주면 목록 의미가 덮여, 읽는 기계가
+      "다섯 항목 중 둘째" 를 말하지 못합니다. 스크롤 상자를 따로 두고
+      목록은 그 안에 그대로 둡니다.
+
+      ── 화살표를 두는 이유 ─────────────────────────────────
+      스크롤 막대를 감췄기 때문입니다. 감춘 채 두면 넘길 수 있다는 사실을
+      아무도 모릅니다. 자동으로 넘기지는 않습니다.
+    */}
+    <div class="journey__bar">
+      {/* 숫자라 다섯 언어가 같습니다. 목록 위치는 <ol> 이 이미 알려 주므로 장식입니다. */}
+      <p class="journey__count" data-journey-count aria-hidden="true">
+        01<span class="journey__countSep">/</span>{String(h.journey.steps.length).padStart(2, '0')}
+      </p>
+      <div class="journey__arrows">
+        <button
+          type="button"
+          class="journey__arrow"
+          data-journey-prev
+          aria-label={h.journey.prev}
+          aria-disabled="true"
+        >
+          <span aria-hidden="true">←</span>
+        </button>
+        <button type="button" class="journey__arrow" data-journey-next aria-label={h.journey.next}>
+          <span aria-hidden="true">→</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="journey" role="region" tabindex="0" aria-label={h.journey.lead} data-journey>
+      <ol class="journey__track">
+        {
+          h.journey.steps.map((step, i) => (
+            <li>
+              <span class="journey__step">{String(i + 1).padStart(2, '0')}</span>
+              <div>
+                <strong class="journey__word">{step.word}</strong>
+                <span class="journey__body">{step.body}</span>
+                {/* 두 번째 줄 — 그 단계에서 실제로 무엇이 걸리는지. */}
+                {step.note && <span class="journey__note">{step.note}</span>}
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
   </div>
   </section>
 

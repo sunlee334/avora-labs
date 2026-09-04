@@ -436,6 +436,64 @@ const xDefault = !wanted || wanted.includes(X_DEFAULT_LOCALE)
     <div class="progress" aria-hidden="true"><span class="progress__fill"></span></div>
 
     <script>
+      // ── 다섯 단계 가로 넘기기 ────────────────────────────────
+      // 휠을 가로채지 않습니다. 사용자가 넘기는 것을 따라 표시만 맞춥니다.
+      {
+        const rail = document.querySelector<HTMLElement>('[data-journey]');
+        const count = document.querySelector<HTMLElement>('[data-journey-count]');
+        const prev = document.querySelector<HTMLButtonElement>('[data-journey-prev]');
+        const next = document.querySelector<HTMLButtonElement>('[data-journey-next]');
+
+        if (rail) {
+          const items = [...rail.querySelectorAll<HTMLElement>('li')];
+          const pad = (n: number) => String(n).padStart(2, '0');
+
+          // 칸 하나 + 사이 간격. 화살표 한 번에 정확히 한 칸씩 움직입니다.
+          const stride = () => {
+            if (items.length < 2) return rail.clientWidth;
+            return items[1].offsetLeft - items[0].offsetLeft;
+          };
+
+          let queued = false;
+          const paint = () => {
+            queued = false;
+            const max = rail.scrollWidth - rail.clientWidth;
+            // 가장 왼쪽에 걸린 칸이 몇 번째인가.
+            const index = Math.min(items.length - 1, Math.round(rail.scrollLeft / stride()));
+            if (count) {
+              count.textContent = '';
+              count.append(pad(index + 1));
+              const sep = document.createElement('span');
+              sep.className = 'journey__countSep';
+              sep.textContent = '/';
+              count.append(sep, pad(items.length));
+            }
+            // 1px 여유 — 소수점 스크롤 위치에서 끝에 닿아도 꺼지지 않던 자리입니다.
+            // `disabled` 가 아니라 `aria-disabled` 입니다. 죽은 버튼은 키보드
+            // 순서에서 빠지고, 이 저장소는 죽은 버튼을 두지 않습니다.
+            prev?.setAttribute('aria-disabled', String(rail.scrollLeft <= 1));
+            next?.setAttribute('aria-disabled', String(rail.scrollLeft >= max - 1));
+          };
+          const schedule = () => {
+            if (queued) return;
+            queued = true;
+            requestAnimationFrame(paint);
+          };
+
+          const move = (dir: number, from?: HTMLElement) => {
+            if (from?.getAttribute('aria-disabled') === 'true') return;
+            const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+            rail.scrollBy({ left: dir * stride(), behavior: smooth ? 'smooth' : 'auto' });
+          };
+          prev?.addEventListener('click', () => move(-1, prev));
+          next?.addEventListener('click', () => move(1, next));
+
+          rail.addEventListener('scroll', schedule, { passive: true });
+          addEventListener('resize', schedule, { passive: true });
+          paint();
+        }
+      }
+
       // ── 스크롤 진행 ──────────────────────────────────────────
       // 스크롤 이벤트마다 계산하면 한 프레임에 여러 번 돕니다.
       // requestAnimationFrame 으로 프레임당 한 번으로 묶습니다.

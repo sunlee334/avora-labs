@@ -105,6 +105,8 @@
       "kicker": "The Journey",
       "lead": "제품이 놓이는 자리",
       "imageAlt": "서핑보드를 들고 흐린 바닷가를 걸어가는 세 사람의 뒷모습",
+      "prev": "이전 단계",
+      "next": "다음 단계",
       "steps": [
         {
           "word": "Sun",
