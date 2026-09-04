@@ -171,19 +171,21 @@ button {
  * 왼쪽 정렬입니다.
  */
 /*
- * ── 왜 max-width 가 아니라 padding 인가 ─────────────────────
- * 이 저장소는 `.section` 과 `.wrap` 을 **같은 요소** 에 겁니다
- * (`<section class="section section--alt wrap">`). `.wrap` 에 max-width 를
- * 주면 섹션 자체가 좁아지고, 그러면 배경 밴드도 함께 줄어듭니다 — 실측으로
- * 1440px 화면에서 교차 섹션 배경이 1120px 로 잘렸습니다. 밴드는 전체 폭이고
- * **그 안의 내용만** 가운데 모여야 합니다.
+ * ── 밴드와 컨테이너를 분리했습니다 ─────────────────────────
+ * 예전에는 `.section` 과 `.wrap` 이 **같은 요소** 였습니다
+ * (`<section class="section section--alt wrap">`). 그래서 `.wrap` 에
+ * max-width 를 주면 배경 밴드까지 줄었습니다 — 실측으로 1665px 화면에서
+ * 교차 밴드가 1120px, 어두운 밴드는 760px 로 잘렸습니다.
  *
- * 좌우 여백을 키워 같은 결과를 냅니다. 요소는 전체 폭으로 남고 내용만
- * 가운데로 옵니다. 마크업을 건드리지 않아도 되는 것은 덤입니다 —
- * `.wrap` 이 쓰이는 곳이 다섯 페이지에 걸쳐 수십 곳입니다.
+ * 그때는 좌우 여백을 키워 같은 결과를 냈습니다. 지금은 밴드 섹션 열여섯 곳을
+ * 바깥 `<section>`(색)과 안쪽 `<div class="wrap">`(내용)으로 나눴으므로,
+ * 컨테이너가 max-width 를 그대로 쓸 수 있습니다.
  *
- * `max()` 안의 뺄셈은 화면이 좁을 때 음수가 되고, 그때는 앞의 기본 여백이
- * 이깁니다.
+ * ⚠️ **여백을 max-width 안에 포함시킵니다.**
+ * `max-width: 1120px` 에 `padding-inline: 48px` 을 더하면 내용이 1024px 이 되고,
+ * 여백 기법을 그대로 쓰는 헤더(내용 1120px)와 어긋납니다. 실측으로 204px
+ * 벌어졌습니다. 여백을 더한 값을 상한으로 두면 내용이 정확히 1120px 이라
+ * 헤더와 같은 줄에 섭니다.
  *
  * ── 왜 변수로 빼 두는가 ────────────────────────────────────
  * 이 값을 쓰는 곳이 `.wrap` 하나가 아닙니다. 헤더·히어로 문구·사진 캡션도
@@ -196,13 +198,16 @@ button {
  * 폭인 헤더와 섹션이 같은 한 줄을 공유할 수 있습니다.
  */
 :root {
+  --pad-wrap: var(--space-gutter-mobile);
   --pad-container: max(
     var(--space-gutter-mobile),
     calc((100% - var(--size-container-max)) / 2)
   );
 }
 .wrap {
-  padding-inline: var(--pad-container);
+  max-width: calc(var(--size-container-max) + 2 * var(--pad-wrap));
+  margin-inline: auto;
+  padding-inline: var(--pad-wrap);
 }
 
 /*
@@ -211,8 +216,19 @@ button {
  * 1120px 로 흘리면 한 줄이 한글 70자를 넘습니다. 눈이 다음 줄 첫머리를 찾지
  * 못해 같은 줄을 다시 읽게 됩니다. 40~50자가 편안합니다.
  */
-.wrap--narrow {
-  padding-inline: var(--pad-container);
+/*
+ * 좁히는 것은 **오른쪽 끝** 이지 시작점이 아닙니다.
+ *
+ * 상한을 칸 자신에게 주면 `margin-inline: auto` 를 함께 받아 가운데로 갑니다.
+ * 그러면 좁은 섹션이 넓은 섹션보다 180px 더 들어가고, 홈을 세로로 읽을 때
+ * 시작점이 튑니다 — `layout.spec.ts` 의 「좁은 섹션도 같은 자리에서
+ * 시작한다」 가 그것을 지킵니다.
+ *
+ * 자식에게 주면 칸은 넓은 섹션과 같은 자리에 서고 글줄만 760px 에서
+ * 접힙니다.
+ */
+.wrap--narrow > * {
+  max-width: var(--size-container-narrow);
 }
 /*
  * 좁히는 것은 **오른쪽 끝** 이지 시작점이 아닙니다.
@@ -226,9 +242,7 @@ button {
  * 왼쪽을 컨테이너에 맞추고 폭만 잘라내면 시작점은 하나로 남고, 긴 글이
  * 40~50자에서 접히는 효과는 그대로입니다.
  */
-.wrap--narrow > * {
-  max-width: var(--size-container-narrow);
-}
+
 
 .section {
   padding-block: var(--space-section-mobile);
@@ -330,6 +344,7 @@ button {
 
 @media (min-width: 900px) {
   :root {
+    --pad-wrap: var(--space-gutter-desktop);
     --pad-container: max(
       var(--space-gutter-desktop),
       calc((100% - var(--size-container-max)) / 2)

@@ -121,7 +121,8 @@ const founderStory = FOUNDER_STORY[locale] ?? null;
     그대로 채웁니다. 오히려 브랜드가 존재하는 까닭을 묻는 이 대목이 눈에
     걸릴 자리로는 더 맞습니다.
   */}
-  <section class="section section--lg section--dark wrap wrap--narrow rise">
+  <section class="section section--lg section--dark rise">
+    <div class="wrap wrap--narrow">
     {/*
       머리말이 곧 이 섹션의 제목입니다("The Question").
 
@@ -135,6 +136,7 @@ const founderStory = FOUNDER_STORY[locale] ?? null;
     <p class="body" style="margin-top: 28px">{b.question.body}</p>
     <p class="body" style="margin-top: 18px">{b.question.belief}</p>
     <p class="body" style="margin-top: 18px">{b.question.close}</p>
+  </div>
   </section>
 
   {/*
@@ -157,9 +159,11 @@ const founderStory = FOUNDER_STORY[locale] ?? null;
     주석과 `config/company.ts` 가 합니다 — 화면이 할 일이 아닙니다.
   */}
   {founderStory && (
-    <section class="section section--alt wrap wrap--narrow rise">
+    <section class="section section--alt rise">
+      <div class="wrap wrap--narrow">
       <h2 class="kicker">{b.maker.kicker}</h2>
       <p class="body" style="margin-top: 26px">{founderStory}</p>
+    </div>
     </section>
   )}
 
@@ -229,7 +233,8 @@ const founderStory = FOUNDER_STORY[locale] ?? null;
     The Journey(01–05)와 다릅니다 — 그쪽은 하루의 순서라 번호를 매기지만,
     이 넷은 순서가 없는 코드라 번호를 붙이면 없는 위계를 만듭니다.
   */}
-  <section class="section section--alt wrap wrap--narrow rise">
+  <section class="section section--alt rise">
+    <div class="wrap wrap--narrow">
     <h2 class="kicker">{b.elements.kicker}</h2>
     <dl class="codes">
       {
@@ -242,6 +247,7 @@ const founderStory = FOUNDER_STORY[locale] ?? null;
       }
     </dl>
     <p class="body" style="margin-top: 24px">{b.elements.note}</p>
+  </div>
   </section>
 
   {/*
@@ -303,11 +309,13 @@ const founderStory = FOUNDER_STORY[locale] ?? null;
     푸터가 잉크색이라 그 바로 위는 어둡지 않아야 합니다 — 위 The Question
     주석을 보세요. 옅은 교차 지반이 마지막 문단을 푸터에서 떼어 놓습니다.
   */}
-  <section class="section section--lg section--dark wrap wrap--narrow rise">
+  <section class="section section--lg section--dark rise">
+    <div class="wrap wrap--narrow">
     <h2 class="kicker">{b.philosophy.kicker}</h2>
     <blockquote class="quote">{b.philosophy.quote}</blockquote>
     <p class="body" style="margin-top: 28px">{b.philosophy.body}</p>
     <p class="body" style="margin-top: 18px">{b.philosophy.beauty}</p>
+  </div>
   </section>
 
   {/*
@@ -337,7 +345,8 @@ const founderStory = FOUNDER_STORY[locale] ?? null;
     영문은 원문 그대로 둡니다. 이 셋은 번역하는 문장이 아니라 브랜드의
     표기이고, 아래 한 줄이 그 뜻을 각 언어로 옮깁니다.
   */}
-  <section class="section section--alt wrap wrap--narrow rise">
+  <section class="section section--alt rise">
+    <div class="wrap wrap--narrow">
     <h2 class="kicker">{b.message.kicker}</h2>
     <ul class="messages">
       {
@@ -350,5 +359,6 @@ const founderStory = FOUNDER_STORY[locale] ?? null;
       }
     </ul>
     <p class="body" style="margin-top: 26px">{b.message.close}</p>
+  </div>
   </section>
 </Base>

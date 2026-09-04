@@ -7,7 +7,7 @@
 :root {
   /* ── 원시 팔레트 — 색은 여기서만 정의합니다 ──────────────── */
   --paros-ink: #252B31; /* Charcoal */
-  --paros-wash: #F6F7F8; /* Off White */
+  --paros-wash: #FAF8F4; /* Off White */
   --paros-aegean: #AFC8D8; /* Mist Blue */
   --paros-aegean-tint: #D2E0E8; /* Mist Blue Tint */
   --paros-stone: #485058; /* Slate */
@@ -46,7 +46,7 @@
   --size-tap-min: 44px;
   --size-measure: 70ch;
   --size-container-max: 1120px;
-  --size-container-narrow: 720px;
+  --size-container-narrow: 760px;
   --size-text-input: 16px;
   --size-control-height: 48px;
 

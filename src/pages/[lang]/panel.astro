@@ -102,9 +102,11 @@ const indexable = locale === 'ko';
     <figcaption>FIELD</figcaption>
   </figure>
 
-  <section class="section section--alt wrap">
+  <section class="section section--alt">
+    <div class="wrap">
     <h2 class="kicker">{p.what.heading}</h2>
     <p class="body panel__lead">{p.what.body}</p>
+  </div>
   </section>
 
   {/*
@@ -165,9 +167,11 @@ const indexable = locale === 'ko';
     게시합니다. 만족도 조사에는 실패가 없습니다 — 떨어진 처방의 점수까지
     공개하는 것이 이 브랜드가 다른 지점입니다.
   */}
-  <section class="section section--dark wrap">
+  <section class="section section--dark">
+    <div class="wrap">
     <h2 class="kicker">{p.rejected.heading}</h2>
     {p.rejected.body.split('\n\n').map((para) => <p class="body panel__lead">{para}</p>)}
+  </div>
   </section>
 
   {/*
@@ -329,9 +333,11 @@ const indexable = locale === 'ko';
     "굿즈 증정" 같은 문구 하나가 확정되지 않은 약속이 됩니다.
   */}
   {PANEL_APPLICATIONS_OPEN && (
-    <section class="section section--alt wrap">
+    <section class="section section--alt">
+      <div class="wrap">
       <h2 class="kicker">{p.pending.heading}</h2>
       <p class="body panel__lead">{p.pending.body}</p>
+    </div>
     </section>
   )}
 </Base>

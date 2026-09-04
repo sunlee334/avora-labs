@@ -429,12 +429,14 @@ const criteriaRows = h.panel.criteria.map((item) => {
     정하세요. 지시서 05-UI수정 11절이 "규칙이 보이지 않는다" 고 적은 것은
     이 규칙이 코드에 없었기 때문입니다.
   */}
-  <section class="section section--lg section--dark wrap wrap--narrow rise" data-section="the_choice">
+  <section class="section section--lg section--dark rise" data-section="the_choice">
+    <div class="wrap wrap--narrow">
     <p class="kicker">{h.choice.kicker}</p>
     <h2 class="display display--tight">{h.choice.lead}</h2>
     <p class="body" style="margin-top: 26px">{h.choice.body}</p>
     <p class="body" style="margin-top: 18px">{h.choice.body2}</p>
     <p class="body" style="margin-top: 18px">{h.choice.body3}</p>
+  </div>
   </section>
 
   {/*
@@ -454,7 +456,8 @@ const criteriaRows = h.panel.criteria.map((item) => {
     배경은 교차용입니다 — 위가 어두운 면이고 아래 둘이 기본 지반이라,
     여기까지 기본 지반이면 같은 배경이 셋 이어집니다(Phase I 규칙).
   */}
-  <section class="section section--alt wrap rise" data-section="criteria">
+  <section class="section section--alt rise" data-section="criteria">
+    <div class="wrap">
     <h2 class="kicker">{h.panel.criteriaHeading}</h2>
     {/*
       배점과 커트라인을 홈에도 적습니다.
@@ -467,6 +470,7 @@ const criteriaRows = h.panel.criteria.map((item) => {
       행마다 카드로 쌓는 것도 그쪽에서 이미 풀어 둔 방식입니다.
     */}
     <CriteriaTable columns={scoring.columns} rows={criteriaRows} />
+  </div>
   </section>
 
   <section class="section section--lg wrap rise" id="panel" data-section="test_panel">
@@ -622,7 +626,8 @@ const criteriaRows = h.panel.criteria.map((item) => {
     남았습니다. 그래서 "제품 보기" 를 보조 형태(cta--ghost)로 내릴 이유가
     없어졌습니다 — 이 섹션에서 유일하게 할 수 있는 일입니다.
   */}
-  <section class="section section--alt wrap rise" data-section="first_product">
+  <section class="section section--alt rise" data-section="first_product">
+    <div class="wrap">
     <p class="kicker">{h.product.kicker}</p>
     <h2 class="display display--tight">{h.product.name}</h2>
     <p class="body" style="margin-top: 14px">{h.product.table.why}</p>
@@ -716,6 +721,7 @@ const criteriaRows = h.panel.criteria.map((item) => {
         {h.product.cta}
       </a>
     </p>
+  </div>
   </section>
   {/*
     시각적 쉼표.
@@ -747,7 +753,8 @@ const criteriaRows = h.panel.criteria.map((item) => {
   </figure>
 
   {/* The Journey — 5단계 여정 */}
-  <section class="section section--dark wrap rise" data-section="the_journey">
+  <section class="section section--dark rise" data-section="the_journey">
+    <div class="wrap">
     <p class="kicker">{h.journey.kicker}</p>
     <h2 class="display display--tight">{h.journey.lead}</h2>
     <ol class="journey">
@@ -765,6 +772,7 @@ const criteriaRows = h.panel.criteria.map((item) => {
         ))
       }
     </ol>
+  </div>
   </section>
 
   {/*
@@ -817,7 +825,8 @@ const criteriaRows = h.panel.criteria.map((item) => {
     인스타그램을 여기 둡니다. 푸터에만 있으면 "살아 있는 회사" 라는 신호가
     본문 어디에도 없습니다.
   */}
-  <section class="section section--alt section--split wrap rise" data-section="company">
+  <section class="section section--alt rise" data-section="company">
+    <div class="section--split wrap">
     <div class="split">
       <div>
         <p class="kicker">{h.company.kicker}</p>
@@ -886,6 +895,7 @@ const criteriaRows = h.panel.criteria.map((item) => {
         )
       }
     </div>
+  </div>
   </section>
 
   {/*
@@ -947,7 +957,8 @@ const criteriaRows = h.panel.criteria.map((item) => {
     그건 이 항목이 막으려던 바로 그 일입니다. 뜻을 그대로 두고 예시만
     "지속 시간이나 만족도 같은 숫자" 로 바꿨습니다.
   */}
-  <section class="section section--alt wrap wrap--narrow rise" data-section="limits">
+  <section class="section section--alt rise" data-section="limits">
+    <div class="wrap wrap--narrow">
     <p class="kicker">{h.limits.kicker}</p>
     <h2 class="display display--tight">{h.limits.heading}</h2>
     <ul class="limits">
@@ -960,6 +971,7 @@ const criteriaRows = h.panel.criteria.map((item) => {
         ))
       }
     </ul>
+  </div>
   </section>
 
   {/*
