@@ -236,11 +236,11 @@
       "use": "버튼·입력창"
     },
     "card": {
-      "value": "10px",
+      "value": "8px",
       "use": "카드·패널"
     },
     "sheet": {
-      "value": "18px",
+      "value": "16px",
       "use": "바텀시트 상단"
     },
     "pill": {

@@ -61,8 +61,8 @@
 
   --radius-hair: 2px;
   --radius-control: 8px;
-  --radius-card: 10px;
-  --radius-sheet: 18px;
+  --radius-card: 8px;
+  --radius-sheet: 16px;
   --radius-pill: 999px;
 
   --motion-rise-duration: 200ms;

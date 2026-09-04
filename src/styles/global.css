@@ -119,7 +119,7 @@ button {
 :focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: 3px;
-  border-radius: 2px;
+  border-radius: var(--radius-hair);
 }
 
 /* 스크린리더 전용 — 시각적으로 숨기되 읽히게 */
@@ -198,6 +198,8 @@ button {
  * 폭인 헤더와 섹션이 같은 한 줄을 공유할 수 있습니다.
  */
 :root {
+  /* 손이 간 자리의 반응. 120ms 를 넘으면 굼떠 보이고, 아래면 안 보입니다. */
+  --motion-hover: 120ms;
   --pad-wrap: var(--space-gutter-mobile);
   --pad-container: max(
     var(--space-gutter-mobile),
@@ -736,6 +738,24 @@ button {
   padding: 16px 0;
   border-top: 1px solid var(--color-border);
 }
+/*
+ * 전환은 밖에, 효과만 안에.
+ *
+ * 전환까지 `@media (hover: hover)` 안에 넣으면 터치 기기에서는 선언 자체가
+ * 사라져, 규칙을 재는 쪽이 "전환이 없다" 와 "호버가 없다" 를 구분하지
+ * 못합니다. 나머지 호버도 같은 모양으로 씁니다.
+ */
+.criteriaTable tbody tr,
+.dataTable tbody tr {
+  transition: background-color var(--motion-hover) ease;
+}
+@media (hover: hover) {
+  .criteriaTable tbody tr:hover,
+  .dataTable tbody tr:hover {
+    background: color-mix(in srgb, var(--color-text) 4%, transparent);
+  }
+}
+
 .criteriaTable tbody tr:last-child {
   border-bottom: 1px solid var(--color-border);
 }
@@ -975,6 +995,19 @@ button {
 .disclosure[open] > summary::after {
   transform: rotate(-135deg) translate(-2px, -2px);
 }
+/*
+ * 손이 간 자리의 반응은 전부 여기서 멈춥니다.
+ *
+ * 이 파일의 관례대로, 움직임을 만드는 규칙 옆에 예외를 붙이지 않고 한곳에
+ * 모읍니다. `--motion-hover` 를 0 으로 두면 전환만 사라지고 최종 상태는
+ * 그대로 남습니다 — 표시가 사라지는 것이 아니라 즉시 바뀝니다.
+ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-hover: 0s;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .disclosure > summary::after {
     transition: none;
@@ -1160,6 +1193,20 @@ a {
   text-underline-offset: 0.22em;
   text-decoration-thickness: 1px;
   text-decoration-skip-ink: auto;
+}
+/*
+ * 손을 올리면 밑줄이 글자 쪽으로 한 단 다가옵니다.
+ *
+ * `text-underline-offset` 은 애니메이션되지 않으므로 전환 없이 즉시 바뀝니다 —
+ * 그래서 움직임 감소 설정에서 따로 끌 것이 없습니다.
+ */
+@media (hover: hover) {
+  a:hover {
+    text-underline-offset: 0.16em;
+  }
+  :lang(th) a:hover {
+    text-underline-offset: 0.22em;
+  }
 }
 /* 태국어는 부호가 아래로도 내려가므로 한 단 더 띄웁니다. */
 :lang(th) a {
@@ -1432,8 +1479,36 @@ html {
   min-height: var(--size-tap-min);
   text-decoration: none;
 }
-.nav__links a:hover {
-  text-decoration: underline;
+/*
+ * 손이 간 자리에 반응이 있어야 합니다.
+ *
+ * 밑줄 대신 아래 2px 선을 띄웁니다. 밑줄은 글자 사이를 파고들어 한글 받침과
+ * 태국어 성조 부호를 건드리는데, 밖에 그린 선은 그런 일이 없습니다.
+ *
+ * `transform` 만 씁니다 — 높이나 여백을 건드리면 옆 항목이 밀립니다.
+ */
+.nav__links a {
+  position: relative;
+}
+.nav__links a::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: 8px;
+  height: 2px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--motion-hover) ease;
+}
+@media (hover: hover) {
+  .nav__links a:hover::after {
+    transform: scaleX(1);
+  }
+}
+.nav__links a:focus-visible::after,
+.nav__links a[aria-current]::after {
+  transform: scaleX(1);
 }
 
 /* ── 드롭다운 ─────────────────────────────────────────────
@@ -1503,7 +1578,7 @@ html {
   list-style: none;
   background: var(--color-bg);
   border: 1px solid var(--color-border);
-  border-radius: 10px;
+  border-radius: var(--radius-card);
   box-shadow: 0 18px 40px -18px color-mix(in srgb, var(--color-text) 30%, transparent);
 }
 .nav__dropdown[hidden] {
@@ -1677,7 +1752,7 @@ html {
   padding-inline: 12px;
   background: transparent;
   border: 1px solid var(--color-border);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-family: var(--font-mono);
   font-size: 12px;
   letter-spacing: 0.06em;
@@ -1694,7 +1769,7 @@ html {
   padding: 4px var(--space-gutter-mobile) calc(14px + env(safe-area-inset-bottom));
   border: 0;
   border-top: 1px solid var(--color-border);
-  border-radius: 18px 18px 0 0;
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
   background: var(--color-bg);
   color: var(--color-text);
   overflow-y: auto;
@@ -1725,7 +1800,7 @@ html {
   min-width: var(--size-tap-min);
   background: transparent;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: 15px;
   color: var(--color-text-muted);
   cursor: pointer;
@@ -2191,6 +2266,27 @@ html {
 }
 
 /* ── 이미지 브레이크 ──────────────────────────────────────── */
+/*
+ * 손이 올라가면 사진이 아주 조금 다가옵니다.
+ *
+ * ⚠️ `overflow: hidden` 은 **사진을 감싼 요소에만** 겁니다. 스티키 요소의
+ * 조상에 걸면 `position: sticky` 가 죽습니다.
+ */
+.figure {
+  overflow: hidden;
+}
+.figure img,
+.figure--inline img,
+.panelShots img {
+  transition: transform var(--motion-hover) ease;
+}
+@media (hover: hover) {
+  .figure:hover img,
+  .figure--inline:hover img,
+  .panelShots a:hover img {
+    transform: scale(1.02);
+  }
+}
 .figure img {
   width: 100%;
   height: 58svh;
@@ -2226,7 +2322,7 @@ html {
 .figure--inline img {
   height: auto;
   aspect-ratio: 3 / 2;
-  border-radius: 4px;
+  border-radius: var(--radius-card);
 }
 .figure--inline figcaption {
   padding-left: 0;
@@ -2252,7 +2348,7 @@ html {
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
-  border-radius: 4px;
+  border-radius: var(--radius-card);
 }
 .panelShots figcaption {
   font-family: var(--font-mono);
@@ -2468,7 +2564,7 @@ html {
 .steps li {
   counter-increment: step;
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   padding: 20px;
   background: var(--color-bg);
 }
@@ -2658,7 +2754,7 @@ html {
   margin-top: 24px;
   padding: 16px 18px;
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   color: var(--color-text-muted);
   font-size: 14px;
 }
@@ -2721,7 +2817,7 @@ html {
   min-width: var(--size-tap-min);
   padding-inline: 12px;
   border: 1px solid var(--color-border);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-family: var(--font-mono);
   font-size: 12px;
   letter-spacing: 0.06em;
@@ -2732,7 +2828,7 @@ html {
   min-width: 18px;
   height: 18px;
   padding-inline: 5px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--color-bg-inverse);
   color: var(--color-accent);
   font-size: 10.5px;
@@ -2792,7 +2888,7 @@ html {
   min-height: var(--size-tap-min);
   padding: 10px 14px;
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   background: var(--color-bg);
   color: var(--color-text);
   width: 100%;
@@ -2833,7 +2929,7 @@ html {
   min-height: 54px;
   padding-inline: 16px;
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   cursor: pointer;
   font-size: 15px;
 }
@@ -2868,7 +2964,7 @@ html {
 .agree {
   padding: 18px;
   border: 1px solid var(--color-border);
-  border-radius: 10px;
+  border-radius: var(--radius-card);
   margin-bottom: 24px;
 }
 .agree__row {
@@ -2914,7 +3010,7 @@ html {
   padding: 14px 16px;
   margin-bottom: 18px;
   border: 1px solid var(--color-text);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   font-size: 14px;
 }
 .checkout__pay {
@@ -2975,7 +3071,7 @@ html {
   overflow-x: auto;
   margin-top: 22px;
   border: 1px solid var(--color-border);
-  border-radius: 10px;
+  border-radius: var(--radius-card);
 }
 .tableScroll:focus-visible {
   /* 초점이 갔다는 것이 보여야 스크롤할 수 있다는 것도 알 수 있습니다. */
@@ -3258,7 +3354,7 @@ html {
   width: 8px;
   height: 8px;
   border: 1px solid var(--color-text-muted);
-  border-radius: 2px;
+  border-radius: var(--radius-hair);
 }
 
 /* ── 푸터 ─────────────────────────────────────────────────── */
@@ -3267,14 +3363,38 @@ html {
   color: var(--color-accent);
   padding-block: 48px 40px;
 }
+/*
+ * 푸터 바닥의 워드마크.
+ *
+ * 읽히되 튀지 않아야 합니다. 흰색으로 두면 링크보다 무거워져 푸터의 위계가
+ * 뒤집힙니다.
+ *
+ * ⚠️ **지시서의 1.5:1 은 쓸 수 없습니다.**
+ * `aria-hidden` 이어도 눈에 보이는 글자라 색 대비 규칙의 대상입니다 — 읽는
+ * 기계에서 숨는 것과 저시력 사용자에게 보이는 것은 다른 문제입니다. axe 가
+ * 모든 페이지에서 이 한 줄로 걸렸습니다(1.47:1).
+ *
+ * 큰 글자(24px 이상)의 기준은 3:1 입니다. 혼합 40% 가 3.45:1 로, 그 선을
+ * 넘으면서 흰색(13:1)보다 훨씬 뒤에 있습니다.
+ *
+ * 시작점은 컨테이너 여백에 맞춥니다. 자간의 뒷여백이 오른쪽에 붙으므로
+ * 왼쪽 정렬은 흐트러지지 않습니다.
+ *
+ * ⚠️ **크기는 푸터 높이가 정합니다.**
+ * 지시서 값 `clamp(72px, 18vw, 280px)` 은 1600px 화면에서 푸터를 948px 로
+ * 만듭니다 — 화면 한 장(900px)을 넘어 푸터만 보이는 화면이 생깁니다.
+ * 14vw · 220px 이 그 경계 안에 들어가는 최대치입니다(실측 892px).
+ */
 .footer__wordmark {
   font-family: var(--font-display);
-  font-size: clamp(38px, 11vw, 76px);
+  font-size: clamp(72px, 14vw, 220px);
   font-weight: 400;
-  letter-spacing: 0.1em;
-  line-height: 1;
-  margin: 0 0 32px;
-  color: var(--color-accent);
+  letter-spacing: 0.06em;
+  line-height: 0.92;
+  margin: 8px 0 12px;
+  color: color-mix(in srgb, var(--color-text-inverse) 40%, var(--color-bg-inverse));
+  /* 한 줄로 섭니다. 접히면 푸터가 화면 한 장을 더 씁니다. */
+  white-space: nowrap;
 }
 .footer__tagline {
   font-family: var(--font-display);
@@ -3473,7 +3593,7 @@ html {
   margin-top: 44px;
   padding: 22px;
   border: 1px solid var(--color-border);
-  border-radius: 10px;
+  border-radius: var(--radius-card);
 }
 .support__card h2 {
   font-size: 15.5px;
@@ -3527,7 +3647,7 @@ html {
   min-height: var(--size-tap-min);
   padding-inline: 12px;
   border: 1px solid var(--color-border);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: none;
   cursor: pointer;
 }
@@ -3572,7 +3692,7 @@ html {
   padding: 4px var(--space-gutter-mobile) calc(14px + env(safe-area-inset-bottom));
   border: 0;
   border-top: 1px solid var(--color-border);
-  border-radius: 18px 18px 0 0;
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
   background: var(--color-bg);
   overflow-y: auto;
 }
@@ -3600,7 +3720,7 @@ html {
   min-width: var(--size-tap-min);
   min-height: var(--size-tap-min);
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: none;
   color: var(--color-text-muted);
   font-size: 15px;
@@ -3715,7 +3835,7 @@ html {
   gap: 10px;
   padding: 32px 22px;
   border: 1px solid var(--color-border);
-  border-radius: 10px;
+  border-radius: var(--radius-card);
   text-align: center;
 }
 .reviews__empty h2 {
@@ -3769,7 +3889,7 @@ html {
 }
 .reviews__bar-track {
   height: 5px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--color-border);
   overflow: hidden;
 }
@@ -3807,7 +3927,7 @@ html {
 .reviews__badge {
   padding: 3px 9px;
   border: 1px solid var(--color-border);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   color: var(--color-text-muted);
   font-size: 11px;
   white-space: nowrap;
@@ -3843,7 +3963,7 @@ html {
   width: 100%;
   padding: 12px 14px;
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   background: var(--color-bg);
   color: var(--color-text);
   line-height: calc(1.8 * var(--leading-scale));
@@ -3871,7 +3991,7 @@ html {
   justify-content: center;
   min-width: var(--size-tap-min);
   min-height: var(--size-tap-min);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   color: var(--color-border);
   font-size: 26px;
   cursor: pointer;
@@ -4215,7 +4335,7 @@ html {
   font-size: 11px;
   letter-spacing: 0.04em;
   padding: 2px 8px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid var(--color-border);
   color: var(--color-text-muted);
 }
@@ -4308,7 +4428,7 @@ html {
   font-size: 11px;
   letter-spacing: 0.08em;
   padding: 3px 8px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   border: 1px solid var(--color-border);
   color: var(--color-text-muted);
   white-space: nowrap;
@@ -4338,7 +4458,7 @@ html {
 .inquiryList__answer {
   margin-top: 14px;
   padding: 14px 16px;
-  border-radius: 10px;
+  border-radius: var(--radius-card);
   background: var(--color-accent);
 }
 .inquiryList__answerLabel {
@@ -4374,7 +4494,7 @@ html {
   width: 100%;
   padding: 12px 14px;
   border: 1px solid var(--color-border);
-  border-radius: 10px;
+  border-radius: var(--radius-card);
   background: transparent;
   color: var(--color-text);
   font-family: inherit;
@@ -4434,7 +4554,7 @@ html {
   width: 100%;
   padding: 10px 14px;
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-control);
   background: var(--color-bg);
   color: var(--color-text);
 }
@@ -4641,7 +4761,7 @@ html {
   display: inline-block;
   margin-top: 14px;
   padding: 5px 12px;
-  border-radius: 2px;
+  border-radius: var(--radius-hair);
   border-left: 3px solid var(--color-campaign);
   background: var(--color-bg-inverse);
   color: var(--color-text-inverse);
@@ -4866,7 +4986,7 @@ html {
   width: 36px;
   height: 4px;
   transform: translateX(-50%);
-  border-radius: 2px;
+  border-radius: var(--radius-hair);
   background: var(--color-text-muted);
 }
 .notifySheet__close {
@@ -5086,4 +5206,45 @@ html {
   margin-top: 4px;
   font-size: 12.5px;
   color: var(--color-text-muted);
+}
+
+
+/* ── 스크롤 진행 ──────────────────────────────────────────
+   장식 요소입니다(Base.astro 주석 참조). 좁은 화면에서는 오른쪽 고정 요소가
+   콘텐츠와 부딪히므로 아예 그리지 않습니다. */
+.progress {
+  display: none;
+}
+@media (min-width: 900px) {
+  .progress {
+    display: block;
+    position: fixed;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2px;
+    height: 40svh;
+    background: color-mix(in srgb, var(--color-text) 12%, transparent);
+    /* 헤더(20)보다 아래. 드롭다운과 시트(60)에도 가립니다. */
+    z-index: 5;
+  }
+  .progress__fill {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: var(--color-text);
+    transform-origin: top;
+    /*
+     * 채움은 `transform` 하나로 표현합니다. 높이를 바꾸면 매 프레임 레이아웃을
+     * 다시 계산하고, 그건 스크롤 중에 가장 하면 안 되는 일입니다.
+     */
+    transform: scaleY(0);
+    transition: transform 80ms linear;
+  }
+}
+/* 표시는 남기고 전환만 없앱니다 — 위치는 여전히 알려 줘야 합니다. */
+@media (prefers-reduced-motion: reduce) {
+  .progress__fill {
+    transition: none;
+  }
 }

@@ -21,8 +21,6 @@ const businessRows = [
 
 <footer class="footer">
   <div class="wrap">
-    {/* Nav 와 같은 이유로 글자입니다 — 거기 주석을 보세요. */}
-    <p class="footer__wordmark">{BUSINESS.brandName}</p>
     <p class="footer__tagline">{t.footer.tagline}</p>
 
     {/*
@@ -162,6 +160,18 @@ const businessRows = [
         }
       </div>
     </details>
+
+    {/*
+      브랜드명이 한 번은 크게 나옵니다.
+
+      원래 이 워드마크는 푸터 맨 위에 76px 로 있었습니다. 위치를 옮기고 키운
+      것이지 새로 더한 것이 아닙니다 — 둘을 다 두면 한 화면에 PAROS 가 두 번
+      나옵니다.
+
+      장식입니다. 링크가 아니고, 헤더에 같은 이름이 이미 있으므로 읽는 기계에는
+      숨깁니다. `BY AVORA LABS` 는 여기에 함께 쓰지 않습니다.
+    */}
+    <p class="footer__wordmark" aria-hidden="true">{BUSINESS.brandName}</p>
 
     <p class="footer__copyright">{t.footer.copyright}</p>
   </div>

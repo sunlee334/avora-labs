@@ -422,7 +422,45 @@ const xDefault = !wanted || wanted.includes(X_DEFAULT_LOCALE)
     </main>
     <Footer locale={locale} />
 
+    {/*
+      어디쯤 왔는지 알려 주는 선.
+
+      홈이 화면 열 장이 넘는데 현재 위치를 알 방법이 없었습니다. 오른쪽에 얇은
+      세로선 하나를 두고 읽은 만큼 채웁니다.
+
+      **장식입니다.** 누를 수 없고 읽는 기계에는 숨깁니다 — 누를 수 있게 만들면
+      목적지 이름을 다섯 언어로 붙여야 하고, 키보드 순서에도 끼어듭니다.
+
+      헤더(z-index 20)보다 아래에 둡니다. 좁은 화면에서는 숨깁니다.
+    */}
+    <div class="progress" aria-hidden="true"><span class="progress__fill"></span></div>
+
     <script>
+      // ── 스크롤 진행 ──────────────────────────────────────────
+      // 스크롤 이벤트마다 계산하면 한 프레임에 여러 번 돕니다.
+      // requestAnimationFrame 으로 프레임당 한 번으로 묶습니다.
+      {
+        const fill = document.querySelector<HTMLElement>('.progress__fill');
+        if (fill) {
+          let queued = false;
+          const paint = () => {
+            queued = false;
+            const doc = document.documentElement;
+            const max = doc.scrollHeight - doc.clientHeight;
+            const ratio = max > 0 ? Math.min(1, Math.max(0, doc.scrollTop / max)) : 0;
+            fill.style.transform = `scaleY(${ratio})`;
+          };
+          const schedule = () => {
+            if (queued) return;
+            queued = true;
+            requestAnimationFrame(paint);
+          };
+          addEventListener('scroll', schedule, { passive: true });
+          addEventListener('resize', schedule, { passive: true });
+          paint();
+        }
+      }
+
       // ── 스크롤 등장 ──────────────────────────────────────────
       // IntersectionObserver 만 씁니다. 시안 01 의 모션은 fade-up 과 밑줄뿐이라
       // 애니메이션 라이브러리가 필요 없습니다.
