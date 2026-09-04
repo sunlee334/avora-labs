@@ -110,14 +110,38 @@ test.describe('헤더 모양', () => {
      * 한 번도 만들지 않은 채 통과합니다.
      */
     await page.goto('/ko/');
+    /*
+     * ⚠️ 스크롤 깊이를 고정하지 않습니다.
+     *
+     * 전에는 1200px 로 못 박았습니다. 그런데 그 위에 있는 폼이 76px 짧아지자
+     * 헤더 자리가 **요소 사이 빈 곳** 이 되어, 결함이 없는데도 "본문이 지나가는
+     * 상태를 못 만들었습니다" 로 걸렸습니다. 검사가 본문 길이에 묶여 있던
+     * 것입니다.
+     *
+     * 글이 실제로 헤더 뒤에 올 때까지 내려갑니다. 단언이 요구하는 조건은
+     * 그대로입니다 — 헤더 뒤에 글이 있어야 비침을 잴 수 있습니다.
+     */
     await page.evaluate(async () => {
       const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-      for (let i = 0; i < 20; i += 1) {
-        window.scrollTo(0, 1200);
-        await sleep(80);
-        const prev = window.scrollY;
-        await sleep(90);
-        if (Math.abs(window.scrollY - prev) < 1) break;
+      const navRect = () => document.querySelector('.nav')!.getBoundingClientRect();
+      const covered = () => {
+        const nav = navRect();
+        return [...document.querySelectorAll('main p, main h2, main li')].some((t) => {
+          const r = t.getBoundingClientRect();
+          return r.height > 0 && r.top < nav.bottom && r.bottom > nav.top;
+        });
+      };
+
+      for (let depth = 900; depth <= 4000; depth += 150) {
+        // Lenis 가 감속하는 동안 재면 도착 전 위치를 읽습니다. 멈출 때까지 기다립니다.
+        for (let i = 0; i < 12; i += 1) {
+          window.scrollTo(0, depth);
+          await sleep(80);
+          const prev = window.scrollY;
+          await sleep(90);
+          if (Math.abs(window.scrollY - prev) < 1) break;
+        }
+        if (covered()) return;
       }
     });
 

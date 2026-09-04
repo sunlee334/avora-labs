@@ -46,7 +46,12 @@ test.describe('첫 화면은 스크립트를 기다리지 않는다', () => {
    */
   const screens = [
     { path: '/ko/', selector: '.hero__copy h1', what: '홈 히어로' },
-    { path: '/ko/product/', selector: '.product-hero__media img', what: '제품 사진' },
+    /*
+     * 제품 화면의 첫 요소는 이제 사진이 아니라 **목표 사양 판** 입니다.
+     * 아치 사진을 내리면서 바뀌었습니다(기획안 5-8 의 그리스풍 장식 금지).
+     * 사진이든 글이든 규칙은 같습니다 — 스크립트를 기다리면 안 됩니다.
+     */
+    { path: '/ko/product/', selector: '.product-hero__spec-values', what: '제품 사양 판' },
     { path: '/ko/brand/', selector: '#story h1', what: '브랜드 첫 문단' },
   ];
 

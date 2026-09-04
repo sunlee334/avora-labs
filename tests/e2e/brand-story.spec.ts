@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
+import { FOUNDER_STORY } from '../../src/config/company';
 import { LOCALES } from '../../src/config/site';
 import ko from '../../src/i18n/ko.json' with { type: 'json' };
 import en from '../../src/i18n/en.json' with { type: 'json' };
@@ -48,12 +49,25 @@ const kickerOf = (dict: { brand: Record<string, unknown> }, key: string) =>
  *
  * 자리 순서는 **키** 로 못 박고 문구는 그 언어의 사전에서 가져옵니다.
  */
-const ORDER_KEYS = ['origin', 'question', 'maker', 'island', 'naming',
-                    'elements', 'how', 'audience',
-                    'philosophy', 'company', 'message'] as const;
+/*
+ * ⚠️ `maker` 는 **조건부** 입니다.
+ *
+ * 그 자리에는 창업 배경이 들어가는데, 아직 확정되지 않았습니다. 예전에는
+ * 자리만 만들어 놓고 "확정되면 채웁니다" 라는 내부 메모를 화면에 그리고
+ * 있었습니다. 지금은 `FOUNDER_STORY` 가 비면 섹션 자체가 없습니다.
+ *
+ * 그래서 이 목록도 같은 조건을 따릅니다. 값이 들어오면 자리가 돌아오고,
+ * 이 검사는 그때 그 자리를 다시 요구합니다.
+ */
+const ALL_KEYS = ['origin', 'question', 'maker', 'island', 'naming',
+                  'elements', 'how', 'audience',
+                  'philosophy', 'company', 'message'] as const;
 
-const orderFor = (dict: { brand: Record<string, unknown> }) =>
-  ORDER_KEYS.map((key) => kickerOf(dict, key));
+const orderKeysFor = (locale: (typeof LOCALES)[number]) =>
+  ALL_KEYS.filter((key) => key !== 'maker' || Boolean(FOUNDER_STORY[locale]));
+
+const orderFor = (dict: { brand: Record<string, unknown> }, locale: (typeof LOCALES)[number]) =>
+  orderKeysFor(locale).map((key) => kickerOf(dict, key));
 
 async function bands(page: import('@playwright/test').Page) {
   return page.locator('section').evaluateAll((nodes) => {
@@ -73,7 +87,7 @@ test.describe('브랜드 페이지', () => {
       const kickers = await page
         .locator('.kicker')
         .evaluateAll((els) => els.map((e) => e.textContent?.trim().toUpperCase() ?? ''));
-      expect(kickers, `${locale} 브랜드 페이지 구성이 다릅니다`).toEqual(orderFor(DICTS[locale]));
+      expect(kickers, `${locale} 브랜드 페이지 구성이 다릅니다`).toEqual(orderFor(DICTS[locale], locale));
     }
   });
 

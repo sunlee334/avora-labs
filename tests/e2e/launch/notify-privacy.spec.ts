@@ -28,11 +28,31 @@ test.describe('알림 신청 폼이 무엇을 받는지 밝힌다', () => {
   });
 
   test('안내가 항목·목적·보유를 모두 말한다', async ({ page }) => {
-    // 셋 중 하나만 빠져도 "무엇을 내는지" 가 흐려집니다.
+    /*
+     * 셋 중 하나만 빠져도 "무엇을 내는지" 가 흐려집니다.
+     *
+     * 이 안내는 이제 `<details>` 안에 **접혀** 있습니다 — 폼 안내문이
+     * 114단어였고 그중 33단어가 여기였습니다. 접은 것이지 지운 것이
+     * 아니므로, 열어서 셋이 다 있는지 봅니다.
+     */
     await page.goto('/ko/');
-    const text = await page.locator('.notify__privacy').first().innerText();
+    const terms = page.locator('#notify .notify__terms');
+    await terms.locator('summary').click();
+
+    const text = await terms.locator('.notify__privacy').first().innerText();
     expect(text, '수집 항목').toMatch(/이메일/);
     expect(text, '이용 목적').toMatch(/펀딩|출시/);
     expect(text, '보유·해지').toMatch(/수신 거부|보관/);
+  });
+
+  test('접혀 있어도 무엇이 접혔는지는 보인다', async ({ page }) => {
+    /*
+     * 접기가 고지를 감추는 쪽으로 기울지 않게 하는 검사입니다. 제목이 없거나
+     * 무슨 내용인지 알 수 없으면, 접은 것이 아니라 숨긴 것이 됩니다.
+     */
+    await page.goto('/ko/');
+    const summary = page.locator('#notify .notify__terms summary');
+    await expect(summary).toBeVisible();
+    await expect(summary, '무엇이 접혔는지 알 수 없습니다').toContainText(/개인정보|정보/);
   });
 });
