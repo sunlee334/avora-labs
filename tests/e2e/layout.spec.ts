@@ -92,7 +92,12 @@ test.describe('컨테이너', () => {
         return {
           헤더: left('.nav__wordmark'),
           히어로: left('.hero__thin'),
-          캡션: left('.figure figcaption'),
+          /*
+           * 칸 안의 사진은 뺍니다. `.figure--split` 은 2열 섹션의 오른쪽
+           * 칸에 있어, 그 캡션이 컨테이너 끝이 아니라 **그 칸에서** 시작하는
+           * 것이 맞습니다. 여기서 지키는 것은 전면 요소들의 기준선입니다.
+           */
+          캡션: left('.figure:not(.figure--split) figcaption'),
           본문: left('main .section.wrap:not(.wrap--narrow) h2'),
           푸터: left('.footer__wordmark'),
         };

@@ -391,7 +391,26 @@ const criteriaRows = h.panel.criteria.map((item) => {
     The Choice 가 밀립니다. 그리고 **어느 브랜드도 지목하지 않습니다.**
     카테고리 전체에 대한 서술로만 남깁니다(00-공통규칙 2-2).
   */}
-  <section class="section wrap wrap--narrow rise" data-section="the_problem">
+  {/*
+    ── 글 옆에 그 장면을 둡니다 ───────────────────────────────
+    이 섹션의 본문은 **몸에서 무슨 일이 일어나는지** 를 말합니다 — 땀이 눈으로
+    흘러 들어오는 장면. 그 사진이 350줄 뒤에서 장식 밴드로 혼자 서 있었습니다.
+    옮겨 왔습니다. 새로 더한 것이 아니라 자리를 바꾼 것입니다.
+
+    ⚠️ **이 그림만 품질이 낮습니다.** 다른 사진과 같은 52 로 두면 780w AVIF 가
+    103KB 로, 히어로(1600w, 33KB)의 세 배가 됩니다. 원인은 인코더가 아니라
+    원본입니다 — 물방울 맺힌 피부 클로즈업이라 화면 전체가 고주파 노이즈고,
+    AVIF 가 그것을 성실히 담습니다. 그런데 **같은 노이즈가 압축 아티팩트도
+    가립니다.** 40 으로 내려 60KB(-42%)가 됐고 크롭을 나란히 놓아도 구분되지
+    않습니다.
+
+    다른 사진에 이 값을 복사하지 마세요. 매끈한 면이 넓은 그림은 같은 값에서
+    띠가 보입니다.
+  */}
+  <section class="section rise" data-section="the_problem">
+    <div class="section--split wrap">
+    <div class="split split--media">
+      <div>
     <p class="kicker">{h.problem.kicker}</p>
     <h2 class="display display--tight">{h.problem.lead}</h2>
     <p class="body" style="margin-top: 26px">{h.problem.body}</p>
@@ -408,6 +427,23 @@ const criteriaRows = h.panel.criteria.map((item) => {
       {h.problem.scene.map((line) => <span>{line}</span>)}
     </p>
     <p class="body" style="margin-top: 18px">{h.problem.close}</p>
+      </div>
+
+      <figure class="figure figure--split">
+        <Picture
+          src={skinImage}
+          alt={h.break.imageAlt}
+          formats={['avif', 'webp']}
+          widths={[390, 780, 1200]}
+          sizes="(min-width: 900px) 55vw, 100vw"
+          quality={40}
+          loading="lazy"
+          decoding="async"
+        />
+        <figcaption>SKIN</figcaption>
+      </figure>
+    </div>
+    </div>
   </section>
 
   {/*
@@ -723,35 +759,6 @@ const criteriaRows = h.panel.criteria.map((item) => {
     </p>
   </div>
   </section>
-  {/*
-    시각적 쉼표.
-
-    ⚠️ **이 그림만 품질이 낮습니다.** 다른 사진과 같은 52 로 두면 780w AVIF 가
-    103KB 로, 히어로(1600w, 33KB)의 세 배가 됩니다 — 홈에서 가장 무거운 자기
-    도메인 자산이 LCP 도 아닌 장식 밴드인 상태였습니다.
-
-    원인은 인코더가 아니라 원본입니다. 물방울 맺힌 피부 클로즈업이라 화면 전체가
-    고주파 노이즈고, AVIF 가 그것을 성실히 담습니다. 그런데 **같은 노이즈가
-    압축 아티팩트도 가립니다** — 40 으로 내려 60KB(-42%)가 됐고, 실제로 보이는
-    크롭을 나란히 놓고 봐도 구분되지 않습니다.
-
-    다른 사진에 이 값을 복사하지 마세요. 매끈한 면이 넓은 그림은 같은 값에서
-    띠가 보입니다.
-  */}
-  <figure class="figure rise">
-    <Picture
-      src={skinImage}
-      alt={h.break.imageAlt}
-      formats={['avif', 'webp']}
-      widths={[390, 780]}
-      sizes="100vw"
-      quality={40}
-      loading="lazy"
-      decoding="async"
-    />
-    <figcaption>SKIN</figcaption>
-  </figure>
-
   {/* The Journey — 5단계 여정 */}
   <section class="section section--dark rise" data-section="the_journey">
     <div class="wrap">
