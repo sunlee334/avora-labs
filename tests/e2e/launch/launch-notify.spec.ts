@@ -66,7 +66,12 @@ test.describe('출시 알림 신청', () => {
     });
     await page.goto('/ko/product');
     await fill(page, 'not-an-email');
-    await expect(page.locator('[data-notify-state]')).toHaveAttribute('data-tone', 'bad');
+    /*
+     * 입력 오류는 결과 문구(`[data-notify-state]`)가 아니라 입력칸 바로 아래의
+     * `role="alert"` 에 뜹니다. 결과 문구는 제출한 뒤의 이야기이고, 이건
+     * 제출하기 전에 그 칸에 대해 하는 말이라 자리를 나눴습니다.
+     */
+    await expect(page.locator('[data-launch-notify] [role="alert"]').first()).toBeVisible();
     expect(calls, '잘못된 주소로 서버를 부르지 않습니다').toHaveLength(0);
   });
 

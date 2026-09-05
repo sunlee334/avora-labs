@@ -103,7 +103,26 @@ function mountOne(form: HTMLFormElement): void {
   const input = form.querySelector<HTMLInputElement>('input[name="email"]');
   const submit = form.querySelector<HTMLButtonElement>('[data-notify-submit]');
   const state = form.querySelector<HTMLElement>('[data-notify-state]');
-  if (!input || !submit || !state) return;
+  /*
+   * 입력 오류는 결과 문구와 **자리가 다릅니다.** 이것은 입력칸 바로 아래,
+   * 결과는 폼 끝입니다. 하나로 겸했을 때 오류가 체크박스 뒤에 떠서 나눴습니다.
+   */
+  const fieldError = form.querySelector<HTMLElement>(`#notify-error-${form.dataset.source}`);
+  if (!input || !submit || !state || !fieldError) return;
+
+  /** 이 칸이 잘못됐다 — 문구·속성·초점을 한 벌로 움직입니다. */
+  function sayFieldError(message: string): void {
+    fieldError!.textContent = message;
+    fieldError!.hidden = false;
+    input!.setAttribute('aria-invalid', 'true');
+    input!.focus();
+  }
+
+  function clearFieldError(): void {
+    fieldError!.hidden = true;
+    fieldError!.textContent = '';
+    input!.removeAttribute('aria-invalid');
+  }
 
   function say(message: string, tone: 'ok' | 'bad'): void {
     state!.textContent = message;
@@ -126,9 +145,7 @@ function mountOne(form: HTMLFormElement): void {
    * 오류 표시를 다음 제출까지 들고 있으면, 이미 고친 사람에게 계속 잘못됐다고
    * 말하는 셈입니다. 표시를 붙이는 것은 제출 때뿐이고 거두는 것은 입력 때입니다.
    */
-  input.addEventListener('input', () => {
-    input.removeAttribute('aria-invalid');
-  });
+  input.addEventListener('input', clearFieldError);
 
   function fail(message: string, status?: number) {
     failures += 1;
@@ -160,18 +177,11 @@ function mountOne(form: HTMLFormElement): void {
     // 브라우저 기본 검증은 novalidate 로 껐습니다. 언어마다 다른 브라우저
     // 문구 대신 우리 문구를 우리 자리에 보여주기 위해서입니다.
     if (!input.checkValidity() || input.value.trim() === '') {
-      say(copy.invalid, 'bad');
-      /*
-       * 문구를 띄우는 것만으로는 스크린리더에서 "이 칸이 잘못됐다" 가
-       * 되지 않습니다. `aria-describedby` 는 설명을 묶을 뿐이라, 잘못됐다는
-       * 사실은 이 속성이 말합니다. 테두리 색도 여기에 걸려 있습니다.
-       */
-      input.setAttribute('aria-invalid', 'true');
-      input.focus();
+      sayFieldError(copy.invalid);
       return;
     }
 
-    input.removeAttribute('aria-invalid');
+    clearFieldError();
     submit.disabled = true;
     const label = submit.textContent;
     submit.textContent = copy.sending;
@@ -262,7 +272,13 @@ function mountOne(form: HTMLFormElement): void {
           cta.setAttribute('hidden', '');
         }
       } else {
-        fail(res.status === 400 ? copy.invalid : copy.error, res.status);
+        /*
+         * 400 은 서버가 형식을 거절한 것이라 **이 칸에 대한 말** 입니다.
+         * 다시 시도해 달라는 안내(fail)가 아니라 고칠 자리로 보냅니다 —
+         * `fail` 이 400 을 세지 않는 것도 같은 이유였습니다.
+         */
+        if (res.status === 400) sayFieldError(copy.invalid);
+        else fail(copy.error, res.status);
       }
     } catch {
       // 응답이 없습니다 — 오프라인이거나 요청이 끊겼습니다.

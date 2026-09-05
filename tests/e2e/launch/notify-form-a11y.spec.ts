@@ -142,9 +142,9 @@ test.describe('알림 폼 접근성', () => {
     await form.locator('[data-notify-submit]').click();
 
     // 1. 문구 — 무엇이 잘못됐는지 글로 남습니다.
-    const state = form.locator('[data-notify-state]');
-    await expect(state, '오류 문구가 뜨지 않았습니다').toBeVisible();
-    await expect(state).toHaveAttribute('data-tone', 'bad');
+    const error = form.locator('[role="alert"]');
+    await expect(error, '오류 문구가 뜨지 않았습니다').toBeVisible();
+    await expect(error).not.toBeEmpty();
 
     // 2. 속성 — 스크린리더가 "이 칸이 잘못됐다" 로 읽습니다.
     await expect(input, 'aria-invalid 가 붙지 않았습니다').toHaveAttribute('aria-invalid', 'true');
@@ -172,6 +172,36 @@ test.describe('알림 폼 접근성', () => {
     );
   });
 
+  test('오류 문구가 입력칸 바로 아래에 뜬다', async ({ page }) => {
+    /*
+     * ⚠️ 이 결함은 **검사가 전부 통과한 뒤에 스크린샷으로 드러났습니다.**
+     *
+     * 처음에는 결과 문구 하나가 제출 결과와 입력 오류를 겸했습니다. 그 자리가
+     * 활동 체크박스 **뒤** 라, 오류를 띄우면 데스크톱에서 약 200px, 390px
+     * 화면에서는 750px 아래에 떴습니다. 포커스는 입력칸으로 돌아와 있는데
+     * 무엇이 잘못됐는지는 화면 저 아래에 있었습니다.
+     *
+     * `aria-describedby` 로 묶여 있어 낭독기에서는 문제가 없었고, 그래서
+     * 접근성 검사도 전부 통과했습니다 — **관계는 맞고 자리가 틀린** 경우라
+     * 거리를 직접 잽니다.
+     */
+    await page.goto('/ko/');
+
+    const form = page.locator(FORM).first();
+    const input = form.locator('input[name="email"]');
+    await form.locator('[data-notify-submit]').click();
+
+    const gap = await form.evaluate((f) => {
+      const box = f.querySelector('input[name="email"]')!.getBoundingClientRect();
+      const err = f.querySelector('[role="alert"]')!.getBoundingClientRect();
+      return Math.round(err.top - box.bottom);
+    });
+
+    expect(gap, `오류 문구가 입력칸에서 ${gap}px 떨어져 있습니다`).toBeLessThan(120);
+    expect(gap, '오류 문구가 입력칸 위에 있습니다').toBeGreaterThanOrEqual(0);
+    await expect(input).toBeFocused();
+  });
+
   test('오류 문구가 본문색이 아니고, 실제 배경에서 읽힌다', async ({ page }) => {
     /*
      * ⚠️ 대비를 **실제 렌더된 색** 으로 잽니다.
@@ -187,10 +217,10 @@ test.describe('알림 폼 접근성', () => {
 
     const form = page.locator(FORM).first();
     await form.locator('[data-notify-submit]').click();
-    const state = form.locator('[data-notify-state]');
-    await expect(state).toBeVisible();
+    const error = form.locator('[role="alert"]');
+    await expect(error).toBeVisible();
 
-    const colors = await state.evaluate((el) => {
+    const colors = await error.evaluate((el) => {
       /* 문구 자체는 배경이 투명합니다. 뒤에 실제로 깔린 면을 찾아 올라갑니다. */
       let node: HTMLElement | null = el as HTMLElement;
       let bg = 'rgba(0, 0, 0, 0)';
