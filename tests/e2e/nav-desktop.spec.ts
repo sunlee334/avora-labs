@@ -368,7 +368,24 @@ test.describe('드롭다운', () => {
 test.describe('유틸리티 줄', () => {
   test.beforeEach(async ({ page }) => desktop(page));
 
-  test('기본 메뉴와 다른 줄에 있다', async ({ page }) => {
+  test('두 행 구간에서는 기본 메뉴와 다른 줄에 있다', async ({ page }) => {
+    /*
+     * ⚠️ **폭을 1280 에서 1000 으로 옮겼습니다.**
+     *
+     * 헤더는 폭에 따라 격자가 다릅니다.
+     *
+     *   900~1099px   'brand util' / 'links links'   ← 두 행. 유틸리티가 위
+     *   1100px~      'brand links util'             ← 한 행. 나란히 선다
+     *
+     * 이 검사는 두 행 성질을 재는데 `desktop()`(1280px)에서 돌고 있었습니다.
+     * 거기서는 같은 행이라 두 상자의 y 가 같아야 맞습니다. 그런데도 통과한
+     * 이유는 `.nav__utility` 의 `border-bottom` 이 상자를 1px 키워 y 가
+     * 0.5px 작았기 때문입니다 — 그 1px 은 메뉴와 마이페이지의 기준선을
+     * 어긋나게 하던 것이라 없앴고, 그러자 이 검사가 드러났습니다.
+     *
+     * 재려던 성질은 유효하므로 그 성질이 존재하는 폭에서 잽니다.
+     */
+    await page.setViewportSize({ width: 1000, height: 900 });
     await page.goto('/ko/');
     const util = await page.locator('.nav__utility').boundingBox();
     const links = await page.locator('.nav__links').boundingBox();

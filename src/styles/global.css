@@ -1498,9 +1498,20 @@ html {
  * 걸린 경우입니다. 글자 수가 적은 언어에서 먼저 터지므로 값이 아니라
  * padding 으로 바닥을 만듭니다.
  */
+/*
+ * 메뉴 항목의 좌우 여백은 유틸리티 링크(0 8px)와 같은 값입니다. 6px 이던
+ * 시절에는 한 줄 안에서 항목 간격이 두 가지였습니다.
+ */
 .nav__links a,
 .nav__links button {
-  padding-inline: 6px;
+  padding-inline: 8px;
+}
+/*
+ * 화살표 버튼의 자간을 옆 링크와 맞춥니다. `<button>` 은 자간을 물려받지
+ * 않아 혼자 `normal` 이었습니다.
+ */
+.nav__links button {
+  letter-spacing: 0.03em;
 }
 .nav__links a {
   display: inline-flex;
@@ -1638,9 +1649,19 @@ html {
      닿지 않습니다. 그래서 여기서 명시합니다. */
   min-height: var(--size-tap-min);
   padding: 0 8px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.04em;
+  /*
+   * 왼쪽 메뉴와 **같은 글자** 입니다.
+   *
+   * 전에는 Mono 12px 이었습니다. 성격이 같은 링크인데 폰트가 달라, 헤더 한
+   * 줄 안에 서체가 셋(Display·Body·Mono)이 되고 마이페이지만 다른 물건처럼
+   * 보였습니다. 기호에 가까운 `KO` 만 Mono 예외로 둡니다.
+   *
+   * ⚠️ 이 규칙이 `.nav__account` 를 이깁니다 — 선택자가 하나 더 깊어
+   * 특정성이 높습니다. 거기 값을 고쳐도 화면은 그대로입니다.
+   */
+  font-family: var(--font-body);
+  font-size: 13px;
+  letter-spacing: 0.03em;
 }
 
 @media (min-width: 900px) {
@@ -1648,7 +1669,25 @@ html {
     display: flex;
     align-items: center;
     gap: 4px;
-    border-bottom: 1px solid var(--color-border);
+    /*
+     * ⚠️ 밑줄을 `border-bottom` 으로 그리지 않습니다.
+     *
+     * 테두리는 상자 높이에 1px 을 더합니다. 이 줄이 헤더 행의 키를 정하는
+     * 쪽이라, 그 1px 때문에 안쪽 링크가 옆 메뉴보다 **0.5px 위** 에 섰습니다.
+     * 지시서가 "메뉴 링크와 마이페이지의 baseline 이 정확히 맞는다" 고 적어
+     * 둔 자리입니다.
+     *
+     * 가짜 요소로 그리면 높이에 끼어들지 않습니다.
+     */
+    position: relative;
+  }
+  .nav__utility::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: 1px;
+    background: var(--color-border);
   }
 }
 
@@ -1778,6 +1817,14 @@ html {
   justify-content: center;
   min-height: var(--size-tap-min);
   min-width: var(--size-tap-min);
+  /*
+   * ⚠️ `padding-block: 0` 이 필요합니다.
+   *
+   * `<button>` 의 브라우저 기본 여백이 위아래 1px 남아, 옆의 `<a>` 메뉴와
+   * 나란히 놓이면 글자 기준선이 1px 어긋납니다. 좌우만 지정하면 그 1px 은
+   * 그대로 남습니다.
+   */
+  padding-block: 0;
   padding-inline: 12px;
   background: transparent;
   border: 1px solid var(--color-border);
