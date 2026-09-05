@@ -120,6 +120,16 @@ function mountOne(form: HTMLFormElement): void {
    */
   let failures = 0;
 
+  /*
+   * 고치기 시작하면 표시를 거둡니다.
+   *
+   * 오류 표시를 다음 제출까지 들고 있으면, 이미 고친 사람에게 계속 잘못됐다고
+   * 말하는 셈입니다. 표시를 붙이는 것은 제출 때뿐이고 거두는 것은 입력 때입니다.
+   */
+  input.addEventListener('input', () => {
+    input.removeAttribute('aria-invalid');
+  });
+
   function fail(message: string, status?: number) {
     failures += 1;
     const extra = failures >= 2 && copy.fallback ? ` ${copy.fallback}` : '';
@@ -151,10 +161,17 @@ function mountOne(form: HTMLFormElement): void {
     // 문구 대신 우리 문구를 우리 자리에 보여주기 위해서입니다.
     if (!input.checkValidity() || input.value.trim() === '') {
       say(copy.invalid, 'bad');
+      /*
+       * 문구를 띄우는 것만으로는 스크린리더에서 "이 칸이 잘못됐다" 가
+       * 되지 않습니다. `aria-describedby` 는 설명을 묶을 뿐이라, 잘못됐다는
+       * 사실은 이 속성이 말합니다. 테두리 색도 여기에 걸려 있습니다.
+       */
+      input.setAttribute('aria-invalid', 'true');
       input.focus();
       return;
     }
 
+    input.removeAttribute('aria-invalid');
     submit.disabled = true;
     const label = submit.textContent;
     submit.textContent = copy.sending;

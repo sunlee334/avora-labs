@@ -3132,12 +3132,22 @@ html {
   color: color-mix(in srgb, var(--color-text-muted) 70%, transparent);
 }
 .field input[aria-invalid='true'] {
-  border-color: var(--color-text);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-text) 14%, transparent);
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-error) 20%, transparent);
 }
+/*
+ * 오류 문구는 본문색이 아닙니다.
+ *
+ * 예전에는 `--color-text` 였습니다. 그러면 오류와 도움말이 같은 색이라,
+ * 무엇이 잘못됐다는 신호가 **글의 내용에만** 있었습니다. 화면을 훑는
+ * 사람에게는 아무 표시도 없는 것과 같습니다.
+ *
+ * ⚠️ 색만으로 말하지는 않습니다 — 문구를 적고 `aria-describedby` 로 입력칸에
+ * 묶는 것이 먼저이고(`Field.astro`), 이 색은 그 위에 얹는 두 번째 신호입니다.
+ */
 .field__error {
   font-size: 13px;
-  color: var(--color-text);
+  color: var(--color-error);
   font-weight: 500;
 }
 .field--postal {
@@ -4770,7 +4780,11 @@ html {
 @media (min-width: 560px) {
   .notify__row {
     grid-template-columns: 1fr auto;
-    align-items: start;
+    /*
+     * `start` 였습니다. 입력칸 위에 라벨이 생기면서 버튼이 라벨 옆에 서게
+     * 되어, 밑선으로 바꿉니다 — 버튼은 입력칸과 같은 줄에 있어야 합니다.
+     */
+    align-items: end;
   }
 }
 /* display 를 준 요소에는 hidden 속성이 먹지 않습니다 — 작성자 규칙이 브라우저
@@ -4779,7 +4793,20 @@ html {
   display: none;
 }
 .notify__field {
-  display: block;
+  display: grid;
+  gap: 8px;
+}
+/*
+ * 라벨을 **항상 보여줍니다.**
+ *
+ * 여기에는 플레이스홀더만 있고 라벨은 화면에서 숨겨져 있었습니다.
+ * `Field.astro` 가 그 이유를 이미 적어 두었는데 이 폼만 따르지 않았습니다 —
+ * 입력을 시작하는 순간 무엇을 적는 칸인지 사라지고, 번역이 길어지면
+ * 플레이스홀더가 잘리는데 잘렸다는 사실이 화면에 드러나지 않습니다.
+ */
+.notify__label {
+  font-size: 14px;
+  font-weight: 600;
 }
 .notify__field input {
   /* 16px 미만이면 iOS 사파리가 포커스 때 화면을 확대합니다. */
@@ -4793,6 +4820,10 @@ html {
   background: var(--color-bg);
   color: var(--color-text);
 }
+.notify__field input[aria-invalid='true'] {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-error) 20%, transparent);
+}
 .notify__field input::placeholder {
   color: color-mix(in srgb, var(--color-text-muted) 70%, transparent);
 }
@@ -4805,7 +4836,7 @@ html {
   font-weight: 500;
 }
 .notify__state[data-tone='bad'] {
-  color: var(--color-text);
+  color: var(--color-error);
 }
 .notify__consent {
   margin-top: 12px;
@@ -4975,17 +5006,6 @@ html {
 }
 
 /* 라벨은 placeholder 와 겹쳐 보이지만, 화면 낭독기에는 남아 있어야 합니다. */
-.field__label--visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
 /* ── 출시 시기 ───────────────────────────────────────────────
  *
  * 캠페인 색(Sunset)을 배경으로 깔면 안 됩니다 — 흰 글자로 3.14:1,
