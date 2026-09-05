@@ -201,9 +201,26 @@ button {
 :root {
   /* 손이 간 자리의 반응. 120ms 를 넘으면 굼떠 보이고, 아래면 안 보입니다. */
   --motion-hover: 120ms;
-  --pad-wrap: var(--space-gutter-mobile);
+  /*
+   * ⚠️ 가로 여백에 `env(safe-area-inset-*)` 이 함께 들어갑니다.
+   *
+   * 노치가 있는 기기를 **가로로 눕히면** 그 홈이 화면 왼쪽이나 오른쪽을
+   * 파먹습니다. 세로에서만 확인하면 영영 안 보이는 결함입니다 — 아래쪽
+   * 인셋은 이미 시트·고정 CTA·토스트·히어로 큐 네 곳에 들어가 있었는데
+   * 가로만 빠져 있었습니다.
+   *
+   * 양쪽에 `max()` 로 같은 값을 겁니다. 파먹히는 쪽은 한쪽뿐이지만 한쪽만
+   * 넓히면 본문이 화면 가운데에서 밀려 보입니다.
+   */
+  --pad-wrap: max(
+    var(--space-gutter-mobile),
+    env(safe-area-inset-left),
+    env(safe-area-inset-right)
+  );
   --pad-container: max(
     var(--space-gutter-mobile),
+    env(safe-area-inset-left),
+    env(safe-area-inset-right),
     calc((100% - var(--size-container-max)) / 2)
   );
 }
@@ -376,9 +393,16 @@ button {
 
 @media (min-width: 900px) {
   :root {
-    --pad-wrap: var(--space-gutter-desktop);
+    /* 가로로 누운 큰 화면도 900px 을 넘습니다. 위와 같은 이유로 함께 겁니다. */
+    --pad-wrap: max(
+      var(--space-gutter-desktop),
+      env(safe-area-inset-left),
+      env(safe-area-inset-right)
+    );
     --pad-container: max(
       var(--space-gutter-desktop),
+      env(safe-area-inset-left),
+      env(safe-area-inset-right),
       calc((100% - var(--size-container-max)) / 2)
     );
   }
@@ -3572,7 +3596,11 @@ html {
 .footer {
   background: var(--color-bg-inverse);
   color: var(--color-accent);
-  padding-block: 48px 40px;
+  /*
+   * 페이지 맨 끝이라 홈 인디케이터가 바로 위에 겹칩니다. 바닥 여백에
+   * 인셋을 더해, 저작권 줄이 그 막대 아래로 들어가지 않게 합니다.
+   */
+  padding-block: 48px calc(40px + env(safe-area-inset-bottom));
 }
 /*
  * 푸터 바닥의 워드마크.
