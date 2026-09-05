@@ -109,9 +109,14 @@ test.describe('버튼 일관성', () => {
      * 나란히 섰습니다. 배포한 화면을 눈으로 보고서야 드러났습니다.
      *
      * ⚠️ **문서 전체의 개수를 세지 않습니다.**
-     * 홈에는 알림 폼이 셋입니다(첫 화면 · 검증단 섹션 · 하단 시트). 같은 행동을
-     * 긴 페이지에서 되묻는 것이라 서로 경쟁하지 않습니다. 규칙이 말하는 것은
-     * **한 화면** 이므로, 화면을 훑으며 그 순간 함께 보이는 것만 셉니다.
+     * 홈에는 알림 폼이 셋입니다(첫 화면 · 검증단 섹션 · 하단 시트). 규칙이 말하는
+     * 것은 **한 화면** 이므로 화면을 훑으며 그 순간 함께 보이는 것만 셉니다.
+     *
+     * ⚠️ **같은 라벨은 하나로 셉니다.**
+     * 390px 에서는 페이지가 길어져 그 알림 폼 중 둘이 한 화면에 들어옵니다.
+     * 둘 다 `출시 알림 받기` 로 **같은 행동** 이고, 규칙이 막는 것은 서로 다른
+     * 행동이 같은 무게로 경쟁하는 것입니다. 같은 요청을 긴 페이지에서 되묻는
+     * 것은 경쟁이 아닙니다 — CI 의 mobile 샤드가 이것을 잡아 주었습니다.
      */
     for (const path of ['/ko/', '/ko/product/', '/ko/brand/', '/ko/cart/']) {
       await page.setViewportSize({ width: 1280, height: 900 });
@@ -128,9 +133,11 @@ test.describe('버튼 일관성', () => {
             const r = el.getBoundingClientRect();
             return r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight;
           });
-          if (here.length > seen.n) {
-            seen.n = here.length;
-            seen.labels = here.map((el) => (el.textContent ?? '').trim().slice(0, 18));
+          // 같은 라벨은 같은 행동입니다. 서로 다른 것이 몇 가지인지만 봅니다.
+          const labels = [...new Set(here.map((el) => (el.textContent ?? '').trim()))];
+          if (labels.length > seen.n) {
+            seen.n = labels.length;
+            seen.labels = labels.map((t) => t.slice(0, 18));
             seen.y = y;
           }
         }
@@ -139,7 +146,7 @@ test.describe('버튼 일관성', () => {
 
       expect(
         worst.n,
-        `${path} 의 ${worst.y}px 지점에 오렌지가 ${worst.n}개 함께 보입니다: ${worst.labels.join(' / ')}`,
+        `${path} 의 ${worst.y}px 지점에 서로 다른 오렌지가 ${worst.n}개 함께 보입니다: ${worst.labels.join(' / ')}`,
       ).toBeLessThanOrEqual(1);
     }
   });
