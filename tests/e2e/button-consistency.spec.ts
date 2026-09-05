@@ -97,6 +97,53 @@ test.describe('버튼 일관성', () => {
     expect(bad, `알약형 텍스트 버튼: ${bad.join(', ')}`).toEqual([]);
   });
 
+  test('한 화면에 오렌지가 둘 서지 않는다', async ({ page }) => {
+    /*
+     * `Button.astro` 가 처음부터 적어 둔 규칙입니다.
+     *
+     *   "primary — 캠페인 오렌지 채움. **한 화면에 하나만.**
+     *    오렌지가 흩어지면 브랜드 시그널이 아니라 배경색이 됩니다"
+     *
+     * 그런데 지켜 주는 것이 없었습니다. `.cta` 25곳을 `.btn--primary` 로 옮기자
+     * 홈에서 `고르는 기준 보기`(이동)와 `출시 알림 받기`(제출)가 130px 안에
+     * 나란히 섰습니다. 배포한 화면을 눈으로 보고서야 드러났습니다.
+     *
+     * ⚠️ **문서 전체의 개수를 세지 않습니다.**
+     * 홈에는 알림 폼이 셋입니다(첫 화면 · 검증단 섹션 · 하단 시트). 같은 행동을
+     * 긴 페이지에서 되묻는 것이라 서로 경쟁하지 않습니다. 규칙이 말하는 것은
+     * **한 화면** 이므로, 화면을 훑으며 그 순간 함께 보이는 것만 셉니다.
+     */
+    for (const path of ['/ko/', '/ko/product/', '/ko/brand/', '/ko/cart/']) {
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await page.goto(path);
+      await page.evaluate(() => document.fonts.ready);
+
+      const worst = await page.evaluate(async () => {
+        const seen: { n: number; labels: string[]; y: number } = { n: 0, labels: [], y: 0 };
+        const step = Math.round(innerHeight * 0.6);
+        for (let y = 0; y < document.documentElement.scrollHeight; y += step) {
+          window.scrollTo(0, y);
+          await new Promise((r) => setTimeout(r, 120));
+          const here = [...document.querySelectorAll('.btn--primary')].filter((el) => {
+            const r = el.getBoundingClientRect();
+            return r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight;
+          });
+          if (here.length > seen.n) {
+            seen.n = here.length;
+            seen.labels = here.map((el) => (el.textContent ?? '').trim().slice(0, 18));
+            seen.y = y;
+          }
+        }
+        return seen;
+      });
+
+      expect(
+        worst.n,
+        `${path} 의 ${worst.y}px 지점에 오렌지가 ${worst.n}개 함께 보입니다: ${worst.labels.join(' / ')}`,
+      ).toBeLessThanOrEqual(1);
+    }
+  });
+
   test('지워진 클래스가 어디에도 남아 있지 않다', async ({ page }) => {
     /*
      * ⚠️ **마크업만 훑으면 놓칩니다.**
