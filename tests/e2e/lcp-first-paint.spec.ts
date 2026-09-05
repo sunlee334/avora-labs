@@ -30,9 +30,11 @@ async function hiddenAncestor(page: Page, selector: string): Promise<string | nu
 /**
  * 페이지 스크립트를 **못 오게 막습니다.**
  *
- * 느린 회선에서 첫 페인트 직전의 상태가 이것입니다. `<head>` 의 인라인
- * 스크립트는 그대로 돌아 `html.js` 를 답니다 — 즉 "감추는 쪽" 은 켜지고
- * "푸는 쪽" 만 늦는, 정확히 문제가 되는 조합이 만들어집니다.
+ * 느린 회선에서 첫 페인트 직전의 상태가 이것입니다. 예전에는 `<head>` 의
+ * 인라인 스크립트가 `html.js` 를 달아 "감추는 쪽" 만 켜지고 "푸는 쪽" 이
+ * 늦는 조합이 만들어졌습니다. 지금은 감추는 일이 CSS 애니메이션 안에 있어
+ * 스크립트와 무관하지만, 다음 사람이 다시 스크립트로 감출 수도 있으므로
+ * 이 검사는 남겨 둡니다.
  */
 async function blockModuleScripts(page: Page) {
   await page.route('**/_astro/*.js', (route) => route.abort());
@@ -68,18 +70,38 @@ test.describe('첫 화면은 스크립트를 기다리지 않는다', () => {
     });
   }
 
-  test('스크립트가 오면 아래 덩어리도 나타난다', async ({ page }) => {
+  test('첫 화면 밖에는 등장 효과가 남아 있다', async ({ page }) => {
     /*
      * 위 검사만 있으면 "등장 효과를 통째로 지운다" 로도 통과합니다.
      * 첫 화면 밖에서는 그 효과가 살아 있어야 합니다 — 그래야 위의 셋이
      * **골라서 뺀 것** 이 됩니다.
+     *
+     * ⚠️ 예전에는 "가만히 두면 5초 안에 선명해진다" 로 확인했습니다. 관찰자가
+     * 화면 200px 앞을 미리 잡아 스크롤 없이도 켜졌기 때문입니다. 지금은
+     * 진행률이 스크롤 위치에서 나오므로 **가만히 두면 켜지지 않는 것이
+     * 맞습니다.** 그래서 제자리로 보낸 뒤에 봅니다.
      */
     await page.goto('/ko/brand/');
     const later = page.locator('.rise').first();
     await expect(later, '등장 효과가 통째로 사라졌습니다').toHaveCount(1);
+
+    /*
+     * 스크롤 타임라인을 지원하지 않는 브라우저에서는 `@supports` 가 통째로
+     * 걸러 내 처음부터 선명합니다 — 연출이 없는 것이지 고장이 아닙니다.
+     */
+    if (await page.evaluate(() => CSS.supports('animation-timeline', 'view()'))) {
+      expect(
+        await later.evaluate((el) => getComputedStyle(el).animationName),
+        '등장 애니메이션이 걸려 있지 않습니다',
+      ).toBe('rise-in');
+    }
+
+    await later.evaluate((el) => el.scrollIntoView({ block: 'center' }));
     await expect
-      .poll(async () => later.evaluate((el) => getComputedStyle(el).opacity), { timeout: 5000 })
-      .toBe('1');
+      .poll(async () => later.evaluate((el) => Number(getComputedStyle(el).opacity)), {
+        timeout: 5000,
+      })
+      .toBeGreaterThan(0.99);
   });
 });
 

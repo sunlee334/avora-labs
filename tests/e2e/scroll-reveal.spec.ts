@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 
 /**
@@ -11,7 +11,7 @@ import { readFileSync } from 'node:fs';
  *
  * ── 재현이 까다롭다 — 그래서 방법을 여기 박아 둔다 ─────────
  * 처음에는 `scrollTo` 로 페이지 곳곳에 **점프해서** 쟀고, 아무 문제도 찾지
- * 못했습니다. 점프는 한 번 뛰고 멈추므로 관찰자가 따라잡을 틈이 생깁니다.
+ * 못했습니다. 점프는 한 번 뛰고 멈추므로 진행이 따라잡을 틈이 생깁니다.
  *
  * 사람은 그렇게 스크롤하지 않습니다. **매 프레임 조금씩 계속** 움직여야
  * 재현됩니다. 그때 화면의 4분의 1 이상을 차지한 요소의 불투명도가
@@ -26,6 +26,12 @@ import { readFileSync } from 'node:fs';
  * `[data-section]` 이 아닌 요소가 빈 자리로 계산돼, 멀쩡한 화면도 52% 로
  * 나왔습니다. 질문 그대로 재는 편이 낫습니다 — **화면의 큰 부분을 차지하는
  * 요소가 흐린 채로 있는 순간이 있는가.**
+ *
+ * ── 기계 장치가 바뀌었다 ───────────────────────────────────
+ * 예전에는 스크립트가 `is-in` 을 붙여 나타냈습니다. 지금은 CSS 스크롤
+ * 타임라인(`animation-timeline: view()`)이 진행률을 직접 만듭니다. 위 질문은
+ * 그대로지만 **새 실패 모드가 하나 생겼고**, 그것을 재는 검사가 아래
+ * `모든 등장 요소가 끝내 선명해진다` 입니다.
  */
 
 /** 화면의 이 비율 이상을 차지하면 "화면을 대표하는 요소" 로 봅니다. */
@@ -33,7 +39,16 @@ const DOMINANT = 0.25;
 /** 이 아래로 내려가면 글자가 읽히지 않습니다. */
 const FLOOR = 0.5;
 
-async function worstOpacityWhileFlicking(page: import('@playwright/test').Page, path: string) {
+/*
+ * 스크롤 타임라인은 Chromium 계열만 지원합니다. 지원하지 않는 브라우저에서는
+ * `@supports` 가 통째로 걸러 내므로 `.rise` 가 **처음부터 선명** 합니다 —
+ * 연출이 없는 것이지 고장이 아닙니다. 그래서 "흐려야 한다" 를 주장하는
+ * 검사만 그쪽에서 건너뜁니다. "흐리면 안 된다" 쪽은 양쪽 다 돌립니다.
+ */
+const supportsViewTimeline = (page: Page) =>
+  page.evaluate(() => CSS.supports('animation-timeline', 'view()'));
+
+async function worstOpacityWhileFlicking(page: Page, path: string) {
   await page.goto(path);
   await page.waitForLoadState('networkidle');
 
@@ -88,6 +103,76 @@ test.describe('빠르게 스크롤해도 읽을 것이 남는다', () => {
     });
   }
 
+  for (const path of ['/ko/', '/ko/brand', '/ko/panel', '/ko/product']) {
+    test(`${path} — 모든 등장 요소가 끝내 선명해진다`, async ({ page }) => {
+      /*
+       * ⚠️ 스크롤 타임라인이 새로 들여온 실패 모드입니다.
+       *
+       * 진행률이 시간이 아니라 **위치** 에 묶입니다. 그래서 범위를 끝까지
+       * 지나지 못하는 요소는 중간 진행률에 **영구히** 머뭅니다 — 2초 뒤에
+       * 저절로 풀리던 예전과 달리, 기다린다고 풀리지 않습니다.
+       *
+       * `cover` 기준이 정확히 그렇습니다. `cover 100%` 는 요소가 화면 위로
+       * 완전히 빠져나가는 지점이라, 페이지 마지막 요소는 끝까지 스크롤해도
+       * 도달하지 못합니다. 그 한 덩어리만 흐린 채로 남고, 나머지가 멀쩡하니
+       * 눈에도 잘 띄지 않습니다.
+       *
+       * 그래서 `entry` 기준을 씁니다(`global.css` 의 `animation-range`).
+       * 이 검사는 그 선택이 실제로 통하는지를 **페이지마다** 확인합니다.
+       *
+       * ── 측정을 rAF 루프로 하지 않습니다 ─────────────────────
+       * 처음에는 위 `worstOpacityWhileFlicking` 처럼 매 프레임 굴리며 최댓값을
+       * 모았습니다. `figure.figure` 하나가 네 페이지 모두에서 0.65 로 걸렸는데,
+       * **CSS 는 멀쩡했습니다** — 바닥까지 내려 2.5초 뒤에 재면 1.0 이었고
+       * 타임라인 진행률도 286% 였습니다.
+       *
+       * 스크롤 타임라인은 컴포지터에서 돕니다. 빠른 rAF 루프 안에서
+       * `getComputedStyle` 은 메인 스레드의 낡은 값을 돌려줄 수 있고, 그것이
+       * 하필 시작값 0.65 였습니다. 검사가 맞는데 실패하는 것보다 나쁜 것은
+       * 이 경우처럼 **없는 결함을 있다고 하는 것** 입니다.
+       *
+       * 그래서 요소를 하나씩 제자리에 세우고 멈춘 뒤에 읽습니다. 느리지만
+       * 재는 것이 분명합니다.
+       */
+      await page.goto(path);
+      await page.waitForLoadState('networkidle');
+
+      const rise = page.locator('.rise');
+      const total = await rise.count();
+      expect(total, '등장 요소가 하나도 없습니다').toBeGreaterThan(0);
+
+      const stuck: string[] = [];
+      for (let i = 0; i < total; i += 1) {
+        const el = rise.nth(i);
+        /*
+         * `block: 'center'` 면 화면보다 크든 작든 `entry 45%` 를 반드시
+         * 넘깁니다. 페이지 끝이라 가운데까지 못 가는 요소는 갈 수 있는 데까지
+         * 갑니다 — 그 자리가 바로 이 검사가 묻는 자리입니다.
+         */
+        await el.evaluate((node) => node.scrollIntoView({ block: 'center' }));
+        await page.waitForTimeout(400);
+
+        let opacity = await el.evaluate((node) => Number(getComputedStyle(node).opacity));
+        if (opacity < 0.99) {
+          // Lenis 의 관성이 아직 남았을 수 있습니다. 한 번 더 기다려 봅니다.
+          await page.waitForTimeout(700);
+          opacity = await el.evaluate((node) => Number(getComputedStyle(node).opacity));
+        }
+        if (opacity < 0.99) {
+          const name = await el.evaluate(
+            (node) => `${node.tagName.toLowerCase()}.${(node.className || '').split(' ')[0]}`,
+          );
+          stuck.push(`${name}[${i}] = ${opacity.toFixed(2)}`);
+        }
+      }
+
+      expect(
+        stuck,
+        `${path} — 제자리에 세워도 선명해지지 않는 요소가 있습니다: ${stuck.join(' / ')}`,
+      ).toEqual([]);
+    });
+  }
+
   test('연출을 없애지는 않았다', async ({ page }) => {
     /*
      * 지시서가 못 박았습니다 — "스크롤 리빌을 통째로 제거하지 말 것. 초기
@@ -95,18 +180,38 @@ test.describe('빠르게 스크롤해도 읽을 것이 남는다', () => {
      * 구조가 남아 있는지 함께 봅니다.
      */
     await page.goto('/ko/');
-    await expect(page.locator('.rise').first()).toHaveCount(1);
+    expect(await page.locator('.rise').count()).toBeGreaterThan(0);
 
-    const state = await page.evaluate(() => {
-      const el = document.querySelector('.rise')!;
-      const before = getComputedStyle(el);
-      return {
-        hasTransition: before.transitionProperty.includes('opacity'),
-        jsClass: document.documentElement.classList.contains('js'),
-      };
-    });
-    expect(state.hasTransition, '전환이 사라졌습니다 — 연출을 지운 것입니다').toBe(true);
-    expect(state.jsClass, '.js 표식이 없습니다').toBe(true);
+    /*
+     * 범위 기준을 소스에서 못 박습니다. 위 `끝내 선명해진다` 검사가 실제
+     * 결과를 보지만, 왜 `cover` 가 아닌지는 그 검사가 실패한 다음에야
+     * 드러납니다. 여기서 먼저 막습니다.
+     */
+    const css = readFileSync('src/styles/global.css', 'utf8');
+    const block = css.slice(
+      css.indexOf('@supports (animation-timeline: view())'),
+      css.indexOf('@keyframes rise-in'),
+    );
+    expect(block, '스크롤 타임라인 블록을 못 찾았습니다').toContain('animation-timeline: view()');
+    expect(
+      block,
+      'animation-range 에 cover 를 썼습니다 — 페이지 마지막 요소가 영영 선명해지지 않습니다',
+    ).not.toMatch(/animation-range:[^;]*\bcover\b/);
+
+    const keyframes = css.slice(css.indexOf('@keyframes rise-in'), css.indexOf('@keyframes mark-draw'));
+    expect(keyframes, '시작 불투명도가 토큰에서 오지 않습니다').toContain('--motion-rise-opacity');
+
+    test.skip(
+      !(await supportsViewTimeline(page)),
+      '이 브라우저는 스크롤 타임라인을 지원하지 않습니다 — 연출 없이 처음부터 선명한 것이 맞습니다',
+    );
+    const belowFaded = await page.evaluate(
+      () =>
+        [...document.querySelectorAll('.rise')]
+          .filter((el) => el.getBoundingClientRect().top > innerHeight)
+          .filter((el) => Number(getComputedStyle(el).opacity) < 0.9).length,
+    );
+    expect(belowFaded, '화면 아래 섹션이 이미 다 드러났습니다 — 연출이 사라진 것입니다').toBeGreaterThan(0);
   });
 
   test('첫 화면은 리빌 대상이 아니다', async ({ page }) => {
@@ -124,105 +229,30 @@ test.describe('빠르게 스크롤해도 읽을 것이 남는다', () => {
 
   test('스크립트가 죽어도 흐린 채로 남지 않는다', async ({ page }) => {
     /*
-     * ⚠️ 이 결함은 **시작값을 올리면서 새로 생겼습니다.**
+     * 예전에는 이 검사가 **안전망을 확인** 했습니다. `.js` 표식은 `<head>`
+     * 인라인이 붙이고 `is-in` 은 문서 끝의 번들 모듈이 붙였는데 — 서로 다른
+     * 실패 단위라 — 모듈만 죽으면 흐린 상태(대비 3.2:1)가 영구히 남았습니다.
+     * 그 대가를 2초 타이머로 갚았고, 그 타이머는 다시 이 검사와 경합했습니다.
      *
-     * `.js` 표식은 `<head>` 인라인이 붙이고 `is-in` 은 문서 끝의 번들 모듈이
-     * 붙입니다 — 서로 다른 실패 단위입니다. 모듈이 죽으면 `.js .rise` 의 흐린
-     * 상태(대비 3.2:1)가 **영구히** 남습니다. 눈에 띄는 고장 없이 글자만 계속
-     * 흐립니다.
+     * 지금은 감추는 일이 CSS 애니메이션 안에 있어 **모듈과 아무 관계가
+     * 없습니다.** 그래서 주장이 바뀝니다 — 안전망이 켜지는지가 아니라,
+     * 모듈이 통째로 없어도 연출이 **그대로 동작하는지** 입니다.
      *
-     * 전에는 같은 고장이 `opacity: 0` 이라 백지로 즉시 드러났습니다. 결함은
-     * 고쳤지만 실패 모드는 더 조용해졌고, 그 대가를 `<head>` 의 2초 안전망이
-     * 갚습니다.
-     *
-     * 안전망을 모듈 안에 두면 소용이 없습니다 — 모듈이 죽을 때 함께 죽습니다.
-     * 그래서 `.js` 를 붙이는 **같은 단위** 에 있어야 합니다.
-     */
-    /*
-     * ⚠️ "처음에는 흐리다" 를 **살아 있는 값으로 확인하지 않습니다.**
-     *
-     * 처음에는 `domcontentloaded` 직후 `opacity` 를 읽어 흐린지 봤는데, 그
-     * 확인이 **자기 2초 타이머와 경합** 했습니다. 스위트가 부하를 받으면
-     * 로드가 2초를 넘고, 그때는 안전망이 이미 켜져 있어 "흐린 것이 없다" 가
-     * 됩니다 — 검사가 맞는데 실패합니다.
-     *
-     * 흐리게 시작한다는 것은 **CSS 선언** 의 사실이므로 규칙에서 읽습니다.
-     * 시점과 무관합니다.
-     */
-    /*
-     * 규칙을 **소스에서** 읽습니다.
-     *
-     * 브라우저에서 `link[rel=stylesheet]` 를 fetch 하려다 세 번 헛돌았습니다 —
-     * `goto` 전에 평가해 `about:blank` 를 보고, 순서를 고쳐도 이 저장소의
-     * 스타일 전달 방식 때문에 그 링크로는 못 읽었습니다. `sticky-cta-clearance`
-     * 가 이미 같은 이유로 파일 읽기를 쓰고 있으니 그쪽에 맞춥니다.
-     */
-    const css = readFileSync('src/styles/global.css', 'utf8');
-    const rule = css.slice(css.indexOf('.js .rise {'), css.indexOf('.js .rise.is-in'));
-    expect(rule, '.js .rise 규칙을 못 찾았습니다').toContain('opacity');
-    expect(rule, '시작 불투명도가 토큰에서 오지 않습니다').toContain('--motion-rise-opacity');
-
-    /*
-     * ⚠️ `route.abort()` 를 쓰지 않습니다.
-     *
-     * 요청을 끊으면 서버 쪽에 `Broken pipe` 가 쌓입니다. CI 로그에서 그
-     * 오류가 줄줄이 나온 뒤 세 샤드가 `ECONNREFUSED 8787` 로 무너졌습니다.
-     * 원인을 이 검사로 단정할 수는 없지만, 같은 목적을 연결을 끊지 않고
-     * 이룰 수 있으면 그쪽이 맞습니다.
-     *
-     * 빈 스크립트로 **정상 응답** 합니다 — 모듈이 오지 않은 것과 화면에서는
-     * 같고, 서버는 요청이 끝난 것으로 봅니다.
+     * ⚠️ `route.abort()` 를 쓰지 않습니다. 요청을 끊으면 서버 쪽에
+     * `Broken pipe` 가 쌓입니다. CI 로그에서 그 오류가 줄줄이 나온 뒤 세
+     * 샤드가 `ECONNREFUSED 8787` 로 무너졌습니다. 원인을 이 검사로 단정할
+     * 수는 없지만, 같은 목적을 연결을 끊지 않고 이룰 수 있으면 그쪽이
+     * 맞습니다. 빈 스크립트로 **정상 응답** 합니다.
      */
     await page.route('**/_astro/*.js', (route) =>
       route.fulfill({ status: 200, contentType: 'text/javascript', body: '' }),
     );
-    await page.goto('/ko/', { waitUntil: 'domcontentloaded' });
 
-    // 모듈이 오지 않으면 안전망이 켜져야 합니다 — 이것이 이 검사의 주장입니다.
-    await page.waitForFunction(
-      () => document.documentElement.classList.contains('rise-fallback'),
-      undefined,
-      { timeout: 8000 },
-    );
-
-    const faded = await page.evaluate(
-      () =>
-        [...document.querySelectorAll('.rise')].filter(
-          (el) => Number(getComputedStyle(el).opacity) < 0.9,
-        ).length,
-    );
-    expect(faded, '안전망이 켜졌는데 아직 흐립니다').toBe(0);
-  });
-
-  test('정상 경로에서는 안전망이 연출을 지우지 않는다', async ({ page }) => {
-    /*
-     * 안전망을 모듈 안에 `setTimeout(revealAll, 2000)` 으로 두었을 때, 2초
-     * 뒤 **아직 스크롤하지 않은 섹션까지 전부 켜졌습니다.** 지시서가 금지한
-     * "리빌 통째 제거" 에 사실상 해당합니다.
-     *
-     * 지금은 모듈이 살아 있으면 스스로 타이머를 지웁니다.
-     */
-    await page.goto('/ko/');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2600);
-
-    const state = await page.evaluate(() => {
-      const rise = [...document.querySelectorAll('.rise')];
-      const below = rise.filter((el) => el.getBoundingClientRect().top > window.innerHeight);
-      return {
-        fallback: document.documentElement.classList.contains('rise-fallback'),
-        belowFold: below.length,
-        stillFaded: below.filter((el) => Number(getComputedStyle(el).opacity) < 0.9).length,
-      };
-    });
-
-    expect(state.fallback, '정상인데 안전망이 켜졌습니다').toBe(false);
-    if (state.belowFold > 0) {
-      expect(
-        state.stillFaded,
-        '화면 아래 섹션이 미리 드러났습니다 — 연출이 사라진 것입니다',
-      ).toBeGreaterThan(0);
-    }
+    const worst = await worstOpacityWhileFlicking(page, '/ko/');
+    expect(
+      worst,
+      `모듈이 없을 때 화면을 채운 요소가 opacity ${worst} 까지 흐려졌습니다`,
+    ).toBeGreaterThanOrEqual(FLOOR);
   });
 
   test('모션을 줄이면 즉시 보인다', async ({ page }) => {
@@ -231,14 +261,14 @@ test.describe('빠르게 스크롤해도 읽을 것이 남는다', () => {
     const rows = await page.locator('.rise').evaluateAll((els) =>
       els.map((el) => {
         const cs = getComputedStyle(el);
-        return { o: Number(cs.opacity), t: cs.transform, tr: cs.transitionDuration };
+        return { o: Number(cs.opacity), t: cs.transform, a: cs.animationName };
       }),
     );
     expect(rows.length).toBeGreaterThan(0);
     for (const r of rows) {
       expect(r.o, '모션 최소화인데 흐립니다').toBe(1);
       expect(r.t, '모션 최소화인데 밀려 있습니다').toBe('none');
-      expect(r.tr, '모션 최소화인데 전환이 남아 있습니다').toBe('0s');
+      expect(r.a, '모션 최소화인데 등장 애니메이션이 걸려 있습니다').toBe('none');
     }
   });
 });

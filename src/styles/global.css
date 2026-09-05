@@ -473,12 +473,16 @@ button {
   bottom: -0.12em;
   height: 2px;
   background: var(--color-campaign);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform var(--motion-rule-duration) var(--motion-rise-easing) 0.25s;
-}
-.rise.is-in .mark::after {
+  /*
+   * ⚠️ 기본값이 **그려진 상태** 입니다.
+   *
+   * 예전에는 `scaleX(0)` 으로 두고 `.rise.is-in` 이 펴 주기를 기다렸습니다.
+   * `is-in` 을 붙이는 것은 스크립트였으므로, 스크립트가 죽으면 밑줄이 영영
+   * 그려지지 않았습니다. 지금은 그리는 연출을 아래 애니메이션이 맡고,
+   * 애니메이션이 없으면 처음부터 그려진 채로 있습니다.
+   */
   transform: scaleX(1);
+  transform-origin: left;
 }
 /*
  * 캠페인 컬러(Sunset)는 기본 배경에서 3.14:1, 어두운 면에서 4.25:1 로 양쪽 다
@@ -494,34 +498,19 @@ button {
 
 /* ── 스크롤 등장 ──────────────────────────────────────────── */
 /*
- * 감추는 것은 `.js` 가 있을 때만입니다.
+ * 기본 상태가 **완성된 상태** 입니다. 감추는 일은 애니메이션이 합니다.
  *
- * `is-in` 을 붙이는 것은 스크립트입니다. 스크립트가 없으면 영영 붙지 않고,
- * 그러면 `opacity: 0` 이 그대로 남습니다. 실측한 결과 `/brand` 는 본문
- * 셋이 전부 `.rise` 라 **가운데가 통째로 백지** 였습니다(홈은 히어로만 남고
- * 일곱 덩어리가 사라졌습니다).
+ * 예전 구조는 셋으로 나뉘어 있었습니다 — `<head>` 인라인이 `.js` 를 붙여
+ * 감추고, 문서 끝의 번들 모듈이 IntersectionObserver 로 `is-in` 을 붙여
+ * 되돌리고, 같은 `<head>` 인라인의 2초 타이머가 모듈이 죽었을 때를 갚았습니다.
  *
- * 표식은 `<head>` 의 인라인 스크립트가 첫 그림 전에 답니다.
- */
-.rise {
-  transition:
-    opacity var(--motion-rise-duration) var(--motion-rise-easing),
-    transform var(--motion-rise-duration) var(--motion-rise-easing);
-}
-/*
- * ⚠️ 시작값이 **0 이 아닙니다.**
+ * 셋이 서로 다른 실패 단위라 조합마다 다른 고장이 났습니다. 모듈만 죽으면
+ * 흐린 상태(대비 3.2:1)가 영구히 남았고, 안전망을 모듈 안에 두면 모듈과 함께
+ * 죽었고, 안전망이 살아 있으면 이번에는 그 2초가 검사와 경합했습니다.
  *
- * 0 이던 시절, 빠르게 스크롤하면 화면 전체가 백지가 됐습니다. 휠을 연속으로
- * 굴리며 매 프레임을 재 보니 66프레임 중 56개가 화면의 절반도 못 채웠고
- * **최악은 0%** 였습니다 — 방문자에게는 사이트가 고장 난 것으로 보입니다.
- *
- * 섹션 하나가 화면보다 큰데 통째로 `opacity: 0` 으로 대기하는 것이 원인이라,
- * 관찰자를 아무리 앞당겨도 시작값이 0 인 한 그 순간은 남습니다. 그래서
- * **연출을 없애지 않고 시작값만 올립니다** — 나타나는 것이 아니라
- * 선명해지는 쪽으로.
- *
- * 한 번에 이 문제를 만드는 조합이었습니다: 시작 0 · 700ms · 16px 이동 ·
- * 관찰자가 뷰포트 아래를 8% 잘라 늦게 트리거. 넷을 함께 고칩니다.
+ * 여기서는 감추는 일 자체가 애니메이션 안에 있습니다. 애니메이션이 돌지
+ * 않으면 감춰지지도 않으므로, 스크립트가 죽든 브라우저가 지원하지 않든
+ * **글자는 처음부터 보입니다.** 갚을 대가가 없으니 안전망도 없습니다.
  *
  * ── 흐린 동안의 대비를 알고 씁니다 ─────────────────────────
  * 0.65 에서 글자 대비가 이만큼 떨어집니다(sRGB, WCAG 2.x).
@@ -530,51 +519,72 @@ button {
  *   어두운 밴드 보조    7.15:1 → 3.05:1
  *   어두운 밴드 본문    13.33:1 → 4.50:1
  *
- * 어두운 밴드는 두 겹으로 무너집니다 — 글자만 흐려지는 것이 아니라 섹션의
- * 어두운 배경이 페이지 배경 쪽으로 함께 씻겨서, 대비의 분모와 분자가 동시에
- * 좁아집니다.
- *
- * 그래도 이 값을 씁니다. **200ms 짜리 전환 프레임** 이고, 모션을 줄이는
- * 설정에서는 애초에 1.0 으로 고정됩니다. 대비 기준을 전환 중간 프레임에
- * 적용하는 해석은 일반적이지 않습니다.
- *
- * ⚠️ **이 값이 안전한 근거는 "얼마나 낮은가" 가 아니라 "얼마나 짧은가" 입니다.**
- * 그러니 짧다는 것을 보장하는 코드가 있어야 합니다.
- *
- * `.js` 표식은 `<head>` 의 인라인 스크립트가 붙이고, `is-in` 은 문서 끝의
- * 번들 모듈이 붙입니다 — **서로 다른 실패 단위** 입니다. 모듈이 죽으면
- * `.js .rise` 는 살아 있는데 `is-in` 이 영영 오지 않아, 3.2:1 이 **영구
- * 상태** 가 됩니다. 눈에 띄는 고장 없이.
- *
- * 전에는 같은 고장이 `opacity: 0`(명백한 백지)이라 즉시 드러났습니다. 이
- * 수정이 결함은 고쳤지만 **실패 모드는 더 조용하게 만들었습니다.** 그래서
- * `Base.astro` 에 2초 안전망을 둡니다.
- *
- * 측정 조건: sRGB · WCAG 2.x · `#F6F7F8` / `#252B31` / `#485058` / `#A8BAC6`.
+ * 이 값이 안전한 근거는 "얼마나 낮은가" 가 아니라 **"반드시 지나간다"** 는
+ * 것입니다. 아래 `animation-range` 주석이 그것을 보장하는 자리입니다.
  *
  * ⚠️ 그리고 **검사는 이 상태를 영원히 보지 못합니다.** axe 가 모션 최소화를
  * 켜고 재기 때문입니다(`tests/support/axe.ts`). 이 값을 더 낮추려는 사람은
  * 자동 검사가 통과한다는 사실을 근거로 삼으면 안 됩니다.
  */
-.js .rise {
-  opacity: var(--motion-rise-opacity);
-  transform: translateY(var(--motion-rise-shift));
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .rise {
+      animation-name: rise-in;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      /* 스크롤 타임라인에서는 `auto` 가 "범위 전체" 를 뜻합니다. */
+      animation-duration: auto;
+      animation-timeline: view();
+      /*
+       * ⚠️ `entry` 기준입니다 — `cover` 를 쓰면 **끝나지 않는 요소** 가 생깁니다.
+       *
+       * 시간이 아니라 위치에 묶이므로, 범위를 다 지나지 못한 요소는 중간
+       * 진행률에 **영구히** 머뭅니다. `cover 100%` 는 요소가 화면 위로 완전히
+       * 빠져나가는 지점이라 페이지 마지막 요소는 끝까지 스크롤해도 도달하지
+       * 못합니다 — 그 요소만 흐린 채로 남습니다.
+       *
+       * `entry` 는 요소가 화면에 다 들어오면 끝납니다. 45% 에서 더 일찍
+       * 끊는 것도 같은 이유입니다. 아래에 푸터가 있어 여유가 있지만 여유에
+       * 기대지 않습니다. `scroll-reveal.spec.ts` 가 모든 `.rise` 가 실제로
+       * 1.0 에 닿는지 페이지마다 확인합니다.
+       */
+      animation-range: entry 5% entry 45%;
+    }
+
+    /*
+     * 밑줄은 자기 자신의 진행률로 그립니다. 예전에는 섹션이 켜진 뒤 0.25s
+     * 늦게 그렸는데, 스크롤 타임라인에는 "뒤" 가 없으므로 범위를 늦게 잡는
+     * 것으로 같은 순서를 만듭니다.
+     */
+    .mark::after {
+      animation-name: mark-draw;
+      animation-timing-function: var(--motion-rise-easing);
+      animation-fill-mode: both;
+      animation-duration: auto;
+      animation-timeline: view();
+      animation-range: entry 25% entry 70%;
+    }
+  }
 }
-.js .rise.is-in {
-  opacity: 1;
-  transform: none;
+
+@keyframes rise-in {
+  from {
+    opacity: var(--motion-rise-opacity);
+    transform: translateY(var(--motion-rise-shift));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
-/*
- * 안전망이 걷어 올린 상태.
- *
- * `<head>` 가 건 2초 타이머가 살아남았다는 것은 번들 모듈이 오지 않았다는
- * 뜻입니다. 그러면 흐린 상태가 영구히 남으므로 전부 되돌립니다 — 연출을
- * 잃는 것이 대비 3.2:1 로 사는 것보다 낫습니다.
- */
-.rise-fallback .rise {
-  opacity: 1;
-  transform: none;
-  transition: none;
+
+@keyframes mark-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 
 /* ── CTA ──────────────────────────────────────────────────── */
@@ -3762,15 +3772,11 @@ html {
   html {
     scroll-behavior: auto;
   }
-  .js .rise {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-  .mark::after {
-    transform: scaleX(1);
-    transition: none;
-  }
+  /*
+   * `.rise` 와 `.mark::after` 는 여기서 되돌릴 것이 없습니다 — 등장
+   * 애니메이션 자체가 `prefers-reduced-motion: no-preference` 안에만
+   * 있으므로, 이 설정에서는 애초에 걸리지 않습니다.
+   */
   .lang__sheet,
   .btn {
     transition: none;

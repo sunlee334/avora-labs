@@ -181,17 +181,36 @@ test.describe('모션 접근성', () => {
 
     // 스크롤하지 않은 상태에서도 아래쪽 .rise 요소가 이미 보여야 합니다.
     const last = page.locator('.rise').last();
-    await expect(last).toHaveClass(/is-in/);
     await expect(last).toHaveCSS('opacity', '1');
+    // 등장 애니메이션 자체가 걸리지 않아야 합니다 — 클래스가 아니라 이것이 근거입니다.
+    await expect(last).toHaveCSS('animation-name', 'none');
   });
 
   test('모션이 켜져 있으면 스크롤에 따라 등장한다', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.goto('/ko/');
 
+    /*
+     * 예전에는 `is-in` 클래스가 붙는지를 봤습니다. 그 클래스를 붙이던
+     * 스크립트가 없어졌으므로(연출은 CSS 스크롤 타임라인이 맡습니다) 결과를
+     * 직접 봅니다 — 화면 밖에서는 흐리고, 들어오면 선명해진다.
+     *
+     * 스크롤 타임라인을 지원하지 않는 브라우저는 처음부터 선명합니다.
+     * 연출이 없는 것이지 고장이 아니므로 그쪽에서는 건너뜁니다.
+     */
+    test.skip(
+      !(await page.evaluate(() => CSS.supports('animation-timeline', 'view()'))),
+      '이 브라우저는 스크롤 타임라인을 지원하지 않습니다',
+    );
+
     const target = page.locator('.rise').nth(3);
+    const before = await target.evaluate((el) => Number(getComputedStyle(el).opacity));
+    expect(before, '화면 밖인데 이미 선명합니다 — 연출이 없습니다').toBeLessThan(0.9);
+
     await target.scrollIntoViewIfNeeded();
-    await expect(target).toHaveClass(/is-in/, { timeout: 3000 });
+    await expect
+      .poll(() => target.evaluate((el) => Number(getComputedStyle(el).opacity)), { timeout: 3000 })
+      .toBeGreaterThan(0.99);
   });
 });
 
