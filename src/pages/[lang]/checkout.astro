@@ -54,7 +54,7 @@ const c = t.checkout;
           <div data-checkout-empty hidden>
             <p class="body">{c.emptyCart}</p>
             <p style="margin-top: 20px">
-              <a class="cta" href={localePath(locale, 'product')}>{t.cart.emptyCta}</a>
+              <a class="btn btn--primary" href={localePath(locale, 'product')}>{t.cart.emptyCta}</a>
             </p>
           </div>
 
@@ -85,7 +85,7 @@ const c = t.checkout;
                     autocomplete="postal-code" placeholder={c.placeholders.postalCode}
                     required maxlength="6" pattern="[0-9]*" />
                 </div>
-                <button type="button" class="cta cta--ghost" data-find-postcode>
+                <button type="button" class="btn btn--secondary" data-find-postcode>
                   {c.findPostcode}
                 </button>
                 <p class="field__error" data-error-for="postalCode" hidden></p>
@@ -215,10 +215,10 @@ const c = t.checkout;
 
             <p class="checkout__error" data-form-error hidden></p>
 
-            <button class="cta checkout__pay" type="submit" data-pay>{c.pay}</button>
+            <button class="btn btn--primary checkout__pay" type="submit" data-pay>{c.pay}</button>
 
             <p style="margin-top: 18px">
-              <a class="cta cta--ghost" href={localePath(locale, 'cart')}>{c.backToCart}</a>
+              <a class="btn btn--secondary" href={localePath(locale, 'cart')}>{c.backToCart}</a>
             </p>
           </div>
         </form>

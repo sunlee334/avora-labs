@@ -113,7 +113,7 @@ const a = t.account;
           {/* 출시 알림은 아직 살 수 없을 때만 뜻이 있습니다. */}
           {!CAN_ORDER && (
             <p style="margin-top: 20px">
-              <a class="cta cta--ghost" href={localePath(locale, 'product')}>{a.preLaunch.cta}</a>
+              <a class="btn btn--secondary" href={localePath(locale, 'product')}>{a.preLaunch.cta}</a>
             </p>
           )}
         </div>
@@ -173,7 +173,7 @@ const a = t.account;
         </div>
         <p class="checkout__error" data-address-error hidden></p>
         <div class="formActions">
-          <button class="cta" type="submit" data-address-save>{a.address.save}</button>
+          <button class="btn btn--primary" type="submit" data-address-save>{a.address.save}</button>
           <button class="linkButton" type="button" data-address-cancel>{a.address.cancel}</button>
         </div>
       </form>
@@ -207,7 +207,7 @@ const a = t.account;
         </div>
         <p class="field__error" data-claim-error hidden></p>
         <p class="body" data-claim-success hidden>{a.claim.success}</p>
-        <button class="cta" type="submit" data-claim-submit>{a.claim.submit}</button>
+        <button class="btn btn--primary" type="submit" data-claim-submit>{a.claim.submit}</button>
       </form>
 
       {/* 후기는 주문에서 나오므로 주문 근처에 둡니다. */}
@@ -383,7 +383,7 @@ const a = t.account;
      */
     function providerLink(kind: 'login' | 'link', provider: string, text: string): HTMLAnchorElement {
       const a = document.createElement('a');
-      a.className = kind === 'login' ? 'cta' : 'cta cta--ghost';
+      a.className = kind === 'login' ? 'btn btn--primary' : 'btn btn--secondary';
       a.href = `/api/auth/${kind === 'login' ? 'login' : 'link'}?provider=${encodeURIComponent(provider)}&returnTo=${returnTo}`;
       a.textContent = text;
       return a;

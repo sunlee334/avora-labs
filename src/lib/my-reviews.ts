@@ -214,7 +214,7 @@ function editForm(review: MyReview, copy: MyReviewsCopy): HTMLFormElement {
   const actions = document.createElement('div');
   actions.className = 'formActions';
   const save = document.createElement('button');
-  save.className = 'cta';
+  save.className = 'btn btn--primary';
   save.type = 'submit';
   save.textContent = copy.save;
   const cancel = document.createElement('button');
@@ -255,7 +255,7 @@ function pendingItem(order: PendingOrder, copy: MyReviewsCopy, writeHref: string
   // 링크입니다 — 버튼이 아니라. 다른 페이지로 가는 것이고, 새 탭·복사·
   // 뒤로가기가 전부 그대로 동작해야 합니다.
   const write = document.createElement('a');
-  write.className = 'cta cta--ghost myReviews__write';
+  write.className = 'btn btn--secondary myReviews__write';
   write.href = writeHref;
   write.textContent = copy.write;
 

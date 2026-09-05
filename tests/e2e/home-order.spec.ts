@@ -22,7 +22,7 @@ async function tops(page: import('@playwright/test').Page) {
       hero: y(document.querySelector('.hero')),
       choice: bySection('.display--tight'),
       panel: y(document.querySelector('#panel')),
-      product: y(document.querySelector('main a.cta[href$="/product/"]')?.closest('section')),
+      product: y(document.querySelector('main a.btn[href$="/product/"]')?.closest('section')),
       journey: y(document.querySelector('.journey')?.closest('section')),
       /*
        * 브랜드 서사는 `/brand` 로 옮겼습니다. 홈에 남은 것은 그리로 보내는

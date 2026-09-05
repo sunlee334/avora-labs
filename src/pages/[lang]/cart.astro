@@ -45,7 +45,7 @@ const purchasable = SELLS_DIRECTLY;
       <div data-cart-empty>
         <p class="body">{c.empty}</p>
         <p style="margin-top: 22px">
-          <a class="cta" href={localePath(locale, 'product')}>{c.emptyCta}</a>
+          <a class="btn btn--primary" href={localePath(locale, 'product')}>{c.emptyCta}</a>
         </p>
       </div>
 
@@ -69,7 +69,7 @@ const purchasable = SELLS_DIRECTLY;
 
         {
           purchasable ? (
-            <a class="cta cart__checkout" href={localePath(locale, 'checkout')} data-cart-checkout>
+            <a class="btn btn--primary cart__checkout" href={localePath(locale, 'checkout')} data-cart-checkout>
               {c.checkout}
             </a>
           ) : (
@@ -78,7 +78,7 @@ const purchasable = SELLS_DIRECTLY;
         }
 
         <p style="margin-top: 20px">
-          <a class="cta cta--ghost" href={localePath(locale, 'product')}>{c.continueShopping}</a>
+          <a class="btn btn--secondary" href={localePath(locale, 'product')}>{c.continueShopping}</a>
         </p>
       </div>
     </div>

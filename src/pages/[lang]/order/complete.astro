@@ -48,8 +48,8 @@ const o = t.order.complete;
         </dl>
 
         <div class="orderResult__actions">
-          <a class="cta" href={localePath(locale)}>{o.home}</a>
-          <a class="cta cta--ghost" href={localePath(locale, 'order/lookup')}>{o.lookup}</a>
+          <a class="btn btn--primary" href={localePath(locale)}>{o.home}</a>
+          <a class="btn btn--secondary" href={localePath(locale, 'order/lookup')}>{o.lookup}</a>
         </div>
       </div>
 
@@ -65,7 +65,7 @@ const o = t.order.complete;
         */}
         <p class="cart__notice" style="margin-top: 12px" data-failed-code hidden></p>
         <div class="orderResult__actions">
-          <a class="cta" href={localePath(locale, 'cart')}>{t.order.failed.retry}</a>
+          <a class="btn btn--primary" href={localePath(locale, 'cart')}>{t.order.failed.retry}</a>
         </div>
       </div>
     </div>

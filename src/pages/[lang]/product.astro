@@ -194,11 +194,11 @@ const rows = specRows(t);
 
         {
           sellsDirectly ? (
-            <button class="cta" type="button" data-add-to-cart data-product-id={productData.id}>
+            <button class="btn btn--primary" type="button" data-add-to-cart data-product-id={productData.id}>
               {p.hero.ctaCart}
             </button>
           ) : externalUrl ? (
-            <a class="cta" href={externalUrl} rel="noopener">
+            <a class="btn btn--primary" href={externalUrl} rel="noopener">
               {p.hero.ctaExternal}
             </a>
           ) : (
@@ -382,8 +382,8 @@ const rows = specRows(t);
     {!SELLS_DIRECTLY && <p class="product__reviewsNote">{p.reviewsNote}</p>}
 
     <p style="margin-top: 36px; display: flex; flex-wrap: wrap; gap: 12px">
-      <a class="cta cta--ghost" href={localePath(locale, 'reviews')}>{t.nav.reviews}</a>
-      <a class="cta cta--ghost" href={localePath(locale)}>{p.backToStory}</a>
+      <a class="btn btn--secondary" href={localePath(locale, 'reviews')}>{t.nav.reviews}</a>
+      <a class="btn btn--secondary" href={localePath(locale)}>{p.backToStory}</a>
     </p>
   </section>
 

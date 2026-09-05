@@ -21,7 +21,7 @@ test.describe('알약형을 쓰지 않는다', () => {
     await page.goto('/ko/');
     const bad = await page.evaluate(() => {
       const out: string[] = [];
-      for (const el of document.querySelectorAll<HTMLElement>('a.cta, .btn, .notify__act')) {
+      for (const el of document.querySelectorAll<HTMLElement>('.btn, .notify__act')) {
         const box = el.getBoundingClientRect();
         if (box.width === 0) continue;
         const r = parseFloat(getComputedStyle(el).borderTopLeftRadius);
@@ -63,7 +63,7 @@ test.describe('버튼', () => {
     await page.goto('/ko/');
     const small = await page.evaluate(() => {
       const out: string[] = [];
-      for (const el of document.querySelectorAll<HTMLElement>('main a.cta, main .btn')) {
+      for (const el of document.querySelectorAll<HTMLElement>('main .btn')) {
         const b = el.getBoundingClientRect();
         if (b.width && b.height < 44) out.push(`${el.className} h=${b.height}`);
       }
