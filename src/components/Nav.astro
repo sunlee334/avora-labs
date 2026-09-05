@@ -69,7 +69,7 @@ const utility = UTILITY_VISIBLE.filter((item) => item.badge !== 'cart');
             </a>
           </li>
         ) : (
-          <li class="nav__group">
+          <li class="nav__group" style={`anchor-name: --nav-anchor-${top.id}`}>
             {/*
               제목은 **링크**, 화살표는 **버튼** 입니다.
 
@@ -98,7 +98,25 @@ const utility = UTILITY_VISIBLE.filter((item) => item.badge !== 'cart');
             >
               <span class="nav__caret" aria-hidden="true"></span>
             </button>
-            <ul class="nav__dropdown" id={`nav-${top.id}`} hidden>
+            {/*
+              네이티브 `popover` 입니다 — 바깥 클릭과 Esc 로 닫는 일을 브라우저가
+              합니다. 전에는 `document` 에 click·keydown 을 걸어 직접 했습니다.
+
+              ⚠️ `popovertarget` 은 쓰지 않습니다. 그 속성은 **누를 때마다
+              토글** 인데, 이 메뉴는 마우스로 열린 것을 눌러도 닫지 않는 규칙이
+              있습니다(`nav-desktop.spec.ts` 의 「올려서 열린 것을 눌러도 닫히지
+              않는다」). 선언형 토글과 그 규칙은 함께 갈 수 없어, 여는 일만
+              스크립트가 합니다.
+
+              위치는 앵커로 잡습니다 — popover 는 top layer 라 조상의
+              `position: relative` 가 더 이상 기준이 되지 못합니다.
+            */}
+            <ul
+              class="nav__dropdown"
+              id={`nav-${top.id}`}
+              popover
+              style={`position-anchor: --nav-anchor-${top.id}`}
+            >
               {top.children.map((leaf) => (
                 <li>
                   <a
@@ -205,11 +223,57 @@ const utility = UTILITY_VISIBLE.filter((item) => item.badge !== 'cart');
    */
   const triggers = document.querySelectorAll<HTMLButtonElement>('[data-nav-drop]');
 
+  /** 열려 있는가. `popover` 는 `hidden` 이 아니라 이 상태로 말합니다. */
+  const isOpen = (panel: HTMLElement) => panel.matches(':popover-open');
+
+  /** 이미 그 상태면 호출하지 않습니다 — 아니면 InvalidStateError 가 납니다. */
+  function setPanel(panel: HTMLElement, open: boolean): void {
+    if (open === isOpen(panel)) return;
+    if (open) panel.showPopover();
+    else panel.hidePopover();
+  }
+
   function closeAll(): void {
     for (const trigger of triggers) {
       const panel = document.getElementById(trigger.getAttribute('aria-controls') ?? '');
-      if (panel) panel.hidden = true;
-      trigger.setAttribute('aria-expanded', 'false');
+      if (panel) setPanel(panel, false);
+    }
+  }
+
+  /*
+   * `aria-expanded` 는 `toggle` 이벤트로 맞춥니다.
+   *
+   * 여는 길이 셋(호버·클릭·키보드)이고 닫는 길이 넷(벗어나기·클릭·Esc·바깥
+   * 클릭)입니다. 그중 둘은 브라우저가 닫으므로, 여는 쪽에서 속성을 함께 쓰면
+   * 브라우저가 닫았을 때 `true` 인 채로 남습니다. 결과를 듣고 쓰는 편이
+   * 경우의 수와 무관합니다.
+   */
+  for (const trigger of triggers) {
+    const panel = document.getElementById(trigger.getAttribute('aria-controls') ?? '');
+    panel?.addEventListener('toggle', (event) => {
+      trigger.setAttribute('aria-expanded', String((event as ToggleEvent).newState === 'open'));
+    });
+  }
+
+  /*
+   * 앵커 위치를 지원하지 않는 브라우저(2026년 현재 파이어폭스)를 위한 자리.
+   *
+   * popover 는 top layer 라 조상 기준 배치가 통하지 않습니다. CSS 로 잡히지
+   * 않으면 트리거의 사각형을 읽어 직접 놓습니다 — 안 하면 화면 왼쪽 위에
+   * 붙습니다.
+   */
+  if (!CSS.supports('position-anchor', '--a')) {
+    for (const trigger of triggers) {
+      const panel = document.getElementById(trigger.getAttribute('aria-controls') ?? '');
+      panel?.addEventListener('toggle', (event) => {
+        if ((event as ToggleEvent).newState !== 'open') return;
+        const box = trigger.getBoundingClientRect();
+        panel.style.position = 'fixed';
+        panel.style.margin = '0';
+        panel.style.top = `${Math.round(box.bottom + 6)}px`;
+        panel.style.left = 'auto';
+        panel.style.right = `${Math.round(innerWidth - box.right)}px`;
+      });
     }
   }
 
@@ -224,10 +288,7 @@ const utility = UTILITY_VISIBLE.filter((item) => item.badge !== 'cart');
     const panel = document.getElementById(trigger.getAttribute('aria-controls') ?? '');
     if (!group || !panel) continue;
 
-    const setOpen = (open: boolean) => {
-      panel.hidden = !open;
-      trigger.setAttribute('aria-expanded', String(open));
-    };
+    const setOpen = (open: boolean) => setPanel(panel, open);
 
     group.addEventListener('mouseenter', () => {
       if (!finePointer.matches) return;
@@ -268,23 +329,43 @@ const utility = UTILITY_VISIBLE.filter((item) => item.badge !== 'cart');
        *
        * 마우스에서 닫는 길은 벗어나기·Esc·바깥 클릭 셋입니다.
        */
+      /*
+       * ⚠️ 포인터로 누를 때 패널은 **이미 닫혀 있을 수 있습니다.**
+       *
+       * 트리거는 패널 바깥이라, 누르는 순간 브라우저의 라이트 디스미스가 먼저
+       * 닫습니다. 그래서 여기서 읽는 상태는 "누르기 직전" 이 아니라 "닫힌 뒤"
+       * 입니다 — 포인터 경로가 무조건 여는 규칙이라 결과는 같습니다.
+       *
+       * 키보드 활성화(detail === 0)에는 라이트 디스미스가 걸리지 않으므로
+       * 읽은 상태가 그대로 맞고, Enter 로 열고 Enter 로 닫는 토글이 됩니다.
+       */
       const byPointer = event.detail > 0 && finePointer.matches;
-      const willOpen = byPointer ? true : panel.hidden;
+      const willOpen = byPointer ? true : !isOpen(panel);
 
       closeAll();
-      panel.hidden = !willOpen;
-      trigger.setAttribute('aria-expanded', String(willOpen));
+      setPanel(panel, willOpen);
     });
   }
 
+  /*
+   * 바깥 클릭·Esc 로 **닫는 일** 은 브라우저가 합니다(`popover="auto"`).
+   * 전에는 `document` 에 click 과 keydown 을 걸어 직접 했습니다.
+   *
+   * ⚠️ 다만 **포커스를 돌려주는 일은 브라우저가 하지 않습니다.**
+   *
+   * 그 복귀는 `popovertarget` 으로 연 popover 에만 보장됩니다. 여기는
+   * `showPopover()` 로 열므로 브라우저가 "누가 열었는지" 를 모릅니다.
+   * 크롬에서는 클릭이 버튼에 포커스를 줘서 우연히 맞았지만, **사파리는
+   * 버튼 클릭에 포커스를 주지 않아** 닫은 뒤 포커스가 body 에 남았습니다.
+   * 키보드 사용자는 닫을 때마다 자리를 잃습니다.
+   */
   if (triggers.length > 0) {
-    document.addEventListener('click', closeAll);
     document.addEventListener('keydown', (event) => {
       if (event.key !== 'Escape') return;
-      // 열려 있던 트리거로 포커스를 돌려줍니다 — 없으면 키보드 사용자가
-      // 닫을 때마다 자리를 잃습니다.
-      const open = [...triggers].find((t) => t.getAttribute('aria-expanded') === 'true');
-      closeAll();
+      const open = [...triggers].find((trigger) => {
+        const panel = document.getElementById(trigger.getAttribute('aria-controls') ?? '');
+        return panel ? isOpen(panel) : false;
+      });
       open?.focus();
     });
   }

@@ -1636,17 +1636,33 @@ html {
   transform: rotate(-135deg) translate(-1px, -1px);
 }
 .nav__dropdown {
-  position: absolute;
-  top: 100%;
-  /* 정박 기준은 `.nav__group` 입니다 — 그쪽에 position: relative 가 있어서,
-     여기 right: 0 은 **트리거 묶음의 오른쪽 끝** 에 붙습니다. 헤더나 목록
-     정렬과는 무관합니다. 그 relative 를 지우면 정박 기준이 뷰포트로 올라가
-     패널이 화면 오른쪽 끝으로 날아갑니다. */
-  right: 0;
-  left: auto;
+  /*
+   * `popover` 라 **top layer** 에 그려집니다.
+   *
+   * 그래서 `.nav__group` 의 `position: relative` 는 더 이상 기준이 되지
+   * 않습니다 — 조상 관계가 아니라 앵커로 잡습니다. 이름은 마크업이
+   * 그룹마다 다르게 붙입니다(`--nav-anchor-{id}`).
+   *
+   * `block-end span-inline-start` 는 트리거 아래, **오른쪽 끝을 맞춰** 놓습니다.
+   * 전에 `right: 0` 이 하던 일과 같습니다.
+   *
+   * ⚠️ 두 키워드는 **같은 계열이어야 합니다.** 처음에
+   * `bottom span-inline-start` 로 썼더니 물리(bottom)와 논리(inline-start)가
+   * 섞여 선언이 통째로 무효가 됐습니다 — 계산값이 `none` 이 되고 패널이
+   * top layer 기본 위치인 화면 왼쪽 위로 날아가 워드마크를 덮었습니다.
+   * 오류 없이 조용히 버려지므로, 값을 바꿀 때 계산값을 확인하세요.
+   *
+   * 앵커를 지원하지 않으면 `Nav.astro` 의 스크립트가 트리거 사각형을 읽어
+   * 직접 놓습니다. 그것도 없으면 top layer 기본 위치(화면 가운데)라
+   * 어긋나므로, 폴백을 지우지 마세요.
+   */
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  position-area: block-end span-inline-start;
+  margin-block-start: 6px;
   z-index: 1;
   min-width: 180px;
-  margin: 0;
   padding: 6px;
   list-style: none;
   background: var(--color-bg);
@@ -1654,9 +1670,7 @@ html {
   border-radius: var(--radius-card);
   box-shadow: 0 18px 40px -18px color-mix(in srgb, var(--color-text) 30%, transparent);
 }
-.nav__dropdown[hidden] {
-  display: none;
-}
+/* 닫혔을 때 감추는 것은 브라우저가 합니다 — `[hidden]` 규칙이 필요 없습니다. */
 .nav__dropdown a {
   display: flex;
   align-items: center;

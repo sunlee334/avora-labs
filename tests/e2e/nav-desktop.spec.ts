@@ -347,6 +347,43 @@ test.describe('드롭다운', () => {
     await expect(page.locator('.nav__dropdown')).toBeHidden();
   });
 
+  test('패널이 트리거 아래, 오른쪽 끝을 맞춰 선다', async ({ page }) => {
+    /*
+     * ⚠️ 이 검사는 **조용한 실패** 하나를 겪고 생겼습니다.
+     *
+     * 패널을 네이티브 `popover` 로 바꾸면서 top layer 로 올라갔고, 위치는
+     * `position-area` 로 잡게 됐습니다. 그런데 `bottom span-inline-start` 로
+     * 썼습니다 — 물리(`bottom`)와 논리(`inline-start`)를 섞으면 선언이 통째로
+     * **무효** 입니다. 오류는 없고 계산값만 `none` 이 됩니다.
+     *
+     * 그래서 패널이 top layer 기본 위치인 화면 왼쪽 위에 떠서 워드마크를
+     * 덮었습니다. 열림/닫힘 검사는 전부 통과했고, 워드마크로 마우스를 옮기는
+     * 검사 셋이 "가리는 요소가 있다" 로 죽고 나서야 드러났습니다.
+     *
+     * 열렸는지가 아니라 **어디에 열렸는지** 를 재면 그 자리에서 걸립니다.
+     */
+    await page.goto('/ko/');
+    test.skip(!(await finePointer(page)), '마우스가 없는 기기입니다');
+    await page.locator('.nav__group').hover();
+    await expect(page.locator('.nav__dropdown')).toBeVisible();
+
+    const box = await page.evaluate(() => {
+      const group = document.querySelector('.nav__group')!.getBoundingClientRect();
+      const panel = document.querySelector('.nav__dropdown')!.getBoundingClientRect();
+      return {
+        아래로: Math.round(panel.top - group.bottom),
+        오른쪽차: Math.round(panel.right - group.right),
+        패널왼쪽: Math.round(panel.left),
+      };
+    });
+
+    expect(box.아래로, `패널이 트리거에서 ${box.아래로}px 떨어져 있습니다`).toBeGreaterThanOrEqual(0);
+    expect(box.아래로, '패널이 트리거에서 너무 멉니다').toBeLessThan(24);
+    expect(box.오른쪽차, `오른쪽 끝이 ${box.오른쪽차}px 어긋났습니다`).toBeLessThanOrEqual(2);
+    // 화면 왼쪽 위로 날아간 경우를 못 박습니다 — 그때 왼쪽이 0 이었습니다.
+    expect(box.패널왼쪽, '패널이 화면 왼쪽 끝에 붙었습니다').toBeGreaterThan(100);
+  });
+
   test('열린 상태로 5개 언어 × 두 폭에서 넘치지 않는다', async ({ page }) => {
     // AC-3 은 **닫힌** 상태만 봅니다. left:0 이면 여기서 최대 133.7px 넘칩니다.
     for (const width of [900, 1280]) {
