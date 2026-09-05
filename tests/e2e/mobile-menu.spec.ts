@@ -4,9 +4,10 @@ import { LOCALES } from '../../src/config/site';
 /**
  * 모바일 메뉴.
  *
- * 헤더의 링크 묶음은 900px 미만에서 숨겨집니다. 그동안 모바일에서 브랜드
- * 스토리·제품·고객센터로 가는 길은 푸터뿐이었습니다. 이 시트가 그 길을
- * 헤더에도 만듭니다.
+ * 900px 미만에서 헤더는 **핵심 항목 + MENU** 입니다. 예전에는 링크 묶음을
+ * 통째로 숨기고 MENU 하나만 두었는데, 그러면 제품 페이지로 가는 데 두 걸음
+ * (열기 → 고르기)이 듭니다. 지금은 좁은 폭에서도 「제품」이 상단에 남고,
+ * 나머지 길은 이 시트가 냅니다.
  *
  * 여기서 확인하는 것은 "열린다" 가 아니라 **닫을 수 있고, 갈 수 있고,
  * 키보드로도 자리를 잃지 않는다** 입니다. 모달은 열기보다 닫기가 어렵습니다.
@@ -24,11 +25,22 @@ test.describe('모바일에서 메뉴가 통로가 된다', () => {
     await page.setViewportSize(MOBILE);
   });
 
-  test('버튼이 보이고, 헤더 링크는 숨어 있다', async ({ page }) => {
+  test('버튼과 핵심 항목이 함께 있고, 나머지는 시트에만 있다', async ({ page }) => {
     await page.goto('/ko/');
     await expect(page.locator('[data-menu-open]')).toBeVisible();
-    // 이 폭에서 .nav__links 가 보인다면 메뉴 버튼은 중복입니다.
-    await expect(page.locator('.nav__links')).toBeHidden();
+
+    /*
+     * 예전에는 「이 폭에서 `.nav__links` 가 보이면 MENU 는 중복이다」 였습니다.
+     * 지금은 둘이 역할을 나눕니다 — 상단은 가장 많이 가는 곳 하나,
+     * MENU 는 나머지 전부. 그래서 **무엇이 남았는지** 를 셉니다.
+     */
+    await expect(page.locator('.nav__links > li[data-top="product"]')).toBeVisible();
+    for (const id of ['brand', 'panel', 'support']) {
+      await expect(
+        page.locator(`.nav__links > li[data-top="${id}"]`),
+        `390px 에 ${id} 까지 나오면 MENU 와 중복이고 폭도 모자랍니다`,
+      ).toBeHidden();
+    }
   });
 
   test('메뉴로 고객센터까지 갈 수 있다', async ({ page }) => {

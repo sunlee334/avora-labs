@@ -62,14 +62,14 @@ const utility = UTILITY_VISIBLE.filter((item) => item.badge !== 'cart');
     {
       TOP_VISIBLE.map((top) =>
         top.kind === 'link' ? (
-          <li>
+          <li data-top={top.id}>
             <a href={localePath(locale, top.path)}
                aria-current={top.match === path ? 'page' : undefined}>
               {top.label(t)}
             </a>
           </li>
         ) : (
-          <li class="nav__group" style={`anchor-name: --nav-anchor-${top.id}`}>
+          <li class="nav__group" data-top={top.id} style={`anchor-name: --nav-anchor-${top.id}`}>
             {/*
               제목은 **링크**, 화살표는 **버튼** 입니다.
 

@@ -450,3 +450,55 @@ test.describe('내릴 때 감추고 올릴 때 보인다', () => {
     await expect(page.locator('.nav')).toBeInViewport();
   });
 });
+
+test.describe('좁은 화면에도 핵심 항목이 상단에 남는다', () => {
+  /*
+   * 900px 미만에서는 상단에 MENU 버튼 하나뿐이었습니다. 제품 페이지로 가려면
+   * 시트를 열고 고르는 두 걸음이 필요했습니다.
+   *
+   * ⚠️ 지시서의 표(821+ / 431~820 / ~430)는 **한국어 길이를 전제** 합니다.
+   * 「고르는 기준」을 다섯 언어로 재면 ko 78 · zh 66 · th 99 · vi 99 ·
+   * **en 114px** 입니다. 그래서 개수가 아니라 **넘치지 않는가** 를 잽니다.
+   */
+  const WIDTHS = [320, 360, 390, 430, 500, 640, 820, 899];
+
+  for (const lang of LOCALES) {
+    test(`/${lang}/ — 320~899px 어디서도 헤더가 넘치지 않는다`, async ({ page }) => {
+      for (const width of WIDTHS) {
+        await page.setViewportSize({ width, height: 800 });
+        await page.goto(`/${lang}/`);
+        const over = await page.evaluate(() => {
+          const nav = document.querySelector('.nav')!;
+          /* 가로 넘침은 자식의 오른쪽 끝이 헤더 안쪽을 넘는 것으로 봅니다. */
+          const box = nav.getBoundingClientRect();
+          const style = getComputedStyle(nav);
+          const right = box.right - Number.parseFloat(style.paddingRight);
+          const worst = [...nav.querySelectorAll('.nav__links > li, .nav__right, .nav__wordmark')]
+            .filter((el) => el.getBoundingClientRect().width > 0)
+            .reduce((m, el) => Math.max(m, el.getBoundingClientRect().right - right), -999);
+          return {
+            넘침: Math.round(worst),
+            가로스크롤: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+            줄수: Math.round(nav.getBoundingClientRect().height),
+          };
+        });
+        expect(over.넘침, `/${lang}/ ${width}px — 헤더 내용이 ${over.넘침}px 넘칩니다`).toBeLessThanOrEqual(1);
+        expect(over.가로스크롤, `/${lang}/ ${width}px — 가로 스크롤이 생겼습니다`).toBe(false);
+      }
+    });
+  }
+
+  test('900px 미만에서도 제품으로 한 번에 간다', async ({ page }) => {
+    for (const width of [320, 430, 640, 820]) {
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto('/ko/');
+      const link = page.locator('.nav__links > li[data-top="product"] a');
+      await expect(link, `${width}px 에서 제품 링크가 상단에 없습니다`).toBeVisible();
+      /* MENU 버튼도 함께 남아 있어야 합니다 — 나머지 길이 사라지면 안 됩니다. */
+      expect(
+        await page.locator('.nav [aria-haspopup], .nav button').count(),
+        `${width}px 에서 MENU 가 사라졌습니다`,
+      ).toBeGreaterThan(0);
+    }
+  });
+});
