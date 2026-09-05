@@ -271,3 +271,182 @@ test.describe('앵커로 이동해도 제목이 가리지 않는다', () => {
     expect(Number.parseInt(values.pad, 10)).toBeGreaterThanOrEqual(values.navReal);
   });
 });
+
+test.describe('스크롤해도 헤더 높이는 그대로다', () => {
+  /*
+   * ⚠️ 이 검사는 **하지 않기로 한 것** 을 지킵니다.
+   *
+   * 지시서는 스크롤하면 78px → 58px 로 줄이라고 했고, 한 번 넣었다가
+   * 되돌렸습니다. 이 헤더는 `position: sticky` 라 문서 흐름 안에 있어서,
+   * 높이가 줄면 아래 내용이 전부 위로 딸려 올라갑니다 — 스크롤하는 내내
+   * 매 프레임.
+   *
+   * 그 움직임이 스크롤 타임라인의 기준을 흔들어
+   * `scroll-reveal.spec.ts` 의 「모든 등장 요소가 끝내 선명해진다」가
+   * 모바일에서 깨졌습니다. 축소만 꺼서 12건이 통과하는 것으로 확인했습니다.
+   *
+   * 12px 을 얻고 페이지 전체의 스크롤 안정성을 내주는 거래입니다. 다음
+   * 사람이 같은 지시서를 보고 다시 넣을 수 있으므로 여기 못 박습니다.
+   */
+  const H = async (page: import('@playwright/test').Page) =>
+    page.locator('.nav').evaluate((el) => Math.round(el.getBoundingClientRect().height));
+
+  /*
+   * ⚠️ `window.scrollTo` 한 번으로는 원하는 자리에 서지 않습니다.
+   *
+   * 이 사이트는 Lenis 로 스크롤을 부드럽게 만들고, 그 라이브러리가
+   * `scrollTo` 를 가로채 관성으로 따라옵니다. 맨 위로 보냈는데 **98px 에
+   * 멈춘 것** 을 실측했고, 그 자리는 아직 축소 구간(0~160px) 안이라
+   * "돌아오지 않았다" 로 읽혔습니다 — 헤더는 멀쩡했습니다.
+   *
+   * 그래서 정착할 때까지 다시 보냅니다.
+   */
+  const scrollTo = (page: import('@playwright/test').Page, y: number) =>
+    page.evaluate(async (top) => {
+      for (let i = 0; i < 12; i += 1) {
+        window.scrollTo(0, top);
+        await new Promise((r) => setTimeout(r, 150));
+        if (Math.abs(window.scrollY - top) < 3) break;
+      }
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    }, y);
+
+
+
+  test('내려도 높이가 바뀌지 않는다', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/ko/');
+
+    const 처음 = await H(page);
+    await scrollTo(page, 400);
+    expect(
+      await H(page),
+      `스크롤에 헤더 높이가 ${처음}px 에서 바뀌었습니다 — 아래 내용이 함께 밀립니다`,
+    ).toBe(처음);
+
+    await scrollTo(page, 2400);
+    expect(await H(page), '더 내려가자 헤더 높이가 바뀌었습니다').toBe(처음);
+
+    // 워드마크의 탭 영역은 어느 자리에서도 44px 입니다.
+    const 워드마크 = await page
+      .locator('.nav__wordmark')
+      .evaluate((el) => Math.round(el.getBoundingClientRect().height));
+    expect(워드마크, `워드마크가 ${워드마크}px 입니다`).toBeGreaterThanOrEqual(44);
+  });
+
+  test('회사명은 접히되 글자 크기는 그대로다', async ({ page }) => {
+    /*
+     * `endorsement.spec.ts` 가 회사명이 브랜드의 55~60% 인지를 글자 크기로
+     * 잽니다. 접는 연출로 크기를 건드리면 그 값이 스크롤 위치에 따라 달라져,
+     * 두 검사가 서로를 흔듭니다.
+     */
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/ko/');
+    test.skip(
+      !(await page.evaluate(() => CSS.supports('animation-timeline', 'scroll(root block)'))),
+      '이 브라우저는 스크롤 타임라인을 지원하지 않습니다',
+    );
+
+    const by = page.locator('.nav__wordmarkBy');
+    const 크기 = () => by.evaluate((el) => getComputedStyle(el).fontSize);
+    const 처음크기 = await 크기();
+    expect(await by.evaluate((el) => Number(getComputedStyle(el).opacity))).toBe(1);
+
+    await scrollTo(page, 400);
+    expect(await by.evaluate((el) => Number(getComputedStyle(el).opacity)), '접히지 않았습니다').toBeLessThan(0.1);
+    expect(await 크기(), '접으면서 글자 크기까지 바꿨습니다').toBe(처음크기);
+  });
+
+  test('모션을 줄이면 줄어들지 않는다', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/ko/');
+
+    const 처음 = await H(page);
+    await scrollTo(page, 400);
+    expect(await H(page), '모션 최소화인데 헤더가 움직였습니다').toBe(처음);
+  });
+});
+
+test.describe('내릴 때 감추고 올릴 때 보인다', () => {
+  /*
+   * 방향은 위치의 함수가 아니라 위치의 **변화** 라, 이 하나만 스크롤 이벤트를
+   * 씁니다(진행선·헤더 축소는 CSS 스크롤 타임라인입니다).
+   *
+   * 그래서 여기서 재는 것은 "감춰지는가" 만이 아닙니다. **감춰졌을 때 잃는
+   * 것이 없는가** 를 함께 봅니다 — 키보드로 들어오면 즉시 보여야 하고,
+   * 첫 화면에서는 감춰지면 안 됩니다.
+   */
+  const away = (page: import('@playwright/test').Page) =>
+    page.locator('.nav').evaluate((el) => el.dataset.away ?? 'false');
+
+  /*
+   * ⚠️ `window.scrollTo` 한 번으로는 원하는 자리에 서지 않습니다.
+   *
+   * 이 사이트는 Lenis 로 스크롤을 부드럽게 만들고, 그 라이브러리가
+   * `scrollTo` 를 가로채 관성으로 따라옵니다. 맨 위로 보냈는데 **98px 에
+   * 멈춘 것** 을 실측했고, 그 자리는 아직 축소 구간(0~160px) 안이라
+   * "돌아오지 않았다" 로 읽혔습니다 — 헤더는 멀쩡했습니다.
+   *
+   * 그래서 정착할 때까지 다시 보냅니다.
+   */
+  const wheelTo = (page: import('@playwright/test').Page, y: number) =>
+    page.evaluate(async (top) => {
+      for (let i = 0; i < 12; i += 1) {
+        window.scrollTo(0, top);
+        await new Promise((r) => setTimeout(r, 150));
+        if (Math.abs(window.scrollY - top) < 3) break;
+      }
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    }, y);
+
+
+
+  test('첫 화면에서는 감추지 않는다', async ({ page }) => {
+    /*
+     * 히어로를 지나기 전에 헤더가 사라지면 어디에 왔는지 알 방법이 사라집니다.
+     * 들어오자마자 조금 내린 사람이 가장 먼저 겪는 화면입니다.
+     */
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/ko/');
+    await wheelTo(page, 200);
+    expect(await away(page), '히어로 안인데 헤더가 감춰졌습니다').toBe('false');
+    await expect(page.locator('.nav')).toBeInViewport();
+  });
+
+  test('히어로를 지나 내리면 감추고, 올리면 돌아온다', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/ko/');
+
+    await wheelTo(page, 2400);
+    expect(await away(page), '한참 내렸는데 감춰지지 않았습니다').toBe('true');
+
+    await wheelTo(page, 1600);
+    expect(await away(page), '올렸는데 돌아오지 않았습니다').toBe('false');
+  });
+
+  test('키보드로 들어오면 즉시 보인다', async ({ page }) => {
+    /*
+     * ⚠️ 감춰진 헤더에도 링크는 그대로 있어 Tab 이 그리로 갑니다.
+     * 보이지 않는 곳에 포커스가 놓이면 키보드 사용자는 자기가 어디 있는지
+     * 알 수 없습니다 — 감추는 연출이 새로 만드는 유일한 결함입니다.
+     */
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/ko/');
+    await wheelTo(page, 2400);
+    expect(await away(page)).toBe('true');
+
+    await page.locator('.nav__wordmark').focus();
+    expect(await away(page), '포커스가 들어왔는데 감춰진 채입니다').toBe('false');
+    await expect(page.locator('.nav')).toBeInViewport();
+  });
+
+  test('모션을 줄이면 감추지 않는다', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/ko/');
+    await wheelTo(page, 2400);
+    expect(await away(page), '모션 최소화인데 헤더가 사라졌습니다').toBe('false');
+    await expect(page.locator('.nav')).toBeInViewport();
+  });
+});
