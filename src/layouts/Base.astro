@@ -453,31 +453,6 @@ const xDefault = !wanted || wanted.includes(X_DEFAULT_LOCALE)
         }
       }
 
-      // ── 스크롤 진행 ──────────────────────────────────────────
-      // 스크롤 이벤트마다 계산하면 한 프레임에 여러 번 돕니다.
-      // requestAnimationFrame 으로 프레임당 한 번으로 묶습니다.
-      {
-        const fill = document.querySelector<HTMLElement>('.progress__fill');
-        if (fill) {
-          let queued = false;
-          const paint = () => {
-            queued = false;
-            const doc = document.documentElement;
-            const max = doc.scrollHeight - doc.clientHeight;
-            const ratio = max > 0 ? Math.min(1, Math.max(0, doc.scrollTop / max)) : 0;
-            fill.style.transform = `scaleY(${ratio})`;
-          };
-          const schedule = () => {
-            if (queued) return;
-            queued = true;
-            requestAnimationFrame(paint);
-          };
-          addEventListener('scroll', schedule, { passive: true });
-          addEventListener('resize', schedule, { passive: true });
-          paint();
-        }
-      }
-
       /*
        * ── 스무스 스크롤 ────────────────────────────────────
        * 등장 연출은 여기 없습니다. CSS 스크롤 타임라인이 맡습니다
