@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 
 /**
  * 손이 간 자리에 반응이 있는가.
@@ -105,5 +106,47 @@ test.describe('호버 상태', () => {
       );
       expect(d, `${name} 가 여전히 움직입니다`).toBe('0s');
     }
+  });
+});
+
+test.describe('호버는 포인터가 있는 기기에만', () => {
+  test('모든 :hover 규칙이 (hover: hover) 안에 있다', () => {
+    /*
+     * ⚠️ 터치에서는 탭한 뒤 호버 상태가 **그대로 남습니다.**
+     *
+     * 손가락을 뗐는데 밑줄이 그어져 있거나 색이 바뀐 채로 있어, 방금 누른
+     * 것이 무엇인지 헷갈립니다. `(hover: hover)` 만 보면 터치 되는 윈도우
+     * 노트북에서 참이라 `(pointer: fine)` 을 함께 봅니다.
+     *
+     * 세 곳이 가드 밖에 있었습니다 — `.linkButton` · 푸터 링크 ·
+     * `.nav__account`. 셋 다 밑줄이나 색만 바꾸는 작은 규칙이라 아무도
+     * 눈치채지 못했고, 그래서 검사가 필요합니다. 하나씩 세는 것보다
+     * **가드 밖이 0인지** 를 세는 편이 다음에 늘어나는 것도 잡습니다.
+     */
+    const css = readFileSync('src/styles/global.css', 'utf8');
+
+    /* `@media … hover: hover …{ … }` 의 바깥쪽 중괄호 구간을 찾습니다. */
+    const guards: Array<[number, number]> = [];
+    for (const m of css.matchAll(/@media[^{]*hover:\s*hover[^{]*\{/g)) {
+      let depth = 1;
+      let i = m.index! + m[0].length;
+      while (depth > 0 && i < css.length) {
+        if (css[i] === '{') depth += 1;
+        else if (css[i] === '}') depth -= 1;
+        i += 1;
+      }
+      guards.push([m.index!, i]);
+    }
+    const guarded = (pos: number) => guards.some(([a, b]) => pos >= a && pos < b);
+
+    const loose: string[] = [];
+    for (const m of css.matchAll(/^[^\n@}]*:hover[^\n{]*\{/gm)) {
+      if (!guarded(m.index!)) loose.push(m[0].trim().replace(/\{$/, '').trim());
+    }
+
+    expect(
+      loose,
+      `(hover: hover) 밖의 호버 규칙입니다 — 터치에서 상태가 남습니다:\n  ${loose.join('\n  ')}`,
+    ).toEqual([]);
   });
 });

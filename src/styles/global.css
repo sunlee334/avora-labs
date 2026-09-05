@@ -3532,7 +3532,20 @@ html {
   text-decoration: underline;
   cursor: pointer;
 }
-.linkButton:hover {
+/*
+ * 호버는 **포인터가 있는 기기에서만** 겁니다.
+ *
+ * 터치에서는 탭한 뒤 호버 상태가 그대로 남습니다 — 손가락을 뗐는데 계속
+ * 밑줄이 그어져 있거나 색이 바뀐 채로 있어, 방금 누른 것이 무엇인지
+ * 헷갈립니다. `(pointer: fine)` 을 함께 봐야 터치 되는 노트북이 걸러집니다.
+ */
+@media (hover: hover) and (pointer: fine) {
+  .linkButton:hover {
+    color: var(--color-text);
+  }
+}
+/* 터치에는 호버 대신 눌림 피드백을 줍니다. */
+.linkButton:active {
   color: var(--color-text);
 }
 
@@ -3889,7 +3902,12 @@ html {
    */
   flex-wrap: wrap;
 }
-.footer__col li a:hover {
+@media (hover: hover) and (pointer: fine) {
+  .footer__col li a:hover {
+    text-decoration: underline;
+  }
+}
+.footer__col li a:active {
   text-decoration: underline;
 }
 
@@ -4455,7 +4473,12 @@ html {
     letter-spacing: 0.03em;
     text-decoration: none;
   }
-  .nav__account:hover {
+  @media (hover: hover) and (pointer: fine) {
+    .nav__account:hover {
+      text-decoration: underline;
+    }
+  }
+  .nav__account:active {
     text-decoration: underline;
   }
 }
