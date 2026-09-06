@@ -201,6 +201,21 @@ button {
 :root {
   /* 손이 간 자리의 반응. 120ms 를 넘으면 굼떠 보이고, 아래면 안 보입니다. */
   --motion-hover: 120ms;
+
+  /*
+   * 뒤집힌 문맥 안에서 **되돌릴 때** 쓰는 기준값.
+   *
+   * `.section--dark` 나 사진 위 헤더는 역할 토큰을 뒤집습니다. 그 안에 자기
+   * 배경을 가진 판(시트·팝오버)이 있으면 뒤집힌 값을 물려받아 밝은 판 위에
+   * 밝은 글자가 됩니다 — 실측에서 `.menu__title` 이 1.88:1 이었습니다.
+   *
+   * 커스텀 속성은 **선언된 자리에서** 값이 정해지므로, 여기서 한 번 떠 두면
+   * 아래에서 아무리 뒤집혀도 이 이름은 원래 값을 지킵니다. 되돌리는 곳에서
+   * 팔레트를 직접 부르지 않아도 됩니다.
+   */
+  --color-text-base: var(--color-text);
+  --color-text-muted-base: var(--color-text-muted);
+  --color-border-base: var(--color-border);
   /*
    * ⚠️ 가로 여백에 `env(safe-area-inset-*)` 이 함께 들어갑니다.
    *
@@ -1461,6 +1476,8 @@ html {
 }
 
 .nav__wordmark {
+  /* 락업은 줄지 않습니다 — 줄면 그 안의 글자가 접힙니다. */
+  flex-shrink: 0;
   display: flex;
   /*
    * 보증 표기라 두 줄입니다(Nav.astro 주석 참조). 세로로 쌓되 왼쪽 끝을
@@ -1497,6 +1514,31 @@ html {
   text-transform: uppercase;
   color: var(--color-text-muted);
   line-height: 1;
+  /*
+   * ⚠️ **접히면 안 됩니다.** 이름이지 문장이 아닙니다.
+   *
+   * 좁은 화면에서 자리가 모자라면 두세 줄로 접혔고, 스크롤에 따라 접는
+   * 연출이 걸어 둔 `max-height` 가 그것을 **잘랐습니다** — 실측에서 320px
+   * 의 `scrollHeight` 가 32px 인데 보이는 높이는 14px 이었습니다. 화면에는
+   * "BY AVORA" 아래 "LABS" 가 반쯤 잘린 채로 남았습니다.
+   *
+   * 자리가 없으면 접는 것이 아니라 아래처럼 통째로 물러납니다.
+   */
+  white-space: nowrap;
+}
+/*
+ * 자리가 모자라면 서명은 물러납니다.
+ *
+ * 로고 락업은 108px 을 요구하는데, 자사 결제가 켜진 좁은 화면에서는
+ * 장바구니까지 서느라 64px 밖에 남지 않습니다. 브랜드 이름(`PAROS`)이
+ * 먼저이고, 보증 표기는 그 다음입니다 — 잘린 서명보다 없는 편이 낫습니다.
+ *
+ * `endorsement.spec.ts` 는 기본 폭에서 비율을 재므로 이 규칙에 닿지 않습니다.
+ */
+@media (max-width: 359.98px) {
+  .nav__wordmarkBy {
+    display: none;
+  }
 }
 .nav__wordmarkBrand {
   line-height: 1;
@@ -1551,6 +1593,109 @@ html {
  * 매번 다시 읽습니다(`Nav.astro` 주석 참조). 전환도 미디어 쿼리 안에 두어,
  * 그 설정에서는 속성이 잘못 와도 헤더가 움직이지 않습니다.
  */
+/* ── 히어로 위에서는 헤더가 사진 위에 뜹니다 ────────────────
+ *
+ * 상태는 `Nav.astro` 가 IntersectionObserver 로 씁니다.
+ *
+ * ⚠️ **색에는 전환을 걸지 않습니다.** 지시서가 "전환 중간에 대비 4.5:1
+ * 미만 구간이 없어야 한다" 고 못 박았는데, 배경과 글자색을 함께 페이드하면
+ * 반드시 그 구간이 생깁니다 — 반쯤 칠해진 밝은 배경 위의 밝은 글자입니다.
+ * 중간 상태를 없애는 가장 확실한 방법은 중간 상태를 만들지 않는 것입니다.
+ *
+ * 색은 `.section--dark` 와 같은 방식으로 **역할 토큰을 바꿔서** 냅니다.
+ * 개별 속성을 하나씩 뒤집으면 나중에 추가되는 요소가 따라오지 않습니다.
+ */
+/*
+ * 시트는 헤더 안에 있지만 사진 위가 아닙니다 — 자기 배경을 가진 판입니다.
+ * `nav > .nav__right > .lang > dialog` 로 세 단계 깊어 직계 자식으로는
+ * 가릴 수 없으므로, 판 자신에서 되돌립니다.
+ */
+.nav[data-over-hero='true'] dialog {
+  --color-text: var(--color-text-base);
+  --color-text-muted: var(--color-text-muted-base);
+  --color-border: var(--color-border-base);
+  --color-focus: var(--color-text-base);
+  color: var(--color-text);
+}
+
+/*
+ * ⚠️ 뒤집은 토큰은 **시트에 새면 안 됩니다.**
+ *
+ * 메뉴·언어 시트는 `.nav` **안에** 있습니다. `.nav` 에 토큰을 걸면 시트까지
+ * 물려받는데, 시트는 사진 위가 아니라 **자기 배경을 가진 판** 입니다. 그러면
+ * 밝은 판 위에 밝은 글자가 됩니다 — 실측에서 `.menu__title` 이 1.88:1 로
+ * axe 에 걸렸습니다.
+ *
+ * 둘의 경계는 `<dialog>` 입니다. 사진 위에 있는 것은 헤더의 직계 자식들이고,
+ * 시트는 top layer 로 떠 있는 별개의 판입니다. 목록으로 적지 않고 그 경계로
+ * 가르면 나중에 자식이 늘어도 따라옵니다.
+ */
+.nav[data-over-hero='true'] > * {
+  --color-text: var(--color-text-inverse);
+  --color-text-muted: var(--color-text-muted-inverse);
+  --color-border: var(--color-border-inverse);
+  --color-focus: var(--color-text-inverse);
+  color: var(--color-text);
+}
+
+.nav[data-over-hero='true'] {
+  /*
+   * ⚠️ 토큰만 바꾸면 **글자색은 따라오지 않습니다.**
+   *
+   * 커스텀 속성을 덮어써도 그 토큰을 `var()` 로 **참조하는 요소** 만 바뀝니다.
+   * 메뉴 링크는 색을 정하지 않고 `body` 에서 물려받는데, 그 값은 이미 `:root`
+   * 의 토큰으로 계산이 끝난 잉크입니다. 실측에서 워드마크만 밝아지고 메뉴는
+   * 잉크 그대로라 사진 위에서 1.09:1 이었습니다.
+   *
+   * `.section--dark` 도 토큰과 `color` 를 함께 적습니다. 같은 관용구입니다.
+   * (그 `color` 는 위 `> :not(dialog)` 규칙에 있습니다.)
+   */
+
+  /*
+   * ⚠️ 장막을 **헤더 자신이** 입습니다. 히어로에 두지 않습니다.
+   *
+   * 처음에는 히어로 위쪽에 `.hero__topVeil` 을 두었습니다. 화면은 같았지만
+   * 검사가 달라집니다 — axe 의 `color-contrast` 는 조상의 배경**색**만
+   * 걷어 올리므로, 헤더가 투명하면 뒤에 사진이 있다는 것을 모른 채
+   * **본문 배경(밝음) 위의 밝은 글자** 로 읽고 위반으로 셉니다. 실제로
+   * 시트를 연 상태에서 12건이 걸렸습니다.
+   *
+   * 대비를 만드는 층이 글자와 같은 요소에 있으면 axe 는 그것을 배경
+   * 이미지로 보고 **"판정 불가"** 로 물러섭니다. 그것이 참인 판정입니다 —
+   * 사진 위의 글자는 도구가 정할 수 없고 사람이 재야 합니다. 그 재기를
+   * `hero-header.spec.ts` 가 실제 픽셀로 합니다.
+   *
+   * 덤으로 장막이 헤더를 따라다닙니다. 헤더가 줄거나 숨을 때 어긋나지
+   * 않고, 히어로가 있는 다른 화면이 생겨도 따로 손볼 것이 없습니다.
+   *
+   * ── 세기를 어떻게 정했나 ─────────────────────────────────
+   * `.hero__veil` 과 같은 방법입니다. 5개 언어 × 일곱 폭(390~1440)에서
+   * **헤더의 글자만 투명하게** 만들어 그 자리를 찍고, 글자 상자 안에서
+   * 가장 밝은 픽셀과의 대비를 실제로 쟀습니다.
+   *
+   *   없음        4.49:1  ← **미달.** 장막 없이는 안 됩니다
+   *   20/14/8     4.70:1 (기준의 104%)   띠 밝기 0.049
+   *   32/22/12    4.90:1 (109%)          0.046
+   *   44/30/16    5.05:1 (112%)          0.043
+   *   58/40/22    5.28:1 (117%)          0.039   ← 이 값
+   *
+   * `.hero__veil` 이 잡아 둔 여유가 기준의 115% 라 그 선에 맞췄습니다.
+   * 최악은 언제나 `by AVORA LABS`(10px, 보조색)이고 자리는 640px 근처입니다.
+   *
+   * ⚠️ 헤더를 통째로 숨겨서 재면 **장막까지 함께 사라집니다.** 그렇게 재면
+   * 어떤 값을 넣어도 "없음"(4.49)이 나옵니다 — 실제로 한 번 그렇게 헤맸습니다.
+   * `hero-header.spec.ts` 가 그 방법을 주석으로 박아 두었습니다.
+   */
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--color-text) 58%, transparent) 0,
+    color-mix(in srgb, var(--color-text) 40%, transparent) 60%,
+    color-mix(in srgb, var(--color-text) 22%, transparent) 100%
+  );
+  backdrop-filter: none;
+  border-bottom-color: transparent;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .nav {
     transition: transform 220ms cubic-bezier(0.2, 0.7, 0.3, 1);
@@ -2138,13 +2283,33 @@ html {
 }
 
 /* ── 히어로 ───────────────────────────────────────────────── */
+/*
+ * ── 히어로는 헤더 **뒤에서** 시작합니다 ────────────────────
+ *
+ * 전에는 헤더가 자리를 차지하고 히어로가 그 아래(y=69)에서 시작했습니다.
+ * 그래서 헤더를 투명하게 만들어도 뒤에 사진이 없었습니다 — "히어로 위
+ * 투명 처리" 는 색 문제가 아니라 **구조 문제** 였습니다.
+ *
+ * 음수 마진으로 헤더 높이만큼 끌어올리고, 같은 값을 안쪽 여백으로 돌려
+ * 줍니다. 그러면 사진만 위로 자라고 **글자와 아래 섹션은 제자리** 입니다.
+ * `box-sizing: border-box` 라 최소 높이도 그만큼 키웁니다.
+ *
+ * 높이 값이 세 곳(기본 78svh · 900px 이상 88svh · 폼이 뒤따르면 78svh)에
+ * 흩어져 있어 `--hero-min` 한 곳으로 모읍니다. 각 값의 근거는 원래 주석에
+ * 그대로 있습니다.
+ */
 .hero {
+  --hero-min: 78svh;
+
   position: relative;
-  min-height: 78svh;
+  margin-top: calc(-1 * var(--nav-height));
+  padding-top: var(--nav-height);
+  min-height: calc(var(--hero-min) + var(--nav-height));
   display: flex;
   align-items: flex-end;
   overflow: hidden;
 }
+
 /*
  * 신청 폼이 뒤따를 때만 히어로를 줄입니다.
  *
@@ -2185,8 +2350,11 @@ html {
    * 먼저 보이게 하려는 것입니다.
    *
    * 규칙을 지우면 데스크톱 히어로가 88svh 로 커지므로 지우면 안 됩니다.
+   *
+   * 값은 `--hero-min` 으로 냅니다 — `.hero` 가 여기에 헤더 높이를 더해
+   * 최소 높이를 만듭니다(히어로가 헤더 뒤에서 시작하므로).
    */
-  min-height: 78svh;
+  --hero-min: 78svh;
 }
 
 .hero__media,
@@ -2403,7 +2571,7 @@ html {
 }
 @media (min-width: 900px) {
   .hero {
-    min-height: 88svh;
+    --hero-min: 88svh;
   }
   .hero__copy {
     padding-block-end: 76px;

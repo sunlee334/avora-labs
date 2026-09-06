@@ -72,7 +72,18 @@ test.describe('보증 표기', () => {
   });
 
   test('회사명은 본문색이 아니라 보조색이다', async ({ page }) => {
-    await page.goto('/ko/');
+    /*
+     * ⚠️ 히어로가 **없는** 화면에서 잽니다.
+     *
+     * 홈에서는 헤더가 첫 화면 동안 사진 위에 뜨고, 그때 글자는 밝은색으로
+     * 뒤집힙니다. 그 상태에서 본문 배경(밝음)과 비교하면 당연히 미달이
+     * 나오는데, 실제 배경은 본문이 아니라 사진입니다 — 재는 대상이 틀립니다.
+     * 사진 위의 대비는 `hero-header.spec.ts` 가 실제 픽셀로 잽니다.
+     *
+     * 여기서 묻는 것은 "회사명이 보조색인가" 이고, 그건 헤더가 제 배경을
+     * 가진 화면에서 물어야 합니다.
+     */
+    await page.goto('/ko/support');
 
     const colors = await page.evaluate(() => {
       const brand = document.querySelector('.nav__wordmarkBrand')!;

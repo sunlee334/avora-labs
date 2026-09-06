@@ -419,6 +419,48 @@ const utility = UTILITY_VISIBLE.filter((item) => item.badge !== 'cart');
   }
 
   /*
+   * ── 히어로 위에서는 사진 위에 뜬다 ─────────────────────────
+   *
+   * 지시서가 `IntersectionObserver` 를 지정했습니다 — 스크롤 이벤트보다
+   * 안정적입니다. 관찰 대상은 히어로 자신이고, 화면 위쪽을 헤더 높이만큼
+   * 잘라낸 영역과 겹치는 동안이 "히어로 위" 입니다.
+   *
+   * 히어로가 없는 화면(제품·브랜드·고객센터…)에서는 관찰할 것이 없으므로
+   * 상태를 쓰지 않고, 헤더는 늘 불투명합니다.
+   */
+  {
+    const nav = document.querySelector<HTMLElement>('.nav');
+    const hero = document.querySelector('.hero');
+
+    if (nav && hero) {
+      let io: IntersectionObserver | null = null;
+
+      /*
+       * 헤더 높이는 폭에 따라 달라집니다(69px / 두 행 117px). `rootMargin`
+       * 은 만들 때 고정되므로 폭이 바뀌면 다시 만듭니다.
+       */
+      const wire = () => {
+        io?.disconnect();
+        const h = Math.round(
+          Number.parseFloat(
+            getComputedStyle(document.documentElement).getPropertyValue('--nav-height'),
+          ) || 0,
+        );
+        io = new IntersectionObserver(
+          ([entry]) => {
+            nav.dataset.overHero = String(entry.isIntersecting);
+          },
+          { rootMargin: `-${h}px 0px 0px 0px`, threshold: 0 },
+        );
+        io.observe(hero);
+      };
+
+      wire();
+      addEventListener('resize', wire, { passive: true });
+    }
+  }
+
+  /*
    * ── 내릴 때 감추고 올릴 때 보인다 ──────────────────────────
    *
    * 스크롤 이벤트를 씁니다. 이 저장소는 진행선과 헤더 축소를 CSS 스크롤
