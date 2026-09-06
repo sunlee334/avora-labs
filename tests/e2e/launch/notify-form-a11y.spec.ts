@@ -279,6 +279,53 @@ test.describe('브라우저 기본 제출로 새지 않는다', () => {
     expect(page.url(), '이메일이 주소창에 남았습니다').not.toContain('example.com');
   });
 
+  test('스크립트가 아예 없어도 이메일이 주소로 가지 않는다', async ({ page }) => {
+    /*
+     * ⚠️ `preventDefault` 는 **모듈이 실행됐을 때** 이야기입니다.
+     *
+     * 번들이 오지 않거나 자바스크립트가 꺼져 있으면 리스너가 붙지 않고
+     * 브라우저가 폼을 그대로 보냅니다. 그때 이메일이 어디로 가는지를 정하는
+     * 것은 스크립트가 아니라 `method` 한 줄입니다 — 이 저장소가 스크롤
+     * 리빌에서 배운 "서로 다른 실패 단위" 와 같은 이야기입니다.
+     *
+     * GET 이면 주소창·방문 기록·리퍼러에 남고, POST 면 몸통으로 갑니다.
+     */
+    await page.goto('/ko/');
+    const method = await page
+      .locator(FORM)
+      .first()
+      .evaluate((form) => (form as HTMLFormElement).method);
+    expect(method, '폼이 GET 입니다 — 스크립트가 없으면 이메일이 주소창에 남습니다').toBe('post');
+  });
+
+  test('서버가 400 을 줘도 초점을 뺏어오지 않는다', async ({ page }) => {
+    /*
+     * 제출 직전 검증에서는 초점을 되돌리는 것이 맞습니다 — 손님이 방금 그
+     * 칸을 떠났으니까요. 서버 응답 뒤는 다릅니다. 기다리는 동안 아래
+     * 체크박스로 옮겨 갔을 수 있고, 그때 초점을 끌어오면 **누르려던 것을
+     * 놓칩니다.**
+     */
+    await page.route('**/api/launch-notify', (route) =>
+      route.fulfill({ status: 400, contentType: 'application/json', body: '{}' }),
+    );
+    await page.goto('/ko/');
+
+    const form = page.locator(FORM).first();
+    await form.locator('input[name="email"]').fill('reader@example.com');
+    await form.locator('[data-notify-submit]').click();
+
+    // 응답을 기다리는 동안 손님이 다른 칸으로 옮겨 갑니다.
+    const box = form.locator('input[name="activities"]').first();
+    await box.focus();
+    await expect(box).toBeFocused();
+
+    // 400 이 도착해도 그 자리를 지켜야 합니다.
+    await expect(form.locator('[role="alert"]')).toBeVisible();
+    await expect(box, '서버 응답이 초점을 입력칸으로 끌어갔습니다').toBeFocused();
+    // 문구와 표시는 그대로 붙습니다.
+    await expect(form.locator('input[name="email"]')).toHaveAttribute('aria-invalid', 'true');
+  });
+
   test('Enter 로 보내도 마찬가지다', async ({ page }) => {
     // 버튼을 누르는 길 말고 `enterkeyhint="send"` 로 보내는 길도 같은 자리를 지납니다.
     await page.goto('/ko/');

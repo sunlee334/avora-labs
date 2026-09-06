@@ -148,7 +148,12 @@ test.describe('하단 고정 바', () => {
     const css = readFileSync('src/styles/global.css', 'utf8');
     const rule = css.slice(css.indexOf('.stickyCta {'), css.indexOf('.stickyCta[data-shown'));
     expect(rule, '.stickyCta 규칙을 못 찾았습니다').toContain('padding');
-    expect(rule, '안전영역 계산이 없습니다').toMatch(/env\(safe-area-inset-bottom\)/);
+    /*
+     * 여는 괄호까지만 봅니다 — 폴백값(`, 0px`)이 붙어도 같은 선언입니다.
+     * 닫는 괄호까지 맞추던 시절, `env(…, 0px)` 로 폴백을 더하자 이 검사가
+     * 깨졌습니다. 재는 것은 "인셋을 더했는가" 이지 표기가 아닙니다.
+     */
+    expect(rule, '안전영역 계산이 없습니다').toMatch(/env\(\s*safe-area-inset-bottom\b/);
   });
 
   test('바가 없는 화면에는 여백도 없다', async ({ page }) => {

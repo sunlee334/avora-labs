@@ -57,8 +57,22 @@ const stateId = `notify-state-${source}`;
 const errorId = `notify-error-${source}`;
 ---
 
+{/*
+  ⚠️ `method="post"` 는 **스크립트에 기대지 않는 유일한 방어** 입니다.
+
+  조립 스크립트가 `preventDefault` 를 걸지만, 그것은 모듈이 실행됐을 때
+  이야기입니다. 번들이 오지 않거나 자바스크립트가 꺼져 있으면 리스너가
+  아예 붙지 않고 브라우저가 이 폼을 그대로 보냅니다. `action` 이 없으니
+  기본은 **지금 주소로 GET** 이고, 그러면 손님의 이메일이 주소창·방문
+  기록·리퍼러에 남습니다.
+
+  POST 면 몸통으로 갑니다. 대가는 워커가 페이지 경로의 POST 에 405 를
+  주므로 **빈 화면을 보게 된다** 는 것입니다 — 이미 폼이 동작하지 않는
+  상태이고, 그 두 결과 중에서는 이쪽이 낫습니다.
+*/}
 <form
   class="notify"
+  method="post"
   data-launch-notify
   data-locale={locale}
   data-source={source}
@@ -158,6 +172,13 @@ const errorId = `notify-error-${source}`;
 
     둘의 성격이 다릅니다 — 이것은 **이 칸에 대한 말** 이고, 아래 것은 제출
     결과입니다. 그래서 자리도 나눕니다.
+  */}
+  {/*
+    `role="alert"` 과 `aria-live="polite"` 를 함께 씁니다 — `alert` 이
+    함의하는 assertive 를 명시적 polite 가 덮어 **결과는 polite** 입니다.
+    의도한 것입니다: 오류가 뜨는 순간 초점이 입력칸으로 옮겨 가고, 그
+    입력칸은 `aria-describedby` 로 이 문구를 가리킵니다. assertive 로 두면
+    같은 문장을 두 번 읽습니다. `Field.astro` 도 같은 조합입니다.
   */}
   <p
     class="notify__error field__error"

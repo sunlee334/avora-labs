@@ -132,12 +132,23 @@ function mountOne(form: HTMLFormElement): void {
   const fieldError = form.querySelector<HTMLElement>('[data-notify-error]') ?? state;
   if (!input || !submit || !state) return;
 
-  /** 이 칸이 잘못됐다 — 문구·속성·초점을 한 벌로 움직입니다. */
-  function sayFieldError(message: string): void {
+  /**
+   * 이 칸이 잘못됐다 — 문구와 속성을 한 벌로 움직입니다.
+   *
+   * ⚠️ 초점은 **선택입니다.**
+   *
+   * 제출 직전 검증에서는 초점을 되돌리는 것이 맞습니다 — 손님이 방금 그
+   * 칸을 떠났고, 고칠 자리가 거기입니다.
+   *
+   * 서버가 400 을 준 경우는 다릅니다. 응답을 기다리는 동안 손님은 아래
+   * 활동 체크박스로 옮겨 갔을 수 있고, 그때 초점을 끌어오면 **누르려던
+   * 것을 놓칩니다.** 문구와 `aria-invalid` 는 그대로 두고 초점만 뺍니다.
+   */
+  function sayFieldError(message: string, moveFocus = true): void {
     fieldError!.textContent = message;
     fieldError!.hidden = false;
     input!.setAttribute('aria-invalid', 'true');
-    input!.focus();
+    if (moveFocus) input!.focus();
   }
 
   function clearFieldError(): void {
@@ -299,7 +310,7 @@ function mountOne(form: HTMLFormElement): void {
          * 다시 시도해 달라는 안내(fail)가 아니라 고칠 자리로 보냅니다 —
          * `fail` 이 400 을 세지 않는 것도 같은 이유였습니다.
          */
-        if (res.status === 400) sayFieldError(copy.invalid);
+        if (res.status === 400) sayFieldError(copy.invalid, false);
         else fail(copy.error, res.status);
       }
     } catch {

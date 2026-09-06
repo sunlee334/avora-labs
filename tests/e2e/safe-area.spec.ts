@@ -69,8 +69,13 @@ test.describe('안전 영역', () => {
     test(`${selector} 는 ${inset} 인셋을 더한다`, () => {
       const bodies = rulesFor(builtCss(), selector);
       expect(bodies.length, `${selector} 규칙을 빌드된 CSS 에서 못 찾았습니다`).toBeGreaterThan(0);
+      /*
+       * 여는 괄호까지만 맞춥니다 — 폴백값(`, 0px`)이 붙어도 같은 선언입니다.
+       * 처음에 닫는 괄호까지 넣었다가, 폴백을 추가하자 이 검사가 통째로
+       * 깨졌습니다. 재는 것은 "인셋을 더했는가" 이지 표기가 아닙니다.
+       */
       expect(
-        bodies.some((b) => b.includes(`env(safe-area-inset-${inset})`)),
+        bodies.some((b) => b.includes(`env(safe-area-inset-${inset}`)),
         `${selector} 에 safe-area-inset-${inset} 이 없습니다 — ${why}`,
       ).toBe(true);
     });
@@ -93,9 +98,31 @@ test.describe('안전 영역', () => {
       const decls = [...css.matchAll(new RegExp(`${token}:\\s*([^;}]+)`, 'g'))].map((m) => m[1]);
       expect(decls.length, `${token} 선언을 못 찾았습니다`).toBeGreaterThan(0);
       for (const value of decls) {
-        expect(value, `${token} 에 좌측 인셋이 없습니다`).toContain('env(safe-area-inset-left)');
-        expect(value, `${token} 에 우측 인셋이 없습니다`).toContain('env(safe-area-inset-right)');
+        expect(value, `${token} 에 좌측 인셋이 없습니다`).toContain('env(safe-area-inset-left');
+        expect(value, `${token} 에 우측 인셋이 없습니다`).toContain('env(safe-area-inset-right');
       }
     }
+  });
+
+  test('모든 env() 에 폴백값이 있다', () => {
+    /*
+     * ⚠️ 폴백이 없으면 **여백이 0 이 됩니다.**
+     *
+     * `env()` 를 모르는 엔진에서는 선언 전체가 계산 시점에 무효가 되고,
+     * `--pad-wrap` / `--pad-container` 가 무효인 커스텀 속성이 되면 그것을
+     * 쓰는 `padding-inline` 이 초기값 0 으로 떨어집니다. 결과는 "본문이
+     * 화면 가장자리에 딱 붙는다" 입니다 — 헤더와 `.wrap` 양쪽에서.
+     *
+     * `env(..., 0px)` 로 적는 비용은 0 입니다.
+     */
+    const css = builtCss();
+    const bare = [...css.matchAll(/env\(\s*safe-area-inset-[a-z]+\s*\)/g)].map((m) => m[0]);
+    expect(
+      [...new Set(bare)],
+      '폴백값 없는 env() 입니다 — 미지원 엔진에서 여백이 0 이 됩니다',
+    ).toEqual([]);
+
+    const withFallback = css.match(/env\(\s*safe-area-inset-[a-z]+\s*,/g) ?? [];
+    expect(withFallback.length, 'env() 를 하나도 못 찾았습니다 — 검사가 낡았습니다').toBeGreaterThan(0);
   });
 });

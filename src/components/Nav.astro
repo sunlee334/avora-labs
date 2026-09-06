@@ -465,9 +465,16 @@ const utility = UTILITY_VISIBLE.filter((item) => item.badge !== 'cart');
          * 않습니다. 이 파일의 드롭다운은 같은 이유로 `finePointer.matches`
          * 를 핸들러 안에서 봅니다 — 그 관용구에 맞춥니다.
          */
-        if (reduced.matches) nav.dataset.away = 'false';
-        else if (y <= limit || y < last - DEADZONE) nav.dataset.away = 'false';
-        else if (y > last + DEADZONE) nav.dataset.away = 'true';
+        /* 값이 바뀔 때만 씁니다 — 매 프레임 같은 값을 다시 쓰면 스타일을
+           헛되이 무효화합니다. */
+        const want = reduced.matches
+          ? 'false'
+          : y <= limit || y < last - DEADZONE
+            ? 'false'
+            : y > last + DEADZONE
+              ? 'true'
+              : nav.dataset.away;
+        if (want && want !== nav.dataset.away) nav.dataset.away = want;
 
         /*
          * ⚠️ 헤더가 올라갈 때 **열려 있던 메뉴를 함께 닫습니다.**
