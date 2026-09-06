@@ -384,7 +384,7 @@ const utility = UTILITY_VISIBLE.filter((item) => item.badge !== 'cart');
     const nav = document.querySelector<HTMLElement>('.nav');
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-    if (nav && !reduced.matches) {
+    if (nav) {
       /*
        * 히어로를 지나기 전에는 감추지 않습니다. 첫 화면에서 헤더가 사라지면
        * 어디에 왔는지 알 방법이 사라집니다. 히어로가 없는 화면은 한 화면분을
@@ -408,10 +408,28 @@ const utility = UTILITY_VISIBLE.filter((item) => item.badge !== 'cart');
       const paint = () => {
         queued = false;
         const y = window.scrollY;
-        if (y <= limit || y < last - DEADZONE) nav.dataset.away = 'false';
+        /*
+         * ⚠️ 설정을 **매번 다시 읽습니다.**
+         *
+         * 처음에는 로드 때 한 번 보고 그때 켜지 않으면 끝이었습니다. 그러면
+         * 보는 중에 모션 최소화를 켠 사람에게 헤더가 계속 사라지고, 전환만
+         * 없어져 **툭 사라집니다.** 반대로 끄면 이번에는 영영 켜지지
+         * 않습니다. 이 파일의 드롭다운은 같은 이유로 `finePointer.matches`
+         * 를 핸들러 안에서 봅니다 — 그 관용구에 맞춥니다.
+         */
+        if (reduced.matches) nav.dataset.away = 'false';
+        else if (y <= limit || y < last - DEADZONE) nav.dataset.away = 'false';
         else if (y > last + DEADZONE) nav.dataset.away = 'true';
         last = y;
       };
+
+      /*
+       * 설정을 켜는 순간 되돌립니다. 스크롤을 기다리면 감춰진 채로 남습니다 —
+       * 전환도 함께 꺼지므로 다시 나타날 때 툭 튀어나옵니다.
+       */
+      reduced.addEventListener('change', () => {
+        if (reduced.matches) nav.dataset.away = 'false';
+      });
 
       addEventListener(
         'scroll',

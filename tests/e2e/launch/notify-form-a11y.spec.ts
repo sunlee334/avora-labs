@@ -251,3 +251,44 @@ test.describe('알림 폼 접근성', () => {
     ).toBeGreaterThanOrEqual(4.5);
   });
 });
+
+test.describe('브라우저 기본 제출로 새지 않는다', () => {
+  test('이메일이 주소창에 찍히지 않는다', async ({ page }) => {
+    /*
+     * ⚠️ 이 폼에는 `action` 도 `method` 도 없습니다.
+     *
+     * 그러면 브라우저 기본 제출은 **지금 주소로 GET** 이고, 손님이 적은
+     * 이메일이 주소창과 방문 기록에 남습니다. `novalidate` 라 브라우저가
+     * 막아 주지도 않습니다.
+     *
+     * 조립 스크립트에는 `return` 이 여럿 있습니다 — 마크업과 스크립트가
+     * 어긋났을 때를 위한 것인데, 그 순간의 결과가 "아무 일도 안 일어난다"
+     * 가 아니라 "주소창에 이메일이 찍힌다" 이면 안 됩니다. 그래서 기본
+     * 제출을 막는 일은 **어떤 조건보다 먼저** 걸립니다.
+     */
+    await page.goto('/ko/');
+    const before = page.url();
+
+    const form = page.locator(FORM).first();
+    await form.locator('input[name="email"]').fill('reader@example.com');
+    await form.locator('[data-notify-submit]').click();
+    await page.waitForTimeout(1200);
+
+    expect(page.url(), '주소가 바뀌었습니다 — 기본 제출이 일어났습니다').toBe(before);
+    expect(page.url(), '이메일이 주소창에 남았습니다').not.toContain('email=');
+    expect(page.url(), '이메일이 주소창에 남았습니다').not.toContain('example.com');
+  });
+
+  test('Enter 로 보내도 마찬가지다', async ({ page }) => {
+    // 버튼을 누르는 길 말고 `enterkeyhint="send"` 로 보내는 길도 같은 자리를 지납니다.
+    await page.goto('/ko/');
+    const before = page.url();
+
+    const input = page.locator(FORM).first().locator('input[name="email"]');
+    await input.fill('reader@example.com');
+    await input.press('Enter');
+    await page.waitForTimeout(1200);
+
+    expect(page.url(), 'Enter 로 보냈더니 주소가 바뀌었습니다').toBe(before);
+  });
+});

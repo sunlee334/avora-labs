@@ -441,6 +441,27 @@ test.describe('내릴 때 감추고 올릴 때 보인다', () => {
     await expect(page.locator('.nav')).toBeInViewport();
   });
 
+  test('보는 중에 모션 최소화를 켜면 즉시 돌아온다', async ({ page }) => {
+    /*
+     * ⚠️ 설정은 **로드 때 한 번** 읽으면 안 됩니다.
+     *
+     * 처음에 그렇게 썼습니다. 그러면 보는 중에 켠 사람에게 헤더가 계속
+     * 사라지는데, 전환만 함께 꺼져서 **툭 사라집니다** — 감춰진 채로
+     * 남기도 합니다. 이 파일의 드롭다운은 같은 이유로 포인터 종류를
+     * 핸들러 안에서 봅니다.
+     */
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/ko/');
+    await wheelTo(page, 2400);
+    expect(await away(page), '감춰져 있어야 이 검사가 의미가 있습니다').toBe('true');
+
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await expect
+      .poll(() => away(page), { timeout: 3000 })
+      .toBe('false');
+    await expect(page.locator('.nav')).toBeInViewport();
+  });
+
   test('모션을 줄이면 감추지 않는다', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.setViewportSize({ width: 1280, height: 900 });

@@ -98,6 +98,17 @@ export function mountLaunchNotify(): void {
 }
 
 function mountOne(form: HTMLFormElement): void {
+  /*
+   * ⚠️ 아래 어떤 조립이 실패하더라도 **브라우저가 이 폼을 그대로 보내지
+   * 않게** 먼저 막습니다.
+   *
+   * 이 폼에는 `action` 도 `method` 도 없습니다. 그러면 기본 제출은 지금
+   * 주소로 GET 이고, 손님이 적은 이메일이 **주소창과 방문 기록에 남습니다.**
+   * 아래 `return` 은 마크업과 스크립트가 어긋났을 때를 위한 것인데, 그
+   * 순간의 결과가 "아무 일도 안 일어난다" 가 아니라 "주소창에 이메일이
+   * 찍힌다" 이면 안 됩니다.
+   */
+  form.addEventListener('submit', (event) => event.preventDefault());
 
   const copy = JSON.parse(form.dataset.copy ?? '{}') as Copy;
   const input = form.querySelector<HTMLInputElement>('input[name="email"]');
@@ -107,8 +118,9 @@ function mountOne(form: HTMLFormElement): void {
    * 입력 오류는 결과 문구와 **자리가 다릅니다.** 이것은 입력칸 바로 아래,
    * 결과는 폼 끝입니다. 하나로 겸했을 때 오류가 체크박스 뒤에 떠서 나눴습니다.
    */
-  const fieldError = form.querySelector<HTMLElement>(`#notify-error-${form.dataset.source}`);
-  if (!input || !submit || !state || !fieldError) return;
+  const fieldError =
+    form.querySelector<HTMLElement>(`#notify-error-${form.dataset.source}`) ?? state;
+  if (!input || !submit || !state) return;
 
   /** 이 칸이 잘못됐다 — 문구·속성·초점을 한 벌로 움직입니다. */
   function sayFieldError(message: string): void {
