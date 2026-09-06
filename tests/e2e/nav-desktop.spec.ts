@@ -384,6 +384,56 @@ test.describe('드롭다운', () => {
     expect(box.패널왼쪽, '패널이 화면 왼쪽 끝에 붙었습니다').toBeGreaterThan(100);
   });
 
+  test('헤더가 감춰지면 메뉴도 함께 닫힌다', async ({ page }) => {
+    /*
+     * 스크롤은 popover 의 라이트 디스미스를 일으키지 않습니다. 그래서 hover
+     * 로 열어 둔 채 휠을 굴리면 헤더는 화면 밖으로 나가는데 popover 는
+     * `:popover-open` 이고 `aria-expanded` 도 `true` 인 채로 남습니다 —
+     * **화면에 없는 것을 열려 있다고 말하는 상태** 입니다.
+     */
+    await page.goto('/ko/');
+    test.skip(!(await finePointer(page)), '마우스가 없는 기기입니다');
+
+    await page.locator('.nav__group').hover();
+    await expect(page.locator('.nav__dropdown')).toBeVisible();
+
+    await page.evaluate(async () => {
+      for (let i = 0; i < 12; i += 1) {
+        window.scrollTo(0, 2400);
+        await new Promise((r) => setTimeout(r, 150));
+        if (Math.abs(window.scrollY - 2400) < 3) break;
+      }
+    });
+
+    await expect(page.locator('.nav')).toHaveAttribute('data-away', 'true');
+    await expect(page.locator('.nav__dropdown'), '헤더는 사라졌는데 메뉴가 열린 채입니다').toBeHidden();
+    await expect(page.locator('[data-nav-drop]').first()).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  test('popover 를 모르는 브라우저에서도 패널이 펼쳐진 채 남지 않는다', async ({ page }) => {
+    /*
+     * ⚠️ 실제로 그 브라우저를 띄워 볼 수는 없습니다(검사는 Chromium·WebKit
+     * 둘뿐입니다). 그러니 **막아 두었는지** 를 빌드된 CSS 에서 확인합니다.
+     *
+     * `popover` 를 모르는 엔진에서 그 속성은 무시됩니다. 예전에는 `hidden`
+     * 속성과 `[hidden]{display:none}` 이 자리를 막았는데 popover 로 옮기며
+     * 둘 다 없앴습니다. 그대로 두면 배경·테두리·그림자를 두른 패널이
+     * **처음부터 펼쳐진 채** 헤더 위에 남습니다.
+     */
+    const { readdirSync, readFileSync } = await import('node:fs');
+    const dir = 'dist/_astro';
+    const css = readdirSync(dir)
+      .filter((f) => f.endsWith('.css'))
+      .map((f) => readFileSync(`${dir}/${f}`, 'utf8'))
+      .join('\n');
+
+    expect(css, '빌드된 CSS 를 못 읽었습니다').toContain('.nav__dropdown');
+    expect(
+      css,
+      'popover 미지원 브라우저용 차단막이 없습니다 — 패널이 펼쳐진 채 남습니다',
+    ).toMatch(/@supports\s+not\s+selector\(\s*:popover-open\s*\)/);
+  });
+
   test('열린 상태로 5개 언어 × 두 폭에서 넘치지 않는다', async ({ page }) => {
     // AC-3 은 **닫힌** 상태만 봅니다. left:0 이면 여기서 최대 133.7px 넘칩니다.
     for (const width of [900, 1280]) {

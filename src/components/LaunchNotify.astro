@@ -159,7 +159,14 @@ const errorId = `notify-error-${source}`;
     둘의 성격이 다릅니다 — 이것은 **이 칸에 대한 말** 이고, 아래 것은 제출
     결과입니다. 그래서 자리도 나눕니다.
   */}
-  <p class="notify__error field__error" id={errorId} role="alert" aria-live="polite" hidden></p>
+  <p
+    class="notify__error field__error"
+    id={errorId}
+    data-notify-error
+    role="alert"
+    aria-live="polite"
+    hidden
+  ></p>
 
   {/*
     활동 선택 — **선택입니다.**

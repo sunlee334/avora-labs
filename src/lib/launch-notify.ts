@@ -118,8 +118,18 @@ function mountOne(form: HTMLFormElement): void {
    * 입력 오류는 결과 문구와 **자리가 다릅니다.** 이것은 입력칸 바로 아래,
    * 결과는 폼 끝입니다. 하나로 겸했을 때 오류가 체크박스 뒤에 떠서 나눴습니다.
    */
-  const fieldError =
-    form.querySelector<HTMLElement>(`#notify-error-${form.dataset.source}`) ?? state;
+  /*
+   * ⚠️ id 를 **문자열로 조립하지 않습니다.**
+   *
+   * 전에는 `#notify-error-${form.dataset.source}` 였습니다. `source` 에 CSS
+   * 식별자로 쓸 수 없는 값(공백·숫자로 시작·`.`·`/`)이 들어가면
+   * `querySelector` 가 SyntaxError 를 던지고, 그 예외는 부르는 쪽 `for` 문을
+   * 뚫고 나가 **그 화면의 신청 폼 전부와 뒤따르는 인라인 코드까지** 죽입니다.
+   * 지금 값은 안전하지만, 새 자리를 추가하는 사람이 알 수 없는 규칙입니다.
+   *
+   * 옆의 `input`·`submit`·`state` 는 전부 속성 선택자입니다. 여기만 달랐습니다.
+   */
+  const fieldError = form.querySelector<HTMLElement>('[data-notify-error]') ?? state;
   if (!input || !submit || !state) return;
 
   /** 이 칸이 잘못됐다 — 문구·속성·초점을 한 벌로 움직입니다. */

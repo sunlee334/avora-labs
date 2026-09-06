@@ -135,4 +135,39 @@ test.describe('토큰이 화면까지 닿는다', () => {
     const bg = await mark.evaluate((el) => getComputedStyle(el, '::after').backgroundColor);
     expect(bg, '밝은 섹션의 강조 밑줄 색').not.toBe('rgba(0, 0, 0, 0)');
   });
+
+  test('밑줄이 색만 있고 폭이 0 이지는 않다', async ({ page }) => {
+    /*
+     * ⚠️ 위 검사는 **색만** 봅니다. 그리고 모션 최소화를 켜고 봅니다.
+     *
+     * 그 사이로 결함이 하나 빠져나갔습니다. 밑줄에 스크롤 애니메이션을
+     * 걸었는데, `animation-timeline: view()` 의 기준은 애니메이션이 붙은
+     * 요소 자신이고 그것이 `height: 2px` 짜리 의사요소였습니다. 구간 길이가
+     * 2px 이라 진행이 사실상 일어나지 않고, 운영에서 마크가 화면을 지나는
+     * **143개 표본이 전부 `scaleX(0)`** 이었습니다.
+     *
+     * 색은 맞았고 폭이 0 이었습니다. 그래서 폭을 잽니다.
+     */
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.goto('/ko/');
+
+    const mark = page.locator('.section:not(.section--dark) .mark').first();
+    await expect(mark).toBeVisible();
+    await mark.evaluate((el) => el.scrollIntoView({ block: 'center' }));
+    await page.waitForTimeout(600);
+
+    const drawn = await mark.evaluate((el) => {
+      const cs = getComputedStyle(el, '::after');
+      const t = cs.transform;
+      // matrix(a, b, c, d, e, f) 의 a 가 가로 배율입니다.
+      const scaleX = t === 'none' ? 1 : Number.parseFloat(t.slice(t.indexOf('(') + 1));
+      return { scaleX: Number(scaleX.toFixed(3)), width: Number.parseFloat(cs.width) };
+    });
+
+    expect(drawn.width, '밑줄에 폭이 없습니다').toBeGreaterThan(10);
+    expect(
+      drawn.scaleX,
+      `밑줄이 scaleX(${drawn.scaleX}) 입니다 — 색은 맞는데 화면에는 없습니다`,
+    ).toBeGreaterThan(0.9);
+  });
 });

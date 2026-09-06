@@ -221,7 +221,26 @@ const utility = UTILITY_VISIBLE.filter((item) => item.badge !== 'cart');
    * 배치가 되고 헤더 나머지를 inert 로 만듭니다. 여기 패널은 트리거에
    * 붙어야 하고 헤더를 죽이면 안 됩니다.
    */
-  const triggers = document.querySelectorAll<HTMLButtonElement>('[data-nav-drop]');
+  /*
+   * ⚠️ `popover` 를 모르는 엔진에서는 **아무것도 걸지 않습니다.**
+   *
+   * 두 가지가 깨집니다. 하나는 패널이 감춰지지 않는 것(CSS 의
+   * `@supports not selector(:popover-open)` 가 막습니다). 다른 하나는
+   * `matches(':popover-open')` 이 **SyntaxError 를 던지는** 것입니다 —
+   * 모르는 의사클래스는 선택자 파싱 오류라, hover·click 핸들러가 매번
+   * 예외로 죽습니다.
+   *
+   * 이 저장소는 원래 "스크립트가 없어도 묶음 제목 링크는 그대로 동작하고
+   * 화살표만 아무 일도 하지 않는다" 를 설계로 삼았습니다. 그 자리로
+   * 돌아가는 것이 맞습니다.
+   */
+  const popoverReady =
+    typeof HTMLElement.prototype.showPopover === 'function' &&
+    CSS.supports('selector(:popover-open)');
+
+  const triggers = popoverReady
+    ? document.querySelectorAll<HTMLButtonElement>('[data-nav-drop]')
+    : ([] as unknown as NodeListOf<HTMLButtonElement>);
 
   /** 열려 있는가. `popover` 는 `hidden` 이 아니라 이 상태로 말합니다. */
   const isOpen = (panel: HTMLElement) => panel.matches(':popover-open');
@@ -265,15 +284,44 @@ const utility = UTILITY_VISIBLE.filter((item) => item.badge !== 'cart');
   if (!CSS.supports('position-anchor', '--a')) {
     for (const trigger of triggers) {
       const panel = document.getElementById(trigger.getAttribute('aria-controls') ?? '');
-      panel?.addEventListener('toggle', (event) => {
-        if ((event as ToggleEvent).newState !== 'open') return;
+      if (!panel) continue;
+
+      const place = () => {
         const box = trigger.getBoundingClientRect();
         panel.style.position = 'fixed';
         panel.style.margin = '0';
         panel.style.top = `${Math.round(box.bottom + 6)}px`;
         panel.style.left = 'auto';
-        panel.style.right = `${Math.round(innerWidth - box.right)}px`;
+        /*
+         * ⚠️ `innerWidth` 가 아니라 `documentElement.clientWidth` 입니다.
+         *
+         * `innerWidth` 는 세로 스크롤바를 **포함** 하는데,
+         * `getBoundingClientRect()` 와 `position: fixed` 의 기준은 그것을
+         * **제외** 합니다. 오버레이 스크롤바가 아닌 환경에서 패널이 트리거보다
+         * 스크롤바 폭(약 15px)만큼 왼쪽에 놓입니다.
+         */
+        panel.style.right = `${Math.round(document.documentElement.clientWidth - box.right)}px`;
+      };
+
+      /*
+       * `toggle` 이 아니라 `beforetoggle` 입니다. `toggle` 은 비동기로
+       * 큐잉되므로, 그때 좌표를 쓰면 **이미 top layer 기본 위치에 그려진
+       * 뒤** 입니다 — 화면 왼쪽 위에서 한 프레임 튑니다.
+       */
+      panel.addEventListener('beforetoggle', (event) => {
+        if ((event as ToggleEvent).newState === 'open') place();
       });
+
+      /*
+       * 앵커 위치잡기는 브라우저가 계속 갱신해 주지만 이 폴백은 아닙니다.
+       * 예전에는 헤더가 스크롤해도 제자리라 한 번으로 충분했는데, 이제
+       * 방향에 따라 위로 밀려 올라갑니다. 열려 있는 동안만 따라갑니다.
+       */
+      const follow = () => {
+        if (isOpen(panel)) place();
+      };
+      addEventListener('scroll', follow, { passive: true });
+      addEventListener('resize', follow, { passive: true });
     }
   }
 
@@ -420,6 +468,16 @@ const utility = UTILITY_VISIBLE.filter((item) => item.badge !== 'cart');
         if (reduced.matches) nav.dataset.away = 'false';
         else if (y <= limit || y < last - DEADZONE) nav.dataset.away = 'false';
         else if (y > last + DEADZONE) nav.dataset.away = 'true';
+
+        /*
+         * ⚠️ 헤더가 올라갈 때 **열려 있던 메뉴를 함께 닫습니다.**
+         *
+         * 스크롤은 popover 의 라이트 디스미스를 일으키지 않습니다. 그래서
+         * hover 로 열어 둔 채 휠을 굴리면 헤더는 화면 밖으로 나가는데
+         * popover 는 `:popover-open` 이고 `aria-expanded` 도 `true` 인 채로
+         * 남습니다 — 화면에 없는 것을 열려 있다고 말하는 상태입니다.
+         */
+        if (nav.dataset.away === 'true') closeAll();
         last = y;
       };
 

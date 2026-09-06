@@ -576,18 +576,19 @@ button {
     }
 
     /*
-     * 밑줄은 자기 자신의 진행률로 그립니다. 예전에는 섹션이 켜진 뒤 0.25s
-     * 늦게 그렸는데, 스크롤 타임라인에는 "뒤" 가 없으므로 범위를 늦게 잡는
-     * 것으로 같은 순서를 만듭니다.
+     * ⚠️ 밑줄에는 스크롤 애니메이션을 걸지 않습니다. 한 번 걸었다가
+     * **운영에서 밑줄이 통째로 사라진 것을 확인하고** 걷어냈습니다.
+     *
+     * `animation-timeline: view()` 의 기준(subject)은 애니메이션이 붙은 요소
+     * 자신입니다. 여기서는 `height: 2px` 짜리 의사요소라 `entry` 구간의
+     * 길이가 **2px** 이고, `entry 25% → 70%` 는 스크롤 0.9px 입니다.
+     * 실측하면 마크가 화면을 지나는 143개 표본이 전부 `scaleX(0)` 이었습니다.
+     *
+     * 상위 `.rise` 의 명명 타임라인에 묶는 방법이 있지만 쓰지 않습니다 —
+     * `/ko/brand` 의 마크는 `.rise` **밖** 에 있고, 그때 타임라인을 찾지
+     * 못하면 애니메이션이 `from`(scaleX 0)에 멈춰 **또 사라집니다.**
+     * 실패하면 안 보이는 연출보다, 늘 보이는 밑줄이 낫습니다.
      */
-    .mark::after {
-      animation-name: mark-draw;
-      animation-timing-function: var(--motion-rise-easing);
-      animation-fill-mode: both;
-      animation-duration: auto;
-      animation-timeline: view();
-      animation-range: entry 25% entry 70%;
-    }
   }
 }
 
@@ -602,14 +603,6 @@ button {
   }
 }
 
-@keyframes mark-draw {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
-}
 
 /* ── CTA ──────────────────────────────────────────────────── */
 /* ── 버튼 (Button.astro) ──────────────────────────────────── */
@@ -1742,7 +1735,24 @@ html {
   border-radius: var(--radius-card);
   box-shadow: 0 18px 40px -18px color-mix(in srgb, var(--color-text) 30%, transparent);
 }
-/* 닫혔을 때 감추는 것은 브라우저가 합니다 — `[hidden]` 규칙이 필요 없습니다. */
+/*
+ * 닫혔을 때 감추는 것은 브라우저가 합니다 — `[hidden]` 규칙이 필요 없습니다.
+ *
+ * ⚠️ 단, **`popover` 를 모르는 브라우저에서는 아무도 감추지 않습니다.**
+ *
+ * 그 엔진에서 `popover` 속성은 그냥 무시되고, 이 패널은 `position: fixed`
+ * 에 배경·테두리·그림자를 두른 채 **처음부터 끝까지 펼쳐진 상태로** 헤더 위에
+ * 남습니다. 예전에는 `hidden` 속성과 `[hidden]{display:none}` 이 그 자리를
+ * 막고 있었는데, popover 로 옮기면서 둘 다 없앴습니다.
+ *
+ * 하위 목록으로 가는 길은 여전히 있습니다 — 묶음 제목이 링크라 그 화면으로
+ * 바로 갑니다(`Nav.astro` 주석 참조). 열리지 않을 뿐입니다.
+ */
+@supports not selector(:popover-open) {
+  .nav__dropdown {
+    display: none;
+  }
+}
 .nav__dropdown a {
   display: flex;
   align-items: center;
@@ -1836,7 +1846,7 @@ html {
  * 넘치지 않느냐** 가 기준입니다 — `header-shape.spec.ts` 가 5개 언어 ×
  * 일곱 폭에서 확인합니다.
  */
-@media (max-width: 899px) {
+@media (max-width: 899.98px) {
   .nav__links {
     display: flex;
     /* 항목마다 좌우 8px 이 있으므로 gap 은 작게 둡니다. */
@@ -1869,12 +1879,12 @@ html {
     min-height: var(--size-tap-min);
   }
 }
-@media (min-width: 431px) and (max-width: 899px) {
+@media (min-width: 431px) and (max-width: 899.98px) {
   .nav__links > li[data-top='panel'] {
     display: block;
   }
 }
-@media (min-width: 620px) and (max-width: 899px) {
+@media (min-width: 620px) and (max-width: 899.98px) {
   .nav__links > li[data-top='brand'] {
     display: block;
   }
