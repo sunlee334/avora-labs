@@ -1673,11 +1673,17 @@ html {
    * **헤더의 글자만 투명하게** 만들어 그 자리를 찍고, 글자 상자 안에서
    * 가장 밝은 픽셀과의 대비를 실제로 쟀습니다.
    *
-   *   없음        4.49:1  ← **미달.** 장막 없이는 안 됩니다
-   *   20/14/8     4.70:1 (기준의 104%)   띠 밝기 0.049
-   *   32/22/12    4.90:1 (109%)          0.046
-   *   44/30/16    5.05:1 (112%)          0.043
-   *   58/40/22    5.28:1 (117%)          0.039   ← 이 값
+   *   없음           4.49:1  ← **미달.** 장막 없이는 안 됩니다
+   *   20/14/8        4.70:1 (기준의 104%)   띠 밝기 0.049
+   *   32/22/12       4.90:1 (109%)          0.046
+   *   44/30/16       5.05:1 (112%)          0.043
+   *   58/40/22       5.28:1 (117%)          0.039
+   *   72/56@50 → 0   5.21:1 (116%)          0.038   ← 이 값
+   *
+   * ⚠️ **마지막 정지점이 0 이어야 합니다.** 22% 로 끊었더니 헤더 아래
+   * 가장자리에 **가로줄이 보였습니다** — 사진 위에 선이 그어진 것처럼요.
+   * 배포한 화면을 찍어 보고서야 알았습니다. 0 으로 내리면 사라지고,
+   * 위쪽을 그만큼 올려 여유는 그대로 둡니다.
    *
    * `.hero__veil` 이 잡아 둔 여유가 기준의 115% 라 그 선에 맞췄습니다.
    * 최악은 언제나 `by AVORA LABS`(10px, 보조색)이고 자리는 640px 근처입니다.
@@ -1688,9 +1694,9 @@ html {
    */
   background: linear-gradient(
     to bottom,
-    color-mix(in srgb, var(--color-text) 58%, transparent) 0,
-    color-mix(in srgb, var(--color-text) 40%, transparent) 60%,
-    color-mix(in srgb, var(--color-text) 22%, transparent) 100%
+    color-mix(in srgb, var(--color-text) 72%, transparent) 0,
+    color-mix(in srgb, var(--color-text) 56%, transparent) 50%,
+    transparent 100%
   );
   backdrop-filter: none;
   border-bottom-color: transparent;
