@@ -2040,6 +2040,41 @@ html {
     min-height: var(--size-tap-min);
   }
 }
+/*
+ * 장바구니가 서는 화면에서는 상단 링크를 더 일찍 접습니다.
+ *
+ * 자사 결제가 켜지면 알약이 하나 더 서는데, 언어에 따라 62~87px 입니다.
+ * 390px 베트남어 실측: 워드마크 102 + 상단 링크 77 + 우측 189 + 간격 32 =
+ * **400px 필요, 350px 가용.** 링크를 접으면 307px 이 되어 들어갑니다.
+ *
+ * CSS 는 어느 모드로 빌드됐는지 모르지만 **장바구니가 서 있는지** 는
+ * 압니다. 조건을 화면에서 직접 읽으므로 모드 플래그를 따로 내려보낼 필요가
+ * 없습니다.
+ */
+@media (max-width: 519.98px) {
+  .nav:has(.nav__cart) .nav__links > li {
+    display: none;
+  }
+}
+
+/*
+ * 가장 좁은 폭에서는 알약의 좌우 여백을 2px 씩 줄입니다.
+ *
+ * 링크를 접고도 베트남어 320px 이 **6px 모자랐습니다**(실측). 탭 영역은
+ * `min-width: 44px` 이 따로 지키므로 여백을 줄여도 손이 닿는 크기는
+ * 그대로입니다.
+ */
+@media (max-width: 399.98px) {
+  .nav:has(.nav__cart) .nav__cart,
+  .nav:has(.nav__cart) .lang__toggle {
+    padding-inline: 10px;
+  }
+  /* 알약 사이 간격도 한 번 더 줍니다 — 여백을 줄이고도 2px 이 모자랐습니다. */
+  .nav:has(.nav__cart) .nav__right {
+    gap: 4px;
+  }
+}
+
 @media (min-width: 431px) and (max-width: 899.98px) {
   .nav__links > li[data-top='panel'] {
     /*
@@ -3400,8 +3435,21 @@ html {
 /* 헤더의 마이페이지 링크. 장바구니와 같은 탭 영역을 확보합니다 —
    글자만 두면 세로가 28px 이라 손가락으로 정확히 누르기 어렵습니다. */
 
+/*
+ * ⚠️ 알약은 **눌리지 않습니다.**
+ *
+ * `flex-shrink` 를 두지 않았더니 좁은 폭에서 알약이 짓눌리고 그 안의 라벨이
+ * **세로로 접혔습니다** — 중국어 320px 에서 `购物车` 가 18×63px 이 되고
+ * 헤더가 69 → 90px 로 자랐습니다. 가로로 넘치지 않아 넘침 검사도 통과했고,
+ * 자사 결제가 꺼진 지금 화면에는 장바구니가 없어 보이지도 않았습니다.
+ *
+ * 자리가 모자라면 눌러 접는 것이 아니라, 아래처럼 **무엇을 세울지** 를
+ * 정합니다.
+ */
 .nav__cart {
   display: inline-flex;
+  flex-shrink: 0;
+  white-space: nowrap;
   align-items: center;
   gap: 6px;
   min-height: var(--size-tap-min);

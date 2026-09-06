@@ -34,7 +34,22 @@ test.describe('모바일에서 메뉴가 통로가 된다', () => {
      * 지금은 둘이 역할을 나눕니다 — 상단은 가장 많이 가는 곳 하나,
      * MENU 는 나머지 전부. 그래서 **무엇이 남았는지** 를 셉니다.
      */
-    await expect(page.locator('.nav__links > li[data-top="product"]')).toBeVisible();
+    /*
+     * ⚠️ 장바구니가 서면 자리가 달라집니다.
+     *
+     * 자사 결제가 켜지면 알약이 하나 더 서서 520px 미만에는 상단 링크를
+     * 세울 자리가 없습니다(실측: 390px 베트남어에서 400px 필요 / 350px 가용).
+     * 모드를 묻지 않고 **화면에 장바구니가 있는지** 로 판단합니다 — CSS 가
+     * 쓰는 조건과 같아서 둘이 어긋나지 않습니다.
+     */
+    const hasCart = await page.evaluate(() => Boolean(document.querySelector('.nav__cart')));
+    const product = page.locator('.nav__links > li[data-top="product"]');
+    if (hasCart) {
+      await expect(product, '장바구니가 선 좁은 폭인데 상단 링크까지 나옵니다').toBeHidden();
+    } else {
+      await expect(product).toBeVisible();
+    }
+
     for (const id of ['brand', 'panel', 'support']) {
       await expect(
         page.locator(`.nav__links > li[data-top="${id}"]`),

@@ -509,8 +509,65 @@ test.describe('좁은 화면에도 핵심 항목이 상단에 남는다', () => 
     });
   }
 
+  for (const lang of LOCALES) {
+    test(`/${lang}/ — 라벨이 세로로 접히지 않는다`, async ({ page }) => {
+      /*
+       * ⚠️ 옆의 넘침 검사가 **이것을 놓쳤습니다.**
+       *
+       * 자사 결제가 켜지면 헤더에 장바구니 알약이 하나 더 섭니다(언어에 따라
+       * 62~87px). 자리가 모자라자 알약이 짓눌리고 그 안의 라벨이 **세로로**
+       * 접혔습니다 — 중국어 320px 에서 `购物车` 가 18×63px 이 되고 헤더가
+       * 69 → 90px 로 자랐습니다.
+       *
+       * 가로로는 넘치지 않았으므로 넘침 검사는 통과했습니다. 세로로 접히는
+       * 것이 넘침을 **대신** 흡수한 것입니다. 그래서 여기서는 모양을 봅니다 —
+       * 글자 상자가 폭보다 훨씬 높으면 접힌 것입니다.
+       *
+       * 이 검사는 두 모드에서 모두 돕니다. 알림 전용 모드에는 장바구니가
+       * 없어 화면에 드러나지 않던 결함이라, commerce 실행이 판정합니다.
+       */
+      for (const width of [320, 360, 390, 430, 520, 640, 820]) {
+        await page.setViewportSize({ width, height: 800 });
+        await page.goto(`/${lang}/`);
+        await page.evaluate(() => document.fonts.ready);
+
+        const bad = await page.evaluate(() =>
+          [...document.querySelectorAll('.nav a, .nav span, .nav button')]
+            .filter((el) => {
+              const b = el.getBoundingClientRect();
+              const text = (el.textContent ?? '').trim();
+              /* 한 글자짜리·빈 요소는 원래 세로로 길 수 있습니다. */
+              return b.width > 3 && text.length > 1 && b.height > b.width * 1.6;
+            })
+            .map((el) => {
+              const b = el.getBoundingClientRect();
+              return `${(el.textContent ?? '').trim().slice(0, 8)} ${Math.round(b.width)}×${Math.round(b.height)}`;
+            }),
+        );
+        expect(bad, `/${lang}/ ${width}px — 헤더 라벨이 세로로 접혔습니다: ${bad.join(' / ')}`).toEqual([]);
+
+        /* 접히면 헤더가 자랍니다. 높이로 한 번 더 확인합니다. */
+        const h = await page.locator('.nav').evaluate((el) => Math.round(el.getBoundingClientRect().height));
+        expect(h, `/${lang}/ ${width}px — 헤더가 ${h}px 입니다(한 행이어야 합니다)`).toBeLessThanOrEqual(76);
+      }
+    });
+  }
+
   test('900px 미만에서도 제품으로 한 번에 간다', async ({ page }) => {
+    /*
+     * ⚠️ 장바구니가 서면 자리가 달라집니다.
+     *
+     * 자사 결제가 켜지면 알약이 하나 더 서서 520px 미만에는 상단 링크를
+     * 세울 자리가 없습니다(실측: 390px 베트남어에서 400px 필요 / 350px 가용).
+     * 모드를 묻지 않고 **화면에 장바구니가 있는지** 로 판단합니다 — CSS 가
+     * 쓰는 것과 같은 조건이라 둘이 어긋나지 않습니다.
+     */
+    /* ⚠️ 먼저 화면을 띄웁니다 — 빈 페이지에서 물으면 언제나 "없다" 입니다. */
+    await page.goto('/ko/');
+    const hasCart = await page.evaluate(() => Boolean(document.querySelector('.nav__cart')));
+
     for (const width of [320, 430, 640, 820]) {
+      if (hasCart && width < 520) continue;
       await page.setViewportSize({ width, height: 800 });
       await page.goto('/ko/');
       const link = page.locator('.nav__links > li[data-top="product"] a');
