@@ -127,7 +127,7 @@ echo -n "<toss secret>" | pnpm exec wrangler secret put TOSS_SECRET_KEY --env pr
 - OG 이미지는 정적 파일 `src/app/opengraph-image.png`(1200×630) 입니다. 워커 번들에서 `@vercel/og`(satori·resvg wasm ≈ 3MB)를 빼기 위해 런타임 생성 대신 파일로 둡니다. 문구를 바꾸려면 PNG 를 다시 만들어 교체하세요(`docs/` 의 브랜드 자산 또는 Figma).
 - 정적 자산 캐시: `scripts/cf-build.mjs` 가 `_headers` 에 `/_next/static/*` 1년 immutable, `/visuals`·`/brand`·`/icon.svg` 하루 캐시를 씁니다. 워커는 Smart Placement 로 D1(APAC) 가까이서 실행됩니다.
 - 공개 빌드 변수(`NEXT_PUBLIC_*`)는 `.env.production` 에서 빌드 시 인라인됩니다. 토스 상점 키로 교체 후 재빌드가 필요합니다.
-- 계정은 당분간 **Workers Free** 플랜입니다(하루 10만 요청, 요청당 CPU 10ms, Time Travel 7일). 한도와 증상, 올려야 할 시점은 `docs/RUNBOOK.md` 1-b 절.
+- 운영 원칙(2026-09-12): **무료 기능만 사용**합니다 — Workers Free(하루 10만 요청, 요청당 CPU 10ms, Time Travel 7일), D1, Turnstile, 무료 WAF 규칙 1개, GitHub Actions, Resend 무료 플랜. 유료 서비스(Workers Paid, Cloudflare Images, 알림톡 등)는 백로그에 [유료·보류]로만 적어 둡니다. 한도와 증상은 `docs/RUNBOOK.md` 1-b 절.
 - 운영에서 토스 테스트 키(`test_*`)는 `wrangler.jsonc` 의 `TOSS_TEST_MODE=1` 이 있을 때만 동작합니다. 실 키로 바꿀 때 이 변수를 제거하세요 (주문서에도 "결제 테스트 환경" 안내가 자동으로 표시됩니다).
 
 ### 운영 안정성 장치
