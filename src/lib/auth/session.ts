@@ -18,6 +18,7 @@ export type SessionUser = Pick<
   | "marketingSmsOptIn"
   | "createdAt"
   | "passwordResetRequired"
+  | "tempPasswordExpiresAt"
 >;
 
 const cookieOptions = () => ({
@@ -71,6 +72,7 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
       marketingEmailOptIn: users.marketingEmailOptIn,
       marketingSmsOptIn: users.marketingSmsOptIn,
       passwordResetRequired: users.passwordResetRequired,
+      tempPasswordExpiresAt: users.tempPasswordExpiresAt,
       createdAt: users.createdAt,
     })
     .from(sessions)

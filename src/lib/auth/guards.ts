@@ -2,13 +2,23 @@ import "server-only";
 import { redirect } from "next/navigation";
 import { localizePath } from "@/i18n/config";
 import { getLocale } from "@/i18n/server";
-import { getCurrentUser, type SessionUser } from "./session";
+import { destroyAllSessions, getCurrentUser, type SessionUser } from "./session";
+import { tempPasswordState } from "./temp-password";
 
-/** 임시 비밀번호로 들어온 사용자는 새 비밀번호를 정하기 전까지 비밀번호 변경 화면으로만 보낸다. */
+/**
+ * 임시 비밀번호로 들어온 사용자는 새 비밀번호를 정하기 전까지 비밀번호 변경 화면으로만 보낸다.
+ * 로그인 뒤 24시간이 지나도록 바꾸지 않았으면 세션을 끊고 다시 발급받게 한다 (유출된 임시 비밀번호의 유효 창을 로그인 시점이 아니라 실제 사용 시점으로 묶는다).
+ */
 async function redirectIfPasswordResetRequired(user: SessionUser, nextPath: string): Promise<void> {
-  if (!user.passwordResetRequired) return;
+  const state = tempPasswordState(user);
+  if (state === "ok") return;
   const locale = await getLocale();
-  redirect(`${localizePath(locale, "/account/password")}?next=${encodeURIComponent(nextPath)}`);
+  if (state === "expired") {
+    // 서버 컴포넌트 렌더링 중이라 쿠키는 지울 수 없다. DB 세션을 지우면 쿠키는 더 이상 유효하지 않다.
+    await destroyAllSessions(user.id);
+    redirect(`${localizePath(locale, "/login")}?next=${encodeURIComponent(localizePath(locale, nextPath))}`);
+  }
+  redirect(`${localizePath(locale, "/account/password")}?next=${encodeURIComponent(localizePath(locale, nextPath))}`);
 }
 
 /** 로그인 필수. 미로그인 시 (현재 언어의) /login?next= 로 이동. `nextPath` 는 접두사 없는 스토어 경로. */

@@ -22,7 +22,8 @@ export default async function AccountPasswordPage({ searchParams }: PageProps<"/
   const sp = await searchParams;
   const user = await getCurrentUser();
   if (!user) {
-    redirect(`${localizePath(locale, "/login")}?next=${encodeURIComponent(localizePath(locale, "/account/password"))}`);
+    // next 를 이 화면으로 두면 로그인 뒤 강제 변경 흐름이 다시 이 화면으로 감싸여 성공 안내 없이 빈 폼으로 돌아온다.
+    redirect(`${localizePath(locale, "/login")}?next=${encodeURIComponent(localizePath(locale, "/account"))}`);
   }
   const fallback = user.role === "admin" ? "/admin" : localizePath(locale, "/account");
   const next = safeRelativePath(firstParam(sp.next), fallback);

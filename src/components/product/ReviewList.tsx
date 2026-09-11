@@ -64,7 +64,7 @@ export async function ReviewList({
             return (
               <li key={tag}>
                 <Link
-                  href={`${basePath}?tag=${tag}#reviews`}
+                  href={`${basePath}?tag=${encodeURIComponent(tag)}#reviews`}
                   aria-current={active ? "true" : undefined}
                   className={`inline-flex items-center rounded-full border px-3.5 py-1.5 text-[13px] transition ${
                     active
