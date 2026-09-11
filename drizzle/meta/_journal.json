@@ -1,0 +1,62 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1788784170309,
+      "tag": "0000_oval_colossus",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1788870908072,
+      "tag": "0001_nappy_nomad",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1788871552876,
+      "tag": "0002_whole_prism",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1788936160829,
+      "tag": "0003_stock_deducted",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1788937664253,
+      "tag": "0004_backfill_stock_deducted",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1788966284435,
+      "tag": "0005_ops_indexes",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1788967975053,
+      "tag": "0006_order_events",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1789132153034,
+      "tag": "0007_coupon_members_only_temp_password",
+      "breakpoints": true
+    }
+  ]
+}

@@ -32,6 +32,9 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# 공개 값만 담는 파일은 추적한다
+!.env.example
+!.env.production
 
 # vercel
 .vercel
@@ -39,3 +42,19 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# app data (local sqlite db, uploads)
+/data
+.env
+
+# QA artifacts
+/.playwright-mcp
+
+# omc operational state
+/.omc
+
+# cloudflare / opennext
+/.open-next
+/.wrangler
+/data/seed.sql
+/.dev.vars

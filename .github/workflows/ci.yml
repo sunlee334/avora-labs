@@ -1,0 +1,43 @@
+name: CI
+
+# typecheck · lint · test · Cloudflare 번들 빌드. 배포는 하지 않는다 (배포는 `pnpm cf:deploy:prod` 를 사람이 실행).
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        # 버전은 package.json 의 packageManager 를 따른다.
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test
+        run: pnpm test
+
+      - name: Cloudflare bundle build
+        # 실제 키 없이도 빌드된다. cf-build.mjs 가 번들에서 비밀 값을 찾으면 실패시킨다.
+        env:
+          NEXT_PUBLIC_SITE_URL: https://avoralabs.co
+        run: pnpm cf:build

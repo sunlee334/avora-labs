@@ -1,26 +1,146 @@
 @import "tailwindcss";
 
+/*
+  PAROS 디자인 토큰 — 제품기획안 5-8 / 9장
+  메인 Mist Blue #AFC8D8, 서브 오프화이트·차콜. 캠페인(움직임) 강조에만 오렌지 소량.
+  무광 매트, 미니멀 타이포. 단일 라이트 팔레트로 고정한다.
+*/
+@theme {
+  --font-sans: var(--font-pretendard), "Pretendard Variable", Pretendard, -apple-system,
+    BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+
+  --color-mist-50: #f1f6f9;
+  --color-mist-100: #e3edf3;
+  --color-mist-200: #cfdfe8;
+  --color-mist-300: #afc8d8; /* 메인 */
+  --color-mist-400: #8fb0c6;
+  --color-mist-500: #6f96b0;
+  --color-mist-600: #567a93;
+
+  --color-paper: #f6f4ef; /* 오프 화이트 */
+  --color-paper-2: #ede9e1;
+  --color-ink: #1e2124; /* 차콜 딥 */
+  --color-charcoal: #2b2f34;
+  --color-stone: #6b7075; /* 뮤트 텍스트 */
+  --color-stone-2: #9a9ea3;
+  --color-line: #e2e4e6;
+  --color-line-2: #cfd3d6;
+
+  --color-accent: #e2622e; /* 캠페인 오렌지. 절제해서 사용 */
+  --color-accent-soft: #fbe9df;
+
+  --color-success: #2f7d5b;
+  --color-danger: #b83b2f;
+
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 1rem;
+
+  --shadow-soft: 0 1px 2px rgb(30 33 36 / 0.04), 0 8px 24px -12px rgb(30 33 36 / 0.12);
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--color-paper);
+  color: var(--color-charcoal);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  font-feature-settings: "ss05", "cv11";
+  letter-spacing: -0.005em;
+  line-height: 1.55;
+  /* 한글은 어절 단위로 줄바꿈 */
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+::selection {
+  background: var(--color-mist-300);
+  color: var(--color-ink);
+}
+
+/* ---------- 타이포 유틸 ---------- */
+@utility eyebrow {
+  font-size: 0.6875rem;
+  line-height: 1;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--color-stone);
+}
+
+@utility display {
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.08;
+  text-wrap: balance;
+}
+
+@utility measure {
+  max-width: 40rem;
+  text-wrap: pretty;
+}
+
+@utility container-x {
+  padding-inline: 1.25rem;
+  margin-inline: auto;
+  width: 100%;
+  max-width: 80rem;
+  @media (min-width: 640px) {
+    padding-inline: 2rem;
+  }
+  @media (min-width: 1024px) {
+    padding-inline: 3rem;
+  }
+}
+
+/* 매트 그레인 오버레이 (오브제 질감) */
+@utility grain {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.35;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+}
+
+/* 폼 기본값 */
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-mist-500);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
 }

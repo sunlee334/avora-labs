@@ -1,0 +1,80 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+
+  // ── Preview (default env) ─────────────────────────────────────────────
+  // `pnpm cf:deploy` → https://paros-store.<account>.workers.dev
+  // ── Production: `pnpm cf:deploy:prod` 는 아래 env.production 으로 기존 "avora-labs" Worker 를
+  //    같은 이름으로 새 버전 배포한다 (avoralabs.co 커스텀 도메인 유지, 롤백은 Cloudflare 대시보드 Rollback).
+  "name": "paros-store",
+  // OpenNext 가 생성한 .open-next/worker.js 를 감싸 cron(scheduled) 핸들러를 더한 진입점.
+  "main": "worker.ts",
+  "compatibility_date": "2026-08-25",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  // 프리뷰는 운영 D1 을 공유하므로 공개 workers.dev 호스트를 열지 않는다 (Access 미적용 우회 경로 방지).
+  // 확인이 필요하면 `pnpm cf:preview`(로컬 workerd) 를 쓰거나, 별도 D1 을 붙인 뒤에만 true 로 바꾼다.
+  "workers_dev": false,
+  // 버전별 프리뷰 URL(*.workers.dev)도 열지 않는다. Access 를 거치지 않는 경로가 생기지 않도록.
+  "preview_urls": false,
+
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+
+  // WORKER_SELF_REFERENCE 서비스 바인딩은 두지 않는다. OpenNext 에서 이 바인딩은 ISR 재검증 큐와
+  // pages router 의 res.revalidate 에만 쓰이는데(dist/api/overrides/queue, patches/res-revalidate),
+  // 이 앱은 모든 페이지가 동적이고 큐를 쓰지 않는다. 바인딩이 있으면 Access·WAF 를 거치지 않는 자기 호출 경로만 생긴다.
+
+  // 스토어 전용 D1. 기존 사이트의 `avora-orders`(users/orders/launch_notify …)는 건드리지 않는다.
+  // 마이그레이션: `pnpm cf:migrate:remote` (drizzle/*.sql 적용)
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "paros-store",
+      "database_id": "7513cee1-439a-4dbe-8cd5-b8c20ab88a2f",
+      "migrations_dir": "drizzle"
+    }
+  ],
+
+  // 리뷰 사진(R2). 대시보드에서 R2 활성화 후 `wrangler r2 bucket create paros-uploads` 하고 주석을 푼다.
+  // "r2_buckets": [{ "binding": "UPLOADS", "bucket_name": "paros-uploads" }],
+
+  // 비밀값(AUTH_SECRET, TOSS_SECRET_KEY)은 `wrangler secret put <NAME>` 으로만 설정한다.
+  // NEXT_PUBLIC_* 는 빌드 시 .env.production 에서 인라인되므로 여기 두지 않는다.
+  "vars": {
+    // 토스 테스트 키 허용 플래그. 실 키로 교체하는 시점에 반드시 제거한다.
+    "TOSS_TEST_MODE": "1"
+  },
+
+  "observability": { "enabled": true },
+
+  "env": {
+    "production": {
+      "name": "avora-labs",
+      "workers_dev": false,
+      "preview_urls": false,
+      "routes": [
+        { "pattern": "avoralabs.co", "custom_domain": true },
+        { "pattern": "www.avoralabs.co", "custom_domain": true }
+      ],
+      // 30분마다: 미결제 pending 만료·승인 중단 주문 토스 대조·세션/카트/rate_limits 정리 (worker.ts scheduled).
+      // 매일 03:15 KST(18:15 UTC): 토스 거래 목록과 주문 상태 일일 대사. 문자열은 worker.ts 의 DAILY_CRON 과 같아야 한다.
+      // 프리뷰 Worker 는 같은 D1 을 공유하므로 운영에서만 돈다.
+      "triggers": { "crons": ["*/30 * * * *", "15 18 * * *"] },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "paros-store",
+          "database_id": "7513cee1-439a-4dbe-8cd5-b8c20ab88a2f",
+          "migrations_dir": "drizzle"
+        }
+      ],
+      // "r2_buckets": [{ "binding": "UPLOADS", "bucket_name": "paros-uploads" }],
+      "vars": {
+        // 토스 테스트 키 허용 플래그. 실 키로 교체하는 시점에 반드시 제거한다.
+        "TOSS_TEST_MODE": "1"
+      },
+      "observability": { "enabled": true }
+    }
+  }
+}

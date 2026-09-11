@@ -1,27 +1,55 @@
 {
-  "name": "shopping-mall-2",
+  "name": "paros-store",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx src/db/migrate.ts",
+    "db:seed": "tsx src/db/seed.ts",
+    "db:seed:demo": "tsx src/db/seed.ts --demo",
+    "db:reset": "rm -f data/paros.db && pnpm db:migrate && pnpm db:seed:demo",
+    "db:studio": "drizzle-kit studio",
+    "cf:build": "node scripts/cf-build.mjs",
+    "cf:preview": "node scripts/cf-build.mjs && opennextjs-cloudflare preview",
+    "cf:deploy": "node scripts/cf-build.mjs && opennextjs-cloudflare deploy",
+    "cf:deploy:prod": "node scripts/cf-build.mjs && opennextjs-cloudflare deploy -- --env production",
+    "cf:typegen": "wrangler types",
+    "cf:migrate:local": "wrangler d1 migrations apply paros-store --local",
+    "cf:migrate:remote": "wrangler d1 migrations apply paros-store --remote",
+    "cf:seed:sql": "tsx scripts/seed-sql.ts"
   },
   "dependencies": {
+    "@libsql/client": "^0.18.0",
+    "@tosspayments/tosspayments-sdk": "^2.8.1",
+    "drizzle-orm": "^0.45.2",
     "next": "16.3.4",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "server-only": "^0.0.1",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "^1.20.6",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^24.13.3",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^17.4.2",
+    "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "tsx": "^4.23.13",
+    "typescript": "^5",
+    "vitest": "^5.0.0",
+    "wrangler": "^4.129.0"
   },
   "packageManager": "pnpm@11.1.2"
 }

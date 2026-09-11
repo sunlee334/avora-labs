@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // wrangler types 가 생성하는 Cloudflare 런타임 타입
+    "worker-configuration.d.ts",
+    ".open-next/**",
+    ".wrangler/**",
   ]),
 ]);
 

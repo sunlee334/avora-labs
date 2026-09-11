@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 520" role="img" aria-labelledby="paros-2set-title">
+  <title id="paros-2set-title">PAROS Daily Sunscreen 2개 세트</title>
+  <defs>
+    <linearGradient id="setBodyBack" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e3edf3" />
+      <stop offset="1" stop-color="#afc8d8" />
+    </linearGradient>
+    <linearGradient id="setBodyFront" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#cfdfe8" />
+      <stop offset="0.55" stop-color="#afc8d8" />
+      <stop offset="1" stop-color="#8fb0c6" />
+    </linearGradient>
+    <linearGradient id="setCap" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8fb0c6" />
+      <stop offset="1" stop-color="#6f96b0" />
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="260" cy="486" rx="150" ry="16" fill="#1e2124" opacity="0.06" />
+
+  <g transform="translate(150 20) scale(0.86)" opacity="0.82">
+    <path d="M100 168 C100 150 108 138 128 132 L232 132 C252 138 260 150 260 168 L272 468 C272 486 258 500 240 500 L120 500 C102 500 88 486 88 468 Z" fill="url(#setBodyBack)" />
+    <rect x="150" y="96" width="60" height="46" rx="10" fill="#cfdfe8" />
+    <path d="M132 40 C132 28 142 20 158 20 L202 20 C218 20 228 28 228 40 L228 76 C228 92 214 104 180 104 C146 104 132 92 132 76 Z" fill="#afc8d8" />
+    <rect x="150" y="16" width="60" height="10" rx="5" fill="#8fb0c6" />
+  </g>
+
+  <g transform="translate(20 30)">
+    <path d="M100 168 C100 150 108 138 128 132 L232 132 C252 138 260 150 260 168 L272 468 C272 486 258 500 240 500 L120 500 C102 500 88 486 88 468 Z" fill="url(#setBodyFront)" />
+    <rect x="150" y="96" width="60" height="46" rx="10" fill="#8fb0c6" />
+    <path d="M132 40 C132 28 142 20 158 20 L202 20 C218 20 228 28 228 40 L228 76 C228 92 214 104 180 104 C146 104 132 92 132 76 Z" fill="url(#setCap)" />
+    <path d="M132 58 L228 58" stroke="#f1f6f9" stroke-opacity="0.35" stroke-width="2" />
+    <rect x="150" y="16" width="60" height="10" rx="5" fill="#567a93" />
+    <text x="180" y="330" text-anchor="middle" font-family="'Pretendard Variable', Pretendard, -apple-system, sans-serif" font-size="30" font-weight="600" letter-spacing="5" fill="#2b2f34">PAROS</text>
+    <text x="180" y="358" text-anchor="middle" font-family="'Pretendard Variable', Pretendard, -apple-system, sans-serif" font-size="11" font-weight="600" letter-spacing="2.5" fill="#4c545b">DAILY SUNSCREEN</text>
+    <line x1="145" y1="390" x2="215" y2="390" stroke="#2b2f34" stroke-opacity="0.25" stroke-width="1" />
+    <text x="180" y="414" text-anchor="middle" font-family="'Pretendard Variable', Pretendard, -apple-system, sans-serif" font-size="12" font-weight="500" letter-spacing="1.2" fill="#2b2f34">SPF50+ PA++++</text>
+  </g>
+</svg>

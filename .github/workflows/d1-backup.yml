@@ -1,0 +1,47 @@
+name: D1 backup
+
+# 운영 D1(paros-store)을 하루 한 번 SQL 로 내보내 아티팩트로 보관한다 (기본 90일).
+# 필요한 저장소 시크릿: CLOUDFLARE_API_TOKEN (권한: Account → D1 Edit), CLOUDFLARE_ACCOUNT_ID.
+# 복구 절차는 docs/D1_BACKUP.md.
+on:
+  schedule:
+    - cron: "30 18 * * *" # 03:30 KST
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Export production D1
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          stamp="$(date -u +%Y%m%dT%H%M%SZ)"
+          mkdir -p backup
+          pnpm exec wrangler d1 export paros-store --remote --output "backup/paros-store-${stamp}.sql"
+          gzip "backup/paros-store-${stamp}.sql"
+          ls -la backup
+          # 내보내기 결과가 비정상적으로 작으면(빈 DB·권한 문제) 실패시킨다.
+          size=$(stat -c %s "backup/paros-store-${stamp}.sql.gz")
+          test "$size" -gt 2000
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: paros-store-d1-${{ github.run_id }}
+          path: backup/*.sql.gz
+          retention-days: 90
+          if-no-files-found: error
