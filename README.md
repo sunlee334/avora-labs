@@ -14,6 +14,10 @@
 | 인증 | 자체 구현 | scrypt 비밀번호 해시, DB 세션 + httpOnly 쿠키 |
 | 테스트 | Vitest | `tests/` — 도메인 로직 단위 + `:memory:` DB 통합 |
 
+## 저장소
+
+소스는 https://github.com/sunlee334/avora-labs (`main`). 이전 사이트(Astro) 이력은 2026-09-11 병합 커밋 아래에 남아 있습니다. push/PR 마다 CI 가 typecheck·lint·test·`cf:build` 를 실행하고, 운영 배포는 사람이 `pnpm cf:deploy:prod` 로 합니다.
+
 ## 시작하기
 
 ```bash
