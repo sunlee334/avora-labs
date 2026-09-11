@@ -11,14 +11,15 @@ const isCloudflareBuild = process.env.CF_BUILD === "1";
  * Content-Security-Policy — 1단계는 Report-Only. 차단하지 않고 위반만 /api/csp-report 로 받아
  * 토스 결제창·카드사 인증창이 실제로 쓰는 출처를 확인한 뒤 enforce 로 바꾼다 (백로그 t06).
  * Next 의 인라인 스크립트 때문에 script-src 에 'unsafe-inline' 이 필요하다 (nonce 도입은 enforce 단계에서).
+ * static.cloudflareinsights.com 은 존에서 켜진 Cloudflare Web Analytics(무료) 비콘을 Cloudflare 가 자동 삽입한 것이다.
  */
 const cspReportOnly = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isCloudflareBuild ? "" : " 'unsafe-eval'"} https://js.tosspayments.com https://challenges.cloudflare.com https://www.googletagmanager.com`,
+  `script-src 'self' 'unsafe-inline'${isCloudflareBuild ? "" : " 'unsafe-eval'"} https://js.tosspayments.com https://challenges.cloudflare.com https://www.googletagmanager.com https://static.cloudflareinsights.com`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.tosspayments.com https://challenges.cloudflare.com https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com",
+  "connect-src 'self' https://*.tosspayments.com https://challenges.cloudflare.com https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://cloudflareinsights.com",
   // 토스 결제창은 서브도메인 없는 https://toss.im 에서도 뜬다 (2026-09-12 로컬 결제 흐름에서 확인) — 와일드카드는 apex 를 포함하지 않는다.
   "frame-src 'self' https://*.tosspayments.com https://toss.im https://*.toss.im https://challenges.cloudflare.com",
   "form-action 'self' https://*.tosspayments.com https://toss.im https://*.toss.im",
