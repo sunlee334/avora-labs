@@ -88,6 +88,13 @@ tests/                # Vitest
 - 저장 데이터는 언어 중립: 배송 메모는 고정 키(`DELIVERY_MEMO_KEYS`: door·security·call·locker)를 저장하고 고객 화면은 사전, 관리자 화면은 `deliveryMemoLabel()`(한국어)로 보여준다. 주문 품목 옵션명은 저장 스냅샷(한국어) 대신 `variant.sku` → `CATALOG.variants` 로 표시만 덮어쓴다. 토스 `orderName`·관리자 이력·리뷰 본문은 번역하지 않는다.
 - 검사: `tests/unit/i18n.test.ts` 가 다섯 사전의 키·자리표시자 동일성, 콘텐츠 형태, 경로 헬퍼, 가격 포맷을 확인한다. 새 문구는 반드시 다섯 파일에 모두 넣어야 타입·테스트를 통과한다. `tests/unit/copy-rules.test.ts` 는 번역 파일에도 언어별 금지 표현(스웨트프루프·미백·주름·여드름·재생·자체 개발 처방 계열)을 건다.
 
+## 관리자 운영 기능
+
+- 주문 CSV 내보내기(`/admin/orders/export`, 출고 대기 기본 필터·기간 지정) 와 송장 CSV 일괄 등록(주문 목록의 "송장 일괄 등록", 헤더 `orderNumber,carrier,trackingNumber`, 2,000행). 송장 등록은 단건·일괄 모두 `markOrderShipped` 한 경로를 거쳐 상태 전이·이력·발송 알림 예약이 같다.
+- 대시보드: 기획안 7-1 중간 점검 목표(알림 신청 1,300·누적 판매 2,500·리뷰 100·재구매율 20%) 대비 게이지, 세트 구매 비중·재구매율·최근 6개월 표. 방문 대비 전환율은 웹 분석 연동 뒤.
+- 회원 목록 세그먼트(펀딩 참여자 > 세트 > 단품 > 신규, `src/lib/segments.ts`) 표시·필터.
+- 검색·측정: `robots.txt`(개인 화면 제외), 상품 JSON-LD(Product·Offer·AggregateRating), 홈 Organization/WebSite. `NEXT_PUBLIC_ANALYTICS_ID`(GA4 측정 ID) 를 `.env.production` 에 넣고 빌드하면 page_view·view_item·add_to_cart·begin_checkout·purchase 이벤트가 나간다(IP 익명화, 광고 신호 끔). 없으면 아무것도 로드하지 않는다.
+
 ## 정책 요약 (기획안 반영)
 
 - 정가 32,000원 고정. 2개 세트 56,000원(개당 28,000원)은 자사몰 전용.

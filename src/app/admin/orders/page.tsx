@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { and, count, desc, eq, like, or } from "drizzle-orm";
+import { BulkShippingForm } from "@/components/admin/BulkShippingForm";
 import { Pagination } from "@/components/admin/Pagination";
 import { OrderStatusBadge } from "@/components/ui/StatusBadge";
 import { db } from "@/db/client";
@@ -56,6 +57,13 @@ export default async function AdminOrdersPage({ searchParams }: PageProps<"/admi
     return `/admin/orders${query ? `?${query}` : ""}`;
   }
 
+  function exportHref() {
+    const qs = new URLSearchParams();
+    if (status) qs.set("status", status);
+    const query = qs.toString();
+    return `/admin/orders/export${query ? `?${query}` : ""}`;
+  }
+
   function pageHref(nextPage: number) {
     const qs = new URLSearchParams();
     if (status) qs.set("status", status);
@@ -83,7 +91,7 @@ export default async function AdminOrdersPage({ searchParams }: PageProps<"/admi
         </form>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Link
           href={chipHref(undefined)}
           className={`rounded-full border px-3.5 py-1.5 text-[12px] font-medium ${
@@ -103,6 +111,18 @@ export default async function AdminOrdersPage({ searchParams }: PageProps<"/admi
             {ORDER_STATUS_LABEL[s]}
           </Link>
         ))}
+        <a
+          href={exportHref()}
+          className="ml-auto rounded-full border border-line-2 bg-white px-3.5 py-1.5 text-[12px] font-medium text-ink hover:border-ink"
+          title={status ? `${ORDER_STATUS_LABEL[status]} 주문을 CSV 로 내려받기` : "출고 대기(결제 완료·상품 준비 중) 주문을 CSV 로 내려받기"}
+        >
+          CSV 내보내기{status ? "" : " (출고 대기)"}
+        </a>
+      </div>
+
+      <div className="rounded-lg border border-line bg-white/70 p-5">
+        <h2 className="mb-3 text-sm font-semibold text-ink">송장 일괄 등록</h2>
+        <BulkShippingForm />
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-line bg-white">

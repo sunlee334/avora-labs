@@ -3,6 +3,8 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { NotifyForm } from "@/components/notify/NotifyForm";
 import { ProductBuyPanel } from "@/components/product/ProductBuyPanel";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { TrackEvent } from "@/components/site/TrackEvent";
 import { PurchaseNotes } from "@/components/product/PurchaseNotes";
 import { ReviewList } from "@/components/product/ReviewList";
 import { ReviewSummaryBar } from "@/components/product/ReviewSummaryBar";
@@ -12,7 +14,7 @@ import type { GalleryImage } from "@/components/product/ProductGallery";
 import type { PurchaseVariant } from "@/components/product/VariantSelector";
 import { Badge, Price, Section } from "@/components/ui/Primitives";
 import { getContent } from "@/content";
-import { LOCALE_META } from "@/i18n/config";
+import { LOCALE_META, localizePath } from "@/i18n/config";
 import { fill } from "@/i18n/format";
 import { Link } from "@/i18n/link";
 import { localeAlternates } from "@/i18n/metadata";
@@ -115,8 +117,47 @@ export default async function ProductPage({ params, searchParams }: PageProps<"/
     </header>
   );
 
+  const base = SITE.url.replace(/\/$/, "");
+  const inStock = forSale && product.variants.some((v) => v.stock > 0);
+  const productJsonLd: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: subtitle || description,
+    image: `${base}${product.image || "/visuals/product-tube.svg"}`,
+    brand: { "@type": "Brand", name: SITE.name },
+    sku: defaultVariant?.sku,
+    url: `${base}${localizePath(locale, `/products/${product.slug}`)}`,
+    ...(forSale && defaultVariant
+      ? {
+          offers: {
+            "@type": "Offer",
+            priceCurrency: "KRW",
+            price: defaultVariant.priceKrw,
+            availability: inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            url: `${base}${localizePath(locale, `/products/${product.slug}`)}`,
+            seller: { "@type": "Organization", name: "AVORA LABS" },
+          },
+        }
+      : {}),
+    ...(summary.count > 0
+      ? { aggregateRating: { "@type": "AggregateRating", ratingValue: Number(summary.average.toFixed(1)), reviewCount: summary.count, bestRating: 5 } }
+      : {}),
+  };
+
   return (
     <>
+      <JsonLd data={productJsonLd} />
+      {forSale && defaultVariant ? (
+        <TrackEvent
+          name="view_item"
+          params={{
+            currency: "KRW",
+            value: defaultVariant.priceKrw,
+            items: [{ item_id: defaultVariant.sku, item_name: product.name, price: defaultVariant.priceKrw, quantity: 1 }],
+          }}
+        />
+      ) : null}
       <div className="container-x pt-10 pb-16 md:pt-16">
         {forSale && defaultVariant ? (
           <ProductBuyPanel

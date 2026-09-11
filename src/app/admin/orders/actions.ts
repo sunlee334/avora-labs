@@ -1,17 +1,18 @@
 "use server";
 
 import { eq } from "drizzle-orm";
-import { enqueueOrderNotifications } from "@/lib/notifications/enqueue";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db/client";
 import { orders } from "@/db/schema";
 import { assertAdmin } from "@/lib/auth/guards";
 import { ORDER_STATUS } from "@/lib/config";
+import { parseTrackingCsv } from "@/lib/csv";
 import { restoreStockForClosedOrder, transitionOrder } from "@/lib/order-admin";
+import { bulkMarkShipped, markOrderShipped, type BulkShipResult } from "@/lib/shipping";
 import { reconcileOrderWithToss } from "@/lib/payments/reconcile";
 import { redirectWithMessage } from "@/app/admin/_lib/redirect";
-import { ALLOWED_TRANSITIONS, CARRIERS } from "./shared";
+import { CARRIERS } from "./shared";
 
 const statusSchema = z.object({
   status: z.enum(ORDER_STATUS),
@@ -117,31 +118,10 @@ export async function setShippingAction(orderId: number, formData: FormData) {
   if (!order) {
     redirectWithMessage(`/admin/orders/${orderId}`, { error: "주문을 찾을 수 없습니다." });
   }
-  if (!ALLOWED_TRANSITIONS[order.status].includes("shipped")) {
-    redirectWithMessage(`/admin/orders/${orderId}`, {
-      error: `${order.status} 상태에서는 배송 처리를 할 수 없습니다.`,
-    });
-  }
-
-  const [shipped] = await db
-    .update(orders)
-    .set({
-      status: "shipped",
-      trackingCarrier: parsed.data.carrier,
-      trackingNumber: parsed.data.trackingNumber,
-      shippedAt: new Date(),
-      updatedAt: new Date(),
-    })
-    .where(eq(orders.id, orderId))
-    .returning();
-
-  if (shipped) {
-    // 송장 안내 알림 예약. 대기열 오류가 배송 처리 자체를 막으면 안 된다.
-    try {
-      await enqueueOrderNotifications(shipped, "shipped");
-    } catch (error) {
-      console.warn(JSON.stringify({ level: "warn", event: "notify.enqueue_failed", order: shipped.orderNumber, stage: "shipped", cause: error instanceof Error ? error.message.slice(0, 200) : String(error) }));
-    }
+  // 단건 입력과 CSV 일괄 등록이 같은 출고 처리(상태·송장·이력·알림)를 쓴다.
+  const shipped = await markOrderShipped({ order, carrier: parsed.data.carrier, trackingNumber: parsed.data.trackingNumber });
+  if (!shipped.ok) {
+    redirectWithMessage(`/admin/orders/${orderId}`, { error: shipped.message });
   }
 
   revalidatePath(`/admin/orders/${orderId}`);
@@ -150,6 +130,38 @@ export async function setShippingAction(orderId: number, formData: FormData) {
   redirectWithMessage(`/admin/orders/${orderId}`, {
     success: "송장 정보를 저장하고 배송 중으로 변경했습니다.",
   });
+}
+
+export interface BulkShippingState {
+  error?: string;
+  result?: BulkShipResult & { parseErrors: { line: number; reason: string }[]; truncated: number };
+}
+
+/** 서버 액션 본문 한도(1mb) 안에서 여유 있게. */
+const BULK_CSV_MAX_BYTES = 900 * 1024;
+
+/**
+ * 송장 CSV 일괄 등록. 헤더 `orderNumber,carrier,trackingNumber` (carrier 비우면 기본 택배사).
+ * 행 단위로 처리하고 결과를 전부 돌려준다 — 일부만 적용된 사실이 숨겨지지 않게.
+ */
+export async function bulkShippingAction(_prev: BulkShippingState, formData: FormData): Promise<BulkShippingState> {
+  await assertAdmin();
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return { error: "CSV 파일을 선택해 주세요." };
+  }
+  if (file.size > BULK_CSV_MAX_BYTES) {
+    return { error: "파일이 너무 큽니다 (900KB 이하, 2,000행 이하로 나눠 올려 주세요)." };
+  }
+  const text = await file.text();
+  const parsed = parseTrackingCsv(text);
+  if (parsed.rows.length === 0) {
+    return { error: parsed.errors[0]?.reason ?? "처리할 행이 없습니다.", result: { applied: 0, skipped: [], errors: [], parseErrors: parsed.errors, truncated: parsed.truncated } };
+  }
+  const result = await bulkMarkShipped(parsed.rows, { source: "admin-csv" });
+  revalidatePath("/admin/orders");
+  revalidatePath("/admin");
+  return { result: { ...result, parseErrors: parsed.errors, truncated: parsed.truncated } };
 }
 
 const memoSchema = z.object({ memo: z.string().max(2000) });

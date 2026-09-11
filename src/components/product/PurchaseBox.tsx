@@ -9,6 +9,7 @@ import { useLocale, useMessages } from "@/i18n/client";
 import { localizePath } from "@/i18n/config";
 import { fill, formatPrice } from "@/i18n/format";
 import { Link } from "@/i18n/link";
+import { track } from "@/lib/analytics";
 import { MAX_QTY_PER_LINE, SHIPPING } from "@/lib/config";
 import { VariantSelector, type PurchaseVariant } from "./VariantSelector";
 
@@ -50,6 +51,13 @@ export function PurchaseBox({
     startTransition(async () => {
       const response = await addToCartAction({ variantId: selected.id, qty });
       setResult({ ok: response.ok, message: response.message });
+      if (response.ok) {
+        track("add_to_cart", {
+          currency: "KRW",
+          value: selected.priceKrw * qty,
+          items: [{ item_id: String(selected.id), item_name: selected.name, price: selected.priceKrw, quantity: qty }],
+        });
+      }
       if (response.ok && then) then();
     });
   }

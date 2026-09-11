@@ -10,9 +10,10 @@ import { Usage } from "@/components/home/Usage";
 import { Reviews } from "@/components/home/Reviews";
 import { Roadmap } from "@/components/home/Roadmap";
 import { NotifySection } from "@/components/home/NotifySection";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { localeAlternates } from "@/i18n/metadata";
 import { getT } from "@/i18n/server";
-import { SITE } from "@/lib/config";
+import { COMPANY, SITE } from "@/lib/config";
 
 // DB 를 읽는 페이지는 항상 요청 시점에 렌더링한다 (Workers 빌드 프리렌더 중 D1 접근 방지).
 export const dynamic = "force-dynamic";
@@ -27,8 +28,27 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function HomePage() {
+  const base = SITE.url.replace(/\/$/, "");
   return (
     <>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Organization",
+              "@id": `${base}/#org`,
+              name: COMPANY.nameEn,
+              alternateName: COMPANY.name,
+              url: base,
+              logo: `${base}/brand/avora-wordmark-forest.svg`,
+              brand: { "@type": "Brand", name: SITE.name },
+              sameAs: ["https://www.instagram.com/avora_labs"],
+            },
+            { "@type": "WebSite", "@id": `${base}/#website`, url: base, name: SITE.fullName, publisher: { "@id": `${base}/#org` } },
+          ],
+        }}
+      />
       <Hero />
       <Problem />
       <Reason />

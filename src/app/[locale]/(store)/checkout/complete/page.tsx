@@ -3,6 +3,7 @@ import { eq, inArray } from "drizzle-orm";
 import { db } from "@/db/client";
 import { orders, variants } from "@/db/schema";
 import { OrderReceipt } from "@/components/checkout/OrderReceipt";
+import { TrackEvent } from "@/components/site/TrackEvent";
 import { ButtonLink } from "@/components/ui/Button";
 import { FormMessage } from "@/components/ui/Field";
 import { PageTitle } from "@/components/ui/Primitives";
@@ -150,6 +151,22 @@ export default async function CheckoutCompletePage({ searchParams }: PageProps<"
         lede={fill(t.ledeReceipt, { order: order.orderNumber })}
       />
 
+      <TrackEvent
+        name="purchase"
+        once={`purchase:${order.orderNumber}`}
+        params={{
+          transaction_id: order.orderNumber,
+          currency: "KRW",
+          value: order.totalKrw,
+          shipping: order.shippingKrw,
+          items: order.items.map((item) => ({
+            item_id: String(item.variantId),
+            item_name: `${item.productName} ${variantNames[item.variantId] ?? item.variantName}`,
+            price: item.unitPriceKrw,
+            quantity: item.qty,
+          })),
+        }}
+      />
       <div className="container-x max-w-3xl space-y-8 pb-24">
         <OrderReceipt order={order} variantNames={variantNames} />
 

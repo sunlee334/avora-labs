@@ -14,18 +14,19 @@ const isCloudflareBuild = process.env.CF_BUILD === "1";
  */
 const cspReportOnly = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isCloudflareBuild ? "" : " 'unsafe-eval'"} https://js.tosspayments.com https://challenges.cloudflare.com`,
+  `script-src 'self' 'unsafe-inline'${isCloudflareBuild ? "" : " 'unsafe-eval'"} https://js.tosspayments.com https://challenges.cloudflare.com https://www.googletagmanager.com`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.tosspayments.com https://challenges.cloudflare.com",
-  "frame-src 'self' https://*.tosspayments.com https://*.toss.im https://challenges.cloudflare.com",
-  "form-action 'self' https://*.tosspayments.com https://*.toss.im",
+  "connect-src 'self' https://*.tosspayments.com https://challenges.cloudflare.com https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com",
+  // 토스 결제창은 서브도메인 없는 https://toss.im 에서도 뜬다 (2026-09-12 로컬 결제 흐름에서 확인) — 와일드카드는 apex 를 포함하지 않는다.
+  "frame-src 'self' https://*.tosspayments.com https://toss.im https://*.toss.im https://challenges.cloudflare.com",
+  "form-action 'self' https://*.tosspayments.com https://toss.im https://*.toss.im",
   "base-uri 'self'",
   "object-src 'none'",
   "frame-ancestors 'self'",
+  // report-to(Reporting API) 는 엔드포인트 등록이 어긋나면 조용히 아무것도 보내지 않으므로 legacy report-uri 만 쓴다 (모든 브라우저가 즉시 POST).
   "report-uri /api/csp-report",
-  "report-to csp",
 ].join("; ");
 
 const nextConfig: NextConfig = {
@@ -57,7 +58,6 @@ const nextConfig: NextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "Reporting-Endpoints", value: 'csp="/api/csp-report"' },
           { key: "Content-Security-Policy-Report-Only", value: cspReportOnly },
           {
             key: "Permissions-Policy",

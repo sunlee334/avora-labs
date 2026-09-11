@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import { Analytics } from "@/components/site/Analytics";
 import { LocaleProvider } from "@/i18n/client";
 import { LOCALE_META } from "@/i18n/config";
 import { getT } from "@/i18n/server";
@@ -49,6 +50,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <LocaleProvider locale={locale} messages={m}>
           {children}
         </LocaleProvider>
+        <Analytics />
       </body>
     </html>
   );

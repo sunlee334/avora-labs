@@ -4,9 +4,16 @@ import { Card } from "@/components/ui/Primitives";
 import { formatKrw } from "@/lib/config";
 import { formatPercent, getAdminDashboardMetrics } from "@/lib/admin/metrics";
 import { formatDateTime } from "@/lib/format";
+import { goalGauges, kstMonthStart, monthlySeries, salesSummary } from "@/lib/metrics";
 
 export default async function AdminDashboardPage() {
-  const m = await getAdminDashboardMetrics();
+  const now = new Date();
+  const [m, gauges, months, thisMonth] = await Promise.all([
+    getAdminDashboardMetrics(),
+    goalGauges(),
+    monthlySeries(6, now),
+    salesSummary({ from: kstMonthStart(now), to: kstMonthStart(now, 1) }),
+  ]);
 
   const stockBreakdown = m.stock.variants
     .map((v) => `${v.variantName} ${v.stock.toLocaleString("ko-KR")}`)
@@ -26,10 +33,13 @@ export default async function AdminDashboardPage() {
     { label: "활성 장바구니", value: `${m.activeCarts}개`, sub: "최근 7일 기준" },
   ];
 
-  const managementCards: { label: string; value: string; note?: string }[] = [
-    { label: "세트 구매 비중", value: formatPercent(m.setShareRatio) },
-    { label: "재구매율", value: formatPercent(m.repeatPurchaseRatio) },
-    { label: "장바구니 이탈률", value: formatPercent(m.cartAbandonmentRatio), note: "근사치" },
+  // 기획안 8-5-2 관리 지표. 방문 대비 전환율은 웹 분석 도구가 있어야 계산할 수 있어 숫자를 지어내지 않는다.
+  const managementCards: { label: string; value: string; note?: string; muted?: boolean }[] = [
+    { label: "이번 달 세트 구매 비중", value: formatPercent(thisMonth.setShare), note: `주문 ${thisMonth.orders}건 중 세트 ${thisMonth.setOrders}건` },
+    { label: "세트 구매 비중 (전체)", value: formatPercent(m.setShareRatio) },
+    { label: "재구매율 (회원)", value: formatPercent(m.repeatPurchaseRatio), note: "분기 1회 확인" },
+    { label: "장바구니 이탈률", value: formatPercent(m.cartAbandonmentRatio), note: "근사치 · 최근 30일" },
+    { label: "방문 대비 구매 전환율", value: "웹 분석 연동 후", muted: true },
   ];
 
   return (
@@ -50,18 +60,71 @@ export default async function AdminDashboardPage() {
       </div>
 
       <div>
+        <div className="mb-3 flex items-baseline justify-between gap-4">
+          <h2 className="text-[13px] font-semibold text-charcoal">기획안 목표 대비</h2>
+          <p className="text-[12px] text-stone-2">제품기획안 7-1 중간 점검 지표</p>
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {gauges.map((g) => (
+            <Card key={g.key} className="p-5">
+              <div className="flex items-baseline justify-between gap-3">
+                <p className="text-[12px] text-stone">{g.label}</p>
+                <p className="text-[11px] text-stone-2">{g.due}</p>
+              </div>
+              <p className="mt-2 text-[15px] font-semibold text-ink tabular-nums">{g.display}</p>
+              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-paper-2" aria-hidden>
+                <div
+                  className={`h-full rounded-full ${g.progress !== null && g.progress >= 1 ? "bg-success" : "bg-mist-600"}`}
+                  style={{ width: `${Math.round((g.progress ?? 0) * 100)}%` }}
+                />
+              </div>
+              <p className="mt-1.5 text-[11px] text-stone-2">
+                {g.progress === null ? "-" : `${Math.round(g.progress * 100)}%`}
+                {g.note ? ` · ${g.note}` : ""}
+              </p>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      <div>
         <h2 className="mb-3 text-[13px] font-semibold text-charcoal">관리 지표</h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-5">
           {managementCards.map((c) => (
             <Card key={c.label} className="p-5">
               <p className="text-[12px] text-stone">
                 {c.label}
                 {c.note ? <span className="ml-1.5 text-stone-2">({c.note})</span> : null}
               </p>
-              <p className="mt-2 text-xl font-semibold text-ink">{c.value}</p>
+              <p className={`mt-2 font-semibold ${c.muted ? "text-[13px] text-stone-2" : "text-xl text-ink"}`}>{c.value}</p>
             </Card>
           ))}
         </div>
+        <div className="mt-4 overflow-x-auto rounded-lg border border-line bg-white">
+          <table className="w-full min-w-[560px] text-[13px]">
+            <thead>
+              <tr className="border-b border-line text-left text-stone">
+                <th className="px-4 py-3 font-medium">월</th>
+                <th className="px-4 py-3 font-medium">주문</th>
+                <th className="px-4 py-3 font-medium">판매 개수</th>
+                <th className="px-4 py-3 font-medium">매출</th>
+                <th className="px-4 py-3 font-medium">세트 비중</th>
+              </tr>
+            </thead>
+            <tbody>
+              {months.map((r) => (
+                <tr key={r.month} className="border-b border-line last:border-0">
+                  <td className="px-4 py-2.5 whitespace-nowrap text-stone">{r.month}</td>
+                  <td className="px-4 py-2.5 tabular-nums">{r.orders}건</td>
+                  <td className="px-4 py-2.5 tabular-nums">{r.units.toLocaleString("ko-KR")}개</td>
+                  <td className="px-4 py-2.5 tabular-nums">{formatKrw(r.revenueKrw)}</td>
+                  <td className="px-4 py-2.5 tabular-nums">{formatPercent(r.setShare)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-2 text-[12px] text-stone-2">판매 개수는 세트를 2개로 셉니다. 결제 시각(없으면 접수 시각), 한국 시간 기준 달.</p>
       </div>
 
       <div>

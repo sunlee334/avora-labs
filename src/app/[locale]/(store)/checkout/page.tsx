@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { CheckoutForm, type CheckoutLine } from "@/components/checkout/CheckoutForm";
+import { TrackEvent } from "@/components/site/TrackEvent";
 import { FormMessage } from "@/components/ui/Field";
 import { PageTitle } from "@/components/ui/Primitives";
 import { getContent } from "@/content";
@@ -56,6 +57,7 @@ export default async function CheckoutPage() {
         </p>
       ) : null}
 
+      <TrackEvent name="begin_checkout" params={{ currency: "KRW", items_count: lines.length }} />
       {clientKey ? (
         <CheckoutForm
           lines={lines}
