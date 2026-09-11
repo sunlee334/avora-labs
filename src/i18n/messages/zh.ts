@@ -432,7 +432,7 @@ export const zh: Messages = {
     brand: { metaTitle: "品牌", metaDescription: "AVORA LABS 为何打造 PAROS，以及其世界观的四个代码。", worldCodeEyebrow: "WORLD CODE", worldCodeTitle: "四个代码 — LIGHT · WIND · WATER · STONE" },
     standard: { metaTitle: "挑选标准", metaDescription: "PAROS 挑选配方时使用的肤感优先级与评估方法。", cutline: "及格线", points: "{n} 分", totalScore: "总分", productLink: "查看按此标准挑选的 Daily Sunscreen" },
     faq: { metaTitle: "常见问题", metaDescription: "关于 PAROS 产品、配送、退换货、支付和品牌的常见问题。", lede: "点击问题展开。" },
-    policy: { eyebrow: "POLICY", termsMeta: "服务条款", termsDesc: "PAROS 商店服务条款。", privacyMeta: "隐私政策", privacyDesc: "PAROS 商店隐私政策。", shippingMeta: "配送 · 退换货", shippingDesc: "PAROS 运费、免运费门槛、发货时间与退货流程。", contactTitle: "7. 联系方式", contactBody: "隐私相关咨询请通过以下方式联系。" },
+    policy: { eyebrow: "POLICY", termsMeta: "服务条款", termsDesc: "PAROS 商店服务条款。", privacyMeta: "隐私政策", privacyDesc: "PAROS 商店隐私政策。", shippingMeta: "配送 · 退换货", shippingDesc: "PAROS 运费、免运费门槛、发货时间与退货流程。", contactTitle: "8. 联系方式", contactBody: "隐私相关咨询请通过以下方式联系。" },
     notFound: { metaTitle: "页面不存在", title: "找不到该页面", body: "地址可能已更改，或页面尚未准备好。" },
     error: { eyebrow: "ERROR", title: "出了点问题", tooLargeTitle: "请求过大", body: "请稍后再试。若持续出现，请通过客服告知我们。", tooLargeBody: "请缩小或移除附件后重试。", retry: "重试", reference: "参考号 {digest}" },
   },

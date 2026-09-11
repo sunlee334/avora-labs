@@ -435,7 +435,7 @@ export const ko = {
     brand: { metaTitle: "브랜드", metaDescription: "AVORA LABS가 PAROS를 만드는 이유와 세계관 4코드를 소개합니다.", worldCodeEyebrow: "WORLD CODE", worldCodeTitle: "세계관 4코드 — LIGHT · WIND · WATER · STONE" },
     standard: { metaTitle: "고르는 기준", metaDescription: "PAROS가 처방을 고를 때 사용하는 사용감 우선순위와 평가 방식을 공개합니다.", cutline: "커트라인", points: "{n}점", totalScore: "총점", productLink: "이 기준으로 고른 Daily Sunscreen 보기" },
     faq: { metaTitle: "자주 묻는 질문", metaDescription: "PAROS 제품, 배송, 교환·반품, 결제, 브랜드에 대해 자주 묻는 질문을 모았습니다.", lede: "궁금한 항목을 눌러 펼쳐 보세요." },
-    policy: { eyebrow: "POLICY", termsMeta: "이용약관", termsDesc: "PAROS 자사몰 이용약관입니다.", privacyMeta: "개인정보처리방침", privacyDesc: "PAROS 자사몰 개인정보처리방침입니다.", shippingMeta: "배송 · 교환 · 반품", shippingDesc: "PAROS 배송비, 무료배송 기준, 출고 일정, 교환·반품 절차를 안내합니다.", contactTitle: "7. 문의처", contactBody: "개인정보 관련 문의는 아래로 연락해 주세요." },
+    policy: { eyebrow: "POLICY", termsMeta: "이용약관", termsDesc: "PAROS 자사몰 이용약관입니다.", privacyMeta: "개인정보처리방침", privacyDesc: "PAROS 자사몰 개인정보처리방침입니다.", shippingMeta: "배송 · 교환 · 반품", shippingDesc: "PAROS 배송비, 무료배송 기준, 출고 일정, 교환·반품 절차를 안내합니다.", contactTitle: "8. 문의처", contactBody: "개인정보 관련 문의는 아래로 연락해 주세요." },
     notFound: { metaTitle: "페이지를 찾을 수 없습니다", title: "찾으시는 페이지가 없습니다", body: "주소가 바뀌었거나, 아직 준비되지 않은 페이지일 수 있습니다." },
     error: { eyebrow: "ERROR", title: "문제가 생겼습니다", tooLargeTitle: "요청 크기가 너무 큽니다", body: "잠시 후 다시 시도해 주세요. 문제가 계속되면 고객 문의 채널로 알려주세요.", tooLargeBody: "첨부 파일을 줄이거나 빼고 다시 시도해 주세요.", retry: "다시 시도", reference: "참조 코드 {digest}" },
   },

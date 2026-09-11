@@ -405,7 +405,7 @@ export const en: Content = {
   },
   PRIVACY_POLICY: {
     title: "Privacy Policy",
-    updatedNote: "AVORA LABS manages users' personal information safely in accordance with applicable law.",
+    updatedNote: "AVORA LABS manages users' personal information safely in accordance with applicable law. (Last revised 12 September 2026: cookies section added)",
     sections: [
       {
         title: "1. Personal information we collect",
@@ -413,6 +413,7 @@ export const en: Content = {
           "On registration: email, name, password, mobile phone number",
           "On ordering: delivery address, recipient name and contact number, payment identification information",
           "In the course of using the service: history of consent to receive marketing information",
+          "Collected automatically while using the service: access logs, cookies, device and browser type, pages visited (see section 7)",
         ],
       },
       {
@@ -431,12 +432,23 @@ export const en: Content = {
           "On membership withdrawal, personal information other than the statutory retention periods above is destroyed without delay.",
         ],
       },
-      { title: "4. Outsourcing of processing", list: ["Payment processing: Toss Payments", "Product delivery: contracted courier (CJ Logistics by default)"] },
+      { title: "4. Outsourcing of processing", list: ["Payment processing: Toss Payments", "Product delivery: contracted courier (CJ Logistics by default)", "Website visit analytics: Google LLC (Google Analytics)"] },
       {
         title: "5. Consent to and refusal of marketing information",
         body: ["Users may separately consent to receiving marketing information such as new product launches, and may refuse at any time via the unsubscribe link at the bottom of emails or through customer service."],
       },
       { title: "6. Users' rights", body: ["Users may view or correct their personal information at any time, and may request deletion by withdrawing their membership."] },
+      {
+        title: "7. Cookies and similar technologies",
+        body: [
+          "We use Google Analytics, provided by Google LLC, to understand site visits and improve the service. Cookies collect the pages you visit, time spent, device and browser type, and approximate location. We do not use this to identify you personally; IP addresses are anonymised and advertising signals are turned off. The information may be stored and processed on Google's servers outside Korea, including in the United States.",
+          "Cookies used to keep you signed in, hold your cart and complete checkout are necessary for the service. You can refuse analytics cookies as follows.",
+        ],
+        list: [
+          "You can block or delete cookies in your browser settings. Blocking all cookies may prevent sign-in, the cart and other features from working.",
+          "To opt out of Google Analytics only, install Google's opt-out browser add-on (https://tools.google.com/dlpage/gaoptout).",
+        ],
+      },
     ],
   },
 };

@@ -102,7 +102,7 @@ export const TERMS_POLICY = {
 
 export const PRIVACY_POLICY = {
   title: "개인정보처리방침",
-  updatedNote: "AVORA LABS는 이용자의 개인정보를 관련 법령에 따라 안전하게 관리합니다.",
+  updatedNote: "AVORA LABS는 이용자의 개인정보를 관련 법령에 따라 안전하게 관리합니다. (최종 개정 2026년 9월 12일: 자동 수집 장치 조항 추가)",
   sections: [
     {
       title: "1. 수집하는 개인정보 항목",
@@ -110,6 +110,7 @@ export const PRIVACY_POLICY = {
         "회원가입 시: 이메일, 이름, 비밀번호, 휴대전화번호",
         "주문 시: 배송지 주소, 수령인 이름·연락처, 결제 식별 정보",
         "서비스 이용 과정에서: 마케팅 정보 수신 동의 이력",
+        "서비스 이용 과정에서 자동 수집: 접속 기록, 쿠키, 기기·브라우저 종류, 방문 페이지 (7항 참고)",
       ],
     },
     {
@@ -130,7 +131,7 @@ export const PRIVACY_POLICY = {
     },
     {
       title: "4. 개인정보 처리 위탁",
-      list: ["결제 처리: 토스페이먼츠", "상품 배송: 계약 택배사(기본 CJ대한통운)"],
+      list: ["결제 처리: 토스페이먼츠", "상품 배송: 계약 택배사(기본 CJ대한통운)", "웹사이트 방문 통계 분석: Google LLC (Google Analytics)"],
     },
     {
       title: "5. 마케팅 정보 수신 동의 및 거부",
@@ -141,6 +142,17 @@ export const PRIVACY_POLICY = {
     {
       title: "6. 이용자의 권리",
       body: ["이용자는 언제든지 자신의 개인정보를 조회하거나 수정할 수 있으며, 회원 탈퇴를 통해 개인정보 삭제를 요청할 수 있습니다."],
+    },
+    {
+      title: "7. 자동 수집 장치(쿠키)의 설치·운영 및 거부",
+      body: [
+        "회사는 방문 통계와 서비스 개선을 위해 Google LLC 의 Google Analytics 를 사용합니다. 이 과정에서 쿠키를 통해 방문 페이지, 이용 시간, 기기·브라우저 종류, 대략적인 접속 지역이 자동으로 수집됩니다. 이 정보로 이용자 개인을 식별하지 않으며, IP 주소는 익명 처리되고 광고 목적의 신호 수집은 사용하지 않습니다. 수집된 정보는 Google 의 서버(미국 등 국외)에서 저장·처리될 수 있습니다.",
+        "로그인 유지·장바구니·결제 진행에 쓰이는 쿠키는 서비스 제공에 꼭 필요한 쿠키이며, 분석용 쿠키는 아래 방법으로 거부할 수 있습니다.",
+      ],
+      list: [
+        "브라우저 설정에서 쿠키 저장을 거부하거나 삭제할 수 있습니다. 모든 쿠키를 거부하면 로그인·장바구니 등 일부 기능을 이용하기 어려울 수 있습니다.",
+        "Google Analytics 수집만 거부하려면 Google 이 제공하는 차단 부가기능(https://tools.google.com/dlpage/gaoptout)을 설치할 수 있습니다.",
+      ],
     },
   ],
 } satisfies { title: string; updatedNote: string; sections: readonly PolicySection[] };
