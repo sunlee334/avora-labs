@@ -57,6 +57,13 @@
       "when": 1789132153034,
       "tag": "0007_coupon_members_only_temp_password",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1789146455194,
+      "tag": "0008_ops_state_notifications",
+      "breakpoints": true
     }
   ]
 }

@@ -14,6 +14,7 @@ import {
 } from "@/db/schema";
 import { clearCart, getCart } from "@/lib/cart";
 import { isUniqueViolation } from "@/lib/db-errors";
+import { enqueueOrderNotifications } from "@/lib/notifications/enqueue";
 import { restoreCouponForOrder, restoreDeductedStock } from "@/lib/order-admin";
 import { recordOrderEvent, type OrderEventActor } from "@/lib/order-events";
 import { opsAlert } from "@/lib/ops-alert";
@@ -539,6 +540,13 @@ export async function applyPaidTransition(
   if (oversoldLines.length > 0) {
     const cancelled = await refundOversoldOrder(finalOrder, payment, oversoldLines, ctx);
     if (cancelled) return { order: cancelled, confirmedNow: false, oversold: true };
+  }
+
+  // 4) 주문 확인 알림 예약. 대기열 오류가 결제 확정을 되돌리면 안 되므로 삼키고 기록만 남긴다.
+  try {
+    await enqueueOrderNotifications(finalOrder, "paid");
+  } catch (error) {
+    console.warn(JSON.stringify({ level: "warn", event: "notify.enqueue_failed", order: order.orderNumber, stage: "paid", cause: error instanceof Error ? error.message.slice(0, 200) : String(error) }));
   }
 
   return { order: finalOrder, confirmedNow, oversold: false };

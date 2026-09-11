@@ -61,6 +61,14 @@
 - `failed`: 웹훅 본문의 주문을 토스에 다시 조회하다 실패. 같은 주문에 대해 30분 cron 이 다시 시도하므로 대개 저절로 맞춰집니다. 반복되면 상점관리자 웹훅 URL(`https://avoralabs.co/api/payments/toss/webhook`)이 맞는지 확인.
 - `throttled`: 같은 주문 웹훅이 짧은 시간에 몰려 일부를 무시했습니다. 할 일 없음.
 
+### `/api/health` 의 `cron.stale: true` — cron 이 멈춤
+- 뜻: 30분 cron 이 90분 넘게 `ops_state` 에 기록을 남기지 않았습니다(GitHub 헬스 프로브가 이 값으로 실패 알림을 보냅니다). 응답의 `cron.maintenanceAt/pendingAt/dailyAt/notificationsAt` 로 어느 단계까지 돌았는지 봅니다.
+- 사람이 할 일: Cloudflare 대시보드 → Workers → `avora-labs` → Settings → Triggers 에 cron 2개가 있는지, Logs 에 `cron.maintenance_failed`/`cron.job_failed` 가 있는지 확인. `pendingAt` 만 비어 있으면 `CRON_SECRET` 문제(`cron.secret_missing`).
+
+### `notify.send_failed` — 알림 발송 5회 실패
+- 뜻: 알림 대기열(`notifications`)의 한 건이 재시도 5회 뒤 `failed` 가 됐습니다. 이메일 서비스 장애·발신 도메인 인증 문제일 가능성이 큽니다. 채널 어댑터가 없을 때는 실패가 아니라 `skipped` 로 남습니다(정상).
+- 사람이 할 일: 로그의 `template`·`error` 확인. 주문 확인·송장 메일이면 고객에게 수동 안내. 이메일 서비스 대시보드에서 발신 도메인 상태 확인.
+
 ### `health.db_unavailable` — DB 장애
 - 뜻: `/api/health` 가 D1 에 닿지 못했습니다(외형 모니터가 503 을 보게 됩니다).
 - 사람이 할 일: Cloudflare 상태 페이지(D1)를 확인. 5분 넘게 계속되면 Cloudflare 지원 티켓. 이 동안 FAQ·정책 페이지는 열리고, 주문·로그인은 "잠시 후 다시 시도" 안내가 나갑니다.

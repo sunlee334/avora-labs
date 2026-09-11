@@ -7,6 +7,7 @@
  */
 import { drizzle } from "drizzle-orm/d1";
 import { opsAlert } from "./src/lib/ops-alert";
+import { setOpsState } from "./src/lib/ops-state";
 import {
   expireStalePendingOrders,
   findStuckPaymentClaims,
@@ -31,7 +32,7 @@ const DAILY_CRON = "15 18 * * *";
  * Next 안의 코드(토스 조회·db 프록시)를 쓰는 cron 작업은 Worker 내부 fetch 로 /api/internal/cron 을 호출한다.
  * CRON_SECRET(Bearer) 으로 인가한다. 시크릿이 없으면 작업을 건너뛰고 알림만 남긴다.
  */
-async function runNextCronJob(env: WorkerEnv, ctx: ExecutionContext, job: "pending" | "daily"): Promise<void> {
+async function runNextCronJob(env: WorkerEnv, ctx: ExecutionContext, job: "pending" | "daily" | "notifications"): Promise<void> {
   if (!env.CRON_SECRET) {
     // 시크릿 없이는 라우트가 거부한다. 조용히 넘어가지 않도록 알림 로그를 남긴다.
     await opsAlert("cron.secret_missing", { job }, { webhookUrl: env.OPS_ALERT_WEBHOOK_URL ?? null });
@@ -43,6 +44,18 @@ async function runNextCronJob(env: WorkerEnv, ctx: ExecutionContext, job: "pendi
   const body = await response.text();
   console.log(JSON.stringify({ level: response.ok ? "info" : "error", event: "cron.next_job", job, status: response.status, body: body.slice(0, 500) }));
   if (!response.ok) throw new Error(`cron job ${job} failed with ${response.status}`);
+  // 성공 시각을 남긴다 — /api/health 가 읽어 외형 모니터가 "cron 이 멈췄다" 를 알 수 있게.
+  await recordHeartbeat(env, `cron:${job}`);
+}
+
+async function recordHeartbeat(env: WorkerEnv, key: string): Promise<void> {
+  try {
+    const db = drizzle(env.DB, { schema }) as unknown as MaintenanceDb;
+    await setOpsState(db, key, new Date().toISOString());
+  } catch (error) {
+    // 하트비트 기록 실패로 cron 자체를 실패시키지 않는다.
+    console.warn(JSON.stringify({ level: "warn", event: "cron.heartbeat_write_failed", key, cause: error instanceof Error ? error.message.slice(0, 200) : String(error) }));
+  }
 }
 
 async function runMaintenance(env: WorkerEnv): Promise<void> {
@@ -83,8 +96,9 @@ async function runMaintenance(env: WorkerEnv): Promise<void> {
       JSON.stringify({ level: "info", event: "cron.housekeeping", sessions: sessionsPurged, guestCarts: cartsPurged }),
     );
   }
-  // 성공 신호. 외형 모니터에서 이 로그(또는 하트비트)가 끊기면 트리거 누락·D1 장애를 의심한다.
+  // 성공 신호. 로그와 함께 ops_state 에도 남겨 /api/health 가 지연을 계산할 수 있게 한다.
   console.log(JSON.stringify({ level: "info", event: "cron.heartbeat", at: now.toISOString() }));
+  await recordHeartbeat(env, "cron:maintenance");
 }
 
 // OpenNext 의 Durable Object(DOQueueHandler·DOShardedTagCache·BucketCachePurge)는 다시 내보내지 않는다.
@@ -101,6 +115,7 @@ export default {
       }
       await runMaintenance(env);
       await runNextCronJob(env, ctx, "pending");
+      await runNextCronJob(env, ctx, "notifications");
     } catch (error) {
       await opsAlert(
         "cron.maintenance_failed",

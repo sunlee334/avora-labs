@@ -363,6 +363,45 @@ export const rateLimits = sqliteTable(
 );
 
 // ----------------------------------------------------------- relations
+/**
+ * 운영 상태 키-값. cron 이 마지막 실행 시각을 남기고 /api/health 가 읽어 "cron 이 멈췄는지" 를 외형 모니터가 알 수 있게 한다.
+ * 키 예: cron:maintenance, cron:pending, cron:daily, cron:notifications (값은 ISO 시각).
+ */
+export const opsState = sqliteTable("ops_state", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+});
+
+/**
+ * 알림 발송 대기열(outbox). 주문 확인·송장·리뷰 요청·재구매 리마인드를 예약해 두고 cron 이 발송한다.
+ * 발송 채널 어댑터(이메일 서비스 등)가 없으면 skipped 로 표시하고 쌓아 두지 않는다.
+ * dedupe_key 로 같은 주문·같은 템플릿이 두 번 들어가지 않는다 (예: order:123:shipped).
+ */
+export const notifications = sqliteTable(
+  "notifications",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    channel: text("channel", { enum: ["email", "sms"] }).notNull(),
+    template: text("template").notNull(),
+    recipient: text("recipient").notNull(),
+    locale: text("locale").notNull().default("ko"),
+    /** 템플릿 변수 JSON (주문번호·송장 등). 개인정보는 최소한만. */
+    payload: text("payload").notNull().default("{}"),
+    dedupeKey: text("dedupe_key"),
+    orderId: integer("order_id").references(() => orders.id, { onDelete: "set null" }),
+    userId: integer("user_id").references(() => users.id, { onDelete: "set null" }),
+    sendAfter: integer("send_after", { mode: "timestamp_ms" }).notNull(),
+    status: text("status", { enum: ["queued", "sent", "failed", "skipped"] }).notNull().default("queued"),
+    attempts: integer("attempts").notNull().default(0),
+    lastError: text("last_error"),
+    sentAt: integer("sent_at", { mode: "timestamp_ms" }),
+    createdAt: timestamp("created_at"),
+  },
+  (t) => [uniqueIndex("notifications_dedupe_uq").on(t.dedupeKey), index("notifications_due_idx").on(t.status, t.sendAfter)],
+);
+export type Notification = typeof notifications.$inferSelect;
+
 export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(sessions),
   orders: many(orders),

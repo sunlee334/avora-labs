@@ -1,6 +1,7 @@
 "use server";
 
 import { eq } from "drizzle-orm";
+import { enqueueOrderNotifications } from "@/lib/notifications/enqueue";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db/client";
@@ -122,7 +123,7 @@ export async function setShippingAction(orderId: number, formData: FormData) {
     });
   }
 
-  await db
+  const [shipped] = await db
     .update(orders)
     .set({
       status: "shipped",
@@ -131,7 +132,17 @@ export async function setShippingAction(orderId: number, formData: FormData) {
       shippedAt: new Date(),
       updatedAt: new Date(),
     })
-    .where(eq(orders.id, orderId));
+    .where(eq(orders.id, orderId))
+    .returning();
+
+  if (shipped) {
+    // 송장 안내 알림 예약. 대기열 오류가 배송 처리 자체를 막으면 안 된다.
+    try {
+      await enqueueOrderNotifications(shipped, "shipped");
+    } catch (error) {
+      console.warn(JSON.stringify({ level: "warn", event: "notify.enqueue_failed", order: shipped.orderNumber, stage: "shipped", cause: error instanceof Error ? error.message.slice(0, 200) : String(error) }));
+    }
+  }
 
   revalidatePath(`/admin/orders/${orderId}`);
   revalidatePath("/admin/orders");

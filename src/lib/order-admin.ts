@@ -6,6 +6,7 @@ import { db } from "@/db/client";
 import { couponRedemptions, coupons, orderItems, orders, variants, type Order } from "@/db/schema";
 import { ORDER_STATUS_LABEL, type OrderStatus } from "@/lib/config";
 import { formatDateTime } from "@/lib/format";
+import { enqueueOrderNotifications } from "@/lib/notifications/enqueue";
 import { recordOrderEvent, type OrderEventActor } from "@/lib/order-events";
 import { opsAlert } from "@/lib/ops-alert";
 import { cancelTossPayment, isVirtualAccount, TossPaymentError } from "@/lib/payments/toss";
@@ -141,6 +142,15 @@ export async function transitionOrder(input: TransitionInput): Promise<Transitio
   }
 
   await recordOrderEvent(db, { orderId: order.id, from: order.status, to: next, actor, reason, source });
+
+  if (next === "shipped" || next === "delivered") {
+    // 송장 안내·리뷰 요청·재구매 리마인드 예약. 대기열 오류가 상태 변경을 실패로 만들면 안 된다.
+    try {
+      await enqueueOrderNotifications(updated, next, { now });
+    } catch (error) {
+      console.warn(JSON.stringify({ level: "warn", event: "notify.enqueue_failed", order: order.orderNumber, stage: next, cause: error instanceof Error ? error.message.slice(0, 200) : String(error) }));
+    }
+  }
 
   let message = `주문을 ${ORDER_STATUS_LABEL[next]} 상태로 변경했습니다.`;
   if (isCancelLike) {

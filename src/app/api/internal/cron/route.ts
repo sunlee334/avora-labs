@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { runNotificationDispatch } from "@/lib/notifications/dispatch";
 import { runDailyReconcileJob, runPendingReconcileJob } from "@/lib/payments/reconcile";
 
 export const dynamic = "force-dynamic";
@@ -30,6 +31,11 @@ export async function GET(request: Request) {
   }
   const job = new URL(request.url).searchParams.get("job") ?? "pending";
   try {
+    if (job === "notifications") {
+      // 알림 발송 대기열: 발송 시각이 된 행을 보내고 결과를 표시한다 (채널 어댑터가 없으면 skipped).
+      const result = await runNotificationDispatch();
+      return NextResponse.json({ ok: true, job, ...result });
+    }
     const summary = job === "daily" ? await runDailyReconcileJob() : await runPendingReconcileJob();
     return NextResponse.json({
       ok: true,

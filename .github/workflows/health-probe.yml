@@ -36,6 +36,8 @@ jobs:
           fail=0
           check "https://avoralabs.co/api/health" 200 || fail=1
           grep -q '"ok":true' /tmp/body || { echo "::error::health 본문에 ok:true 가 없습니다"; fail=1; }
+          # cron 이 90분 넘게 기록을 남기지 않으면(stale) 실패 — 트리거 누락·CRON_SECRET 문제 등
+          if grep -q '"stale":true' /tmp/body; then echo "::error::cron 이 멈췄습니다 (health.cron.stale=true): $(head -c 300 /tmp/body)"; fail=1; fi
           check "https://avoralabs.co/" 200 || fail=1
           check "https://avoralabs.co/en" 200 || fail=1
           exit $fail
