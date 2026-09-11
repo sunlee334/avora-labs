@@ -2,8 +2,8 @@
 
 운영 DB 는 Cloudflare D1 `paros-store` 하나입니다. 두 겹으로 지킵니다.
 
-1. **Time Travel(기본 제공)** — D1 은 최근 30일 안의 어느 시점(분 단위)으로든 되돌릴 수 있습니다. 잘못된 관리자 작업·마이그레이션 사고의 1차 복구 수단.
-2. **일일 내보내기(GitHub Actions)** — `.github/workflows/d1-backup.yml` 이 매일 03:30 KST 에 `wrangler d1 export --remote` 로 전체 SQL 을 받아 아티팩트로 90일 보관합니다. Time Travel 창(30일)을 넘긴 복구, 계정 사고, 로컬 재현용.
+1. **Time Travel(기본 제공)** — D1 은 최근 어느 시점(분 단위)으로든 되돌릴 수 있습니다. 보존 기간은 **Workers Paid 30일, Free 7일**입니다. 잘못된 관리자 작업·마이그레이션 사고의 1차 복구 수단.
+2. **일일 내보내기(GitHub Actions)** — `.github/workflows/d1-backup.yml` 이 매일 03:30 KST 에 `wrangler d1 export --remote` 로 전체 SQL 을 받아 아티팩트로 90일 보관합니다. Time Travel 창을 넘긴 복구, 계정 사고, 로컬 재현용.
 
 ## 설정 (한 번만)
 
@@ -18,7 +18,7 @@ GitHub 저장소 → Settings → Secrets and variables → Actions:
 
 ## 복구 절차
 
-### A. 최근 30일 안 — Time Travel
+### A. Time Travel 보존 기간 안 (Paid 30일 / Free 7일)
 
 ```bash
 # 1) 되돌릴 시점의 북마크 확인 (UTC)
