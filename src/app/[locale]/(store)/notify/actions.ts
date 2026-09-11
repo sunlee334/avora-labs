@@ -6,6 +6,7 @@ import { notifySignups } from "@/db/schema";
 import { getT } from "@/i18n/server";
 import { rateLimit } from "@/lib/auth/rate-limit";
 import { clientIp } from "@/lib/request-ip";
+import { verifyTurnstileToken } from "@/lib/turnstile";
 
 export interface NotifyState {
   status: "idle" | "success" | "error";
@@ -18,6 +19,10 @@ export async function subscribeNotify(_prev: NotifyState, formData: FormData): P
   const limit = await rateLimit(`notify:${ip}`, { limit: 10, windowMs: 10 * 60_000 });
   if (!limit.ok) {
     return { status: "error", message: m.actions.generic };
+  }
+  // 봇 확인(Turnstile, 키가 있을 때만). D1 에 쓰기 전에 거른다.
+  if (!(await verifyTurnstileToken(String(formData.get("cf-turnstile-response") ?? "") || null, ip))) {
+    return { status: "error", message: m.actions.botCheckFailed };
   }
 
   // 오류 문구가 요청 언어를 따르도록 스키마는 액션 안에서 만든다.

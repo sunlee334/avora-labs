@@ -7,6 +7,27 @@ import type { NextConfig } from "next";
  */
 const isCloudflareBuild = process.env.CF_BUILD === "1";
 
+/**
+ * Content-Security-Policy — 1단계는 Report-Only. 차단하지 않고 위반만 /api/csp-report 로 받아
+ * 토스 결제창·카드사 인증창이 실제로 쓰는 출처를 확인한 뒤 enforce 로 바꾼다 (백로그 t06).
+ * Next 의 인라인 스크립트 때문에 script-src 에 'unsafe-inline' 이 필요하다 (nonce 도입은 enforce 단계에서).
+ */
+const cspReportOnly = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline'${isCloudflareBuild ? "" : " 'unsafe-eval'"} https://js.tosspayments.com https://challenges.cloudflare.com`,
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https:",
+  "font-src 'self' data:",
+  "connect-src 'self' https://*.tosspayments.com https://challenges.cloudflare.com",
+  "frame-src 'self' https://*.tosspayments.com https://*.toss.im https://challenges.cloudflare.com",
+  "form-action 'self' https://*.tosspayments.com https://*.toss.im",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'self'",
+  "report-uri /api/csp-report",
+  "report-to csp",
+].join("; ");
+
 const nextConfig: NextConfig = {
   serverExternalPackages: isCloudflareBuild ? [] : ["@libsql/client"],
   experimental: {
@@ -36,6 +57,8 @@ const nextConfig: NextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Reporting-Endpoints", value: 'csp="/api/csp-report"' },
+          { key: "Content-Security-Policy-Report-Only", value: cspReportOnly },
           {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=()",

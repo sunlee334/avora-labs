@@ -442,6 +442,7 @@ export const en: Messages = {
     invalidInput: "Please check your input.",
     loginAgain: "Please log in again.",
     saveFailed: "Couldn't save. Please try again later.",
+    botCheckFailed: "We couldn't verify that you're human. Please refresh the page and try again.",
     cart: {
       failed: "Couldn't update the cart. Please try again later.",
       notForSale: "This item isn't available right now.",

@@ -10,6 +10,7 @@ import type { Messages } from "@/i18n/messages";
 import { getT } from "@/i18n/server";
 import { rateLimit } from "@/lib/auth/rate-limit";
 import { clientIp } from "@/lib/request-ip";
+import { verifyTurnstileToken } from "@/lib/turnstile";
 import { transitionOrder } from "@/lib/order-admin";
 import { CANCEL_REASON_KEYS, CANCEL_REASONS, isCustomerCancellable } from "@/lib/config";
 import { isValidOrderNumber, localizeOrderItems, toPublicOrder, type PublicOrder } from "@/lib/orders";
@@ -36,6 +37,10 @@ export async function lookupOrder(_prev: LookupState, formData: FormData): Promi
   const limit = await rateLimit(`order-lookup:${ip}`, { limit: 10, windowMs: 10 * 60_000 });
   if (!limit.ok) {
     return { status: "error", message: m.actions.generic };
+  }
+  // 봇 확인(Turnstile, 키가 있을 때만). 주문 테이블을 읽기 전에 거른다.
+  if (!(await verifyTurnstileToken(String(formData.get("cf-turnstile-response") ?? "") || null, ip))) {
+    return { status: "error", message: m.actions.botCheckFailed };
   }
 
   const parsed = buildLookupSchema(m).safeParse({

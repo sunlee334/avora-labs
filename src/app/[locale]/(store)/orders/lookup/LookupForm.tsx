@@ -5,6 +5,7 @@ import { CustomerCancelForm } from "@/components/orders/CustomerCancelForm";
 import { OrderDetail } from "@/components/orders/OrderDetail";
 import { Button } from "@/components/ui/Button";
 import { FormMessage, Input, Label } from "@/components/ui/Field";
+import { Turnstile } from "@/components/ui/Turnstile";
 import { useMessages } from "@/i18n/client";
 import { isCustomerCancellable } from "@/lib/config";
 import { cancelGuestOrder, lookupOrder, type LookupState } from "./actions";
@@ -27,6 +28,7 @@ export function LookupForm() {
           <Input id="lookup-email" name="email" type="email" required />
         </div>
         {state.status === "error" ? <FormMessage tone="error">{state.message}</FormMessage> : null}
+        <Turnstile resetKey={state} />
         <Button type="submit" disabled={pending} className="w-full">
           {pending ? m.lookup.submitting : m.lookup.submit}
         </Button>

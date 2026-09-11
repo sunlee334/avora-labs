@@ -442,6 +442,7 @@ export const vi: Messages = {
     invalidInput: "Vui lòng kiểm tra lại thông tin nhập.",
     loginAgain: "Vui lòng đăng nhập lại.",
     saveFailed: "Không lưu được. Vui lòng thử lại sau.",
+    botCheckFailed: "Không xác minh được bạn không phải bot. Vui lòng tải lại trang và thử lại.",
     cart: {
       failed: "Không cập nhật được giỏ hàng. Vui lòng thử lại sau.",
       notForSale: "Sản phẩm này hiện không bán.",

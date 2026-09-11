@@ -445,6 +445,7 @@ export const ko = {
     invalidInput: "입력값을 확인해 주세요.",
     loginAgain: "다시 로그인해 주세요.",
     saveFailed: "저장하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+    botCheckFailed: "자동 입력 방지 확인에 실패했습니다. 페이지를 새로고침한 뒤 다시 시도해 주세요.",
     cart: {
       failed: "장바구니를 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.",
       notForSale: "지금은 구매할 수 없는 상품입니다.",

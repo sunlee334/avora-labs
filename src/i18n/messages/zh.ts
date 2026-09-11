@@ -442,6 +442,7 @@ export const zh: Messages = {
     invalidInput: "请检查输入内容。",
     loginAgain: "请重新登录。",
     saveFailed: "保存失败，请稍后再试。",
+    botCheckFailed: "人机验证未通过，请刷新页面后重试。",
     cart: {
       failed: "无法更新购物车，请稍后再试。",
       notForSale: "该商品目前不可购买。",

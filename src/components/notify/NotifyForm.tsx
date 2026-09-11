@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { subscribeNotify, type NotifyState } from "@/app/[locale]/(store)/notify/actions";
 import { Button } from "@/components/ui/Button";
 import { Checkbox, FormMessage, Input } from "@/components/ui/Field";
+import { Turnstile } from "@/components/ui/Turnstile";
 import { useMessages } from "@/i18n/client";
 
 const initial: NotifyState = { status: "idle" };
@@ -35,6 +36,7 @@ export function NotifyForm({
     <form action={action} className="space-y-3">
       <input type="hidden" name="interest" value={interest} />
       <input type="hidden" name="source" value={source} />
+      <Turnstile resetKey={state} />
       <div className={compact ? "flex flex-col gap-2 sm:flex-row" : "space-y-2"}>
         <Input
           id={`${id}-email`}

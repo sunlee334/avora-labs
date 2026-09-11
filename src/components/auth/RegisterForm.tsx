@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { registerAction, type AuthState } from "@/lib/auth/actions";
 import { Button } from "@/components/ui/Button";
 import { Checkbox, FieldError, FormMessage, Input, Label } from "@/components/ui/Field";
+import { Turnstile } from "@/components/ui/Turnstile";
 import { useMessages } from "@/i18n/client";
 import { Link } from "@/i18n/link";
 
@@ -115,6 +116,7 @@ export function RegisterForm({ next }: { next?: string }) {
       </div>
 
       {state.error ? <FormMessage tone="error">{state.error}</FormMessage> : null}
+      <Turnstile resetKey={state} />
       <Button type="submit" disabled={pending} className="w-full">
         {pending ? m.auth.registering : m.auth.register}
       </Button>

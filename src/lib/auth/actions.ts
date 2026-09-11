@@ -16,6 +16,7 @@ import { isUniqueViolation } from "@/lib/db-errors";
 import { zodFieldErrors } from "@/lib/forms";
 import { safeRelativePath } from "@/lib/auth/safe-path";
 import { clientIp } from "@/lib/request-ip";
+import { verifyTurnstileToken } from "@/lib/turnstile";
 import { hashPassword, verifyPassword } from "@/lib/auth/password";
 import { createSession, destroySession } from "@/lib/auth/session";
 import { eq } from "drizzle-orm";
@@ -61,6 +62,10 @@ export async function registerAction(_prev: AuthState, formData: FormData): Prom
   const limit = await rateLimit(`register:${ip}`, { limit: 5, windowMs: 10 * 60_000 });
   if (!limit.ok) {
     return { error: m.actions.generic };
+  }
+  // 봇 확인(Turnstile, 키가 있을 때만). DB 를 읽기 전에 거른다.
+  if (!(await verifyTurnstileToken(String(formData.get("cf-turnstile-response") ?? "") || null, ip))) {
+    return { error: m.actions.botCheckFailed };
   }
 
   const rawPhone = String(formData.get("phone") ?? "").replace(/-/g, "").trim();
@@ -136,6 +141,10 @@ export async function loginAction(_prev: AuthState, formData: FormData): Promise
     return { error: m.actions.generic };
   }
   const recordFailure = () => rateLimit(emailKey, { limit: 10, windowMs: 10 * 60_000 });
+  // 봇 확인(Turnstile, 키가 있을 때만). 비밀번호 검증·DB 조회 전에 거른다.
+  if (!(await verifyTurnstileToken(String(formData.get("cf-turnstile-response") ?? "") || null, ip))) {
+    return { error: m.actions.botCheckFailed };
+  }
 
   const parsed = buildLoginSchema(m).safeParse({
     email: rawEmail,
