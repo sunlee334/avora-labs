@@ -59,16 +59,16 @@ export async function getProductReviewsPage(
   {
     const pageSize = Math.max(1, Math.min(opts.pageSize ?? REVIEW_PAGE_SIZE, 50));
     const where = opts.tag ? and(eq(reviews.productId, productId), eq(reviews.activityTag, opts.tag)) : eq(reviews.productId, productId);
-    const totalRow = await db.select({ count: count() }).from(reviews).where(where).get();
-    const total = totalRow?.count ?? 0;
+    const requested = Math.max(1, opts.page ?? 1);
+    const rowsQuery = (page: number) =>
+      db.query.reviews.findMany({ where, orderBy: [desc(reviews.createdAt)], limit: pageSize, offset: (page - 1) * pageSize });
+    // 건수와 첫 페이지를 한 번의 왕복(batch)으로 읽는다. D1 은 쿼리마다 네트워크 왕복이라 체감 차이가 크다.
+    const [totalRow, firstRows] = await db.batch([db.select({ count: count() }).from(reviews).where(where), rowsQuery(requested)]);
+    const total = totalRow[0]?.count ?? 0;
     const totalPages = Math.max(1, Math.ceil(total / pageSize));
-    const page = Math.min(Math.max(1, opts.page ?? 1), totalPages);
-    const rows = await db.query.reviews.findMany({
-      where,
-      orderBy: [desc(reviews.createdAt)],
-      limit: pageSize,
-      offset: (page - 1) * pageSize,
-    });
+    const page = Math.min(requested, totalPages);
+    // 범위를 벗어난 페이지를 요청한 드문 경우만 마지막 페이지를 다시 읽는다.
+    const rows = page === requested ? firstRows : await rowsQuery(page);
     return { rows, total, page, totalPages };
   }
 }

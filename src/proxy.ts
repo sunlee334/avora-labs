@@ -11,6 +11,14 @@ import { SESSION_COOKIE } from "@/lib/config";
 export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
+  // www 는 apex 로 통일한다 (canonical·hreflang·sitemap 이 모두 apex 기준).
+  const host = request.headers.get("host") ?? "";
+  if (host.startsWith("www.")) {
+    const url = request.nextUrl.clone();
+    url.host = host.slice(4);
+    return NextResponse.redirect(url, 308);
+  }
+
   if (isLocaleAgnosticPath(pathname)) {
     if (pathname.startsWith("/admin") && !request.cookies.get(SESSION_COOKIE)?.value) {
       const url = new URL("/login", request.url);

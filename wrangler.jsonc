@@ -46,6 +46,7 @@
     "TOSS_TEST_MODE": "1"
   },
 
+  "placement": { "mode": "smart" },
   "observability": { "enabled": true },
 
   "env": {
@@ -74,6 +75,7 @@
         // 토스 테스트 키 허용 플래그. 실 키로 교체하는 시점에 반드시 제거한다.
         "TOSS_TEST_MODE": "1"
       },
+      "placement": { "mode": "smart" },
       "observability": { "enabled": true }
     }
   }

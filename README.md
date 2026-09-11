@@ -122,6 +122,8 @@ echo -n "<toss secret>" | pnpm exec wrangler secret put TOSS_SECRET_KEY --env pr
 - `cf:*` 스크립트는 `scripts/cf-build.mjs` 를 거칩니다. 빌드 동안 `.env`(로컬 비밀값)를 격리해 워커 번들(`next-env.mjs`)에 들어가지 않게 하고, 번들에 비밀 키가 남으면 빌드를 실패시킵니다.
 - 프리뷰 워커 `paros-store` 는 운영 D1 을 공유하므로 `workers_dev: false` 로 공개 호스트를 닫아 두었습니다. 외부 확인이 필요하면 별도 D1 을 붙인 뒤에만 여세요.
 - 레이트리밋은 D1 `rate_limits` 테이블 기반입니다(Workers 는 isolate 별 메모리라 인메모리 제한이 무의미). 클라이언트 IP 는 Cloudflare 의 `cf-connecting-ip` 만 신뢰합니다.
+- OG 이미지는 정적 파일 `src/app/opengraph-image.png`(1200×630) 입니다. 워커 번들에서 `@vercel/og`(satori·resvg wasm ≈ 3MB)를 빼기 위해 런타임 생성 대신 파일로 둡니다. 문구를 바꾸려면 PNG 를 다시 만들어 교체하세요(`docs/` 의 브랜드 자산 또는 Figma).
+- 정적 자산 캐시: `scripts/cf-build.mjs` 가 `_headers` 에 `/_next/static/*` 1년 immutable, `/visuals`·`/brand`·`/icon.svg` 하루 캐시를 씁니다. 워커는 Smart Placement 로 D1(APAC) 가까이서 실행됩니다.
 - 공개 빌드 변수(`NEXT_PUBLIC_*`)는 `.env.production` 에서 빌드 시 인라인됩니다. 토스 상점 키로 교체 후 재빌드가 필요합니다.
 - 운영에서 토스 테스트 키(`test_*`)는 `wrangler.jsonc` 의 `TOSS_TEST_MODE=1` 이 있을 때만 동작합니다. 실 키로 바꿀 때 이 변수를 제거하세요 (주문서에도 "결제 테스트 환경" 안내가 자동으로 표시됩니다).
 

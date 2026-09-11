@@ -115,7 +115,8 @@ if (secretValues.size > 0) {
 }
 
 // Workers Assets 는 정적 파일을 Worker 앞에서 응답하므로 next.config 의 headers() 가 적용되지 않는다.
-// 같은 보안 헤더를 _headers 파일로 준다 (Cache-Control 은 Assets 기본값을 그대로 둔다).
+// 같은 보안 헤더를 _headers 파일로 준다. Next 의 해시 자산(/_next/static)은 내용이 바뀌면 경로도 바뀌므로
+// 1년 immutable 로 두고, 해시가 없는 public/ 자산은 하루만 캐시한다 (Assets 기본값은 max-age=0 이라 브라우저가 매번 재검증한다).
 const assetsDir = path.join(root, ".open-next", "assets");
 if (existsSync(assetsDir)) {
   writeFileSync(
@@ -128,7 +129,19 @@ if (existsSync(assetsDir)) {
       "  Permissions-Policy: camera=(), microphone=(), geolocation=()",
       "  Strict-Transport-Security: max-age=63072000; includeSubDomains",
       "",
+      "/_next/static/*",
+      "  Cache-Control: public, max-age=31536000, immutable",
+      "",
+      "/visuals/*",
+      "  Cache-Control: public, max-age=86400, stale-while-revalidate=604800",
+      "",
+      "/brand/*",
+      "  Cache-Control: public, max-age=86400, stale-while-revalidate=604800",
+      "",
+      "/icon.svg",
+      "  Cache-Control: public, max-age=86400, stale-while-revalidate=604800",
+      "",
     ].join("\n"),
   );
-  console.log("[cf-build] .open-next/assets/_headers 작성 (정적 자산 보안 헤더)");
+  console.log("[cf-build] .open-next/assets/_headers 작성 (정적 자산 보안·캐시 헤더)");
 }

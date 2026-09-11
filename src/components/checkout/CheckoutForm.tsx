@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  ANONYMOUS,
-  loadTossPayments,
-  type TossPaymentsWidgets,
-} from "@tosspayments/tosspayments-sdk";
+import type { TossPaymentsWidgets } from "@tosspayments/tosspayments-sdk";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { createPendingOrderAction, validateCouponAction } from "@/app/[locale]/(store)/checkout/actions";
@@ -124,6 +120,8 @@ export function CheckoutForm({
     let cancelled = false;
     (async () => {
       try {
+        // SDK 는 결제 화면에서만 필요하므로 여기서 동적으로 불러온다 (서버 렌더링 청크와 다른 페이지 JS 에서 제외).
+        const { loadTossPayments, ANONYMOUS } = await import("@tosspayments/tosspayments-sdk");
         const tossPayments = await loadTossPayments(clientKey);
         if (cancelled) return;
         setWidgets(
