@@ -1,0 +1,41 @@
+name: Health probe
+
+# 무료 외형 모니터. 15분마다 운영 헬스체크와 스토어 첫 화면을 확인하고, 실패하면 워크플로가 실패해 GitHub 가 알림(이메일)을 보낸다.
+# GitHub 의 schedule 은 몇 분씩 늦거나 건너뛸 수 있으므로 정밀 감시가 필요해지면 UptimeRobot 같은 전용 모니터로 바꾼다 (백로그 t23).
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check /api/health and the storefront
+        run: |
+          set -u
+          check() {
+            local url="$1" want="$2" attempt
+            for attempt in 1 2 3; do
+              code=$(curl -s -o /tmp/body -w "%{http_code}" --max-time 20 "$url" || echo "000")
+              if [ "$code" = "$want" ]; then
+                echo "ok   $url ($code)"
+                return 0
+              fi
+              echo "retry $attempt: $url -> $code"
+              sleep 15
+            done
+            echo "::error::$url 이 $want 가 아닙니다 (마지막 응답 $code)"
+            head -c 300 /tmp/body; echo
+            return 1
+          }
+          fail=0
+          check "https://avoralabs.co/api/health" 200 || fail=1
+          grep -q '"ok":true' /tmp/body || { echo "::error::health 본문에 ok:true 가 없습니다"; fail=1; }
+          check "https://avoralabs.co/" 200 || fail=1
+          check "https://avoralabs.co/en" 200 || fail=1
+          exit $fail
