@@ -58,3 +58,6 @@ next-env.d.ts
 /.wrangler
 /data/seed.sql
 /.dev.vars
+
+# 세션 스크래치 (백로그 페이지 미리보기)
+backlog-preview.png

@@ -16,7 +16,9 @@
 
 ## 저장소
 
-소스는 https://github.com/sunlee334/avora-labs (`main`). 이전 사이트(Astro) 이력은 2026-09-11 병합 커밋 아래에 남아 있습니다. push/PR 마다 CI 가 typecheck·lint·test·`cf:build` 를 실행하고, 운영 배포는 사람이 `pnpm cf:deploy:prod` 로 합니다.
+[![CI](https://github.com/sunlee334/avora-labs/actions/workflows/ci.yml/badge.svg)](https://github.com/sunlee334/avora-labs/actions/workflows/ci.yml) [![D1 backup](https://github.com/sunlee334/avora-labs/actions/workflows/d1-backup.yml/badge.svg)](https://github.com/sunlee334/avora-labs/actions/workflows/d1-backup.yml)
+
+소스는 https://github.com/sunlee334/avora-labs (`main`). 이전 사이트(Astro) 이력은 2026-09-11 병합 커밋 아래에 남아 있습니다. push/PR 마다 CI 가 typecheck·lint·test·`cf:build` 를 실행하고(수동 실행도 가능), 운영 배포는 사람이 `pnpm cf:deploy:prod` 로 합니다. 배포한 커밋에는 `deploy/<날짜>-<워커 버전 앞 8자>` 태그를 남깁니다.
 
 ## 시작하기
 
