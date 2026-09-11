@@ -104,7 +104,7 @@ D1 은 BEGIN/COMMIT 을 지원하지 않으므로 체크아웃은 트랜잭션 �
 |---|---|
 | 프리뷰 Worker | `paros-store` → `https://paros-store.<account>.workers.dev` |
 | 운영 Worker | `avora-labs` (avoralabs.co · www 커스텀 도메인이 붙어 있음) — `wrangler.jsonc` `env.production` |
-| D1 | `paros-store` (스토어 전용). 기존 사이트의 `avora-orders` 는 사용하지 않음 |
+| D1 | `paros-store` (스토어 전용). 이전 사이트의 `avora-orders` 는 2026-09-12 백업 후 삭제 |
 | R2 | `paros-uploads` (리뷰 사진) — 대시보드에서 R2 활성화 후 버킷 생성·바인딩 주석 해제 |
 
 ```bash

@@ -25,7 +25,7 @@
   // pages router 의 res.revalidate 에만 쓰이는데(dist/api/overrides/queue, patches/res-revalidate),
   // 이 앱은 모든 페이지가 동적이고 큐를 쓰지 않는다. 바인딩이 있으면 Access·WAF 를 거치지 않는 자기 호출 경로만 생긴다.
 
-  // 스토어 전용 D1. 기존 사이트의 `avora-orders`(users/orders/launch_notify …)는 건드리지 않는다.
+  // 스토어 전용 D1. 이전 사이트의 `avora-orders` 는 2026-09-12 백업 후 삭제했다.
   // 마이그레이션: `pnpm cf:migrate:remote` (drizzle/*.sql 적용)
   "d1_databases": [
     {
