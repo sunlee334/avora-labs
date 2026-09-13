@@ -405,7 +405,7 @@ export const en: Content = {
   },
   PRIVACY_POLICY: {
     title: "Privacy Policy",
-    updatedNote: "AVORA LABS manages users' personal information safely in accordance with applicable law. (Last revised 12 September 2026: cookies section added)",
+    updatedNote: "AVORA LABS manages users' personal information safely in accordance with applicable law. (Last revised 13 September 2026: processors updated, transfer abroad section added)",
     sections: [
       {
         title: "1. Personal information we collect",
@@ -413,7 +413,7 @@ export const en: Content = {
           "On registration: email, name, password, mobile phone number",
           "On ordering: delivery address, recipient name and contact number, payment identification information",
           "In the course of using the service: history of consent to receive marketing information",
-          "Collected automatically while using the service: access logs, cookies, device and browser type, pages visited (see section 7)",
+          "Collected automatically while using the service: access logs, cookies, device and browser type, pages visited (see section 8)",
         ],
       },
       {
@@ -432,14 +432,36 @@ export const en: Content = {
           "On membership withdrawal, personal information other than the statutory retention periods above is destroyed without delay.",
         ],
       },
-      { title: "4. Outsourcing of processing", list: ["Payment processing: Toss Payments", "Product delivery: contracted courier (CJ Logistics by default)", "Website visit analytics: Google LLC (Google Analytics)"] },
       {
-        title: "5. Consent to and refusal of marketing information",
+        title: "4. Outsourcing of processing",
+        body: ["We entrust the following processing to service providers and oversee them so that they handle personal information safely in accordance with applicable law."],
+        list: [
+          "Toss Payments Co., Ltd.: payment processing",
+          "Contracted courier (CJ Logistics by default): product delivery",
+          "Cloudflare, Inc.: website hosting, database storage, security (bot protection)",
+          "Plus Five Five, Inc. (Resend): order and delivery emails, and emails to users who have consented",
+          "Google LLC (Google Analytics): website visit analytics",
+        ],
+      },
+      {
+        title: "5. Transfer of personal information abroad",
+        body: [
+          "To operate the website and provide the service (performance of contract), we store and have personal information processed outside Korea as set out below. Transfers take place over the network when you use the service.",
+          "If you do not want your information transferred abroad, you may choose not to register or order, or withdraw your membership; because the website and database run on overseas infrastructure, you will not be able to use the service in that case. You can refuse analytics cookies (Google Analytics) as described in section 8 without any limit on using the service.",
+        ],
+        list: [
+          "Cloudflare, Inc. (San Francisco, USA; privacyquestions@cloudflare.com) — Countries: United States and data centres operated by Cloudflare abroad (database in the Asia-Pacific region) · Items: member and order information, access logs · Purpose: website hosting, database storage, security · Retention: for the periods in section 3",
+          "Plus Five Five, Inc. (Resend) (USA; support@resend.com) — Country: United States · Items: email address, name, and email content such as order number and delivery details · Purpose: sending email · Retention: until the purpose of sending is fulfilled or the service contract ends",
+          "Google LLC (Mountain View, USA; privacy contact form https://support.google.com/policies/contact/general_privacy_form) — Country: United States · Items: cookie identifiers, pages visited, device and browser information, approximate location · Purpose: visit analytics · Retention: per the Google Analytics data retention setting (up to 14 months)",
+        ],
+      },
+      {
+        title: "6. Consent to and refusal of marketing information",
         body: ["Users may separately consent to receiving marketing information such as new product launches, and may refuse at any time via the unsubscribe link at the bottom of emails or through customer service."],
       },
-      { title: "6. Users' rights", body: ["Users may view or correct their personal information at any time, and may request deletion by withdrawing their membership."] },
+      { title: "7. Users' rights", body: ["Users may view or correct their personal information at any time, and may request deletion by withdrawing their membership."] },
       {
-        title: "7. Cookies and similar technologies",
+        title: "8. Cookies and similar technologies",
         body: [
           "We use Google Analytics, provided by Google LLC, to understand site visits and improve the service. Cookies collect the pages you visit, time spent, device and browser type, and approximate location. We do not use this to identify you personally; IP addresses are anonymised and advertising signals are turned off. The information may be stored and processed on Google's servers outside Korea, including in the United States.",
           "Cookies used to keep you signed in, hold your cart and complete checkout are necessary for the service. You can refuse analytics cookies as follows.",
