@@ -128,6 +128,8 @@ export const zh: Messages = {
       buyNow: "立即购买",
       viewCart: "查看购物车",
       shippingNote: "满 {threshold} 免运费。会员首单免运费。标准运费 {fee}。",
+      salesClosed: "目前正在筹备开售，暂时无法购买。登记上市通知，开售时第一时间通知你。",
+      salesClosedLink: "接收上市通知 →",
     },
     notesTitle: "配送 · 退换货",
     reviewSummary: {
@@ -171,6 +173,7 @@ export const zh: Messages = {
       setHint: "换成两支装即可免运费。",
       couponHint: "优惠券在结算时使用。",
       checkout: "去结算",
+      salesClosed: "目前正在筹备开售，暂时无法下单。",
     },
   },
   checkout: {
@@ -445,6 +448,7 @@ export const zh: Messages = {
     botCheckFailed: "人机验证未通过，请刷新页面后重试。",
     cart: {
       failed: "无法更新购物车，请稍后再试。",
+      salesClosed: "尚未开售，暂时无法加入购物车。",
       notForSale: "该商品目前不可购买。",
       soldOut: "该商品已售罄。",
       stockLeft: "库存仅剩 {n} 件。",
@@ -468,6 +472,7 @@ export const zh: Messages = {
     },
     checkout: {
       emptyCart: "购物车是空的。",
+      salesClosed: "尚未开售，暂时无法下单。",
       notPurchasable: "购物车中有商品无法购买，请检查购物车。",
       invalidAmount: "无法计算支付金额。",
       createFailed: "无法创建订单，请稍后再试。",

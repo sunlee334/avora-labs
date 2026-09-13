@@ -131,6 +131,8 @@ export const ko = {
       buyNow: "바로 구매",
       viewCart: "장바구니 보기",
       shippingNote: "{threshold} 이상 구매 시 무료배송. 회원 첫 구매는 배송비를 받지 않습니다. 기본 배송비는 {fee}입니다.",
+      salesClosed: "지금은 판매 준비 중이라 구매할 수 없습니다. 출시 알림을 신청하시면 판매를 시작할 때 가장 먼저 알려드립니다.",
+      salesClosedLink: "출시 알림 신청하기 →",
     },
     notesTitle: "배송 · 반품 안내",
     reviewSummary: {
@@ -174,6 +176,7 @@ export const ko = {
       setHint: "2개 세트로 바꾸면 무료배송 기준을 넘습니다.",
       couponHint: "쿠폰은 결제 단계에서 적용합니다.",
       checkout: "주문하기",
+      salesClosed: "지금은 판매 준비 중이라 주문할 수 없습니다.",
     },
   },
   checkout: {
@@ -448,6 +451,7 @@ export const ko = {
     botCheckFailed: "자동 입력 방지 확인에 실패했습니다. 페이지를 새로고침한 뒤 다시 시도해 주세요.",
     cart: {
       failed: "장바구니를 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+      salesClosed: "지금은 판매 준비 중이라 장바구니에 담을 수 없습니다.",
       notForSale: "지금은 구매할 수 없는 상품입니다.",
       soldOut: "품절된 상품입니다.",
       stockLeft: "재고가 {n}개 남았습니다.",
@@ -471,6 +475,7 @@ export const ko = {
     },
     checkout: {
       emptyCart: "장바구니가 비어 있습니다.",
+      salesClosed: "지금은 판매 준비 중이라 주문할 수 없습니다.",
       notPurchasable: "장바구니에 구매할 수 없는 상품이 있습니다. 장바구니를 확인해 주세요.",
       invalidAmount: "결제 금액을 계산하지 못했습니다.",
       createFailed: "주문을 생성하지 못했습니다. 잠시 후 다시 시도해 주세요.",

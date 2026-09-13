@@ -10,7 +10,7 @@ import { localizePath } from "@/i18n/config";
 import { fill, formatPrice } from "@/i18n/format";
 import { Link } from "@/i18n/link";
 import { track } from "@/lib/analytics";
-import { MAX_QTY_PER_LINE, SHIPPING } from "@/lib/config";
+import { MAX_QTY_PER_LINE, SALES_OPEN, SHIPPING } from "@/lib/config";
 import { VariantSelector, type PurchaseVariant } from "./VariantSelector";
 
 /**
@@ -36,6 +36,8 @@ export function PurchaseBox({
 
   const selected = variants.find((v) => v.id === selectedId) ?? variants[0];
   const soldOut = !selected || selected.stock <= 0;
+  // 출시 전: 구매 관련 입력을 모두 막는다. 서버 액션도 같은 설정으로 거부한다.
+  const closed = !SALES_OPEN;
   const ceiling = Math.min(MAX_QTY_PER_LINE, Math.max(1, selected?.stock ?? 1));
   const lineTotal = selected ? selected.priceKrw * qty : 0;
 
@@ -77,7 +79,7 @@ export function PurchaseBox({
           <button
             type="button"
             onClick={() => setQty((q) => Math.max(1, q - 1))}
-            disabled={pending || soldOut || qty <= 1}
+            disabled={pending || closed || soldOut || qty <= 1}
             aria-label={t.decrease}
             className="flex h-10 w-10 items-center justify-center rounded-l-full text-lg text-charcoal transition hover:bg-paper-2 disabled:opacity-35"
           >
@@ -89,7 +91,7 @@ export function PurchaseBox({
           <button
             type="button"
             onClick={() => setQty((q) => Math.min(ceiling, q + 1))}
-            disabled={pending || soldOut || qty >= ceiling}
+            disabled={pending || closed || soldOut || qty >= ceiling}
             aria-label={t.increase}
             className="flex h-10 w-10 items-center justify-center rounded-r-full text-lg text-charcoal transition hover:bg-paper-2 disabled:opacity-35"
           >
@@ -103,14 +105,25 @@ export function PurchaseBox({
         <span className="text-2xl font-semibold tabular-nums text-ink">{formatPrice(lineTotal, locale)}</span>
       </div>
 
-      {soldOut ? <FormMessage tone="info">{t.soldOut}</FormMessage> : null}
+      {closed ? (
+        <FormMessage tone="info">
+          <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span>{t.salesClosed}</span>
+            <Link href="/notify" className="font-medium underline underline-offset-4">
+              {t.salesClosedLink}
+            </Link>
+          </span>
+        </FormMessage>
+      ) : soldOut ? (
+        <FormMessage tone="info">{t.soldOut}</FormMessage>
+      ) : null}
 
       <div className="grid gap-3 sm:grid-cols-2">
         <Button
           type="button"
           variant="secondary"
           size="lg"
-          disabled={pending || soldOut}
+          disabled={pending || closed || soldOut}
           onClick={() => add()}
         >
           {pending ? m.common.processing : t.addToCart}
@@ -118,7 +131,7 @@ export function PurchaseBox({
         <Button
           type="button"
           size="lg"
-          disabled={pending || soldOut}
+          disabled={pending || closed || soldOut}
           onClick={() => add(() => router.push(localizePath(locale, "/checkout")))}
         >
           {t.buyNow}

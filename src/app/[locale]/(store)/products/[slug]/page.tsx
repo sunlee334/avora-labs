@@ -21,7 +21,7 @@ import { localeAlternates } from "@/i18n/metadata";
 import { getT } from "@/i18n/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getProductBySlug, getProductReviewsPage, getReviewSummary, getReviewTagCounts } from "@/lib/catalog";
-import { SITE } from "@/lib/config";
+import { SALES_OPEN, SITE } from "@/lib/config";
 import { isActivityTag } from "@/lib/reviews";
 import { firstParam } from "@/lib/search-params";
 
@@ -128,7 +128,8 @@ export default async function ProductPage({ params, searchParams }: PageProps<"/
     brand: { "@type": "Brand", name: SITE.name },
     sku: defaultVariant?.sku,
     url: `${base}${localizePath(locale, `/products/${product.slug}`)}`,
-    ...(forSale && defaultVariant
+    // 판매 개시 전에는 가격·재고(Offer)를 내지 않는다 — 살 수 없는 상품을 구매 가능으로 표시하지 않도록.
+    ...(SALES_OPEN && forSale && defaultVariant
       ? {
           offers: {
             "@type": "Offer",

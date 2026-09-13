@@ -128,6 +128,8 @@ export const vi: Messages = {
       buyNow: "Mua ngay",
       viewCart: "Xem giỏ hàng",
       shippingNote: "Miễn phí giao hàng cho đơn từ {threshold}. Thành viên được miễn phí đơn đầu tiên. Phí giao hàng tiêu chuẩn {fee}.",
+      salesClosed: "Chúng tôi đang chuẩn bị mở bán nên chưa thể mua. Đăng ký nhận thông báo ra mắt để được báo đầu tiên khi mở bán.",
+      salesClosedLink: "Nhận thông báo ra mắt →",
     },
     notesTitle: "Giao hàng · Đổi trả",
     reviewSummary: {
@@ -171,6 +173,7 @@ export const vi: Messages = {
       setHint: "Chuyển sang bộ 2 tuýp để được miễn phí giao hàng.",
       couponHint: "Mã ưu đãi được áp dụng khi thanh toán.",
       checkout: "Thanh toán",
+      salesClosed: "Chưa thể đặt hàng vì chúng tôi đang chuẩn bị mở bán.",
     },
   },
   checkout: {
@@ -445,6 +448,7 @@ export const vi: Messages = {
     botCheckFailed: "Không xác minh được bạn không phải bot. Vui lòng tải lại trang và thử lại.",
     cart: {
       failed: "Không cập nhật được giỏ hàng. Vui lòng thử lại sau.",
+      salesClosed: "Chưa mở bán nên chưa thể thêm vào giỏ.",
       notForSale: "Sản phẩm này hiện không bán.",
       soldOut: "Sản phẩm này đã hết hàng.",
       stockLeft: "Chỉ còn {n} sản phẩm.",
@@ -468,6 +472,7 @@ export const vi: Messages = {
     },
     checkout: {
       emptyCart: "Giỏ hàng trống.",
+      salesClosed: "Chưa mở bán nên chưa thể đặt hàng.",
       notPurchasable: "Một số sản phẩm trong giỏ không mua được. Vui lòng kiểm tra giỏ hàng.",
       invalidAmount: "Không tính được số tiền thanh toán.",
       createFailed: "Không tạo được đơn hàng. Vui lòng thử lại sau.",

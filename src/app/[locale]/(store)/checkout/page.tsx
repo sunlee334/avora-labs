@@ -11,6 +11,7 @@ import { getT } from "@/i18n/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getCart } from "@/lib/cart";
 import { isFirstOrderForUser } from "@/lib/checkout";
+import { SALES_OPEN } from "@/lib/config";
 
 // DB 를 읽는 페이지는 항상 요청 시점에 렌더링한다 (Workers 빌드 프리렌더 중 D1 접근 방지).
 export const dynamic = "force-dynamic";
@@ -27,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function CheckoutPage() {
   const [cart, user, { locale, m }] = await Promise.all([getCart(), getCurrentUser(), getT()]);
-  if (cart.lines.length === 0 || !cart.purchasable) {
+  if (!SALES_OPEN || cart.lines.length === 0 || !cart.purchasable) {
     redirect(localizePath(locale, "/cart"));
   }
 

@@ -7,7 +7,7 @@ import { db } from "@/db/client";
 import { cartItems, variants } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth/session";
 import { addToCart, MAX_QTY_PER_LINE, setCartItemQty } from "@/lib/cart";
-import { CART_COOKIE } from "@/lib/config";
+import { CART_COOKIE, SALES_OPEN } from "@/lib/config";
 import { cookies } from "next/headers";
 import { fill } from "@/i18n/format";
 import { getT } from "@/i18n/server";
@@ -72,6 +72,9 @@ export async function addToCartAction(input: {
 
 async function addToCartUnguarded(input: { variantId: number; qty: number }): Promise<CartActionState> {
   const { m } = await getT();
+  if (!SALES_OPEN) {
+    return { ok: false, message: m.actions.cart.salesClosed, itemCount: await currentItemCount() };
+  }
   const parsed = addSchema.safeParse(input);
   if (!parsed.success) {
     return { ok: false, message: m.actions.invalidInput, itemCount: await currentItemCount() };

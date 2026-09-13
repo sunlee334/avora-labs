@@ -128,6 +128,8 @@ export const en: Messages = {
       buyNow: "Buy now",
       viewCart: "View cart",
       shippingNote: "Free shipping on orders of {threshold} or more. Members get free shipping on their first order. Standard shipping is {fee}.",
+      salesClosed: "We're still getting ready to sell, so purchases aren't open yet. Sign up for launch alerts and we'll tell you first when sales begin.",
+      salesClosedLink: "Get launch alerts →",
     },
     notesTitle: "Shipping · Returns",
     reviewSummary: {
@@ -171,6 +173,7 @@ export const en: Messages = {
       setHint: "Switch to the 2-pack to qualify for free shipping.",
       couponHint: "Coupons are applied at checkout.",
       checkout: "Check out",
+      salesClosed: "Orders aren't open yet while we get ready to sell.",
     },
   },
   checkout: {
@@ -445,6 +448,7 @@ export const en: Messages = {
     botCheckFailed: "We couldn't verify that you're human. Please refresh the page and try again.",
     cart: {
       failed: "Couldn't update the cart. Please try again later.",
+      salesClosed: "Sales haven't started yet, so items can't be added to the cart.",
       notForSale: "This item isn't available right now.",
       soldOut: "This item is sold out.",
       stockLeft: "Only {n} left in stock.",
@@ -468,6 +472,7 @@ export const en: Messages = {
     },
     checkout: {
       emptyCart: "Your cart is empty.",
+      salesClosed: "Sales haven't started yet, so orders can't be placed.",
       notPurchasable: "Some items in your cart can't be purchased. Please check your cart.",
       invalidAmount: "Couldn't calculate the payment amount.",
       createFailed: "Couldn't create the order. Please try again later.",

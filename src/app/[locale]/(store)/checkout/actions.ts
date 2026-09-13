@@ -2,6 +2,7 @@
 
 import { getCurrentUser } from "@/lib/auth/session";
 import { rateLimit } from "@/lib/auth/rate-limit";
+import { SALES_OPEN } from "@/lib/config";
 import { clientIp } from "@/lib/request-ip";
 import { getCart } from "@/lib/cart";
 import { CheckoutError, createPendingOrder } from "@/lib/checkout";
@@ -81,6 +82,9 @@ export async function createPendingOrderAction(
   values: CheckoutValues,
 ): Promise<PendingOrderActionResult> {
   const { locale, m } = await getT();
+  if (!SALES_OPEN) {
+    return { ok: false, message: m.actions.checkout.salesClosed };
+  }
   const ip = await clientIp();
   const limit = await rateLimit(`checkout:${ip}`, { limit: 10, windowMs: 60_000 });
   if (!limit.ok) {

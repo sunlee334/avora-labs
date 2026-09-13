@@ -63,6 +63,13 @@ export function deliveryMemoLabel(memo: string | null | undefined): string {
   return Object.hasOwn(DELIVERY_MEMO_LABEL, memo) ? DELIVERY_MEMO_LABEL[memo as DeliveryMemoKey] : memo;
 }
 
+/**
+ * 판매 개방 여부. 출시 전에는 장바구니 담기·바로 구매·주문서·주문 생성을 모두 막는다 (버튼 비활성 + 서버 거부).
+ * 판매를 시작할 때 `.env.production` 에 `NEXT_PUBLIC_SALES_OPEN=1` 을 넣고 재배포한다 (빌드 시 인라인되는 공개 값).
+ * 이미 결제창을 연 뒤의 결제 승인(/checkout/success)은 막지 않는다 — 돈이 움직인 뒤라 확정·환불 흐름이 처리해야 한다.
+ */
+export const SALES_OPEN = process.env.NEXT_PUBLIC_SALES_OPEN === "1";
+
 /** 장바구니 라인당 최대 수량 */
 export const MAX_QTY_PER_LINE = 10;
 

@@ -3,7 +3,7 @@ import { Divider } from "@/components/ui/Primitives";
 import { fill, formatPrice } from "@/i18n/format";
 import { Link } from "@/i18n/link";
 import { getT } from "@/i18n/server";
-import { SHIPPING } from "@/lib/config";
+import { SALES_OPEN, SHIPPING } from "@/lib/config";
 import type { PricingResult } from "@/lib/pricing";
 
 /** 장바구니 합계. 무료배송까지 남은 금액과 세트 전환 힌트를 함께 보여준다. */
@@ -64,7 +64,8 @@ export async function CartSummary({
       </div>
 
       <div className="mt-6 space-y-3">
-        {purchasable ? (
+        {!SALES_OPEN ? <p className="text-[13px] leading-relaxed text-stone">{t.salesClosed}</p> : null}
+        {purchasable && SALES_OPEN ? (
           <ButtonLink href="/checkout" size="lg" className="w-full">
             {t.checkout}
           </ButtonLink>
